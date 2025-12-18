@@ -2,6 +2,7 @@ import React, {useRef} from 'react'
 import gsap from 'gsap';
 import {useGSAP} from "@gsap/react";
 
+
 const FONT_WEIGHTS = {
     subtitle: {min: 100, max:400, default: 100},
     title: {min: 400, max: 900, default: 400}
@@ -18,7 +19,7 @@ const renderText = (text, className, baseWeight=400) => {
 }
 
 const setupTextHover = (container, type) => {
-    if(!container) return;
+    if(!container) return () => {};
 
     const letters = container.querySelectorAll("span");
     const {min, max, default: base} = FONT_WEIGHTS[type];
@@ -79,7 +80,7 @@ const Welcome = () => {
         </h1>
 
         <div className="small-screen">
-            <p>This Portfolio is designed for desktop/tabled screens only.</p>
+            <p>This Portfolio is designed for desktop/tablet screens only.</p>
         </div>
     </section>
 }
