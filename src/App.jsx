@@ -1,5 +1,5 @@
 import React from 'react'
-import { Navbar, Welcome} from "#components"
+import { Navbar, Welcome, Dock} from "#components"
 import Snowfall from "react-snowfall/src";
 
 const App = () => {
@@ -7,9 +7,9 @@ const App = () => {
         <>
             <Snowfall color="#ffffff" />
             <main>
-                    <Navbar />
-                    <Welcome />
-                {/*</snowfall>*/}
+                <Navbar />
+                <Welcome />
+                <Dock />
             </main>
         </>
     )
