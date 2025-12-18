@@ -1,11 +1,17 @@
 import React from 'react'
-import Navbar from "../components/Navbar.jsx";
+import { Navbar, Welcome} from "#components"
+import Snowfall from "react-snowfall/src";
 
 const App = () => {
     return (
-        <main>
-            <Navbar />
-        </main>
+        <>
+            <Snowfall color="#ffffff" />
+            <main>
+                    <Navbar />
+                    <Welcome />
+                {/*</snowfall>*/}
+            </main>
+        </>
     )
 }
 export default App
