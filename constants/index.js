@@ -114,7 +114,7 @@ const techStack = [
     },
     {
         category: "Backend",
-        items: ["Node.js", "Express", "NestJS"],
+        items: ["Node.js", "Express"],
     },
     {
         category: "Database",
