@@ -44,7 +44,7 @@ const dockApps = [
     },
     {
         id: "safari",
-        name: "Articles", // was "Safari"
+        name: "Repo", // was "Safari"
         icon: "safari.png",
         canOpen: true,
     },
@@ -77,25 +77,27 @@ const dockApps = [
 const blogPosts = [
     {
         id: 1,
-        date: "Sep 2, 2025",
-        title:
-            "TypeScript Explained: What It Is, Why It Matters, and How to Master It",
-        image: "/images/blog1.png",
-        link: "https://jsmastery.com/blog/typescript-explained-what-it-is-why-it-matters-and-how-to-master-it",
+        date: "Dec 2025", // You can use this for project completion date or tech stack
+        title: "Awwwards Clone",
+        description: "A modern web experience replicating the Awwwards voting platform.",
+        image: "/images/awwwards.png", // specific placeholder
+        link: "https://github.com/Aman241104/awwards_clone",
     },
     {
         id: 2,
-        date: "Aug 28, 2025",
-        title: "The Ultimate Guide to Mastering Three.js for 3D Development",
-        image: "/images/blog2.png",
-        link: "https://jsmastery.com/blog/the-ultimate-guide-to-mastering-three-js-for-3d-development",
+        date: "Nov 2025",
+        title: "Stock Market App",
+        description: "Real-time stock tracking application with dynamic data visualization.",
+        image: "/images/stock-market-app.png",
+        link: "https://github.com/Aman241104/stock_app_demo",
     },
     {
         id: 3,
-        date: "Aug 15, 2025",
-        title: "The Ultimate Guide to Mastering GSAP Animations",
-        image: "/images/blog3.png",
-        link: "https://jsmastery.com/blog/the-ultimate-guide-to-mastering-gsap-animations",
+        date: "Oct 2025",
+        title: "3D Macbook Scroll Demo",
+        description: "An interactive 3D experience featuring a scrolling Macbook animation.",
+        image: "/images/3D-macbook.png",
+        link: "https://github.com/Aman241104/macbook_demo",
     },
 ];
 
@@ -132,28 +134,28 @@ const socials = [
         text: "Github",
         icon: "/icons/github.svg",
         bg: "#f4656b",
-        link: "https://github.com/JavaScript-Mastery-Pro",
+        link: "https://github.com/Aman241104",
     },
     {
         id: 2,
-        text: "Platform",
-        icon: "/icons/atom.svg",
+        text: "Instagram",
+        icon: "/icons/instagram.png",
         bg: "#4bcb63",
-        link: "https://jsmastery.com/",
+        link: "https://www.instagram.com/aman_.2411?igsh=dm10YXNlYmtwOGIz",
     },
     {
         id: 3,
         text: "Twitter/X",
         icon: "/icons/twitter.svg",
         bg: "#ff866b",
-        link: "https://x.com/jsmasterypro",
+        link: "https://x.com/Aman60734818",
     },
     {
         id: 4,
         text: "LinkedIn",
         icon: "/icons/linkedin.svg",
         bg: "#05b6f6",
-        link: "https://www.linkedin.com/company/javascriptmastery/posts/?feedView=all",
+        link: "https://www.linkedin.com/in/aman-patel-88847a265?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
     },
 ];
 
@@ -188,19 +190,19 @@ const photosLinks = [
 const gallery = [
     {
         id: 1,
-        img: "/images/gal1.png",
+        img: "/images/stock-market-app.png",
     },
     {
         id: 2,
-        img: "/images/gal2.png",
+        img: "/images/awwwards.png",
     },
     {
         id: 3,
-        img: "/images/gal3.png",
+        img: "/images/aman-2.jpeg",
     },
     {
         id: 4,
-        img: "/images/gal4.png",
+        img: "/images/3D-macbook.png",
     },
 ];
 
@@ -397,7 +399,7 @@ const ABOUT_LOCATION = {
             kind: "file",
             fileType: "img",
             position: "top-10 left-5",
-            imageUrl: "/images/adrian.jpg",
+            imageUrl: "/images/aman-1.jpeg",
         },
         {
             id: 2,
@@ -406,16 +408,16 @@ const ABOUT_LOCATION = {
             kind: "file",
             fileType: "img",
             position: "top-28 right-72",
-            imageUrl: "/images/adrian-2.jpg",
+            imageUrl: "/images/aman-2.jpeg",
         },
         {
             id: 3,
-            name: "conference-me.png",
+            name: "group-me.png",
             icon: "/images/image.png",
             kind: "file",
             fileType: "img",
             position: "top-52 left-80",
-            imageUrl: "/images/adrian-3.jpeg",
+            imageUrl: "/images/aman-3.jpeg",
         },
         {
             id: 4,
@@ -427,10 +429,14 @@ const ABOUT_LOCATION = {
             subtitle: "Meet the Developer Behind the Code",
             image: "/images/adrian.jpg",
             description: [
-                "Hey! I’m Adrian 👋, a web developer who enjoys building sleek, interactive websites that actually work well.",
-                "I specialize in JavaScript, React, and Next.js—and I love making things feel smooth, fast, and just a little bit delightful.",
-                "I’m big on clean UI, good UX, and writing code that doesn’t need a search party to debug.",
-                "Outside of dev work, you'll find me tweaking layouts at 2AM, sipping overpriced coffee, or impulse-buying gadgets I absolutely convinced myself I needed 😅",
+                "👋 Hi, I’m Aman Patel",
+
+                "💻 Currently working on full-stack and frontend projects using JavaScript, React, and modern web tools",
+                "🤝 Open to collaborating on web development, React apps, and practical software projects",
+                "🛠️ Looking for help with system design, backend integration, and scalable architectures'",
+                "📚 Currently learning advanced React patterns, backend development, and data handling",
+                "💬 Ask me about JavaScript, CSS, React, Python, or project setup",
+                "⚡ Fun fact: I enjoy turning half-finished ideas into working projects (and occasionally over-engineering them)",
             ],
         },
     ],

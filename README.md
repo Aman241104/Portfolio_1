@@ -1,16 +1,10 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+✦ Portfolio_1!(https://img.shields.io/badge/Tailwind%20v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)!(https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)!(https://img.shields.io/badge/MongoDB-Serverless-47A248?style=for-the-badge&logo=mongodb&logoColor=white)Engineering Digital Identity through Modern Architecture.A high-performance showcase of Server Components, Asynchronous Mutation, and Atomic Design.(https://your-deployment-url.vercel.app) •(https://github.com/Aman241104/Portfolio_1/issues) •(https://github.com/Aman241104/Portfolio_1/issues)🟢 Project PhilosophyThis repository represents the v1 baseline of my professional portfolio, engineered not just to display content, but to demonstrate mastery over the 2025 web ecosystem. It moves beyond standard templates by implementing a serverless-first architecture that solves common bottlenecks in hydration, database connection pooling, and layout shifts.Core Tenet: "Performance is not a feature; it is the baseline."⚡ Technical Highlights1. Next.js 15 ArchitectureLeveraging the latest stable release to ensure future-proof code maturity.Async Request Model: All headers, cookies, and params are awaited to prevent main-thread blocking and ensure accurate hydration.Server Actions: Zero-API-Route mutation for the Contact form, utilizing zod for schema validation and automatic CSRF protection.Dynamic Metadata: SEO tags are generated programmatically for every project route, ensuring rich social previews on LinkedIn and Twitter.2. Tailwind CSS v4 EngineBuilt on the new Rust-based engine for sub-millisecond build times.CSS-First Configuration: Theme variables defined natively in @theme blocks, eliminating the legacy JavaScript config.Container Queries: Cards adapt to their parent width rather than the viewport, creating a truly modular UI component library.3. Serverless Database PatternsGlobal Mongoose Cache: A custom singleton pattern prevents connection storming during Vercel function "cold starts," ensuring stability under load.Type-Safe Schemas: Strict TypeScript interfaces mirror Mongoose models to prevent runtime data shape errors.🛠 Tech StackDomainTechnologyRationaleCoreNext.js 15App Router, Server Components, Server Actions.Styling(https://tailwindcss.com/)Native CSS variables, rust-based compilation.Language(https://www.typescriptlang.org/)Strict mode enabled for comprehensive type safety.Database(https://www.mongodb.com/)Serverless instance with cached connection pooling.MotionFramer MotionLayout animations using template.tsx for route transitions.TestingVitestUnit testing logic and hooks.📂 ArchitectureA clean "Shift-Left" structure emphasizing separation of concerns.src/├── actions/       # Server Actions (Mutations)│   └── contact.ts # Form submission logic with Zod validation├── app/           # App Router (Pages & Layouts)│   ├── layout.tsx # Persistent Shell (Fonts, Providers)│   ├── template.tsx # Animation Entry Point (Framer Motion)│   └── page.tsx   # Server Component (Async Data Fetching)├── components/    # Atomic UI Library│   ├── ui/        # Primitive atoms (Buttons, Inputs)│   └── motion/    # Client-side animation wrappers├── lib/           # Singletons & Utilities│   └── db.ts      # Global Cached Mongoose Connection└── styles/        # CSS-First Tailwind Config🚀 Getting StartedPrerequisitesNode.js 18+MongoDB Atlas URIInstallationClone the repositoryBashgit clone https://github.com/Aman241104/Portfolio_1.git
+cd Portfolio_1
+Install dependenciesBashnpm install
+# or
+pnpm install
+Configure EnvironmentCreate a .env.local file in the root:Code snippetMONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/portfolio
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+Run Development ServerBashnpm run dev
+🧪 Quality AssuranceCode quality is enforced via GitHub Actions and local pre-commit hooks.Linting: eslint-config-next with strict accessibility rules (jsx-a11y).Unit Tests: Vitest runs against all utility functions and hooks.Bashnpm run test
+E2E Tests: Playwright verifies critical user flows (Navigation, Form Submission).🤝 Connect
