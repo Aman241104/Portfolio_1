@@ -44,7 +44,7 @@ const Safari = () => {
             </div>
 
             <div className="blog">
-                <h2>My Projects</h2>
+                <h2>My Project's Repo On git</h2>
 
                 <div className="space-y-8">
                     {blogPosts.map(({id, title, image, date, link})=>(
@@ -57,7 +57,7 @@ const Safari = () => {
                                 <p>{date}</p>
                                 <h3>{title}</h3>
                                 <a href={link} target="_blank" rel="noopener">
-                                    Check out the full post
+                                    Check out the full repo on git
                                     <MoveRight className="icon" />
                                 </a>
                             </div>

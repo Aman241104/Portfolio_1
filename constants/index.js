@@ -44,7 +44,7 @@ const dockApps = [
     },
     {
         id: "safari",
-        name: "Articles", // was "Safari"
+        name: "Repo", // was "Safari"
         icon: "safari.png",
         canOpen: true,
     },
@@ -77,25 +77,27 @@ const dockApps = [
 const blogPosts = [
     {
         id: 1,
-        date: "Sep 2, 2025",
-        title:
-            "TypeScript Explained: What It Is, Why It Matters, and How to Master It",
-        image: "/images/blog1.png",
-        link: "https://jsmastery.com/blog/typescript-explained-what-it-is-why-it-matters-and-how-to-master-it",
+        date: "Dec 2025", // You can use this for project completion date or tech stack
+        title: "Awwwards Clone",
+        description: "A modern web experience replicating the Awwwards voting platform.",
+        image: "/images/awwwards.png", // specific placeholder
+        link: "https://github.com/Aman241104/awwards_clone",
     },
     {
         id: 2,
-        date: "Aug 28, 2025",
-        title: "The Ultimate Guide to Mastering Three.js for 3D Development",
-        image: "/images/blog2.png",
-        link: "https://jsmastery.com/blog/the-ultimate-guide-to-mastering-three-js-for-3d-development",
+        date: "Nov 2025",
+        title: "Stock Market App",
+        description: "Real-time stock tracking application with dynamic data visualization.",
+        image: "/images/stock-market-app.png",
+        link: "https://github.com/Aman241104/stock_app_demo",
     },
     {
         id: 3,
-        date: "Aug 15, 2025",
-        title: "The Ultimate Guide to Mastering GSAP Animations",
-        image: "/images/blog3.png",
-        link: "https://jsmastery.com/blog/the-ultimate-guide-to-mastering-gsap-animations",
+        date: "Oct 2025",
+        title: "3D Macbook Scroll Demo",
+        description: "An interactive 3D experience featuring a scrolling Macbook animation.",
+        image: "/images/3D-macbook.png",
+        link: "https://github.com/Aman241104/macbook_demo",
     },
 ];
 
@@ -132,28 +134,28 @@ const socials = [
         text: "Github",
         icon: "/icons/github.svg",
         bg: "#f4656b",
-        link: "https://github.com/JavaScript-Mastery-Pro",
+        link: "https://github.com/Aman241104",
     },
     {
         id: 2,
-        text: "Platform",
-        icon: "/icons/atom.svg",
+        text: "Instagram",
+        icon: "/icons/instagram.png",
         bg: "#4bcb63",
-        link: "https://jsmastery.com/",
+        link: "https://www.instagram.com/aman_.2411?igsh=dm10YXNlYmtwOGIz",
     },
     {
         id: 3,
         text: "Twitter/X",
         icon: "/icons/twitter.svg",
         bg: "#ff866b",
-        link: "https://x.com/jsmasterypro",
+        link: "https://x.com/Aman60734818",
     },
     {
         id: 4,
         text: "LinkedIn",
         icon: "/icons/linkedin.svg",
         bg: "#05b6f6",
-        link: "https://www.linkedin.com/company/javascriptmastery/posts/?feedView=all",
+        link: "https://www.linkedin.com/in/aman-patel-88847a265?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
     },
 ];
 
@@ -188,19 +190,19 @@ const photosLinks = [
 const gallery = [
     {
         id: 1,
-        img: "/images/gal1.png",
+        img: "/images/stock-market-app.png",
     },
     {
         id: 2,
-        img: "/images/gal2.png",
+        img: "/images/awwwards.png",
     },
     {
         id: 3,
-        img: "/images/gal3.png",
+        img: "/images/aman-2.jpeg",
     },
     {
         id: 4,
-        img: "/images/gal4.png",
+        img: "/images/3D-macbook.png",
     },
 ];
 
@@ -222,161 +224,236 @@ const WORK_LOCATION = {
     icon: "/icons/work.svg",
     kind: "folder",
     children: [
-        // ▶ Project 1
+        // ===============================================
+        // COLUMN 1 (Left Edge)
+        // ===============================================
+
+        // ▶ Project 1: Awwwards Clone
+        {
+            id: 2,
+            name: "Awwwards Clone",
+            icon: "/images/folder.png",
+            kind: "folder",
+            // Desktop Icon: Row 1, Col 1
+            position: "top-5 left-5",
+            // Window opens at:
+            windowPosition: "top-[10%] left-[0%]",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-10 left-10",
+                    description: [
+                        "A full-stack clone of the Awwwards platform.",
+                        "Features a voting system, media-rich galleries, and smooth transitions.",
+                        "Replicates the premium feel of the original site."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/awwards_clone",
+                    position: "top-10 right-10",
+                },
+                {
+                    id: 3,
+                    name: "Live Demo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://awwardswebp2.netlify.app/",
+                    position: "bottom-10 left-1/2 -translate-x-1/2",
+                },
+            ],
+        },
+
+        // ▶ Project 2: Stock Market App
+        {
+            id: 3,
+            name: "Stock Market App",
+            icon: "/images/folder.png",
+            kind: "folder",
+            // Desktop Icon: Row 2, Col 1
+            position: "top-32 left-5",
+            // Window opens at:
+            windowPosition: "top-[15%] left-[7%]",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-5 left-1/2 -translate-x-1/2", // Centered top
+                    description: [
+                        "Real-time stock market tracking application.",
+                        "Includes interactive charts and data visualization.",
+                        "Clean dashboard interface for financial data."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/stock_app_demo",
+                    position: "bottom-10 left-10",
+                },
+                {
+                    id: 3,
+                    name: "Live Demo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://stock-app-demo.vercel.app/",
+                    position: "bottom-10 right-10",
+                },
+            ],
+        },
+
+        // ▶ Project 3: 3D Macbook Demo
+        {
+            id: 4,
+            name: "3D Macbook Scroll",
+            icon: "/images/folder.png",
+            kind: "folder",
+            // Desktop Icon: Row 3, Col 1
+            position: "top-60 left-5",
+            // Window opens at:
+            windowPosition: "top-[20%] left-[14%]",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-1/2 -translate-y-1/2 left-10", // Left Middle
+                    description: [
+                        "Immersive 3D web experience with a Macbook model.",
+                        "Uses Three.js and React Three Fiber.",
+                        "Features camera movements and scroll-triggered animations."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/macbook_demo",
+                    position: "top-10 right-10",
+                },
+                {
+                    id: 3,
+                    name: "Live Demo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://macbook-demo.netlify.app/",
+                    position: "bottom-10 right-10",
+                },
+            ],
+        },
+
+        // ===============================================
+        // COLUMN 2 (Next to Column 1)
+        // ===============================================
+
+        // ▶ Project 4: SaaS Landing Page
         {
             id: 5,
-            name: "Nike Ecommerce Website Application",
+            name: "SaaS Landing Page",
             icon: "/images/folder.png",
             kind: "folder",
-            position: "top-10 left-5", // icon position inside Finder
-            windowPosition: "top-[5vh] left-5", // optional: Finder window position
+            // Desktop Icon: Row 1, Col 2
+            position: "top-5 left-32",
+            // Window opens at:
+            windowPosition: "top-[25%] left-[21%]",
             children: [
                 {
                     id: 1,
-                    name: "Nike Project.txt",
+                    name: "About Project.txt",
                     icon: "/images/txt.png",
                     kind: "file",
                     fileType: "txt",
-                    position: "top-5 left-10",
+                    position: "bottom-5 right-5", // Bottom right corner
                     description: [
-                        "The Nike eCommerce website is a sleek and modern platform designed for shopping the latest Nike collections.",
-                        "Instead of a simple online store, it delivers an immersive experience with bold visuals, interactive product displays, and smooth navigation.",
-                        "Think of it like walking into a flagship Nike store—but right from your phone or laptop.",
-                        "It's built with Next.js and Tailwind, ensuring fast performance, responsive design, and a clean, premium look.",
+                        "High-converting landing page for SaaS products.",
+                        "Responsive layout with hero sections and feature grids.",
+                        "Focuses on UI/UX best practices."
                     ],
                 },
                 {
                     id: 2,
-                    name: "nike.com",
+                    name: "GitHub Repo",
                     icon: "/images/safari.png",
                     kind: "file",
                     fileType: "url",
-                    href: "https://youtu.be/fZdTYswuZjU?si=Awjl-pIst9e09_UU",
-                    position: "top-10 right-20",
+                    href: "https://github.com/Aman241104/saas_landing_page",
+                    position: "top-5 left-5",
                 },
                 {
-                    id: 4,
-                    name: "nike.png",
-                    icon: "/images/image.png",
+                    id: 3,
+                    name: "Live Demo",
+                    icon: "/images/safari.png",
                     kind: "file",
-                    fileType: "img",
-                    position: "top-52 right-80",
-                    imageUrl: "/images/project-1.png",
-                },
-                {
-                    id: 5,
-                    name: "Design.fig",
-                    icon: "/images/plain.png",
-                    kind: "file",
-                    fileType: "fig",
-                    href: "https://google.com",
-                    position: "top-60 right-20",
+                    fileType: "url",
+                    // 👇 REPLACE THIS STRING WITH YOUR DEPLOYED URL
+                    href: "https://saaslandpage2411.netlify.app/",
+                    position: "top-5 right-5",
                 },
             ],
         },
 
-        // ▶ Project 2
+        // ▶ Project 5: Next.js Demo
         {
             id: 6,
-            name: "AI Resume Analyzer",
+            name: "Next.js Demo",
             icon: "/images/folder.png",
             kind: "folder",
-            position: "top-52 right-80",
-            windowPosition: "top-[20vh] left-7",
+            // Desktop Icon: Row 2, Col 2
+            position: "top-32 left-32",
+            // Window opens at:
+            windowPosition: "top-[30%] left-[28%]",
             children: [
                 {
                     id: 1,
-                    name: "AI Resume Analyzer Project.txt",
+                    name: "About Project.txt",
                     icon: "/images/txt.png",
                     kind: "file",
                     fileType: "txt",
-                    position: "top-5 right-10",
+                    position: "top-10 left-20",
                     description: [
-                        "AI Resume Analyzer is a smart tool that helps you perfect your resume with instant feedback.",
-                        "Instead of guessing what recruiters want, you get AI-powered insights on keywords, formatting, and overall impact.",
-                        "Think of it like having a career coach—pointing out strengths, fixing weaknesses, and boosting your chances of landing interviews.",
-                        "It's built with Next.js and Tailwind, so it runs fast, looks professional, and works seamlessly on any device.",
+                        "Comprehensive Next.js capabilities demo.",
+                        "Explores SSR, SSG, and App Router.",
+                        "Reference for performant React apps."
                     ],
                 },
                 {
                     id: 2,
-                    name: "ai-resume-analyzer.com",
+                    name: "GitHub Repo",
                     icon: "/images/safari.png",
                     kind: "file",
                     fileType: "url",
-                    href: "https://youtu.be/iYOz165wGkQ?si=R1hs8Legl200m0Cl",
-                    position: "top-20 left-20",
+                    href: "https://github.com/Aman241104/next_js_demo",
+                    position: "bottom-20 left-10",
                 },
                 {
-                    id: 4,
-                    name: "ai-resume-analyzer.png",
-                    icon: "/images/image.png",
-                    kind: "file",
-                    fileType: "img",
-                    position: "top-52 left-80",
-                    imageUrl: "/images/project-2.png",
-                },
-                {
-                    id: 5,
-                    name: "Design.fig",
-                    icon: "/images/plain.png",
-                    kind: "file",
-                    fileType: "fig",
-                    href: "https://google.com",
-                    position: "top-60 left-5",
-                },
-            ],
-        },
-
-        // ▶ Project 3
-        {
-            id: 7,
-            name: "Food Delivery App",
-            icon: "/images/folder.png",
-            kind: "folder",
-            position: "top-10 left-80",
-            windowPosition: "top-[33vh] left-7",
-            children: [
-                {
-                    id: 1,
-                    name: "Food Delivery App Project.txt",
-                    icon: "/images/txt.png",
-                    kind: "file",
-                    fileType: "txt",
-                    position: "top-5 left-10",
-                    description: [
-                        "Our Food Delivery App is a fast and convenient way to order meals from your favorite restaurants.",
-                        "Instead of making calls or waiting in line, you can browse menus, customize orders, and track deliveries in real time.",
-                        "Think of it like having your favorite restaurants in your pocket—ready to deliver anytime, anywhere.",
-                        "It’s built with React Native, so it works smoothly on both iOS and Android with a clean, modern design.",
-                    ],
-                },
-                {
-                    id: 2,
-                    name: "food-delivery-app.com",
+                    id: 3,
+                    name: "Live Demo",
                     icon: "/images/safari.png",
                     kind: "file",
                     fileType: "url",
-                    href: "https://youtu.be/LKrX390fJMw?si=cExkuVhf2DTV9G2-",
-                    position: "top-10 right-20",
-                },
-                {
-                    id: 4,
-                    name: "food-delivery-app.png",
-                    icon: "/images/image.png",
-                    kind: "file",
-                    fileType: "img",
-                    position: "top-52 right-80",
-                    imageUrl: "/images/project-3.png",
-                },
-                {
-                    id: 5,
-                    name: "Design.fig",
-                    icon: "/images/plain.png",
-                    kind: "file",
-                    fileType: "fig",
-                    href: "https://google.com",
-                    position: "top-60 right-20",
+                    href: "https://deveventsbyaman.vercel.app/",
+                    position: "top-20 right-20",
                 },
             ],
         },
@@ -397,7 +474,7 @@ const ABOUT_LOCATION = {
             kind: "file",
             fileType: "img",
             position: "top-10 left-5",
-            imageUrl: "/images/adrian.jpg",
+            imageUrl: "/images/aman-1.jpeg",
         },
         {
             id: 2,
@@ -406,16 +483,16 @@ const ABOUT_LOCATION = {
             kind: "file",
             fileType: "img",
             position: "top-28 right-72",
-            imageUrl: "/images/adrian-2.jpg",
+            imageUrl: "/images/aman-2.jpeg",
         },
         {
             id: 3,
-            name: "conference-me.png",
+            name: "group-me.png",
             icon: "/images/image.png",
             kind: "file",
             fileType: "img",
             position: "top-52 left-80",
-            imageUrl: "/images/adrian-3.jpeg",
+            imageUrl: "/images/aman-3.jpeg",
         },
         {
             id: 4,
@@ -427,10 +504,14 @@ const ABOUT_LOCATION = {
             subtitle: "Meet the Developer Behind the Code",
             image: "/images/adrian.jpg",
             description: [
-                "Hey! I’m Adrian 👋, a web developer who enjoys building sleek, interactive websites that actually work well.",
-                "I specialize in JavaScript, React, and Next.js—and I love making things feel smooth, fast, and just a little bit delightful.",
-                "I’m big on clean UI, good UX, and writing code that doesn’t need a search party to debug.",
-                "Outside of dev work, you'll find me tweaking layouts at 2AM, sipping overpriced coffee, or impulse-buying gadgets I absolutely convinced myself I needed 😅",
+                "👋 Hi, I’m Aman Patel",
+
+                "💻 Currently working on full-stack and frontend projects using JavaScript, React, and modern web tools",
+                "🤝 Open to collaborating on web development, React apps, and practical software projects",
+                "🛠️ Looking for help with system design, backend integration, and scalable architectures'",
+                "📚 Currently learning advanced React patterns, backend development, and data handling",
+                "💬 Ask me about JavaScript, CSS, React, Python, or project setup",
+                "⚡ Fun fact: I enjoy turning half-finished ideas into working projects (and occasionally over-engineering them)",
             ],
         },
     ],

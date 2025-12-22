@@ -1,12 +1,12 @@
 import React from 'react'
-import { Navbar, Welcome, Dock} from "#components"
+import {Navbar, Welcome, Dock, Home} from "#components"
 
 import gsap from 'gsap';
 
 import { Draggable } from "gsap/Draggable";
 gsap.registerPlugin(Draggable)
 
-import {Terminal, Safari, Resume, Finder, Text, Image, Contact} from '#windows';
+import {Terminal, Safari, Resume, Finder, Text, Image, Contact, Photos} from '#windows';
 import Snowfall from "react-snowfall/src";
 
 const App = () => {
@@ -18,6 +18,7 @@ const App = () => {
                 <Welcome />
                 <Dock />
 
+
                 <Terminal />
                 <Safari />
                 <Resume />
@@ -25,6 +26,9 @@ const App = () => {
                 <Text />
                 <Image />
                 <Contact />
+                <Photos />
+
+                <Home />
             </main>
         </>
     )
