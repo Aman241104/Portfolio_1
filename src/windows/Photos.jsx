@@ -11,7 +11,7 @@ const Photos = () => {
     return (
         <div className="flex flex-col h-full w-full bg-white">
             {/* Header */}
-            <div id="window-header" className="flex-shrink-0">
+            <div id="window-header">
                 <WindowControls target="photos" />
                 <div className="w-full flex justify-end items-center gap-3 text-gray-500">
                     <Mail className="w-4 h-4" />
