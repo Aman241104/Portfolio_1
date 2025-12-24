@@ -237,7 +237,7 @@ const WORK_LOCATION = {
             // Desktop Icon: Row 1, Col 1
             position: "top-5 left-5",
             // Window opens at:
-            windowPosition: "top-[10%] left-[0%]",
+            windowPosition: "top-7 left-3",
             children: [
                 {
                     id: 1,
@@ -282,7 +282,7 @@ const WORK_LOCATION = {
             // Desktop Icon: Row 2, Col 1
             position: "top-32 left-5",
             // Window opens at:
-            windowPosition: "top-[15%] left-[7%]",
+            windowPosition: "top-35 left-3",
             children: [
                 {
                     id: 1,
@@ -327,7 +327,7 @@ const WORK_LOCATION = {
             // Desktop Icon: Row 3, Col 1
             position: "top-60 left-5",
             // Window opens at:
-            windowPosition: "top-[20%] left-[14%]",
+            windowPosition: "top-63 left-3",
             children: [
                 {
                     id: 1,
@@ -374,9 +374,9 @@ const WORK_LOCATION = {
             icon: "/images/folder.png",
             kind: "folder",
             // Desktop Icon: Row 1, Col 2
-            position: "top-5 left-32",
+            position: "top-5 left-50",
             // Window opens at:
-            windowPosition: "top-[25%] left-[21%]",
+            windowPosition: "top-91 left-3",
             children: [
                 {
                     id: 1,
@@ -384,7 +384,7 @@ const WORK_LOCATION = {
                     icon: "/images/txt.png",
                     kind: "file",
                     fileType: "txt",
-                    position: "bottom-5 right-5", // Bottom right corner
+                    position: "bottom-5 right-15", // Bottom right corner
                     description: [
                         "High-converting landing page for SaaS products.",
                         "Responsive layout with hero sections and feature grids.",
@@ -420,9 +420,9 @@ const WORK_LOCATION = {
             icon: "/images/folder.png",
             kind: "folder",
             // Desktop Icon: Row 2, Col 2
-            position: "top-32 left-32",
+            position: "top-32 left-50",
             // Window opens at:
-            windowPosition: "top-[30%] left-[28%]",
+            windowPosition: "top-120 left-7",
             children: [
                 {
                     id: 1,
@@ -537,31 +537,6 @@ const RESUME_LOCATION = {
 };
 
 const TRASH_LOCATION = {
-    id: 4,
-    type: "trash",
-    name: "Trash",
-    icon: "/icons/trash.svg",
-    kind: "folder",
-    children: [
-        {
-            id: 1,
-            name: "trash1.png",
-            icon: "/images/image.png",
-            kind: "file",
-            fileType: "img",
-            position: "top-10 left-10",
-            imageUrl: "/images/trash-1.png",
-        },
-        {
-            id: 2,
-            name: "trash2.png",
-            icon: "/images/image.png",
-            kind: "file",
-            fileType: "img",
-            position: "top-40 left-80",
-            imageUrl: "/images/trash-2.png",
-        },
-    ],
 };
 
 export const locations = {
