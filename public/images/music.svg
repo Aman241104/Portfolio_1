@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140">
+  <defs>
+    <linearGradient id="musicGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="132" height="132" rx="30" fill="url(#musicGrad)"/>
+  <circle cx="52" cy="98" r="12" fill="#ffffff"/>
+  <circle cx="90" cy="90" r="12" fill="#ffffff"/>
+  <rect x="62" y="42" width="6" height="56" fill="#ffffff"/>
+  <rect x="100" y="34" width="6" height="56" fill="#ffffff"/>
+  <path d="M62 42 L106 34 L106 46 L62 54 Z" fill="#ffffff"/>
+</svg>

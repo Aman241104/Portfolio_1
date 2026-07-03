@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140">
+  <defs>
+    <linearGradient id="gameGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="132" height="132" rx="30" fill="url(#gameGrad)"/>
+  <rect x="35" y="52" width="70" height="40" rx="18" fill="#ffffff"/>
+  <circle cx="52" cy="72" r="5" fill="#4f46e5"/>
+  <circle cx="42" cy="62" r="0" fill="none"/>
+  <rect x="49" y="63" width="6" height="18" rx="2" fill="#4f46e5"/>
+  <rect x="40" y="69" width="24" height="6" rx="2" fill="#4f46e5"/>
+  <circle cx="90" cy="66" r="5" fill="#4f46e5"/>
+  <circle cx="90" cy="78" r="5" fill="#4f46e5"/>
+</svg>

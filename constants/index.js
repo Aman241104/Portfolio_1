@@ -72,19 +72,65 @@ const dockApps = [
         icon: "trash.png",
         canOpen: false,
     },
+    {
+        id: "game",
+        name: "Game",
+        icon: "game.svg",
+        canOpen: true,
+    },
+    {
+        id: "music",
+        name: "Music",
+        icon: "music.svg",
+        canOpen: true,
+    },
 ];
+
+// Separate from dockApps so the desktop Dock (which maps over dockApps
+// directly) is unaffected — mobile has a "Resume" app that desktop reaches
+// via the Navbar instead of the dock, so it has no dockApps entry to reuse.
+const mobileApps = [
+    ...dockApps.filter((app) => app.canOpen),
+    {
+        id: "resume",
+        name: "Resume",
+        icon: "pdf.png",
+        canOpen: true,
+    },
+];
+
+// iOS-style: 4 pinned dock icons, rest in the scrollable springboard grid.
+const MOBILE_DOCK_IDS = ["finder", "contact", "resume", "terminal"];
+const mobileDockApps = mobileApps.filter((app) => MOBILE_DOCK_IDS.includes(app.id));
+const mobileGridApps = mobileApps.filter((app) => !MOBILE_DOCK_IDS.includes(app.id));
 
 const blogPosts = [
     {
         id: 1,
-        date: "Dec 2025", // You can use this for project completion date or tech stack
-        title: "Awwwards Clone",
-        description: "A modern web experience replicating the Awwwards voting platform.",
-        image: "/images/awwwards.png", // specific placeholder
-        link: "https://github.com/Aman241104/awwards_clone",
+        date: "Jul 2026",
+        title: "Job Search Automation Platform",
+        description: "Multi-agent job-search system: 12-source scraper, hybrid keyword+LLM scoring, auto-generated tailored CVs.",
+        image: "/images/projects/job-serach.png",
+        link: "https://github.com/Aman241104/job-search",
     },
     {
         id: 2,
+        date: "Jun 2026",
+        title: "WhatsApp AI Agent — Multi-Tenant SaaS",
+        description: "Multi-tenant WhatsApp Business AI SaaS with LLM agents, RLS tenant isolation, and a booking state machine.",
+        image: "/images/projects/whatsapp-ai.png",
+        link: "https://whatsapp-ai-agent-inky.vercel.app",
+    },
+    {
+        id: 3,
+        date: "Dec 2025",
+        title: "Awwwards Clone",
+        description: "A modern web experience replicating the Awwwards voting platform.",
+        image: "/images/awwwards.png",
+        link: "https://github.com/Aman241104/awwards_clone",
+    },
+    {
+        id: 4,
         date: "Nov 2025",
         title: "Stock Market App",
         description: "Real-time stock tracking application with dynamic data visualization.",
@@ -92,7 +138,7 @@ const blogPosts = [
         link: "https://github.com/Aman241104/stock_app_demo",
     },
     {
-        id: 3,
+        id: 5,
         date: "Oct 2025",
         title: "3D Macbook Scroll Demo",
         description: "An interactive 3D experience featuring a scrolling Macbook animation.",
@@ -104,7 +150,7 @@ const blogPosts = [
 const techStack = [
     {
         category: "Frontend",
-        items: ["React.js", "Next.js", "TypeScript"],
+        items: ["React", "Next.js", "TypeScript", "GSAP", "Framer Motion"],
     },
     {
         category: "Mobile",
@@ -116,15 +162,23 @@ const techStack = [
     },
     {
         category: "Backend",
-        items: ["Node.js", "Express"],
+        items: ["Node.js", "Express", "FastAPI", "REST APIs", "Server-Sent Events"],
     },
     {
         category: "Database",
-        items: ["MongoDB", "PostgreSQL"],
+        items: ["PostgreSQL", "Supabase", "MongoDB"],
+    },
+    {
+        category: "AI / LLM",
+        items: ["Gemini API", "Groq API", "Claude API", "LLM Tool-Calling", "Multi-Agent Systems"],
+    },
+    {
+        category: "Automation",
+        items: ["n8n", "Playwright", "Web Scraping"],
     },
     {
         category: "Dev Tools",
-        items: ["Git", "GitHub", "Docker"],
+        items: ["Git", "GitHub", "Docker", "Vercel", "Render", "CI/CD"],
     },
 ];
 
@@ -204,12 +258,23 @@ const gallery = [
         id: 4,
         img: "/images/3D-macbook.png",
     },
+    {
+        id: 5,
+        img: "/images/projects/job-serach.png",
+    },
+    {
+        id: 6,
+        img: "/images/projects/whatsapp-ai.png",
+    },
 ];
 
 export {
     navLinks,
     navIcons,
     dockApps,
+    mobileApps,
+    mobileDockApps,
+    mobileGridApps,
     blogPosts,
     techStack,
     socials,
@@ -228,16 +293,249 @@ const WORK_LOCATION = {
         // COLUMN 1 (Left Edge)
         // ===============================================
 
-        // ▶ Project 1: Awwwards Clone
+        // ▶ Project 1: WhatsApp AI Agent — Multi-Tenant SaaS
         {
-            id: 2,
+            id: 102,
+            name: "WhatsApp AI Agent",
+            icon: "/images/folder.png",
+            kind: "folder",
+            position: "top-5 left-5",
+            windowPosition: "top-7 left-3",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-10 left-10",
+                    description: [
+                        "Multi-tenant WhatsApp Business AI SaaS: an admin dashboard lets each business",
+                        "workspace configure an LLM-powered agent handling real WhatsApp Business Cloud API conversations.",
+                        "Row-Level-Security tenant isolation, a booking state machine, and a drip-sequence follow-up engine.",
+                        "Found and fixed a real cross-tenant data-leak bug via a live RLS audit."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "Live Demo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://whatsapp-ai-agent-inky.vercel.app",
+                    position: "bottom-10 left-1/2 -translate-x-1/2",
+                },
+            ],
+        },
+
+        // ▶ Project 2: Job Search Automation Platform (this very app)
+        {
+            id: 103,
+            name: "Job Search Platform",
+            icon: "/images/folder.png",
+            kind: "folder",
+            position: "top-32 left-5",
+            windowPosition: "top-35 left-3",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-5 left-1/2 -translate-x-1/2",
+                    description: [
+                        "Self-built, fully deployed multi-agent job-search system.",
+                        "Scrapes 12 job sources concurrently, scores every listing via a hybrid keyword+LLM pipeline,",
+                        "and auto-generates tailored ATS-friendly PDF CVs and cover letters per job.",
+                        "FastAPI backend on Render, Next.js frontend on Vercel, shared Supabase Postgres database."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/job-search",
+                    position: "bottom-10 left-10",
+                },
+                {
+                    id: 3,
+                    name: "Live Demo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://job-search-zeta-ten.vercel.app",
+                    position: "bottom-10 right-10",
+                },
+            ],
+        },
+
+        // ▶ Project 3: Stock Trading Demo App
+        {
+            id: 104,
+            name: "Stock Trading Demo",
+            icon: "/images/folder.png",
+            kind: "folder",
+            position: "top-60 left-5",
+            windowPosition: "top-63 left-3",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-1/2 -translate-y-1/2 left-10",
+                    description: [
+                        "Stock/trading demo app with authenticated and public route groups.",
+                        "Background job processing via Inngest for scheduled/async tasks.",
+                        "better-auth for authentication, Radix UI + react-hook-form for accessible forms."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/stock_app_demo",
+                    position: "top-10 right-10",
+                },
+                {
+                    id: 3,
+                    name: "Live Demo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://stock-app-demo.vercel.app/",
+                    position: "bottom-10 right-10",
+                },
+            ],
+        },
+
+        // ===============================================
+        // COLUMN 2 (Next to Column 1)
+        // ===============================================
+
+        // ▶ Project 4: Zing Bliss Events — Luxury Event Agency Platform
+        {
+            id: 105,
+            name: "Zing Bliss Events",
+            icon: "/images/folder.png",
+            kind: "folder",
+            position: "top-5 left-50",
+            windowPosition: "top-91 left-3",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "bottom-5 right-15",
+                    description: [
+                        "High-end event-management agency platform, not just a marketing site.",
+                        "Public routes plus an interactive client-preference quiz, a private authenticated",
+                        "client portal with live event itineraries, and an admin CMS for event management.",
+                        "GSAP + Lenis smooth-scroll cinematic animation system across every route."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/event-management",
+                    position: "top-5 left-5",
+                },
+            ],
+        },
+
+        // ▶ Project 5: Gym Tracker
+        {
+            id: 106,
+            name: "Gym Tracker",
+            icon: "/images/folder.png",
+            kind: "folder",
+            position: "top-32 left-50",
+            windowPosition: "top-120 left-7",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-10 left-20",
+                    description: [
+                        "Full-stack fitness tracker: workout logging, routine builder, and a per-exercise",
+                        "analytics view charting historical performance via Recharts.",
+                        "An algorithmic (non-LLM) progressive-overload coach suggests next-session weights/reps.",
+                        "Multi-user auth via NextAuth + MongoDB adapter, GitHub OAuth."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/gym-app",
+                    position: "bottom-20 left-10",
+                },
+            ],
+        },
+
+        // ▶ Project 6: Inventory Manager
+        {
+            id: 107,
+            name: "Inventory Manager",
+            icon: "/images/folder.png",
+            kind: "folder",
+            position: "top-60 left-50",
+            windowPosition: "top-148 left-7",
+            children: [
+                {
+                    id: 1,
+                    name: "About Project.txt",
+                    icon: "/images/txt.png",
+                    kind: "file",
+                    fileType: "txt",
+                    position: "top-10 left-20",
+                    description: [
+                        "Batch/lot-based inventory management system for a produce/fruit-stock use case.",
+                        "Products, vendors, and customers CRUD with buy/sell transaction ledgers.",
+                        "Weighted-average cost calculation across lots, plus a soft-delete trash pattern",
+                        "instead of hard deletes."
+                    ],
+                },
+                {
+                    id: 2,
+                    name: "GitHub Repo",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://github.com/Aman241104/inventory-manager",
+                    position: "bottom-20 left-10",
+                },
+            ],
+        },
+
+        // ===============================================
+        // COLUMN 3 — earlier projects, kept (not removed)
+        // ===============================================
+
+        // ▶ Project 7: Awwwards Clone
+        {
+            id: 108,
             name: "Awwwards Clone",
             icon: "/images/folder.png",
             kind: "folder",
-            // Desktop Icon: Row 1, Col 1
-            position: "top-5 left-5",
-            // Window opens at:
-            windowPosition: "top-7 left-3",
+            position: "top-5 left-95",
+            windowPosition: "top-176 left-3",
             children: [
                 {
                     id: 1,
@@ -273,16 +571,14 @@ const WORK_LOCATION = {
             ],
         },
 
-        // ▶ Project 2: Stock Market App
+        // ▶ Project 8: Stock Market App (earlier, separate from the Stock Trading Demo above)
         {
-            id: 3,
+            id: 109,
             name: "Stock Market App",
             icon: "/images/folder.png",
             kind: "folder",
-            // Desktop Icon: Row 2, Col 1
-            position: "top-32 left-5",
-            // Window opens at:
-            windowPosition: "top-35 left-3",
+            position: "top-32 left-95",
+            windowPosition: "top-204 left-3",
             children: [
                 {
                     id: 1,
@@ -290,7 +586,7 @@ const WORK_LOCATION = {
                     icon: "/images/txt.png",
                     kind: "file",
                     fileType: "txt",
-                    position: "top-5 left-1/2 -translate-x-1/2", // Centered top
+                    position: "top-5 left-1/2 -translate-x-1/2",
                     description: [
                         "Real-time stock market tracking application.",
                         "Includes interactive charts and data visualization.",
@@ -306,28 +602,17 @@ const WORK_LOCATION = {
                     href: "https://github.com/Aman241104/stock_app_demo",
                     position: "bottom-10 left-10",
                 },
-                {
-                    id: 3,
-                    name: "Live Demo",
-                    icon: "/images/safari.png",
-                    kind: "file",
-                    fileType: "url",
-                    href: "https://stock-app-demo.vercel.app/",
-                    position: "bottom-10 right-10",
-                },
             ],
         },
 
-        // ▶ Project 3: 3D Macbook Demo
+        // ▶ Project 9: 3D Macbook Demo
         {
-            id: 4,
+            id: 110,
             name: "3D Macbook Scroll",
             icon: "/images/folder.png",
             kind: "folder",
-            // Desktop Icon: Row 3, Col 1
-            position: "top-60 left-5",
-            // Window opens at:
-            windowPosition: "top-63 left-3",
+            position: "top-60 left-95",
+            windowPosition: "top-232 left-3",
             children: [
                 {
                     id: 1,
@@ -335,7 +620,7 @@ const WORK_LOCATION = {
                     icon: "/images/txt.png",
                     kind: "file",
                     fileType: "txt",
-                    position: "top-1/2 -translate-y-1/2 left-10", // Left Middle
+                    position: "top-1/2 -translate-y-1/2 left-10",
                     description: [
                         "Immersive 3D web experience with a Macbook model.",
                         "Uses Three.js and React Three Fiber.",
@@ -364,19 +649,17 @@ const WORK_LOCATION = {
         },
 
         // ===============================================
-        // COLUMN 2 (Next to Column 1)
+        // COLUMN 4 — earlier projects, kept (not removed)
         // ===============================================
 
-        // ▶ Project 4: SaaS Landing Page
+        // ▶ Project 10: SaaS Landing Page
         {
-            id: 5,
+            id: 111,
             name: "SaaS Landing Page",
             icon: "/images/folder.png",
             kind: "folder",
-            // Desktop Icon: Row 1, Col 2
-            position: "top-5 left-50",
-            // Window opens at:
-            windowPosition: "top-91 left-3",
+            position: "top-5 left-140",
+            windowPosition: "top-260 left-3",
             children: [
                 {
                     id: 1,
@@ -384,7 +667,7 @@ const WORK_LOCATION = {
                     icon: "/images/txt.png",
                     kind: "file",
                     fileType: "txt",
-                    position: "bottom-5 right-15", // Bottom right corner
+                    position: "bottom-5 right-15",
                     description: [
                         "High-converting landing page for SaaS products.",
                         "Responsive layout with hero sections and feature grids.",
@@ -406,23 +689,20 @@ const WORK_LOCATION = {
                     icon: "/images/safari.png",
                     kind: "file",
                     fileType: "url",
-                    // 👇 REPLACE THIS STRING WITH YOUR DEPLOYED URL
                     href: "https://saaslandpage2411.netlify.app/",
                     position: "top-5 right-5",
                 },
             ],
         },
 
-        // ▶ Project 5: Next.js Demo
+        // ▶ Project 11: Next.js Demo
         {
-            id: 6,
+            id: 112,
             name: "Next.js Demo",
             icon: "/images/folder.png",
             kind: "folder",
-            // Desktop Icon: Row 2, Col 2
-            position: "top-32 left-50",
-            // Window opens at:
-            windowPosition: "top-120 left-7",
+            position: "top-32 left-140",
+            windowPosition: "top-288 left-7",
             children: [
                 {
                     id: 1,
@@ -502,7 +782,7 @@ const ABOUT_LOCATION = {
             fileType: "txt",
             position: "top-60 left-5",
             subtitle: "Meet the Developer Behind the Code",
-            image: "/images/adrian.jpg",
+            image: "/images/aman-1.jpeg",
             description: [
                 "👋 Hi, I’m Aman Patel",
 
@@ -537,6 +817,12 @@ const RESUME_LOCATION = {
 };
 
 const TRASH_LOCATION = {
+    id: 4,
+    type: "trash",
+    name: "Archive",
+    icon: "/icons/trash.svg",
+    kind: "folder",
+    children: [],
 };
 
 export const locations = {
@@ -557,6 +843,8 @@ const WINDOW_CONFIG = {
     terminal: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
     txtfile: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
     imgfile: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
+    game: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
+    music: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
 };
 
 export { INITIAL_Z_INDEX, WINDOW_CONFIG };

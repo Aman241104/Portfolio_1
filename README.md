@@ -1,10 +1,58 @@
-✦ Portfolio_1!(https://img.shields.io/badge/Tailwind%20v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)!(https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)!(https://img.shields.io/badge/MongoDB-Serverless-47A248?style=for-the-badge&logo=mongodb&logoColor=white)Engineering Digital Identity through Modern Architecture.A high-performance showcase of Server Components, Asynchronous Mutation, and Atomic Design.(https://your-deployment-url.vercel.app) •(https://github.com/Aman241104/Portfolio_1/issues) •(https://github.com/Aman241104/Portfolio_1/issues)🟢 Project PhilosophyThis repository represents the v1 baseline of my professional portfolio, engineered not just to display content, but to demonstrate mastery over the 2025 web ecosystem. It moves beyond standard templates by implementing a serverless-first architecture that solves common bottlenecks in hydration, database connection pooling, and layout shifts.Core Tenet: "Performance is not a feature; it is the baseline."⚡ Technical Highlights1. Next.js 15 ArchitectureLeveraging the latest stable release to ensure future-proof code maturity.Async Request Model: All headers, cookies, and params are awaited to prevent main-thread blocking and ensure accurate hydration.Server Actions: Zero-API-Route mutation for the Contact form, utilizing zod for schema validation and automatic CSRF protection.Dynamic Metadata: SEO tags are generated programmatically for every project route, ensuring rich social previews on LinkedIn and Twitter.2. Tailwind CSS v4 EngineBuilt on the new Rust-based engine for sub-millisecond build times.CSS-First Configuration: Theme variables defined natively in @theme blocks, eliminating the legacy JavaScript config.Container Queries: Cards adapt to their parent width rather than the viewport, creating a truly modular UI component library.3. Serverless Database PatternsGlobal Mongoose Cache: A custom singleton pattern prevents connection storming during Vercel function "cold starts," ensuring stability under load.Type-Safe Schemas: Strict TypeScript interfaces mirror Mongoose models to prevent runtime data shape errors.🛠 Tech StackDomainTechnologyRationaleCoreNext.js 15App Router, Server Components, Server Actions.Styling(https://tailwindcss.com/)Native CSS variables, rust-based compilation.Language(https://www.typescriptlang.org/)Strict mode enabled for comprehensive type safety.Database(https://www.mongodb.com/)Serverless instance with cached connection pooling.MotionFramer MotionLayout animations using template.tsx for route transitions.TestingVitestUnit testing logic and hooks.📂 ArchitectureA clean "Shift-Left" structure emphasizing separation of concerns.src/├── actions/       # Server Actions (Mutations)│   └── contact.ts # Form submission logic with Zod validation├── app/           # App Router (Pages & Layouts)│   ├── layout.tsx # Persistent Shell (Fonts, Providers)│   ├── template.tsx # Animation Entry Point (Framer Motion)│   └── page.tsx   # Server Component (Async Data Fetching)├── components/    # Atomic UI Library│   ├── ui/        # Primitive atoms (Buttons, Inputs)│   └── motion/    # Client-side animation wrappers├── lib/           # Singletons & Utilities│   └── db.ts      # Global Cached Mongoose Connection└── styles/        # CSS-First Tailwind Config🚀 Getting StartedPrerequisitesNode.js 18+MongoDB Atlas URIInstallationClone the repositoryBashgit clone https://github.com/Aman241104/Portfolio_1.git
-cd Portfolio_1
-Install dependenciesBashnpm install
-# or
-pnpm install
-Configure EnvironmentCreate a .env.local file in the root:Code snippetMONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/portfolio
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-Run Development ServerBashnpm run dev
-🧪 Quality AssuranceCode quality is enforced via GitHub Actions and local pre-commit hooks.Linting: eslint-config-next with strict accessibility rules (jsx-a11y).Unit Tests: Vitest runs against all utility functions and hooks.Bashnpm run test
-E2E Tests: Playwright verifies critical user flows (Navigation, Form Submission).🤝 Connect
+# Portfolio_1
+
+A personal developer portfolio built as a macOS-desktop simulator — a dock, draggable windows, a Finder-style project browser, Terminal-style skills view, Safari-style project blog, Photos gallery, a Contact window, and (new) a Snake mini-game and an embedded Spotify player.
+
+Live: https://portfolio-1-five-jet.vercel.app
+Repo: https://github.com/Aman241104/Portfolio_1
+
+## Stack
+
+| Layer | Technology |
+|---|---|
+| Build tool | Vite 7 |
+| UI | React 19 |
+| Styling | Tailwind CSS 4 (Rust engine, `@tailwindcss/vite` plugin) |
+| Animation | GSAP 3 + `@gsap/react` (including `Draggable` for window dragging) |
+| State | Zustand 5 + Immer middleware |
+| PDF viewing | react-pdf (renders the resume inline) |
+| Misc | react-snowfall (desktop snow effect), react-tooltip, dayjs, clsx |
+
+No backend, no database, no TypeScript — this is a static single-page app. Content (projects, tech stack, socials, gallery) lives in `constants/index.js` as plain data, not fetched from anywhere.
+
+## Architecture
+
+```
+src/
+├── App.jsx              # Mounts every window + the desktop shell
+├── main.jsx              # Vite/React entry point
+├── hoc/
+│   └── WindowWrapper.jsx # Wraps a window component: open/close animation, dragging, z-index via zustand
+├── store/
+│   ├── window.js         # zustand store: which windows are open, their z-index/data
+│   └── location.js       # zustand store: current Finder folder
+└── windows/               # One file per "app": Finder, Terminal, Safari, Resume,
+                            # Photos, Contact, Text, Image, Game, Music
+
+components/
+├── Dock.jsx     # Bottom dock, macOS-style hover magnification via GSAP
+├── Navbar.jsx   # Top menu bar
+├── Home.jsx     # Desktop icons (one per project folder)
+└── Welcome.jsx  # Intro/landing overlay
+
+constants/index.js  # All content: dockApps, techStack, WORK_LOCATION (projects),
+                     # ABOUT_LOCATION, socials, gallery, blogPosts, WINDOW_CONFIG
+```
+
+Adding a new "app": create a component in `src/windows/`, wrap it with `WindowWrapper(Component, "somekey")`, add `somekey` to `WINDOW_CONFIG` in `constants/index.js`, add an entry to `dockApps` with a matching `id`, and render `<YourWindow />` in `App.jsx`.
+
+## Getting Started
+
+```bash
+npm install
+npm run dev      # start dev server
+npm run build     # production build
+npm run preview   # preview the production build locally
+npm run lint      # eslint
+```
+
+No environment variables or external services required to run locally.

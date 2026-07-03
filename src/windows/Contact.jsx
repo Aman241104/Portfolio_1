@@ -3,18 +3,20 @@ import WindowWrapper from "#hoc/WindowWrapper.jsx";
 import { socials } from "#constants";
 import { WindowControls } from "#components";
 
-const Contact = () => {
+const Contact = ({ embedded = false } = {}) => {
     return (
         <>
-            <div id="window-header">
-                <WindowControls target="contact" />
-                <h2>Contact Me</h2>
-            </div>
+            {!embedded && (
+                <div id="window-header">
+                    <WindowControls target="contact" />
+                    <h2>Contact Me</h2>
+                </div>
+            )}
 
             <div className="p-5 space-y-5">
                 <img
                     src="/images/aman.jpeg"
-                    alt="adrian"
+                    alt="Aman Patel"
                     className="w-20 rounded-full"
                 />
 
@@ -55,3 +57,4 @@ const Contact = () => {
 
 const ContactWindow = WindowWrapper(Contact, "contact");
 export default ContactWindow;
+export { Contact };

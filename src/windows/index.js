@@ -6,5 +6,7 @@ import Text from './Text';
 import Image from './Image';
 import Contact from './Contact';
 import Photos from './Photos';
+import Game from './Game';
+import Music from './Music';
 
-export { Terminal, Safari, Resume, Finder, Text, Image, Contact, Photos };
+export { Terminal, Safari, Resume, Finder, Text, Image, Contact, Photos, Game, Music };
