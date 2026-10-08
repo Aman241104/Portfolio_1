@@ -109,8 +109,8 @@ const blogPosts = [
         id: 1,
         date: "Jul 2026",
         title: "Job Search Automation Platform",
-        description: "Multi-agent job-search system: 12-source scraper, hybrid keyword+LLM scoring, auto-generated tailored CVs.",
-        image: "/images/projects/job-serach.png",
+        description: "AI job search platform: 19-source scraper, experience-aware LLM scoring, validated one-page CVs, interview prep.",
+        image: "/images/projects/job-search-os.jpg",
         link: "https://github.com/Aman241104/job-search",
     },
     {
@@ -345,10 +345,11 @@ const WORK_LOCATION = {
                     fileType: "txt",
                     position: "top-5 left-1/2 -translate-x-1/2",
                     description: [
-                        "Self-built, fully deployed multi-agent job-search system.",
-                        "Scrapes 12 job sources concurrently, scores every listing via a hybrid keyword+LLM pipeline,",
-                        "and auto-generates tailored ATS-friendly PDF CVs and cover letters per job.",
-                        "FastAPI backend on Render, Next.js frontend on Vercel, shared Supabase Postgres database."
+                        "Multi-user AI job search platform, built and used daily for my own search.",
+                        "Scrapes 19 job sources concurrently, scores each listing on skills, real experience required and salary,",
+                        "re-checks top listings daily, and writes a validated one-page CV and cover letter per job.",
+                        "Also: copy-ready application answers, interview prep packs, analytics, and an Obsidian vault viewer.",
+                        "FastAPI on Google Cloud Run, Next.js dashboard, Supabase Postgres with per-user isolation, 27 tests."
                     ],
                 },
                 {
@@ -403,15 +404,6 @@ const WORK_LOCATION = {
                     href: "https://github.com/Aman241104/stock_app_demo",
                     position: "top-10 right-10",
                 },
-                {
-                    id: 3,
-                    name: "Live Demo",
-                    icon: "/images/safari.png",
-                    kind: "file",
-                    fileType: "url",
-                    href: "https://stock-app-demo.vercel.app/",
-                    position: "bottom-10 right-10",
-                },
             ],
         },
 
@@ -450,6 +442,15 @@ const WORK_LOCATION = {
                     fileType: "url",
                     href: "https://github.com/Aman241104/event-management",
                     position: "top-5 left-5",
+                },
+                {
+                    id: 3,
+                    name: "Live Site",
+                    icon: "/images/safari.png",
+                    kind: "file",
+                    fileType: "url",
+                    href: "https://www.zingblissevents.com",
+                    position: "bottom-10 left-10",
                 },
             ],
         },
