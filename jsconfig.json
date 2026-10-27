@@ -2,8 +2,19 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "#*": ["src/*"]
+      "#components/*": ["components/*"],
+      "#constants": ["constants/index.js"],
+      "#content/*": ["content/*"],
+      "#store/*": ["src/store/*"],
+      "#hoc/*": ["src/hoc/*"],
+      "#windows": ["src/windows/index.js"],
+      "#windows/*": ["src/windows/*"],
+      "#mobile/*": ["src/mobile/*"],
+      "#hooks/*": ["src/hooks/*"],
+      "#worlds/*": ["src/worlds/*"],
+      "#shell/*": ["src/shell/*"],
+      "#machine/*": ["src/machine/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "components", "constants", "content"]
 }
