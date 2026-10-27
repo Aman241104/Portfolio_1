@@ -15,6 +15,9 @@ Collected 2026-10-27 from Awwwards, Dribbble, Behance, Muzli, GitHub and WebGPU.
 
 ---
 
+**Your own Pinterest boards** (web, portfolio, type, prompts) are saved with images + art-direction notes in
+[references/pinterest/README.md](./references/pinterest/README.md).
+
 ## 1. Tooling installed (Claude Code plugins, user scope)
 
 | Plugin | Use it for | Invoke |

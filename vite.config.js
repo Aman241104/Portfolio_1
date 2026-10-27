@@ -17,6 +17,9 @@ export default defineConfig({
       '#windows' : resolve(dirname(fileURLToPath(import.meta.url)),'src/windows'),
       '#mobile' : resolve(dirname(fileURLToPath(import.meta.url)),'src/mobile'),
       '#hooks' : resolve(dirname(fileURLToPath(import.meta.url)),'src/hooks'),
+      '#worlds' : resolve(dirname(fileURLToPath(import.meta.url)),'src/worlds'),
+      '#shell' : resolve(dirname(fileURLToPath(import.meta.url)),'src/shell'),
+      '#machine' : resolve(dirname(fileURLToPath(import.meta.url)),'src/machine'),
     }
   }
 });

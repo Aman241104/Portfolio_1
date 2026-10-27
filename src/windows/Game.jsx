@@ -61,6 +61,9 @@ const Game = ({ embedded = false } = {}) => {
             };
             const next = map[e.key];
             if (!next) return;
+            // Windows stay mounted while hidden: ignore keys when the board isn't visible or the user is typing elsewhere.
+            if (!canvasRef.current?.offsetParent) return;
+            if (e.target.closest?.("input, textarea, select, [contenteditable]")) return;
             e.preventDefault();
             trySetDirection(next);
         };
