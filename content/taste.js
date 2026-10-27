@@ -28,10 +28,15 @@ export const topArtists = [
 // Outside rap, but always there.
 export const alsoListening = ["Radiohead", "Pink Floyd", "Beach House", "Daniel Caesar", "Joji"];
 
+// Sitcoms + shows pulled from the Nuvio library / watch progress, 2026-10-27.
 export const watching = {
     films: ["One Battle After Another", "Akira"],
     anime: [],
-    sitcoms: [], // The Office shows up on Pinterest
+    sitcoms: [
+        "Friends", "Community", "30 Rock", "Curb Your Enthusiasm", "Malcolm in the Middle",
+        "It's Always Sunny in Philadelphia", "black-ish", "BoJack Horseman", "South Park",
+    ],
+    shows: ["Mirzapur", "The Rookie", "Cobra Kai", "Running Point"],
 };
 
 export const playing = [];
