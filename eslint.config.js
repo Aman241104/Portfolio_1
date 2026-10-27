@@ -26,4 +26,9 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // react-three-fiber scenes mutate three.js objects (textures, uniforms, materials) by design
+    files: ['src/lab/**/*.{js,jsx}'],
+    rules: { 'react-hooks/immutability': 'off' },
+  },
 ])

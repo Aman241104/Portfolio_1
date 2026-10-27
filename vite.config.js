@@ -7,6 +7,15 @@ import { fileURLToPath } from 'url';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    // ship the 3D machine lab alongside the site (Vite only builds index.html by default)
+    rollupOptions: {
+      input: {
+        main: resolve(dirname(fileURLToPath(import.meta.url)), 'index.html'),
+        lab: resolve(dirname(fileURLToPath(import.meta.url)), 'lab/machine.html'),
+      },
+    },
+  },
   resolve: {
     alias: {
       '#components' : resolve(dirname(fileURLToPath(import.meta.url)),'components'),
