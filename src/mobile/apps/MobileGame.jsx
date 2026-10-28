@@ -1,4 +1,4 @@
-import { Game } from "#windows/Game.jsx";
+import { Game } from "@windows/Game.jsx";
 
 const MobileGame = () => <Game embedded />;
 

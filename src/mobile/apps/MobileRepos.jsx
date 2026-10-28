@@ -1,5 +1,5 @@
 import { MoveRight } from "lucide-react";
-import { blogPosts } from "#constants";
+import { blogPosts } from "@constants";
 
 const MobileRepos = () => {
     return (

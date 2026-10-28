@@ -1,11 +1,11 @@
 import React from 'react'
-import { WindowControls } from "#components";
+import { WindowControls } from "@components";
 import { Search } from "lucide-react";
-import WindowWrapper from "#hoc/WindowWrapper.jsx";
-import { locations } from "#constants";
-import useLocationStore from "#store/location.js";
+import WindowWrapper from "@hoc/WindowWrapper.jsx";
+import { locations } from "@constants";
+import useLocationStore from "@store/location.js";
 import clsx from "clsx";
-import useWindowStore from "#store/window.js";
+import useWindowStore from "@store/window.js";
 
 const Finder = () => {
 

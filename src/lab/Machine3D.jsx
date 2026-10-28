@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, extend } from "@react-three/fiber";
@@ -5,7 +7,9 @@ import { Environment, Lightformer, RoundedBox, Text, ContactShadows, useGLTF, us
 import { Water } from "three/examples/jsm/objects/Water.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { EffectComposer, Bloom, DepthOfField, Vignette } from "@react-three/postprocessing";
-import { worlds } from "#worlds/registry.js";
+import { worlds } from "@worlds/registry.js";
+import { getSeen, setSeen } from "@shell/storage.js";
+import { audio } from "./audio";
 
 // D2 lab: "clear hardware on an island". The clear-case machine on a glass plinth, standing on a small
 // island of rock, grass and flowers floating on a dusk ocean ("Enjoy the Edge" ref). The sea and sky give
@@ -20,6 +24,12 @@ const WIRE = "#ff7a1a";
 const FLOOR = -2.75;
 // one low golden-hour sun, behind-left of the machine: drives the sky, the sea glint and the rim light
 const SUN = new THREE.Vector3(-0.32, 0.035, -1).normalize();
+// the sun sinks during the intro: everything that depends on it reads this vector every frame
+const sunDir = SUN.clone();
+const setSunElevation = (y) => sunDir.set(-0.32, y, -1).normalize();
+// lighter tier for phones / low-core laptops: fewer grass blades, no depth of field, lower DPR
+const LITE = typeof window !== "undefined" &&
+    (window.matchMedia("(max-width: 768px)").matches || (navigator.hardwareConcurrency || 8) <= 4);
 const PLINTH_H = 0.8;
 const PLINTH_TOP = FLOOR + PLINTH_H;
 const MACHINE_Y = PLINTH_TOP + 0.06 + 1.35;
@@ -78,18 +88,37 @@ const useReelTexture = (reel) => useMemo(() => {
     return { sharp, blur };
 }, [reel]);
 
-const Reel = ({ index, x, spinning }) => {
+// Slot k on the payline ⇔ drum angle SLOT_OFFSET + k·SLOT_ANGLE. A spin carries the drum forward several
+// whole turns and eases into the target world's slot, each reel later than the last.
+const REEL_DIR = 1;
+const easeOutBack = (t, s = 0.9) => 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2);
+const reelDuration = (index) => 1.5 + index * 0.5;
+
+const Reel = ({ index, x, spin }) => {
     const ref = useRef();
     const { sharp, blur } = useReelTexture(index);
     const drum = useRef();
-    const speed = useRef(0);
-    useFrame((_, dt) => {
-        const target = spinning ? 14 - index * 2 : 0;
-        speed.current = THREE.MathUtils.damp(speed.current, target, spinning ? 3 : 1.6 + index * 0.6, dt);
+    const anim = useRef(null);           // { from, to, start, dur }
+    const lastSlot = useRef(0);
+    useFrame(({ clock }) => {
         const r = ref.current.rotation;
-        if (spinning || speed.current > 0.4) r.x += speed.current * dt;
-        else r.x = THREE.MathUtils.damp(r.x, Math.round((r.x - SLOT_OFFSET) / SLOT_ANGLE) * SLOT_ANGLE + SLOT_OFFSET, 10, dt);
-        drum.current.map = speed.current > 5 ? blur : sharp;
+        if (spin && anim.current?.id !== spin.id) {
+            const target = SLOT_OFFSET + REEL_DIR * spin.world * SLOT_ANGLE;
+            const turns = (3 + index) * Math.PI * 2;
+            const delta = (((target - r.x) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            anim.current = { id: spin.id, from: r.x, to: r.x + turns + delta, start: clock.elapsedTime, dur: reelDuration(index) };
+        }
+        let speed = 0;
+        const a = anim.current;
+        if (a) {
+            const t = Math.min((clock.elapsedTime - a.start) / a.dur, 1);
+            const prev = r.x;
+            r.x = a.from + (a.to - a.from) * easeOutBack(t);
+            speed = Math.abs(r.x - prev) * 60;
+            const slot = Math.floor(r.x / SLOT_ANGLE);
+            if (slot !== lastSlot.current) { lastSlot.current = slot; if (speed > 0.5) audio.click(1200 + speed * 60, 0.06, 0.02); }
+        }
+        drum.current.map = speed > 5 ? blur : sharp;
     });
     return (
         <group position={[x, 0.42, 0.25]}>
@@ -447,11 +476,11 @@ const GlintSweep = ({ spinning }) => {
     );
 };
 
-const Machine = ({ spinning, pulled, booted, onPull }) => (
+const Machine = ({ spinning, spin, pulled, booted, onPull }) => (
     <group position={[0, MACHINE_Y, 0]} onClick={(e) => { e.stopPropagation(); onPull(); }}>
         <Internals />
         <Mechanism spinning={spinning} />
-        {[-0.95, 0, 0.95].map((x, i) => <Reel key={i} index={i} x={x} spinning={spinning} />)}
+        {[-0.95, 0, 0.95].map((x, i) => <Reel key={i} index={i} x={x} spin={spin} />)}
         <Case />
 
         {/* printed bands */}
@@ -656,7 +685,7 @@ const Grass = () => {
             s.fragmentShader = "varying float vH;\n" + s.fragmentShader.replace("#include <color_fragment>", `#include <color_fragment>
                 diffuseColor.rgb *= mix(0.25, 0.85, vH);   // dark roots, sunlit tips (kept below clipping in backlight)`);
         };
-        return { geo, material, count: 22000 };
+        return { geo, material, count: LITE ? 8000 : 22000 };
     }, [uniforms]);
     useEffect(() => {
         const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), pos = new THREE.Vector3(), e = new THREE.Euler(), col = new THREE.Color();
@@ -897,32 +926,62 @@ const Ocean = () => {
             waterColor: 0x0b2c38, distortionScale: 2.4, fog: true,
         };
     }, [normals]);
-    useFrame((_, dt) => { if (ref.current) ref.current.material.uniforms.time.value += dt * 0.35; });
+    useFrame((_, dt) => {
+        if (!ref.current) return;
+        ref.current.material.uniforms.time.value += dt * 0.35;
+        ref.current.material.uniforms.sunDirection.value.copy(sunDir);
+    });
     return <water ref={ref} args={[geo, config]} rotation-x={-Math.PI / 2} position={[0, SEA, 0]} />;
+};
+
+// Sky + key light track the animated sun.
+const SunRig = ({ light }) => {
+    const sky = useRef();
+    useFrame(() => {
+        sky.current?.material.uniforms.sunPosition.value.copy(sunDir).multiplyScalar(100);
+        light.current?.position.copy(sunDir).multiplyScalar(30);
+    });
+    return <PhysicalSky ref={sky} sunPosition={SUN.clone().multiplyScalar(100)} distance={4000} turbidity={2.6} rayleigh={1.3} mieCoefficient={0.0012} mieDirectionalG={0.96} />;
 };
 
 /* ---------------------------------------------------------------- camera */
 
-// Opens wide on the whole floating island (the diorama), then glides in until the reels fill the frame.
-const HOLD_WIDE = typeof location !== "undefined" && new URLSearchParams(location.search).get("shot") === "wide";
-const WIDE = { pos: new THREE.Vector3(7, -7.6, 44), look: new THREE.Vector3(0, -3.2, 0) };  // low over the water, far enough for negative space
-const CLOSE = { pos: new THREE.Vector3(1.5, 1.3, 12.8), look: new THREE.Vector3(-0.2, -0.95, 0) };
-const Rig = ({ onBooted, onStart }) => {
+// The intro camera: a curve, not a straight glide. Low over the water → arc around the island's side →
+// rise past the rocky underside → push in to the machine. Held on the first frame until the visitor enters.
+const PATH = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(7, -7.6, 44), new THREE.Vector3(-14, -6.2, 30), new THREE.Vector3(-13, -3.2, 17),
+    new THREE.Vector3(-4, 1.8, 15), new THREE.Vector3(1.5, 1.3, 12.8),
+], false, "centripetal");
+const LOOK = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, -3.2, 0), new THREE.Vector3(0, -4.4, 0), new THREE.Vector3(0, -3.6, 0),
+    new THREE.Vector3(0, -1.4, 0), new THREE.Vector3(-0.2, -0.95, 0),
+], false, "centripetal");
+const INTRO_SECONDS = 7;
+
+const Rig = ({ entered, hold, dof, onBooted, onStart }) => {
     const t0 = useRef(null);
     const done = useRef(false);
     const pos = useMemo(() => new THREE.Vector3(), []);
     const look = useMemo(() => new THREE.Vector3(), []);
     useFrame(({ clock, camera, pointer }) => {
-        if (t0.current === null) { t0.current = clock.elapsedTime; onStart?.(); }   // first rendered frame with everything loaded
-        const t = clock.elapsedTime - t0.current;
-        // ?shot=wide freezes the opening frame (for reviewing/art-directing the intro)
-        const k = HOLD_WIDE ? 0 : THREE.MathUtils.clamp((t - 2.6) / 5, 0, 1); // hold the wide shot under the title card, then glide
-        const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; // ease in-out cubic
-        pos.lerpVectors(WIDE.pos, CLOSE.pos, e);
-        look.lerpVectors(WIDE.look, CLOSE.look, e);
-        pos.x += pointer.x * 0.8 * e; pos.y += pointer.y * 0.3 * e;        // parallax only once we've arrived
+        if (t0.current === null) onStart?.();                               // first rendered frame with everything loaded
+        if (t0.current === null && entered && !hold) t0.current = clock.elapsedTime + 0.9;  // a beat after Enter
+        const t = t0.current === null ? 0 : Math.max(0, clock.elapsedTime - t0.current);
+        const k = Math.min(t / INTRO_SECONDS, 1);
+        const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;   // ease in-out cubic
+        PATH.getPoint(e, pos); LOOK.getPoint(e, look);
+        // handheld: a little drift while travelling, none on arrival
+        const shake = Math.sin(Math.PI * e) * 0.06;
+        pos.x += Math.sin(clock.elapsedTime * 0.9) * shake; pos.y += Math.sin(clock.elapsedTime * 1.3 + 1) * shake;
+        pos.x += pointer.x * 0.8 * e; pos.y += pointer.y * 0.3 * e;              // parallax once arrived
         camera.position.lerp(pos, 0.12);
         camera.lookAt(look);
+        // portrait screens: widen the lens so the island fits
+        const fov = camera.aspect < 0.9 ? 48 : 32;
+        if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
+        setSunElevation(0.07 - 0.035 * e);                                       // the sun sinks while we travel
+        audio.swell(k > 0 && k < 1 ? k : 0);
+        if (dof.current) dof.current.bokehScale = 2.2 * THREE.MathUtils.smoothstep(e, 0.85, 1);  // focus pull on arrival
         if (k === 1 && !done.current) { done.current = true; onBooted(); }
     });
     return null;
@@ -930,30 +989,49 @@ const Rig = ({ onBooted, onStart }) => {
 
 /* ---------------------------------------------------------------- scene */
 
-export default function Machine3D({ onSpin, onArrive, onReady }) {
+// No repeats until every world has been seen this session, then start over.
+const pickWorld = () => {
+    const seen = getSeen();
+    let pool = worlds.filter((w) => !seen.includes(w.id));
+    if (pool.length === 0) pool = worlds;
+    const w = pool[Math.floor(Math.random() * pool.length)];
+    setSeen(pool === worlds ? [w.id] : [...seen, w.id]);
+    return w;
+};
+
+export default function Machine3D({ entered = false, hold = false, onSpin, onArrive, onReady, onLand }) {
+    const [spin, setSpin] = useState(null);          // { id, world: index, worldId }
     const [spinning, setSpinning] = useState(false);
     const [pulled, setPulled] = useState(false);
     const [booted, setBooted] = useState(false);
+    const dof = useRef(null);
+    const key = useRef(null);
 
     const pull = () => {
-        if (spinning) return;
-        setPulled(true); setSpinning(true); onSpin?.(true);
+        if (spinning || !booted) return;
+        const w = pickWorld();
+        setPulled(true); setSpinning(true); onSpin?.(true, w);
+        setSpin((prev) => ({ id: (prev?.id ?? 0) + 1, world: worlds.indexOf(w), worldId: w.id }));
+        audio.ratchet();
         setTimeout(() => setPulled(false), 260);
-        setTimeout(() => { setSpinning(false); onSpin?.(false); }, 1600);
+        setTimeout(() => {                                   // the last reel has settled
+            setSpinning(false); onSpin?.(false, w); audio.chime();
+            onLand?.(w.id);
+        }, reelDuration(2) * 1000 + 150);
     };
 
     useEffect(() => {
-        const onKey = (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); pull(); } };
+        const onKey = (e) => { if ((e.key === " " || e.key === "Enter") && !e.target.closest?.("button, a, input")) { e.preventDefault(); pull(); } };
         window.addEventListener("keydown", onKey);
         window.addEventListener("pexe:pull", pull);           // the page's "Pull the lever" button
         return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("pexe:pull", pull); };
     });
 
     return (
-        <Canvas shadows dpr={[1, 2]} camera={{ position: [7, -7.6, 44], fov: 32, far: 1000 }}
+        <Canvas shadows dpr={[1, LITE ? 1.25 : 2]} camera={{ position: [7, -7.6, 44], fov: 32, far: 1000 }}
             gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.36 }}>
-            {/* physical golden-hour sky with the sun low on the horizon, and warm haze that melts the far sea into it */}
-            <PhysicalSky sunPosition={SUN.clone().multiplyScalar(100)} distance={4000} turbidity={2.6} rayleigh={1.3} mieCoefficient={0.0012} mieDirectionalG={0.96} />
+            {/* physical golden-hour sky; the sun sinks a little during the intro */}
+            <SunRig light={key} />
             <fog attach="fog" args={["#e7b493", 60, 340]} />
             <GlassSurface />
 
@@ -969,29 +1047,29 @@ export default function Machine3D({ onSpin, onArrive, onReady }) {
                 <HeroFlower />
                 <Birds />
                 <CloudBank />
-                {/* the camera move starts only once everything above has loaded, so the wide shot is never wasted on a blank canvas */}
-                <Rig onStart={onReady} onBooted={() => { setBooted(true); onArrive?.(); }} />
+                {/* mounted after everything above has loaded, so the opening frame is never a blank canvas */}
+                <Rig entered={entered} hold={hold} dof={dof} onStart={onReady} onBooted={() => { setBooted(true); onArrive?.(); }} />
             </Suspense>
             <Plinth />
-            <Machine spinning={spinning} pulled={pulled} booted={booted} onPull={pull} />
+            <Machine spinning={spinning} spin={spin} pulled={pulled} booted={booted} onPull={pull} />
             <ContactShadows position={[0, FLOOR + 0.01, 0]} opacity={0.6} scale={12} blur={2.4} far={4} />
 
             {/* backlight from the low sun: hot rim on glass + chrome, long shadows toward camera */}
-            <directionalLight position={SUN.clone().multiplyScalar(30).toArray()} intensity={3.4} color="#ff9e5e" castShadow shadow-mapSize={[2048, 2048]}
+            <directionalLight ref={key} position={SUN.clone().multiplyScalar(30).toArray()} intensity={3.4} color="#ff9e5e" castShadow shadow-mapSize={[2048, 2048]}
                 shadow-camera-left={-9} shadow-camera-right={9} shadow-camera-top={9} shadow-camera-bottom={-9} shadow-bias={-0.0003} />
             {/* soft cool fill from the camera side so the front never goes black */}
             <directionalLight position={[4, 5, 10]} intensity={1.4} color="#a9bfdc" />
             <hemisphereLight args={["#ffd6b8", "#24302c", 0.35]} />
 
-            {/* CC0 Poly Haven clear sunset for reflections only (the visible sky is the physical sky above) */}
+            {/* CC0 Poly Haven clear sunset for reflections only (the visible sky is the physical sky) */}
             <Environment files="/hdri/kiara_8_sunset_1k.hdr" environmentIntensity={1.4}>
                 <Lightformer form="rect" intensity={2} position={[0, 6, 6]} rotation-x={Math.PI / 2} scale={[10, 3, 1]} />
                 <Lightformer form="rect" intensity={1.5} position={[-6, 2, 4]} rotation-y={Math.PI / 3} scale={[2, 6, 1]} />
             </Environment>
 
-            <EffectComposer multisampling={4}>
-                {/* shallow focus on the machine: the foreground grass and far sea soften */}
-                {booted ? <DepthOfField worldFocusDistance={13} worldFocusRange={7} bokehScale={2.2} /> : <></>}
+            <EffectComposer multisampling={LITE ? 0 : 4}>
+                {/* focus pulls onto the machine as the camera arrives (bokeh ramps 0 → 2.2) */}
+                {LITE ? <></> : <DepthOfField ref={dof} worldFocusDistance={13} worldFocusRange={7} bokehScale={0} />}
                 <Bloom mipmapBlur luminanceThreshold={7} intensity={0.45} radius={0.4} />  {/* only LEDs/payline exceed 7 */}
                 <Vignette offset={0.3} darkness={0.55} />
             </EffectComposer>

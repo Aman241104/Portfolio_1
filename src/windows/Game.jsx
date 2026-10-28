@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import WindowWrapper from "#hoc/WindowWrapper.jsx";
-import { WindowControls } from "#components";
+import WindowWrapper from "@hoc/WindowWrapper.jsx";
+import { WindowControls } from "@components";
 
 const GRID = 18;
 const CELL = 20;

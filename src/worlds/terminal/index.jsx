@@ -1,7 +1,10 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
-import { profile, projects, skills, socials } from "#content/profile.js";
-import { onRepeat, topArtists, watching } from "#content/taste.js";
-import { worlds } from "#worlds/registry.js";
+import { profile, projects, skills, socials } from "@content/profile.js";
+import { onRepeat, topArtists, watching } from "@content/taste.js";
+import { worlds } from "@worlds/registry.js";
+import { useShell } from "@shell/WorldShell";
 
 // World 3: a shell. Everything is a command; `help` lists them.
 const BANNER = [
@@ -46,7 +49,8 @@ const commands = ({ go, spin }) => ({
         : ["nice try."],
 });
 
-const TerminalWorld = ({ shell }) => {
+const TerminalWorld = () => {
+    const shell = useShell();
     const [lines, setLines] = useState(BANNER);
     const [input, setInput] = useState("");
     const [history, setHistory] = useState([]);

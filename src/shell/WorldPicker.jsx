@@ -1,5 +1,7 @@
+"use client";
+
 import { useEffect } from "react";
-import { worlds } from "#worlds/registry.js";
+import { worlds } from "@worlds/registry.js";
 
 // Gallery of every world. Used by the machine ("Pick a world") and the coin slot ("Worlds").
 const WorldPicker = ({ onSelect, onClose, current }) => {

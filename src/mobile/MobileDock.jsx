@@ -1,5 +1,5 @@
-import { mobileDockApps } from "#constants";
-import useMobileNavStore from "#store/mobileNav.js";
+import { mobileDockApps } from "@constants";
+import useMobileNavStore from "@store/mobileNav.js";
 
 // Real iOS convention: dock icons carry no label (unlike springboard icons).
 const MobileDock = () => {

@@ -1,4 +1,4 @@
-import { Music } from "#windows/Music.jsx";
+import { Music } from "@windows/Music.jsx";
 
 const MobileMusic = () => <Music embedded />;
 

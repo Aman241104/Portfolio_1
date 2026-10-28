@@ -9,15 +9,25 @@ Repo: https://github.com/Aman241104/Portfolio_1
 
 | Layer | Technology |
 |---|---|
-| Build tool | Vite 7 |
-| UI | React 19 |
-| Styling | Tailwind CSS 4 (Rust engine, `@tailwindcss/vite` plugin) |
-| Animation | GSAP 3 + `@gsap/react` (including `Draggable` for window dragging) |
-| State | Zustand 5 + Immer middleware |
-| PDF viewing | react-pdf (renders the resume inline) |
-| Misc | react-snowfall (desktop snow effect), react-tooltip, dayjs, clsx |
+| Framework | Next.js 16 (App Router, Turbopack), static routes |
+| UI | React 19, TypeScript for new code (existing JS allowed) |
+| Styling | Tailwind CSS 4 (`@tailwindcss/postcss`) |
+| 3D | three.js, React Three Fiber, drei, postprocessing |
+| Animation | GSAP 3 + `@gsap/react` (SplitText, Draggable) |
+| Sound | Procedural WebAudio (no audio files), opt-in |
+| Fonts | `next/font` (Geist, Geist Mono, Instrument Serif, Georama, Roboto Mono) + tiny Google subsets for the 11 multiverse scripts |
+| State | Zustand 5 + Immer (desktop world) |
 
-No backend, no database, no TypeScript — this is a static single-page app. Content (projects, tech stack, socials, gallery) lives in `constants/index.js` as plain data, not fetched from anywhere.
+## Routes
+
+| Route | What |
+|---|---|
+| `/` | PORTFOLIO.exe: gate → cinematic intro over a floating island → pull the lever → land in a world |
+| `/editorial` | Recruiter view (alias: old `/?style=classic` links redirect here) |
+| `/terminal` | The portfolio as a shell |
+| `/desktop` | The original macOS-style desktop |
+
+`/?shot=wide` holds the intro's opening frame (art direction).
 
 ## Architecture
 

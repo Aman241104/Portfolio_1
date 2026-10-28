@@ -1,8 +1,10 @@
+"use client";
+
 import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { profile, projects, skills, socials } from "#content/profile.js";
-import { onRepeat, watching } from "#content/taste.js";
+import { profile, projects, skills, socials } from "@content/profile.js";
+import { onRepeat, watching } from "@content/taste.js";
 
 // World 2: the recruiter view. Klein blue on white, big type, everything one scroll away.
 const Section = ({ n, title, children }) => (

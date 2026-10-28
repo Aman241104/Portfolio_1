@@ -9,4 +9,4 @@ export const profile = {
 };
 
 // ponytail: projects/skills/socials still live in constants/index.js (plan Phase 0 moves them here).
-export { blogPosts as projects, techStack as skills, socials } from "#constants";
+export { blogPosts as projects, techStack as skills, socials } from "@constants";

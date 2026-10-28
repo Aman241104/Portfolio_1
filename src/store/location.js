@@ -1,4 +1,4 @@
-import { locations } from "#constants";
+import { locations } from "@constants";
 import { immer } from "zustand/middleware/immer";
 import { create } from "zustand";
 

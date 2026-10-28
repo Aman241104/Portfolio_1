@@ -1,9 +1,9 @@
 import React from 'react'
-import { WindowControls } from "#components";
+import { WindowControls } from "@components";
 import { Mail, Search } from "lucide-react";
-import useWindowStore from "#store/window.js";
-import { photosLinks, gallery } from "#constants";
-import WindowWrapper from "#hoc/WindowWrapper.jsx";
+import useWindowStore from "@store/window.js";
+import { photosLinks, gallery } from "@constants";
+import WindowWrapper from "@hoc/WindowWrapper.jsx";
 
 const Photos = () => {
     const { openWindow } = useWindowStore();
