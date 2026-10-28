@@ -2,16 +2,16 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ChevronLeft } from "lucide-react";
-import useMobileNavStore from "#store/mobileNav.js";
-import { mobileApps } from "#constants";
-import MobileProjects from "#mobile/apps/MobileProjects.jsx";
-import MobileContact from "#mobile/apps/MobileContact.jsx";
-import MobileResume from "#mobile/apps/MobileResume.jsx";
-import MobileSkills from "#mobile/apps/MobileSkills.jsx";
-import MobileGame from "#mobile/apps/MobileGame.jsx";
-import MobileMusic from "#mobile/apps/MobileMusic.jsx";
-import MobileGallery from "#mobile/apps/MobileGallery.jsx";
-import MobileRepos from "#mobile/apps/MobileRepos.jsx";
+import useMobileNavStore from "@store/mobileNav.js";
+import { mobileApps } from "@constants";
+import MobileProjects from "@mobile/apps/MobileProjects.jsx";
+import MobileContact from "@mobile/apps/MobileContact.jsx";
+import MobileResume from "@mobile/apps/MobileResume.jsx";
+import MobileSkills from "@mobile/apps/MobileSkills.jsx";
+import MobileGame from "@mobile/apps/MobileGame.jsx";
+import MobileMusic from "@mobile/apps/MobileMusic.jsx";
+import MobileGallery from "@mobile/apps/MobileGallery.jsx";
+import MobileRepos from "@mobile/apps/MobileRepos.jsx";
 
 const APP_COMPONENTS = {
     finder: MobileProjects,

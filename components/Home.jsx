@@ -1,9 +1,9 @@
-import {locations} from "#constants";
+import {locations} from "@constants";
 import clsx from "clsx";
 import {useGSAP} from "@gsap/react";
 import { Draggable } from "gsap/Draggable";
-import useWindowStore from "#store/window.js";
-import useLocationStore from "#store/location.js";
+import useWindowStore from "@store/window.js";
+import useLocationStore from "@store/location.js";
 
 const projects = locations.work?.children ?? [];
 

@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import WindowWrapper from "#hoc/WindowWrapper.jsx";
-import { socials } from "#constants";
-import { WindowControls } from "#components";
-import useJobStats from "#hooks/useJobStats.js";
+import WindowWrapper from "@hoc/WindowWrapper.jsx";
+import { socials } from "@constants";
+import { WindowControls } from "@components";
+import useJobStats from "@hooks/useJobStats.js";
 
-const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID;
+const FORMSPREE_FORM_ID = process.env.NEXT_PUBLIC_FORMSPREE_FORM_ID;
 const FORM_ENABLED = Boolean(FORMSPREE_FORM_ID);
 const SUBMIT_TIMEOUT_MS = 15000;
 

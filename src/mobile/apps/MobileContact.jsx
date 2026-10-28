@@ -1,5 +1,5 @@
-import { locations } from "#constants";
-import { Contact } from "#windows/Contact.jsx";
+import { locations } from "@constants";
+import { Contact } from "@windows/Contact.jsx";
 
 const aboutText = locations.about.children.find((c) => c.name === "about-me.txt");
 

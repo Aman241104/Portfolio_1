@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronRight, ChevronLeft, Github, ExternalLink } from "lucide-react";
-import { locations } from "#constants";
+import { locations } from "@constants";
 
 const projects = locations.work.children;
 

@@ -1,7 +1,9 @@
+"use client";
+
 import { useState } from "react";
 import { Dices, LayoutGrid, Link2, FileText } from "lucide-react";
-import WorldPicker from "#shell/WorldPicker.jsx";
-import { profile } from "#content/profile.js";
+import WorldPicker from "@shell/WorldPicker.jsx";
+import { profile } from "@content/profile.js";
 
 // The persistent escape hatch, same place in every world. Sits above any world's own stacking.
 const CoinSlot = ({ current, onSpin, onSelect }) => {
@@ -10,7 +12,7 @@ const CoinSlot = ({ current, onSpin, onSelect }) => {
 
     const copyLink = async () => {
         try {
-            await navigator.clipboard.writeText(`${location.origin}${location.pathname}?style=${current}`);
+            await navigator.clipboard.writeText(`${location.origin}/${current}`);
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
         } catch { /* clipboard blocked: the URL bar already has the link */ }

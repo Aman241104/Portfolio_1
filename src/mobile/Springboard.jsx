@@ -1,6 +1,6 @@
-import { mobileGridApps } from "#constants";
-import useMobileNavStore from "#store/mobileNav.js";
-import MobileDock from "#mobile/MobileDock.jsx";
+import { mobileGridApps } from "@constants";
+import useMobileNavStore from "@store/mobileNav.js";
+import MobileDock from "@mobile/MobileDock.jsx";
 
 const Springboard = () => {
     const { openApp } = useMobileNavStore();

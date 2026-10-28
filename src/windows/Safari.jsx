@@ -1,5 +1,5 @@
 import React from 'react'
-import {WindowControls} from "#components";
+import {WindowControls} from "@components";
 import {
     PanelLeft,
     ShieldHalf,
@@ -7,8 +7,8 @@ import {
     ChevronRight,
     Search, Share, Plus, Copy, MoveRight,
 } from "lucide-react";
-import WindowWrapper from "#hoc/WindowWrapper.jsx";
-import {blogPosts} from "#constants";
+import WindowWrapper from "@hoc/WindowWrapper.jsx";
+import {blogPosts} from "@constants";
 
 const Safari = () => {
     return (

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import clsx from "clsx";
-import WindowWrapper from "#hoc/WindowWrapper.jsx";
-import { WindowControls } from "#components";
-import { onRepeat, topArtists, alsoListening } from "#content/taste.js";
+import WindowWrapper from "@hoc/WindowWrapper.jsx";
+import { WindowControls } from "@components";
+import { onRepeat, topArtists, alsoListening } from "@content/taste.js";
 
 // Real taste, pulled from my YouTube Music (via BitChord). Tracks play through
 // youtube-nocookie embeds, so no API key or login is needed.

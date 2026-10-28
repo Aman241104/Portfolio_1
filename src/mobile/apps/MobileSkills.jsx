@@ -1,4 +1,4 @@
-import { techStack } from "#constants";
+import { techStack } from "@constants";
 
 const MobileSkills = () => {
     return (

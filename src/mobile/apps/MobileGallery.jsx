@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { gallery } from "#constants";
+import { gallery } from "@constants";
 
 const MobileGallery = () => {
     const [full, setFull] = useState(null);

@@ -1,8 +1,10 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 
 // "Aman" across universes. Swaps step at 12 fps (Spider-Verse "on twos"), each swap = 3 glitch frames.
 const NAMES = [
-    { text: "AMAN", font: "'Geist', sans-serif", weight: 800, label: "EN" },
+    { text: "AMAN", font: "var(--font-geist), sans-serif", weight: 800, label: "EN" },
     { text: "अमन", font: "'Rozha One', serif", weight: 400, label: "HI" },
     { text: "અમન", font: "'Baloo Bhai 2', sans-serif", weight: 800, label: "GU" },
     { text: "アマン", font: "'Dela Gothic One', sans-serif", weight: 400, label: "JA" },

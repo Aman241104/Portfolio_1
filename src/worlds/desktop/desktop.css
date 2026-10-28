@@ -1,4 +1,4 @@
-@reference "../../index.css";
+@reference "../../app/globals.css";
 
 /* Everything the macOS desktop world needs, scoped so it never leaks into other worlds
    (Vite does not unload a lazy chunk's CSS when you switch worlds). */
