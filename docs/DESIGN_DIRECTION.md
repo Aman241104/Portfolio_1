@@ -567,3 +567,15 @@ Idea bank, ranked by wow ÷ effort (next sessions):
 - **Stack**: Neon (`api/_db.js`, `DATABASE_URL`) for the pull counter + messages; Resend (`RESEND_API_KEY`) for email;
   PostHog (`VITE_POSTHOG_KEY`, lazy, events only, no autocapture/recording); Cloudinary (cloud `dhrcarq8g`) for every
   project image. Everything degrades quietly when its env var is missing.
+
+### 14.4 Next (decided with Aman 2026-11-10, not built yet)
+- Add a **Mobile apps** kind to `content/work.js`: **Home with Huggsy** (Next.js 16 PWA + native Android in Jetpack
+  Compose, liquid-glass nav, one Supabase backend; github.com/Aman241104/home-with-huggsy; present as a product, no
+  personal details) and **Mindcore** (Android, app.mindcore, release 0.9.5: share a reel/post/link/screenshot, AI
+  extracts repos/tools/certs/jobs, verifies each online, ask-your-library; github.com/Aman241104/mind-core). Need
+  screenshots (phone frames) → Cloudinary `portfolio/work/<slug>`. NOT Convx, gym app, outreach (not ticked).
+- **Live & maintained** section: the 6 real domains + Aayush, Ekam, Advocate Jay Patel + Job Search OS, Pulse AI,
+  with a browser-side reachability dot.
+- **Skills** section: full grouped list from the résumé + projects (expand `content/experience.js` skills).
+- **One content source for every world**: make `constants` blogPosts/techStack derive from `content/work.js` and
+  the skills list, so Desktop OS / Editorial / Terminal show the same detail.
