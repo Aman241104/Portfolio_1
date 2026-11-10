@@ -1,3 +1,4 @@
+/* global process */
 // Uptime for the "Live & maintained" list, checked server-side (Vercel, Singapore) so visitors' ad-blockers,
 // privacy extensions or a site's cold start can't show false "down" dots. Cached 5 min at the edge.
 import { work } from "../content/work.js";
