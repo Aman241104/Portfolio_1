@@ -1,11 +1,11 @@
 /* global process */
 // Contact form: validate → store in Neon → email Aman through Resend (plain text, reply-to = sender).
 // Env: RESEND_API_KEY (required to send), CONTACT_TO (defaults to the address already public on the site),
-// CONTACT_FROM (defaults to Resend's test sender, which can only deliver to the Resend account's own address).
+// CONTACT_FROM (defaults to hello@aman-patel.me). The sender also gets a short confirmation (reply-to = Aman's inbox).
 import { sql, ensure, ipOf } from "./_db.js";
 
 const TO = process.env.CONTACT_TO || "patelaman0241@gmail.com";
-const FROM = process.env.CONTACT_FROM || "PX-01 <onboarding@resend.dev>";
+const FROM = process.env.CONTACT_FROM || "Aman Patel <hello@aman-patel.me>";   // aman-patel.me verified in Resend 2026-11-10
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 
 export const validate = (b) => {
@@ -38,16 +38,22 @@ export default async function handler(req, res) {
         } catch { /* storage is a bonus; still try to deliver */ }
     }
     if (process.env.RESEND_API_KEY) {
-        const r = await fetch("https://api.resend.com/emails", {
+        const send = (body) => fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                from: FROM, to: [TO], reply_to: v.email,
-                subject: `PX-01 · message from ${v.name}`,
-                text: `${v.message}\n\n— ${v.name} <${v.email}>${id ? `\nmessage #${id}` : ""}`,
-            }),
+            body: JSON.stringify({ from: FROM, ...body }),
         }).catch(() => null);
+        const r = await send({
+            to: [TO], reply_to: v.email,
+            subject: `PX-01 · message from ${v.name}`,
+            text: `${v.message}\n\n— ${v.name} <${v.email}>${id ? `\nmessage #${id}` : ""}`,
+        });
         if (!r?.ok && !id) return res.status(502).json({ error: "Couldn't send right now. Email me instead." });
+        if (r?.ok) await send({                                   // confirmation to the sender; replies land with Aman
+            to: [v.email], reply_to: TO,
+            subject: "Got your message · Aman Patel",
+            text: `Hi ${v.name.split(" ")[0]},\n\nThanks for writing. Your message reached my inbox and I'll reply to this address.\n\nWhat you sent:\n> ${v.message.replace(/\n/g, "\n> ")}\n\nAman Patel\nFull-stack engineer, Ahmedabad\nhttps://www.aman-patel.me`,
+        });
     }
     return res.status(200).json({ ok: true, no: id });
 }
