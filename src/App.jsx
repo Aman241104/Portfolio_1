@@ -2,6 +2,7 @@ import { Suspense, useState } from "react";
 import { findWorld } from "#worlds/registry.js";
 import { getLast, setLast } from "#shell/storage.js";
 import Machine from "#machine/Machine.jsx";
+import Home from "./home/Home.jsx";
 import CoinSlot from "#shell/CoinSlot.jsx";
 import WorldBoundary from "#shell/WorldBoundary.jsx";
 
@@ -10,6 +11,9 @@ const initialWorld = () => {
     const fromUrl = findWorld(new URLSearchParams(location.search).get("style"));
     return (fromUrl ?? findWorld(getLast()))?.id ?? null;
 };
+
+// The 3D home needs WebGL 2; without it the CSS machine still spins and lands.
+const hasWebGL = (() => { try { return !!document.createElement("canvas").getContext("webgl2"); } catch { return false; } })();
 
 const syncUrl = (id) => {
     const url = new URL(location.href);
@@ -35,7 +39,7 @@ const App = () => {
         setWorldId(null);
     };
 
-    if (!world) return <Machine onSelect={go} />;
+    if (!world) return hasWebGL ? <Home onSelect={go} /> : <Machine onSelect={go} />;
 
     const { Component } = world;
     return (

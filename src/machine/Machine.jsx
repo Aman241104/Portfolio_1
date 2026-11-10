@@ -12,7 +12,7 @@ const prefersReducedMotion = () =>
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // No repeats until every world has been seen this session, then start over.
-const pickWorld = () => {
+export const pickWorld = () => {
     const seen = getSeen();
     let pool = worlds.filter((w) => !seen.includes(w.id));
     if (pool.length === 0) pool = worlds;
