@@ -1,26 +1,34 @@
 import { useEffect, useRef, useState } from "react";
 import { work, KINDS } from "#content/work.js";
 
-// Production sites and products I built and still look after. The status column is a real check, run from the
-// visitor's browser when the section scrolls into view (no-cors fetch: reachable or not, plus round-trip time).
+// Production sites and products I built and still look after. Status comes from /api/status (checked server-side,
+// cached 5 min); if that's unavailable (local dev), the visitor's browser pings each site instead, with a retry.
 const host = (u) => u.replace(/^https?:\/\//, "").replace(/\/$/, "").replace(/^www\./, "");
 const ping = async (url) => {
-    const t = performance.now();
-    try {
-        await Promise.race([fetch(url, { mode: "no-cors", cache: "no-store" }), new Promise((_, no) => setTimeout(no, 8000))]);
-        return Math.round(performance.now() - t);
-    } catch { return -1; }
+    for (let i = 0; i < 2; i++) {
+        const t = performance.now();
+        try {
+            await Promise.race([fetch(url, { mode: "no-cors", cache: "no-store" }), new Promise((_, no) => setTimeout(no, 12000))]);
+            return Math.round(performance.now() - t);
+        } catch { /* one retry */ }
+    }
+    return -1;
 };
+const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "just now" : `${m} min ago`; };
 
 export default function Maintained() {
     const list = work.filter((w) => w.maintained);
     const [status, setStatus] = useState({});
+    const [checked, setChecked] = useState(null);       // { at, from } when the server check answered
     const ref = useRef(null);
     useEffect(() => {
         const io = new IntersectionObserver(([e]) => {
             if (!e.isIntersecting) return;
             io.disconnect();
-            list.forEach((w) => ping(w.url).then((ms) => setStatus((s) => ({ ...s, [w.slug]: ms }))));
+            fetch("/api/status").then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => {
+                setStatus(Object.fromEntries(list.map((w) => [w.slug, d.sites[w.slug]?.ok ? d.sites[w.slug].ms : -1])));
+                setChecked({ at: d.checkedAt, from: d.from });
+            }).catch(() => list.forEach((w) => ping(w.url).then((ms) => setStatus((s) => ({ ...s, [w.slug]: ms })))));
         }, { rootMargin: "200px" });
         io.observe(ref.current);
         return () => io.disconnect();
@@ -32,7 +40,7 @@ export default function Maintained() {
             <div className="work-head">
                 <h2 id="kept-h">Live &amp; maintained</h2>
                 <p className="mono kept-sum" aria-live="polite">
-                    {Object.keys(status).length < list.length ? "Checking from your browser…" : `${up} of ${list.length} up · checked from your browser just now`}
+                    {Object.keys(status).length < list.length ? "Checking…" : `${up} of ${list.length} up · checked ${checked ? `${ago(checked.at)} from ${checked.from === "sin1" ? "Singapore" : "the server"}` : "from your browser just now"}`}
                 </p>
             </div>
             <p className="kept-intro">Sites and products I built that are in production today. I still ship fixes, content and features on them.</p>
