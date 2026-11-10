@@ -104,7 +104,7 @@ export default function Work() {
                                 <div className="card-img"><img src={shot(w, 720)} alt="" loading="lazy" /></div>
                             </div>
                             <div className="card-meta">
-                                <p className="mono">{KINDS[w.kind]}{w.client ? ` · ${w.client}` : ""} · {w.year}</p>
+                                <p className="mono">{KINDS[w.kind]} · {w.year}{w.live && <span className="live">● Live at {host(w.url).replace(/^www\./, "")}</span>}</p>
                                 <h3>{w.title} <i aria-hidden>↗</i></h3>
                                 <p className="card-line">{w.line}</p>
                                 {w.stack && <p className="mono card-stack">{w.stack}</p>}

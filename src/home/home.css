@@ -232,6 +232,7 @@
 .card-meta h3 { margin: 6px 0 8px; font: 500 clamp(19px, 1.6vw, 23px)/1.15 "Geist", sans-serif; letter-spacing: -0.025em; }
 .card-meta h3 i { font-style: normal; color: var(--signal); display: inline-block; transition: transform .3s; }
 .card-line { margin: 0; font: 400 14px/1.55 "Geist", sans-serif; color: rgba(237, 234, 227, .66); }
+.card-meta .live { margin-left: 10px; padding: 3px 7px; border: 1px solid rgba(61, 220, 132, .35); border-radius: 999px; color: #3ddc84; letter-spacing: .06em; text-transform: none; }
 .card-stack { margin-top: 10px !important; text-transform: none; letter-spacing: .02em; }
 .card-code { position: absolute; top: 44px; right: 10px; padding: 6px 9px; background: rgba(5, 5, 6, .8); border: 1px solid rgba(237, 234, 227, .2); border-radius: 3px; color: var(--bone) !important; text-decoration: none; }
 .card[data-active] .card-img img { object-position: 50% 100%; }

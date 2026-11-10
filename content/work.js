@@ -1,7 +1,8 @@
 // Everything on the Work grid. Only projects Aman confirmed as his own work go here (2026-11-10: the résumé
 // projects, his own products/concepts, client sites from ~/work/AGENTS.md, and the 14 sites he ticked by hand).
-// Left out on purpose: astrology sites, the two wishes sites, yashhuuuu, DealLens, Docket, Prestine.
-// Screenshots live on Cloudinary under portfolio/work/<slug> (captured from the live sites); `img` overrides that id.
+// Left out on purpose: astrology sites, the two wishes sites, yashhuuuu, DealLens, Docket, Prestine, Destination Anywhere.
+// `live: true` = the client's own production domain (checked 2026-11-10; jadetravels.co.in serves a blank WordPress,
+// akshartravels.in isn't theirs, so those stay on vercel.app). Screenshots live on Cloudinary under portfolio/work/<slug> (captured from the live sites); `img` overrides that id.
 export const KINDS = { product: "Products", client: "Client websites", concept: "Concepts & demos" };
 
 export const work = [
@@ -19,9 +20,34 @@ export const work = [
     },
     {
         slug: "zing-bliss", kind: "client", year: 2026, title: "Zing Bliss Events",
-        url: "https://www.zingblissevents.com",
+        url: "https://www.zingblissevents.com", live: true,
         line: "Event agency platform: marketing site, client-preference quiz, client portal and an admin CMS.",
         stack: "Next.js · GSAP · Lenis",
+    },
+    {
+        slug: "bni-ares", kind: "client", year: 2026, title: "BNI Ares",
+        url: "https://www.bniares.com", live: true,
+        line: "Site and member roster for Ahmedabad West's Platinum BNI chapter: members, visitor sign-up and chapter stats.",
+    },
+    {
+        slug: "vitlead", kind: "client", year: 2026, title: "Vitlead",
+        url: "https://www.vitlead.com", live: true,
+        line: "Lead-generation site for Australian mortgage brokers running suburb-targeted Meta ads.",
+    },
+    {
+        slug: "naam-transfer", kind: "client", year: 2026, title: "Naam Transfer",
+        url: "https://www.naamtransfer.com", live: true,
+        line: "Electricity, gas and municipal name-transfer service in Ahmedabad, handled end to end online.",
+    },
+    {
+        slug: "cmj-events", kind: "client", year: 2026, title: "CMJ Events",
+        url: "https://www.clubmjevents.com", live: true,
+        line: "Luxury wedding and event planner: destination weddings, corporate events, portfolio and enquiries.",
+    },
+    {
+        slug: "prihaan-spices", kind: "client", year: 2026, title: "Prihaan Spices",
+        url: "https://www.prihaanspices.in", live: true,
+        line: "Storefront for spices, masalas and dry fruits, with WhatsApp ordering.",
     },
     {
         slug: "aayush-packaging", kind: "client", year: 2026, title: "Aayush Packaging",
@@ -45,31 +71,6 @@ export const work = [
         line: "Agency site for a web and e-commerce studio in Ahmedabad: services, work, ERP offering and lead capture.",
     },
     {
-        slug: "bni-ares", kind: "client", year: 2026, title: "BNI Ares",
-        url: "https://bni-ares-roster.vercel.app",
-        line: "Site and member roster for Ahmedabad West's Platinum BNI chapter: members, visitor sign-up and chapter stats.",
-    },
-    {
-        slug: "vitlead", kind: "client", year: 2026, title: "Vitlead",
-        url: "https://vitlead-web.vercel.app",
-        line: "Lead-generation site for Australian mortgage brokers running suburb-targeted Meta ads.",
-    },
-    {
-        slug: "naam-transfer", kind: "client", year: 2026, title: "Naam Transfer",
-        url: "https://namm-transfer.vercel.app",
-        line: "Electricity, gas and municipal name-transfer service in Ahmedabad, handled end to end online.",
-    },
-    {
-        slug: "cmj-events", kind: "client", year: 2026, title: "CMJ Events",
-        url: "https://mj-events-web.vercel.app",
-        line: "Luxury wedding and event planner: destination weddings, corporate events, portfolio and enquiries.",
-    },
-    {
-        slug: "prihaan-spices", kind: "client", year: 2026, title: "Prihaan Spices",
-        url: "https://prihaan-spices-web.vercel.app",
-        line: "Storefront for spices, masalas and dry fruits, with WhatsApp ordering.",
-    },
-    {
         slug: "eye-hospital", kind: "client", year: 2026, title: "EyeCare Hospital",
         url: "https://eye-hospital-web.vercel.app",
         line: "Eye hospital site: LASIK, cataract and paediatric care, specialists and appointment booking.",
@@ -88,11 +89,6 @@ export const work = [
         slug: "jade-tours", kind: "client", year: 2026, title: "Jade Tours & Travel",
         url: "https://travel-web-april.vercel.app",
         line: "Travel agency for flights, holidays, passports and visas, with a trip enquiry form.",
-    },
-    {
-        slug: "destination-anywhere", kind: "client", year: 2026, title: "Destination Anywhere & Co.",
-        url: "https://trevelweb.vercel.app",
-        line: "Travel agency in Ahmedabad: international and domestic tour packages.",
     },
     {
         slug: "hvac-prep", kind: "client", year: 2026, title: "HVAC Test Prep",
