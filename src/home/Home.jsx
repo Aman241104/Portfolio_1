@@ -3,6 +3,7 @@ import { worlds, RECRUITER_WORLD } from "#worlds/registry.js";
 import { pickWorld } from "#machine/Machine.jsx";
 import { profile, projects, socials } from "#content/profile.js";
 import MultiverseName from "../lab/MultiverseName.jsx";
+import sig from "./signature.json";
 import "./home.css";
 
 // Main screen (docs/DESIGN_DIRECTION.md §10): the machine floating in the dark over a giant "Portfolio",
@@ -43,6 +44,8 @@ const STAR = ["M30 4 C 31 20, 34 26, 56 30 C 36 33, 32 38, 30 56 C 28 38, 24 33,
 const SCRIBBLE = ["M4 22 C 40 6, 80 30, 120 14 S 196 6, 236 20"];
 const LOOP = ["M14 34 C 6 10, 104 2, 112 24 C 118 46, 22 56, 8 38 C 2 28, 18 12, 44 9"];
 const CROSS = ["M8 8 L 40 38", "M38 6 L 10 40"];
+// My real signature (traced from a photo, src/home/signature.json): x in [-1, 1], y up → SVG space 200 wide.
+const SIG = sig.strokes.map((st) => "M" + st.map(([x, y]) => `${((x + 1) * 100).toFixed(1)} ${((0.55 - y) * 100).toFixed(1)}`).join(" L"));
 
 // Boot screen = the loader (§5: "the loader is a brand moment"). The counter chases real milestones
 // (fonts → 3D code → first rendered frame), then the screen collapses to a line of light and the machine drops in.
@@ -180,6 +183,10 @@ const Home = ({ onSelect }) => {
 
                 <div className="ink" aria-hidden>
                     <span className="tag mono">[2026]</span>
+                    <svg className="sig-mark doodle" viewBox="0 -4 200 130" aria-hidden>
+                        {SIG.map((d, i) => <path key={i} d={d} pathLength="1" style={{ "--i": i * 0.6 }} />)}
+                        {sig.dots.map(([x, y], i) => <circle key={i} cx={(x + 1) * 100} cy={(0.55 - y) * 100} r="3" />)}
+                    </svg>
                     <Doodle d={LOOP} className="d-loop" />
                     <p className="note n-role">full-stack dev</p>
                     <Doodle d={ARROW} className="d-arrow" />

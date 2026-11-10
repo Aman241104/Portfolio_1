@@ -261,5 +261,17 @@
 .home[data-booted] .ident { opacity: 1; }
 @keyframes pulse { 50% { opacity: .3; } }
 .boot[data-skip] { cursor: pointer; }
-@media (max-width: 760px) { .home .ident { top: 66px; font-size: 10px; max-width: 34ch; } .tag, .d-loop { display: none; } }
+@media (max-width: 760px) { .home .ident { top: 62px; font-size: 10px; max-width: 44ch; line-height: 1.6; } .tag, .d-loop { display: none; } }
 @media (prefers-reduced-motion: reduce) { .home .ident { opacity: 1; transition: none; } }
+
+/* the signature: small, in red ink, just above the word, writing itself in after the doodles */
+.sig-mark {
+    left: calc(5vw + 108px); bottom: calc(var(--word-bottom) + var(--word-h) + 0.6vw);
+    width: clamp(64px, 6.4vw, 118px); stroke-width: 3.4;
+    filter: drop-shadow(0 0 6px rgba(255, 46, 31, .55));
+}
+.sig-mark circle { fill: var(--signal); opacity: 0; transition: opacity .3s 3.6s; }
+.home[data-booted] .sig-mark circle { opacity: 1; }
+.home[data-booted] .sig-mark path { animation-delay: calc(2.6s + var(--i) * .22s); animation-duration: .5s; }
+.n-role { bottom: calc(var(--word-bottom) + var(--word-h) + 6.8vw) !important; }
+@media (max-width: 760px) { .sig-mark { left: var(--gutter); width: 70px; bottom: calc(var(--word-bottom) + var(--word-h) + 4px); } }

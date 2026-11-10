@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Lightformer, Float, PresentationControls, SpotLight, Sparkles, Preload } from "@react-three/drei";
-import { Machine, GlassSurface, brass } from "#machine/MachineModel.jsx";
+import { Machine, GlassSurface } from "#machine/MachineModel.jsx";
+import Keychains from "./Keychains.jsx";
 
 // Hero: PX-01 floating in a black void under one volumetric key light (docs/DESIGN_DIRECTION.md §10–11).
 // The canvas is transparent so the giant "Portfolio" word in the DOM sits behind the machine.
@@ -83,38 +84,6 @@ const Ground = ({ floatRef, dropRef }) => {
     );
 };
 
-// Brass coins orbiting the machine like moons. On a win they burst outward and fall back into orbit.
-const COINS = Array.from({ length: 9 }, (_, i) => ({
-    r: 3.0 + (i % 3) * 0.55, speed: 0.16 + (i % 4) * 0.035, phase: (i / 9) * Math.PI * 2,
-    y: -0.9 + ((i * 7) % 9) * 0.27, spin: 0.6 + (i % 5) * 0.35, size: 0.16 + (i % 3) * 0.05,
-}));
-const coinGeo = new THREE.CylinderGeometry(1, 1, 0.14, 40);
-const Coins = ({ lit, jackpot }) => {
-    const refs = useRef([]);
-    const since = useSince(lit);
-    const burst = useRef(9);
-    const was = useRef(false);
-    useFrame(({ clock }, dt) => {
-        if (jackpot && !was.current) burst.current = 0;
-        was.current = !!jackpot;
-        burst.current += dt;
-        const t = since(clock);
-        const appear = reduced ? 1 : t === null ? 0 : clamp01((t - 1.1) / 1.2);
-        const b = clamp01(burst.current / 1.6), pop = Math.sin(b * Math.PI) * (1 - b * 0.3);
-        COINS.forEach((c, i) => {
-            const m = refs.current[i];
-            if (!m) return;
-            const a = c.phase + clock.elapsedTime * c.speed * (reduced ? 0 : 1);
-            const r = c.r * (0.4 + 0.6 * outCubic(appear)) + pop * 2.6;
-            m.position.set(Math.cos(a) * r, c.y + Math.sin(clock.elapsedTime * 0.8 + c.phase) * 0.18 + pop * 1.4, -Math.abs(Math.sin(a)) * r * 0.6 - 0.9);   // only behind/beside: never across the reels
-            m.rotation.x = clock.elapsedTime * c.spin * (1 + pop * 6);
-            m.rotation.z = clock.elapsedTime * c.spin * 0.6;
-            m.scale.setScalar(c.size * outCubic(appear));
-        });
-    });
-    return COINS.map((_, i) => <mesh key={i} ref={(m) => (refs.current[i] = m)} geometry={coinGeo} material={brass} scale={0} />);
-};
-
 // A short red-warm flash from the reel window when the reels come to rest on a world.
 const WinFlash = ({ jackpot }) => {
     const ref = useRef();
@@ -144,17 +113,37 @@ const Lean = ({ children }) => {
 
 // Camera: machine in the top ~60% (the word owns the bottom), backs off on narrow screens so the whole
 // machine + lever fits, eases with the cursor, and on `entering` pushes into the reel window.
+// Base framing for a screen shape: camera distance (narrow screens back off so the machine + lever fit)
+// and where it looks (machine in the top ~60%). Shared with the keychain placement.
+const TAN = Math.tan(THREE.MathUtils.degToRad(15));
+export const framing = (aspect) => ({
+    // phones: the machine fills ~80% of the width and sits at the visual centre, keychains hang above it
+    dist: Math.max(aspect > 2.1 ? 11.6 : 12.6, (aspect < 0.8 ? 2.3 : 2.55) / (TAN * aspect)),
+    lookY: aspect < 0.8 ? -0.75 : aspect < 1.2 ? -1.1 : -0.45,
+});
+
+// Product-reveal light sweep: a bright strip glides across the environment so a highlight runs over every
+// chrome edge, once after power-on and then every 7 s. (Desktop only: it re-renders the env cube each frame.)
+const Sweep = ({ lit }) => {
+    const ref = useRef();
+    const since = useSince(lit);
+    useFrame(({ clock }) => {
+        const t = since(clock);
+        const k = t === null || reduced ? 1 : ((t - 2.2) % 7) / 1.8;          // 0..1 during a pass
+        ref.current.visible = k >= 0 && k <= 1;
+        ref.current.position.x = THREE.MathUtils.lerp(-9, 9, THREE.MathUtils.smoothstep(k, 0, 1));
+    });
+    return <Lightformer ref={ref} form="rect" intensity={9} position={[0, 1, 5]} rotation-z={0.35} scale={[0.6, 12, 1]} visible={false} />;
+};
 const Rig = ({ entering }) => {
     const pos = useMemo(() => new THREE.Vector3(), []);
     const look = useMemo(() => new THREE.Vector3(), []);
     useFrame(({ camera, pointer, size }, dt) => {
-        const aspect = size.width / size.height;
-        const fit = 2.55 / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * aspect);
-        const dist = Math.max(aspect > 2.1 ? 11.6 : 12.6, fit);          // ultrawide: come a bit closer
+        const { dist, lookY } = framing(size.width / size.height);
         if (entering) { pos.copy(REEL_WINDOW).setZ(2.4); look.copy(REEL_WINDOW); }
         else {
             pos.set(pointer.x * 0.6, 0.2 + pointer.y * 0.3, dist);
-            look.set(0, aspect < 0.8 ? -1.85 : aspect < 1.2 ? -1.1 : -0.45, 0);
+            look.set(0, lookY, 0);
         }
         const k = entering ? 2.2 : 2.5;
         camera.position.x = THREE.MathUtils.damp(camera.position.x, pos.x, k, dt);
@@ -181,7 +170,7 @@ export default function Studio({ spinning, pulled, booted, target, entering, jac
     return (
         <Canvas className="studio" frameloop={active ? "always" : "never"} dpr={coarse ? [1, 1.5] : [1, 1.75]}
             camera={{ position: [0, 0.2, 14], fov: 30 }}
-            gl={{ alpha: true, antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
+            gl={{ alpha: true, antialias: true, toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.3 }}
             onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}>
             <GlassSurface />
             <Rig entering={entering} />
@@ -192,10 +181,14 @@ export default function Studio({ spinning, pulled, booted, target, entering, jac
             <directionalLight position={[-6, 3, -5]} intensity={2.6} color="#cfe0ff" />
             <directionalLight position={[6, 1.5, -4]} intensity={1.8} color="#ffd6b0" />
             <directionalLight position={[2, 2, 9]} intensity={0.35} />
+            {/* separation: a cool top rim and a faint red kicker from below-behind (ties the machine to the red ink) */}
+            <directionalLight position={[0, 7, -5]} intensity={1.6} color="#dfe8ff" />
+            <directionalLight position={[0, -3, -6]} intensity={1.3} color="#ff3a22" />
             <hemisphereLight args={["#ffffff", "#000000", 0.12]} />
 
             {/* reflections come only from these strips: chrome reads as bright bars on black, the product-shot look */}
-            <Environment resolution={256}>
+            <Environment resolution={coarse ? 128 : 256} frames={coarse || reduced ? 1 : Infinity}>
+                {!coarse && <Sweep lit={lit} />}
                 <Lightformer form="rect" intensity={2.2} position={[0, 6, 1]} rotation-x={Math.PI / 2} scale={[7, 3, 1]} />
                 <Lightformer form="rect" intensity={5} position={[-5, 1, -1]} rotation-y={Math.PI / 2.4} scale={[0.5, 7, 1]} />
                 <Lightformer form="rect" intensity={3} color="#ffd9b8" position={[5, 1, -1]} rotation-y={-Math.PI / 2.4} scale={[0.5, 7, 1]} />
@@ -215,7 +208,7 @@ export default function Studio({ spinning, pulled, booted, target, entering, jac
                         </PresentationControls>
                     </Float>
             </Entrance>
-            <Coins lit={lit} jackpot={jackpot} />
+            <Keychains lit={lit} jackpot={jackpot} framing={framing} />
             <Ground floatRef={floatRef} dropRef={dropRef} />
             <FirstFrame onFrame={onFrame} />
             <Preload all />

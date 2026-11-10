@@ -445,3 +445,25 @@ marquee band before the footer, PX-01 favicon (svg + 32px + apple-touch), OG ima
 6. **Social proof**: one quote line or a "currently building" card (yashahire) in the footer, not the hero.
 7. **Ask-me-anything world** (aaabadcode/yashahire trend) as world #4 on the reels, not a chat box on the hero.
 8. **Returning visitors**: decide whether `/` always shows the machine (recommended for a public, SEO'd site) or resumes the last world.
+
+## 12. Keychains, signature, lighting (2026-11-10)
+- **Keychains** (replaced the coins, then the scatter): enamel-pin charms with the real logos (Simple Icons, CC0, `simple-icons`),
+  a red ENTER keycap and a racing helmet, each on a chrome split ring hanging from a hairline display cable. A designed layout:
+  desktop = 3 per side in a mirrored arc at one depth (same size); phones = a row of 3 above the machine. Lowered in on their
+  cables after power-on, one slow wave of sway across the set, facing front; a touch or a win gives one full turn that settles.
+  Slots live in screen space and are solved per aspect with the camera's `framing()`, pushed clear of the machine when needed.
+- **Signature**: traced from Aman's photo (blue-ink mask → skeleton → graph walk → spur prune → gap bridge → Gaussian smoothing →
+  resample; `src/home/signature.json`). A big neon version behind the machine was tried and cut (too loud, competes with the
+  object). It now sits small in red ink just above "Portfolio" and writes itself in after the doodles.
+- **Lighting pass** (options weighed → chosen):
+  | Option | Verdict |
+  |---|---|
+  | AgX tone mapping (vs ACES) | ✅ chrome highlights roll off naturally, reds stay red instead of shifting orange |
+  | Animated light sweep (a Lightformer strip crossing the env, every 7 s) | ✅ desktop; the classic product-reveal highlight. Off on phones (env cube re-render) |
+  | Cool top rim + faint red under-kicker | ✅ separates the case edges from the black; red ties it to the ink |
+  | Studio HDRI (Poly Haven) instead of Lightformers | ❌ softer but muddier on black; strips read more "product shot" |
+  | RectAreaLight softbox key | later: nicer soft speculars, costs a uniforms lib + per-material support |
+  | Bloom / N8AO post | ❌ breaks the transparent canvas the DOM word needs; revisit if the word moves into 3D |
+  | Neon sign as a light source | cut with the big neon (see above) |
+- **Phones**: machine fills ~80% of the width at the visual centre (`framing()`), keychains above it, name line 2 rows.
+- `/` always opens on the machine; only `?style=` links go straight into a world.
