@@ -214,7 +214,7 @@ const SoundToggle = () => {
     );
 };
 
-const MARQUEE = ["Pick a reality", "Desktop OS", "Editorial", "Terminal", "Ahmedabad, IN", "Open to work"];
+const MARQUEE = ["Pick a reality", "Desktop OS", "Editorial", "Terminal", "Album Rollout", "Ahmedabad, IN", "Open to work"];
 
 // The machine as an explicit state machine, so a half-finished animation can never strand the UI:
 //   idle → armed (lever grabbed) → spinning → locking (reels report as they physically stop) → revealed → transitioning
@@ -449,7 +449,7 @@ const Home = ({ onSelect }) => {
                     </div>
                     <nav className="keys" aria-label="Site index">
                         {[
-                            ["Worlds", "Three ways to see this site", worlds.map((w) => ({ label: w.name, hint: w.tagline, onClick: () => onSelect(w.id), icon: "→" }))],
+                            ["Worlds", "Four ways to see this site", worlds.map((w) => ({ label: w.name, hint: w.tagline, onClick: () => onSelect(w.id), icon: "→" }))],
                             ["Contact", "Résumé, email and profiles", [
                                 { label: "Résumé", hint: "One-page PDF", href: profile.resume, ext: true, icon: "↓" },
                                 { label: "Email", hint: profile.email, href: `mailto:${profile.email}`, icon: "↗" },

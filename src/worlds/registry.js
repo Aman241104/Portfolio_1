@@ -28,6 +28,14 @@ export const worlds = [
         accent: "#22c55e",
         load: () => import("./terminal/index.jsx"),
     },
+    {
+        id: "album",
+        name: "Album Rollout",
+        tagline: "The portfolio, deluxe. Projects as a tracklist.",
+        symbols: ["Y2K", "Album", "Loud"],
+        accent: "#c8ff2e",
+        load: () => import("./album/index.jsx"),
+    },
 ];
 
 // One lazy component per world, from the same loader, so preloading on lever pull warms the chunk it will render.
