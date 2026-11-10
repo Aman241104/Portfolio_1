@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer, Float, PresentationControls, SpotLight, Sparkles, Preload } from "@react-three/drei";
 import { Machine, GlassSurface } from "#machine/MachineModel.jsx";
 import Keychains from "./Keychains.jsx";
@@ -12,6 +12,7 @@ import Keychains from "./Keychains.jsx";
 const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const KEY = 340;                       // key light intensity at full power (physical units, decay 2)
 const REEL_WINDOW = new THREE.Vector3(0, 0.42, 0);
+const DIVE = new THREE.Vector3(0, 0.42, 3.2);
 const clamp01 = (x) => THREE.MathUtils.clamp(x, 0, 1);
 const outCubic = (k) => 1 - Math.pow(1 - k, 3);
 const outBack = (k, s = 1.4) => 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2);
@@ -63,11 +64,47 @@ const poolTexture = (stops) => {
     g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
     return new THREE.CanvasTexture(c);
 };
+// The key light falls through a jali: the Sidi Saiyyed tree-of-life window (Ahmedabad), drawn procedurally into the
+// light pool on the floor. Canvas top = far side of the floor, so the arch points away from the viewer.
+const jaliTexture = () => {
+    const W = 1024, H = 600, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"), pool = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W / 2);
+    [[0, "rgba(255,236,214,.13)"], [0.45, "rgba(255,236,214,.04)"], [1, "rgba(255,236,214,0)"]].forEach(([a, col]) => pool.addColorStop(a, col));
+    g.fillStyle = pool; g.fillRect(0, 0, W, H);
+    // arch window, ~1/3 of the pool, centred
+    const cx = W / 2, base = H * 0.86, aw = 250, top = H * 0.12;
+    const arch = new Path2D();
+    arch.moveTo(cx - aw / 2, base); arch.lineTo(cx - aw / 2, top + aw * 0.5);
+    arch.quadraticCurveTo(cx - aw / 2, top, cx, top); arch.quadraticCurveTo(cx + aw / 2, top, cx + aw / 2, top + aw * 0.5);
+    arch.lineTo(cx + aw / 2, base); arch.closePath();
+    g.save(); g.clip(arch);
+    g.filter = "blur(2.5px)"; g.strokeStyle = "rgba(255,236,214,.22)"; g.lineCap = "round";
+    // the tree: a trunk that splits into curling branches, each ending in a spiral leaf
+    const branch = (x, y, ang, len, w, depth) => {
+        const ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len, curl = ang + (depth % 2 ? 0.5 : -0.5);
+        g.lineWidth = w; g.beginPath(); g.moveTo(x, y);
+        g.quadraticCurveTo(x + Math.cos(curl) * len * 0.6, y + Math.sin(curl) * len * 0.6, ex, ey); g.stroke();
+        if (depth === 0) {
+            g.lineWidth = 2; g.beginPath();
+            for (let a = 0; a < 9; a += 0.3) g.lineTo(ex + Math.cos(a + ang) * a * 1.4, ey + Math.sin(a + ang) * a * 1.4);
+            g.stroke(); return;
+        }
+        branch(ex, ey, ang - 0.55, len * 0.72, w * 0.7, depth - 1);
+        branch(ex, ey, ang + 0.55, len * 0.72, w * 0.7, depth - 1);
+    };
+    branch(cx, base, -Math.PI / 2, 120, 12, 5);
+    // stone lattice along the bottom third
+    g.lineWidth = 3;
+    for (let x = cx - aw / 2; x < cx + aw / 2; x += 22) for (let y = base - 110; y < base; y += 22) { g.beginPath(); g.arc(x + 11, y + 11, 8, 0, Math.PI * 2); g.stroke(); }
+    g.restore();
+    g.filter = "none"; g.strokeStyle = "rgba(255,236,214,.12)"; g.lineWidth = 4; g.stroke(arch);
+    return new THREE.CanvasTexture(c);
+};
 const FLOOR_Y = -3.4;
 const Ground = ({ floatRef, dropRef }) => {
     const shadow = useRef();
     const tex = useMemo(() => ({
-        pool: poolTexture([[0, "rgba(255,236,214,.16)"], [0.45, "rgba(255,236,214,.05)"], [1, "rgba(255,236,214,0)"]]),
+        pool: jaliTexture(),
         shadow: poolTexture([[0, "rgba(0,0,0,.9)"], [0.5, "rgba(0,0,0,.45)"], [1, "rgba(0,0,0,0)"]]),
     }), []);
     useFrame(() => {
@@ -136,6 +173,7 @@ const Sweep = ({ lit }) => {
     return <Lightformer ref={ref} form="rect" intensity={9} position={[0, 1, 5]} rotation-z={0.35} scale={[0.6, 12, 1]} visible={false} />;
 };
 const Rig = ({ entering }) => {
+    const dive = useRef(0);                    // scroll progress, shared with the DOM as --dive (fades the overlays)
     const pos = useMemo(() => new THREE.Vector3(), []);
     const look = useMemo(() => new THREE.Vector3(), []);
     useFrame(({ camera, pointer, size }, dt) => {
@@ -144,6 +182,10 @@ const Rig = ({ entering }) => {
         else {
             pos.set(pointer.x * 0.6, 0.2 + pointer.y * 0.3, dist);
             look.set(0, lookY, 0);
+            // scrolling away dives the camera into the reels (the hero leaves through the machine)
+            const p = THREE.MathUtils.smoothstep(window.scrollY / (window.innerHeight * 0.75), 0, 1);
+            if (p > 0) { pos.lerp(DIVE, p); look.lerp(REEL_WINDOW, p); }
+            if (Math.abs(p - dive.current) > 0.004) { dive.current = p; document.documentElement.style.setProperty("--dive", p.toFixed(3)); }
         }
         const k = entering ? 2.2 : 2.5;
         camera.position.x = THREE.MathUtils.damp(camera.position.x, pos.x, k, dt);
@@ -173,6 +215,26 @@ const Anchors = ({ onAnchors }) => {
     return <group ref={ref} />;
 };
 
+// Engineer's easter egg (hold the lever 3 s): wireframe everything and print live renderer stats into .debug-hud.
+const Debug = ({ on }) => {
+    const { scene } = useThree();
+    useEffect(() => {
+        scene.traverse((o) => { if (o.material && "wireframe" in o.material) o.material.wireframe = on; });
+    }, [on, scene]);
+    const n = useRef(0), last = useRef(0);
+    useFrame(({ gl }) => {
+        if (gl.info.autoReset === on) { gl.info.autoReset = !on; gl.info.reset(); }   // debug: count every pass (env cube + main), averaged below
+        if (!on || ++n.current % 20) return;
+        const now = performance.now(), fps = last.current ? 20000 / (now - last.current) : 0;
+        last.current = now;
+        const el = document.querySelector(".debug-hud pre");
+        const { render, memory } = gl.info;
+        if (el) el.textContent = `fps        ${fps.toFixed(0)}\ndraw calls ${Math.round(render.calls / 20)} / frame\ntriangles  ${Math.round(render.triangles / 20).toLocaleString()}\ngeometries ${memory.geometries}\ntextures   ${memory.textures}\ndpr        ${gl.getPixelRatio().toFixed(2)}`;
+        gl.info.reset();
+    });
+    return null;
+};
+
 // Reports the first rendered frame (after Preload compiled every shader), which ends the boot screen.
 const FirstFrame = ({ onFrame }) => {
     const done = useRef(false);
@@ -180,7 +242,7 @@ const FirstFrame = ({ onFrame }) => {
     return null;
 };
 
-export default function Studio({ spinning, pulled, booted, target, entering, jackpot, lit, onPull, onArm, onReelStop, onAnchors, onBooted, onFrame, onCreated, active }) {
+export default function Studio({ count, ticket, onTicket, onDebug, debug, spinning, pulled, booted, target, entering, jackpot, lit, onPull, onArm, onReelStop, onAnchors, onBooted, onFrame, onCreated, active }) {
     const floatRef = useRef();
     const dropRef = useRef();
     useEffect(() => { onCreated?.(); }, [onCreated]);
@@ -222,7 +284,7 @@ export default function Studio({ spinning, pulled, booted, target, entering, jac
                     <Float ref={floatRef} enabled={!reduced} speed={1.3} rotationIntensity={0.18} floatIntensity={0.55} floatingRange={[-0.18, 0.18]}>
                         <PresentationControls global={false} cursor={!entering} snap speed={1.4} polar={[-0.35, 0.35]} azimuth={[-0.9, 0.9]} damping={0.25}>
                             <Lean>
-                                <Machine spinning={spinning} pulled={pulled} booted={booted} target={target} onPull={onPull} onArm={onArm} onReelStop={onReelStop} />
+                                <Machine spinning={spinning} pulled={pulled} booted={booted} target={target} jackpot={jackpot} count={count} ticket={ticket} onTicket={onTicket} onDebug={onDebug} onPull={onPull} onArm={onArm} onReelStop={onReelStop} />
                                 <Anchors onAnchors={onAnchors} />
                             </Lean>
                         </PresentationControls>
@@ -231,6 +293,7 @@ export default function Studio({ spinning, pulled, booted, target, entering, jac
             <Keychains lit={lit} jackpot={jackpot} framing={framing} />
             <Ground floatRef={floatRef} dropRef={dropRef} />
             <FirstFrame onFrame={onFrame} />
+            <Debug on={!!debug} />
             <Preload all />
         </Canvas>
     );

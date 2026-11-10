@@ -54,7 +54,7 @@ const build = (count) => {
 };
 
 const vertexShader = /* glsl */ `
-uniform float uTime, uPR, uActive;
+uniform float uTime, uPR, uActive, uBurst;
 uniform vec3 uMouse;
 attribute float aSize, aKind, aSeed;
 varying float vAlpha;
@@ -70,6 +70,11 @@ void main() {
         p.xz += normalize(d + 1e-4) * f * 1.1;
         p.y += sin(dist * 2.0 - uTime * 4.0) * smoothstep(8.0, 1.5, dist) * 0.14 * uActive;   // ripple
         vAlpha = 0.72 + f * 0.28;
+        // "copy email": a ring of light leaves the dust machine and rolls out across the dunes
+        float bt = uTime - uBurst, dm = length(p.xz - vec2(7.5, -9.0)), front = bt * 6.0;
+        float wave = step(0.0, bt) * exp(-bt * 0.7) * smoothstep(2.5, 0.0, abs(dm - front));
+        p.y += wave * 0.55 * (aKind < 0.5 ? 1.0 : 0.0);
+        vAlpha += wave * 0.6 + (aKind > 1.5 ? step(0.0, bt) * exp(-bt * 1.6) * 0.9 : 0.0);
     } else vAlpha = 0.55 + 0.45 * sin(uTime * 1.7 + aSeed * 60.0);
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -87,15 +92,17 @@ void main() {
 const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.4);
 const hit = new THREE.Vector3();
 
-const Dust = ({ count }) => {
+const Dust = ({ count, pulse }) => {
     const geo = useMemo(() => build(count), [count]);
     const uniforms = useMemo(() => ({
         uTime: { value: 0 }, uPR: { value: Math.min(window.devicePixelRatio, 2) },
-        uMouse: { value: new THREE.Vector3(0, 0, -100) }, uActive: { value: 0 },
+        uMouse: { value: new THREE.Vector3(0, 0, -100) }, uActive: { value: 0 }, uBurst: { value: -100 },
     }), []);
     const last = useRef({ x: 9, y: 9, moved: 0 });
+    const seen = useRef(pulse);
     useFrame(({ clock, pointer, raycaster, camera }, dt) => {
         uniforms.uTime.value = clock.elapsedTime;
+        if (pulse !== seen.current) { seen.current = pulse; uniforms.uBurst.value = clock.elapsedTime; }
         const l = last.current;
         if (pointer.x !== l.x || pointer.y !== l.y) { l.x = pointer.x; l.y = pointer.y; l.moved = clock.elapsedTime; }
         raycaster.setFromCamera(pointer, camera);
@@ -113,13 +120,13 @@ const Dust = ({ count }) => {
 };
 
 // `eventSource`: the footer element, so the dots react even when the cursor is over the footer's text.
-export default function DotField({ active, eventSource }) {
+export default function DotField({ active, eventSource, pulse = 0 }) {
     const count = typeof window !== "undefined" && window.innerWidth < 700 ? 40000 : 95000;
     return (
         <Canvas className="dots" frameloop={active ? "always" : "never"} dpr={[1, 1.5]} eventSource={eventSource} eventPrefix="client"
             camera={{ position: [0, 3.4, 12], fov: 45, far: 200 }} gl={{ antialias: false }}
             onCreated={({ camera, gl }) => { camera.lookAt(0, 0.2, -10); gl.setClearColor("#050506"); }}>
-            <Dust count={count} />
+            <Dust count={count} pulse={pulse} />
         </Canvas>
     );
 }

@@ -491,3 +491,61 @@ Not done yet (next session, in this order):
 4. Content: 3–5 real case studies (problem → decisions → outcome; no invented metrics), from `constants/index.js` projects.
 5. World system: reels as Era/Interface/Personality mapped onto 8–12 art-directed worlds (not 64).
 6. Archive pieces clickable only once they lead somewhere real (e.g. a filtered project list per technology).
+
+## 14. Intro pass: sound, haptics, payout + idea bank (2026-11-10, later)
+Research this pass (web): Utsubo "8 best three.js sites 2026" (Oryzo/Lusion: one product with weight, reveal on
+interaction; Cartier W&W: one scene per object + a Web Audio score; Hubtown: cursor reveals detail on a single
+monolith), Awwwards hero/intro inspiration, Teenage-Engineering-style hardware UIs (draggable product, mono spec
+grids, knob interactions). Common rule: **commit to one hard idea, give the object weight, let interaction reveal**.
+None of them has an operable machine; the PX-01 is still the rarest thing in the set.
+
+Done:
+- `src/machine/sfx.js`: Web Audio synth, no files. Lever ratchet per notch + detent clunk, reel ticks as symbols
+  pass, per-reel lock thunk, win arpeggio, coin chimes, power-on hum. **Off by default**, remembered in localStorage,
+  `S` toggles, "Sound on/off" button with a tiny EQ in the top bar (phones too, top-right). Android vibrates on
+  ratchet / lock / win (`navigator.vibrate`).
+- Jackpot payout: 7 brass coins jump from the chute into the front tray on a win (`Payout` in MachineModel).
+- Boot hint now says how to switch sound on instead of "there isn't any".
+
+Idea bank, ranked by wow ÷ effort (next sessions):
+1. **Ticket instead of a card.** On a win the machine prints a paper ticket from a slot (world name, Era/Medium/Mood,
+   result no.); tear/click it = Enter this world. Turns the DOM reveal card into a physical object.
+2. **Near-miss tease.** Reel 3 overshoots one symbol, hangs, clicks back. Classic slot tension, ~15 lines in `Reel`.
+3. **Boot on the machine itself.** Drop the separate loader screen: the machine is in the dark, the play counter
+   rolls 000000→000427 and the LEDs light one by one as assets load. The loader becomes the product reveal.
+4. **Real play counter.** Shared count of pulls across visitors (Vercel KV / Upstash free tier) → "Result 001 284"
+   is true and doubles as quiet social proof ("1,284 pulls this month").
+5. **Jali gobo.** Sidi Saiyyed tree-lattice pattern cast by the key light onto the floor pool (SpotLight.map).
+   The Ahmedabad signature research §4 asked for, without a single extra word.
+6. **Scroll = dive.** Scrolling pushes the camera into the reel window and the reels become the section index
+   for the case studies.
+7. **Engineer's easter egg.** Hold the lever down 3 s → debug view (wireframe, normals, fps, draw calls).
+8. **Declutter pass.** 7 doodles + 7 keychains + CTA column + tabs + clock compete. Cut doodles to 3 (signature,
+   pull me, ring) and let the machine breathe — test with Aman before cutting (he likes the handwriting).
+
+### 14.1 Built the same day (idea bank 1–7)
+1. **Ticket** (`Ticket` in MachineModel): prints from a slot under the case 0.45 s after the reels lock (print buzz +
+   haptics), shows result no., world, Era/Medium/Mood, "Tear here to enter →"; clicking it enters the world. The DOM
+   reveal card stays for keyboard/screen readers; on phones its "Result" line is hidden (the ticket carries it).
+2. **Near miss** (`Reel`): reel 3, half the time, stops one symbol late, hangs 0.5 s, snaps back (ease 11).
+3. **Boot on the machine**: the loader no longer shows a big number or a bar, only the log lines. The machine's own
+   play counter rolls 000000 → count while the key light comes up (`Counter` redraws only when the digit changes).
+4. **Shared counter**: `api/pulls.js` (Vercel function, Upstash Redis REST, 1 pull per IP per 4 s). **Needs setup:**
+   Vercel → project → Storage → Upstash Redis (free) → connect; it injects `KV_REST_API_URL/TOKEN`. Until then the
+   API answers 501 and the page keeps the house number and hides "N pulls so far". Not called in `vite dev`.
+5. **Jali gobo** (`jaliTexture` in Studio): arch + recursive curling tree + stone lattice painted into the floor
+   light pool. Subtle on purpose; strengthen the alpha if it reads too faint on real screens.
+6. **Scroll dive** (`Rig`): the camera pushes into the reel window over the first 75% of the hero scroll; the DOM
+   overlays fade via `--dive` (CSS `filter: opacity()`, so the boot transitions aren't affected).
+7. **Debug view**: hold the lever still for 3 s → wireframe + live fps / draw calls / triangles HUD; hold again or
+   "Close" to exit. Releasing after the hold never pulls.
+
+### 14.2 Declutter + footer rebuild (same day)
+- **#8 done:** removed the purely decorative marks (star, cross, loop around [2026], scribble under the script name,
+  the loose arrow). Kept handwriting that says something: script name, real signature, "fullstack dev", "+3D & AI",
+  "Ahmedabad, IN", "pull me" + arrow, the result ring.
+- **Footer = Selected work + contact on the dunes.** The empty sky above the dunes now holds the work index
+  (`projects` from constants): big rows, number / title / one line / date; hover draws a red rule, dims the others
+  and floats the project shot under the cursor (fine pointers only). Contact block: bigger Geist headline, "Now: open
+  to full-stack roles · Ahmedabad, on-site", **copy-email button** (falls back to mailto) that sends a ring of light
+  out of the dust machine across the dunes (`uBurst` in DotField). "Album Rollout — soon" removed everywhere (not built).

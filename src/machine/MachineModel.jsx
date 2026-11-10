@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";
 import { worlds } from "#worlds/registry.js";
+import { sfx } from "./sfx.js";
 
 // PX-01, the clear-case reality selector. Shared by the home screen (src/home) and the lab (/lab/machine.html).
 // Everything is code + PBR. Units ≈ decimetres. The machine is centred on its own origin.
@@ -75,8 +76,12 @@ const Reel = ({ index, x, spinning, target, onStop }) => {
     const speed = useRef(0);
     const stop = useRef(null);
     const spun = useRef(false);                     // report a lock only after a real spin, not on mount
+    const slot = useRef(0);
+    const tease = useRef(false), hold = useRef(0), ease = useRef(STOP_EASE);
     useFrame((_, dt) => {
         const r = ref.current.rotation;
+        const k = Math.floor(r.x / SLOT_ANGLE);
+        if (k !== slot.current) { slot.current = k; if (spun.current) sfx.tick(); }
         if (spinning) {
             stop.current = null;
             spun.current = true;
@@ -87,12 +92,18 @@ const Reel = ({ index, x, spinning, target, onStop }) => {
                 const ahead = Math.round(speed.current / STOP_EASE / SLOT_ANGLE) + (speed.current > 1 ? index * 5 : 0);
                 let k = Math.ceil((r.x - SLOT_OFFSET) / SLOT_ANGLE - 1e-6) + ahead;
                 if (target != null) while ((((k % SLOTS) + SLOTS) % SLOTS) % worlds.length !== target) k++;
-                stop.current = k * SLOT_ANGLE + SLOT_OFFSET;
+                tease.current = index === 2 && spun.current && Math.random() < 0.5;   // the near miss, half the time
+                hold.current = 0; ease.current = STOP_EASE;
+                stop.current = (k + (tease.current ? 1 : 0)) * SLOT_ANGLE + SLOT_OFFSET;
             }
             const before = r.x;
-            r.x = THREE.MathUtils.damp(r.x, stop.current, STOP_EASE, dt);
+            r.x = THREE.MathUtils.damp(r.x, stop.current, ease.current, dt);
             speed.current = (r.x - before) / Math.max(dt, 1e-4);
-            if (spun.current && Math.abs(stop.current - r.x) < 0.004) { spun.current = false; r.x = stop.current; onStop?.(index); }
+            if (spun.current && Math.abs(stop.current - r.x) < 0.004) {
+                if (tease.current) {                                       // hang on the wrong symbol… then click back
+                    if ((hold.current += dt) > 0.5) { tease.current = false; stop.current -= SLOT_ANGLE; ease.current = 11; }
+                } else { spun.current = false; r.x = stop.current; sfx.lock(index); onStop?.(index); }
+            }
         }
         drum.current.map = speed.current > 5 ? blur : sharp;
     });
@@ -225,18 +236,30 @@ const Spring = ({ position }) => {
 };
 
 // Mechanical play counter: digits on a dark plate behind the glass.
-const Counter = ({ position }) => {
-    const tex = useMemo(() => {
+// Mechanical play counter. Rolls up from 000000 to `count` on power-on, then ticks once per pull.
+const Counter = ({ position, count = 427 }) => {
+    const { tex, draw } = useMemo(() => {
         const c = document.createElement("canvas"); c.width = 256; c.height = 64;
-        const g = c.getContext("2d");
-        g.fillStyle = "#0b0b0c"; g.fillRect(0, 0, 256, 64);
-        "000427".split("").forEach((d, i) => {
-            g.fillStyle = i < 3 ? "#202024" : "#2a2a2e"; g.fillRect(6 + i * 41, 6, 36, 52);
-            g.fillStyle = "#edeae3"; g.font = "600 38px 'Geist Mono', monospace"; g.textAlign = "center"; g.textBaseline = "middle";
-            g.fillText(d, 24 + i * 41, 33);
-        });
-        const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+        const g = c.getContext("2d"), t = new THREE.CanvasTexture(c);
+        t.colorSpace = THREE.SRGBColorSpace;
+        const draw = (n) => {
+            g.fillStyle = "#0b0b0c"; g.fillRect(0, 0, 256, 64);
+            String(n).padStart(6, "0").slice(-6).split("").forEach((d, i) => {
+                g.fillStyle = i < 3 ? "#202024" : "#2a2a2e"; g.fillRect(6 + i * 41, 6, 36, 52);
+                g.fillStyle = "#edeae3"; g.font = "600 38px 'Geist Mono', monospace"; g.textAlign = "center"; g.textBaseline = "middle";
+                g.fillText(d, 24 + i * 41, 33);
+            });
+            t.needsUpdate = true;
+        };
+        draw(0);
+        return { tex: t, draw };
     }, []);
+    const v = useRef(0), shown = useRef(0);
+    useFrame((_, dt) => {
+        v.current = count < v.current ? count : Math.min(count, v.current + Math.max(dt * 30, (count - v.current) * dt * 2.5));
+        const n = Math.floor(v.current);
+        if (n !== shown.current) { shown.current = n; draw(n); }
+    });
     return (
         <mesh position={position}>
             <planeGeometry args={[0.56, 0.14]} />
@@ -245,7 +268,7 @@ const Counter = ({ position }) => {
     );
 };
 
-const Mechanism = ({ spinning }) => (
+const Mechanism = ({ spinning, count }) => (
     <group>
         {/* gear train, lower left, facing the viewer */}
         <Gear r={0.32} teeth={22} position={[-0.95, -0.55, 0.35]} material={mat.chrome} spinning={spinning} />
@@ -299,7 +322,7 @@ const Mechanism = ({ spinning }) => (
 
         {/* lever return spring + play counter */}
         <Spring position={[1.38, -0.15, 0.05]} />
-        <Counter position={[0.2, 1.07, 0.845]} />
+        <Counter position={[0.2, 1.07, 0.845]} count={count} />
 
         {/* chrome screws at the shell corners */}
         {[[-1.48, 1.13], [1.48, 1.13], [-1.48, -1.13], [1.48, -1.13]].map(([x, y], i) => (
@@ -314,7 +337,7 @@ const Mechanism = ({ spinning }) => (
 /* ---------------------------------------------------------------- lever, LEDs */
 
 // Grab the knob and drag down: the arm follows with resistance, fires past 70% of travel, springs back otherwise.
-const Lever = ({ pulled, onPull, onArm }) => {
+const Lever = ({ pulled, onPull, onArm, onDebug }) => {
     const pivot = useRef();
     const drag = useRef(null);                      // { startY, angle } while dragging
     useEffect(() => {
@@ -322,11 +345,15 @@ const Lever = ({ pulled, onPull, onArm }) => {
             if (!drag.current) return;
             const raw = Math.max(0, (e.clientY - drag.current.startY) / 160);
             drag.current.angle = Math.min(1, raw / (1 + raw * 0.6)) * 0.95;   // resistance: diminishing return
+            const notch = Math.floor(drag.current.angle * 10);
+            if (notch > drag.current.notch) drag.current.angle > 0.66 && drag.current.notch * 0.1 <= 0.66 ? sfx.detent() : sfx.ratchet();
+            drag.current.notch = notch;
         };
         const up = () => {
             if (!drag.current) return;
             // a past-70% drag fires; so does a plain tap on the knob (touch screens scroll instead of dragging)
-            if (drag.current.angle > 0.66 || drag.current.angle < 0.03) onPull();
+            if (drag.current.debug) onArm?.(false);   // the hold opened the debug view: no pull
+            else if (drag.current.angle > 0.66 || drag.current.angle < 0.03) onPull();
             else onArm?.(false);                      // let go before the detent: back to idle
             drag.current = null; document.body.style.cursor = "";
         };
@@ -336,11 +363,13 @@ const Lever = ({ pulled, onPull, onArm }) => {
     }, [onPull, onArm]);
     const hot = useRef(false);
     useFrame((_, dt) => {
+        const d = drag.current;
+        if (d && onDebug && !d.debug && d.angle < 0.03 && performance.now() - d.t0 > 3000) { d.debug = true; sfx.detent(); onDebug(); }
         const target = drag.current ? drag.current.angle : pulled ? 0.9 : 0;
         pivot.current.rotation.x = THREE.MathUtils.damp(pivot.current.rotation.x, target, drag.current ? 20 : pulled ? 14 : 5, dt);
         mat.knob.emissiveIntensity = THREE.MathUtils.damp(mat.knob.emissiveIntensity, hot.current || drag.current ? 1.6 : 0, 8, dt);
     });
-    const grab = (e) => { e.stopPropagation(); drag.current = { startY: e.clientY, angle: 0 }; document.body.style.cursor = "grabbing"; onArm?.(true); };
+    const grab = (e) => { e.stopPropagation(); drag.current = { startY: e.clientY, angle: 0, notch: 0, t0: performance.now() }; document.body.style.cursor = "grabbing"; onArm?.(true); };
     return (
         <group position={[1.6, 0.1, 0.05]}>
             <mesh material={mat.black} rotation={[0, 0, Math.PI / 2]} position={[0.04, 0, 0]}><cylinderGeometry args={[0.3, 0.3, 0.08, 48]} /></mesh>
@@ -462,10 +491,95 @@ const GlintSweep = ({ spinning }) => {
 
 // `target`: index into worlds the reels should land on (undefined = wherever they stop).
 // `onReelStop(i)` fires when reel i physically locks after a spin; `onArm(bool)` when the lever is grabbed/released.
-export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, target, ...props }) => (
+// Jackpot payout: a handful of coins jump out of the chute mouth into the tray, tumble and settle.
+const COINS = 7;
+const Payout = ({ jackpot }) => {
+    const refs = useRef([]);
+    const t = useRef(-1);
+    const was = useRef(false);
+    const seeds = useMemo(() => Array.from({ length: COINS }, (_, i) => {
+        const r = (n) => (Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 * 0.5 + 0.5;   // fixed scatter, same every win
+        return {
+            vx: -0.55 + r(1) * 0.5, vz: 0.9 + r(2) * 0.5, vy: 1.4 + r(3) * 0.8, delay: i * 0.07,
+            spin: 6 + r(4) * 8, rest: [0.75 + (i % 4) * 0.13 - r(5) * 0.05, -1.0 + (i % 3) * 0.012, 0.8 + (i % 2) * 0.08],
+        };
+    }), []);
+    useFrame((_, dt) => {
+        if (jackpot && !was.current) { t.current = 0; seeds.forEach((_, i) => sfx.coin(i)); }
+        was.current = !!jackpot;
+        if (!jackpot) t.current = -1;
+        refs.current.forEach((m, i) => {
+            if (!m) return;
+            const s = seeds[i], k = t.current - s.delay;
+            m.visible = t.current >= 0 && k > 0;
+            if (!m.visible) return;
+            const fly = Math.min(k, 0.55);                                    // ballistic arc, then settle in the tray
+            if (k < 0.55) m.position.set(1.18 + s.vx * fly, -0.95 + s.vy * fly - 4.9 * fly * fly, -0.5 + s.vz * fly * 2.2);
+            else m.position.lerp(new THREE.Vector3(...s.rest), 1 - Math.exp(-dt * 10));
+            m.rotation.x += dt * (k < 0.55 ? s.spin : 0); m.rotation.x = k < 0.55 ? m.rotation.x : THREE.MathUtils.damp(m.rotation.x, 0.15, 8, dt);
+        });
+        if (t.current >= 0) t.current += dt;
+    });
+    return Array.from({ length: COINS }, (_, i) => (
+        <mesh key={i} ref={(m) => (refs.current[i] = m)} visible={false} material={brass}><cylinderGeometry args={[0.075, 0.075, 0.025, 32]} /></mesh>
+    ));
+};
+
+// Win ticket: prints out of a slot under the case, curls toward you, and is the way in (click = enter the world).
+const TICKET_H = 1.05;
+const Ticket = ({ ticket, onTicket }) => {
+    const root = useRef(), paper = useRef(), t = useRef(0), hot = useRef(false);
+    useFrame(({ clock }, dt) => {
+        t.current = ticket ? t.current + dt : 0;
+        if (ticket && t.current - dt < 0.45 && t.current >= 0.45) sfx.print();
+        const k = THREE.MathUtils.clamp((t.current - 0.45) / 1.0, 0, 1), e = 1 - Math.pow(1 - k, 3);
+        root.current.visible = k > 0;
+        paper.current.scale.y = Math.max(e, 0.001);
+        root.current.rotation.x = 0.14 * e + Math.sin(clock.elapsedTime * 1.4) * 0.025 * e - (hot.current ? 0.12 : 0);
+    });
+    const tk = ticket;
+    return (
+        <group position={[0, -1.24, 0.92]}>
+            <mesh material={mat.black}><boxGeometry args={[1.0, 0.035, 0.06]} /></mesh>
+            <group ref={root} visible={false} scale={1.3}>
+                <group ref={paper}>
+                    <group position={[0, -TICKET_H / 2, 0]}>
+                        <mesh onClick={(e) => { e.stopPropagation(); onTicket?.(); }}
+                            onPointerOver={() => { hot.current = true; document.body.style.cursor = "pointer"; }}
+                            onPointerOut={() => { hot.current = false; document.body.style.cursor = ""; }}>
+                            <planeGeometry args={[0.86, TICKET_H]} />
+                            <meshStandardMaterial color="#f2eee4" roughness={0.9} side={THREE.DoubleSide} />
+                        </mesh>
+                        {tk && (
+                            <group position={[0, 0, 0.003]}>
+                                <Text font={MONO} fontSize={0.045} letterSpacing={0.12} color="#0b0b0c" anchorX="left" anchorY="top" position={[-0.38, 0.47, 0]}>PX-01</Text>
+                                <Text font={MONO} fontSize={0.045} letterSpacing={0.08} color="#0b0b0c" anchorX="right" anchorY="top" position={[0.38, 0.47, 0]}>{`No. ${String(tk.no).padStart(6, "0")}`}</Text>
+                                <mesh position={[0, 0.37, 0]}><planeGeometry args={[0.76, 0.004]} /><meshBasicMaterial color="#0b0b0c" /></mesh>
+                                <Text font={MONO} fontSize={0.04} letterSpacing={0.14} color={SIGNAL} anchorX="left" anchorY="top" position={[-0.38, 0.31, 0]}>REALITY SELECTED</Text>
+                                <Text font={MONO} fontSize={0.12} letterSpacing={-0.02} color="#0b0b0c" anchorX="left" anchorY="top" position={[-0.38, 0.24, 0]} maxWidth={0.76}>{tk.name.toUpperCase()}</Text>
+                                {["ERA", "MEDIUM", "MOOD"].map((l, i) => (
+                                    <group key={l} position={[-0.38 + i * 0.26, -0.02, 0]}>
+                                        <Text font={MONO} fontSize={0.03} letterSpacing={0.14} color="#77736b" anchorX="left" anchorY="top">{l}</Text>
+                                        <Text font={MONO} fontSize={0.045} color="#0b0b0c" anchorX="left" anchorY="top" position={[0, -0.05, 0]}>{tk.symbols[i].toUpperCase()}</Text>
+                                    </group>
+                                ))}
+                                {Array.from({ length: 19 }, (_, i) => (
+                                    <mesh key={i} position={[-0.36 + i * 0.04, -0.27, 0]}><planeGeometry args={[0.02, 0.004]} /><meshBasicMaterial color="#77736b" /></mesh>
+                                ))}
+                                <Text font={MONO} fontSize={0.05} letterSpacing={0.12} color={SIGNAL} anchorX="left" anchorY="middle" position={[-0.38, -0.39, 0]}>TEAR HERE TO ENTER →</Text>
+                            </group>
+                        )}
+                    </group>
+                </group>
+            </group>
+        </group>
+    );
+};
+
+export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, target, jackpot, count, ticket, onTicket, onDebug, ...props }) => (
     <group {...props}>
         <Internals />
-        <Mechanism spinning={spinning} />
+        <Mechanism spinning={spinning} count={count} />
         {[-0.95, 0, 0.95].map((x, i) => <Reel key={i} index={i} x={x} spinning={spinning} target={target} onStop={onReelStop} />)}
         <Case />
 
@@ -486,8 +600,10 @@ export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, t
         ))}
 
         <Leds spinning={spinning} booted={booted} />
-        <Lever pulled={pulled} onPull={onPull} onArm={onArm} />
+        <Lever pulled={pulled} onPull={onPull} onArm={onArm} onDebug={onDebug} />
         <GlintSweep spinning={spinning} />
+        <Payout jackpot={jackpot} />
+        <Ticket ticket={ticket} onTicket={onTicket} />
         {[[-1.4, 0.6], [1.4, 0.6], [-1.4, -0.6], [1.4, -0.6]].map(([x, z], i) => (
             <mesh key={i} position={[x, -1.3, z]} material={mat.chrome}><cylinderGeometry args={[0.1, 0.12, 0.1, 24]} /></mesh>
         ))}

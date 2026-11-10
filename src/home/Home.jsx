@@ -5,6 +5,7 @@ import { pickWorld } from "#machine/Machine.jsx";
 import { profile, projects, socials } from "#content/profile.js";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import sig from "./signature.json";
+import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
 import "./home.css";
 
 // Main screen (docs/DESIGN_DIRECTION.md §10–13): PX-01 floating in a dark exhibition space, the component archive
@@ -43,11 +44,6 @@ const Doodle = ({ d, className, view = "0 0 120 60", style }) => (
     </svg>
 );
 const ARROW = ["M6 8 C 40 4, 86 18, 112 50", "M96 46 L113 52 L112 34"];        // "pull me" → down-right to the knob
-const HINT = ["M6 50 C 30 8, 78 4, 110 26", "M96 14 L111 27 L93 33"];
-const STAR = ["M30 4 C 31 20, 34 26, 56 30 C 36 33, 32 38, 30 56 C 28 38, 24 33, 4 30 C 24 27, 29 20, 30 4"];
-const SCRIBBLE = ["M4 22 C 40 6, 80 30, 120 14 S 196 6, 236 20"];
-const LOOP = ["M14 34 C 6 10, 104 2, 112 24 C 118 46, 22 56, 8 38 C 2 28, 18 12, 44 9"];
-const CROSS = ["M8 8 L 40 38", "M38 6 L 10 40"];
 const RING = ["M18 34 C 10 8, 186 2, 194 28 C 200 54, 26 62, 12 40 C 6 30, 30 14, 70 10"];  // hand-drawn ellipse
 // My real signature (traced from a photo, src/home/signature.json): x in [-1, 1], y up → SVG space 200 wide.
 const SIG = sig.strokes.map((st) => "M" + st.map(([x, y]) => `${((x + 1) * 100).toFixed(1)} ${((0.55 - y) * 100).toFixed(1)}`).join(" L"));
@@ -80,9 +76,7 @@ const Boot = ({ target, onDone }) => {
     return (
         <div className="boot" data-out={out || undefined} data-skip={skip || undefined} aria-hidden onClick={() => skip && setN(100)}>
             <div className="boot-log mono">{BOOT_LINES.filter(([at]) => n >= at).map(([, l]) => <p key={l}>{l}</p>)}</div>
-            <p className="boot-count">{String(n).padStart(3, "0")}</p>
-            <div className="boot-bar"><i style={{ transform: `scaleX(${n / 100})` }} /></div>
-            <p className="boot-hint mono">{skip ? "Click anywhere to skip" : "Turn your sound off. There isn't any."}</p>
+            <p className="boot-hint mono">{skip ? "Click anywhere to skip" : isTouch() ? "Sound is off · switch it on top right" : "Sound is off · press S for clicks and coins"}</p>
             <div className="boot-line" />
         </div>
     );
@@ -110,7 +104,23 @@ const Cursor = () => {
     return <div ref={ref} className="cursor" aria-hidden><span>Pull</span></div>;
 };
 
-const MARQUEE = ["Pick a reality", "Desktop OS", "Editorial", "Terminal", "Album Rollout — soon", "Open to work"];
+// Sound is off until asked for. S toggles it from anywhere on the page.
+const SoundToggle = () => {
+    const [on, setOn] = useState(soundOn);
+    useEffect(() => onSound(setOn), []);
+    useEffect(() => {
+        const k = (e) => { if ((e.key === "s" || e.key === "S") && !e.metaKey && !e.ctrlKey && !e.target.closest?.("input, textarea")) setSound(!soundOn()); };
+        window.addEventListener("keydown", k);
+        return () => window.removeEventListener("keydown", k);
+    }, []);
+    return (
+        <button type="button" className="mono sound" aria-pressed={on} onClick={() => setSound(!on)} title="Sound (S)">
+            <span className="eq" aria-hidden><i /><i /><i /></span>Sound {on ? "on" : "off"}
+        </button>
+    );
+};
+
+const MARQUEE = ["Pick a reality", "Desktop OS", "Editorial", "Terminal", "Ahmedabad, IN", "Open to work"];
 
 // The machine as an explicit state machine, so a half-finished animation can never strand the UI:
 //   idle → armed (lever grabbed) → spinning → locking (reels report as they physically stop) → revealed → transitioning
@@ -130,6 +140,22 @@ const Home = ({ onSelect }) => {
     const [result, setResult] = useState(null);
     const [target, setTarget] = useState();
     const [plays, setPlays] = useState(427);
+    const [shared, setShared] = useState(false);       // true once the count comes from the shared counter (api/pulls.js)
+    const [debug, setDebug] = useState(false);
+    const [peek, setPeek] = useState({ src: null, on: false });   // hover preview in the work list
+    const [copied, setCopied] = useState(false);
+    const [pulse, setPulse] = useState(0);                         // copy email → a ripple runs through the dunes
+    const work = useRef(null);
+    const copyEmail = () => {
+        navigator.clipboard.writeText(profile.email)
+            .then(() => { setCopied(true); setPulse((n) => n + 1); sfx.coin(0); setTimeout(() => setCopied(false), 1800); })
+            .catch(() => { location.href = `mailto:${profile.email}`; });
+    };
+    const onWorkMove = (e) => {
+        const r = work.current.getBoundingClientRect();
+        work.current.style.setProperty("--px", `${e.clientX - r.left}px`);
+        work.current.style.setProperty("--py", `${e.clientY - r.top}px`);
+    };
     const [picking, setPicking] = useState(false);
     const [progress, setProgress] = useState(8);
     const [lit, setLit] = useState(() => reduced());
@@ -141,7 +167,15 @@ const Home = ({ onSelect }) => {
     useEffect(() => { monoReady.then(() => { setFontsOk(true); bump(35); }); }, []);
     // never trap anyone on the boot screen: a slow GPU or a lost WebGL context still gets the page after 9 s
     useEffect(() => { const t = setTimeout(() => { bump(100); setBooted(true); }, 9000); return () => clearTimeout(t); }, []);
-    useEffect(() => { if (phase === "revealed") enterBtn.current?.focus({ preventScroll: true }); }, [phase]);
+    useEffect(() => { if (phase === "revealed") { enterBtn.current?.focus({ preventScroll: true }); sfx.win(); } }, [phase]);
+    useEffect(() => { if (lit) sfx.power(); }, [lit]);
+    // Shared pull counter. Not configured (or local dev) → keep the house number and say nothing about it.
+    useEffect(() => {
+        if (import.meta.env.DEV) return;                // vite dev has no /api
+        fetch("/api/pulls").then((r) => (r.ok ? r.json() : null)).then((d) => {
+            if (d && Number.isFinite(d.pulls)) { setPlays(d.pulls); setShared(true); }
+        }).catch(() => {});
+    }, []);
 
     // Pull → pick a world (no repeats this session) → reels spin → each reel locks on its symbol → reveal.
     const pull = () => {
@@ -149,6 +183,7 @@ const Home = ({ onSelect }) => {
         const world = pickWorld();
         world.load();                                         // the spin hides the chunk download
         setResult(world); setPlays((n) => n + 1);
+        if (!import.meta.env.DEV) fetch("/api/pulls", { method: "POST" }).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d?.pulls) setPlays(d.pulls); }).catch(() => {});
         if (reduced()) { setPhase("revealed"); return; }      // no spin, straight to the result
         locked.current = 0;
         setTarget(worlds.indexOf(world));
@@ -199,7 +234,9 @@ const Home = ({ onSelect }) => {
 
                 {fontsOk && (
                     <Suspense fallback={null}>
-                        <Studio active={heroOn} spinning={phase === "spinning"} pulled={pulled} booted={booted}
+                        <Studio active={heroOn} count={lit ? plays : 0} debug={debug} onDebug={() => setDebug((d) => !d)}
+                            ticket={phase === "revealed" && result ? { no: plays, name: result.name, symbols: result.symbols } : null}
+                            onTicket={() => result && enter(result.id)} spinning={phase === "spinning"} pulled={pulled} booted={booted}
                             target={target} entering={phase === "transitioning"} jackpot={phase === "revealed" || phase === "transitioning"} lit={lit}
                             onPull={pull} onArm={onArm} onReelStop={onReelStop} onAnchors={onAnchors}
                             onCreated={() => bump(65)} onFrame={() => bump(100)} onBooted={() => setBooted(true)} />
@@ -209,7 +246,7 @@ const Home = ({ onSelect }) => {
                 <header className="bar">
                     <MultiverseName scramble={phase === "spinning"} />
                     <p className="mono center">PX‑01 — Reality selector</p>
-                    <p className="mono right"><Clock /></p>
+                    <div className="mono right"><SoundToggle /><span className="clock"><Clock /></span></div>
                 </header>
 
                 {/* handwriting pinned to the machine: what to grab, and (after a win) what was chosen */}
@@ -219,15 +256,10 @@ const Home = ({ onSelect }) => {
                         {SIG.map((d, i) => <path key={i} d={d} pathLength="1" style={{ "--i": i * 0.6 }} />)}
                         {sig.dots.map(([x, y], i) => <circle key={i} cx={(x + 1) * 100} cy={(0.55 - y) * 100} r="3" />)}
                     </svg>
-                    <Doodle d={LOOP} className="d-loop" />
                     <p className="note n-role">full-stack dev</p>
-                    <Doodle d={HINT} className="d-hint" />
                     <p className="note n-craft">+ 3D &amp; AI</p>
-                    <Doodle d={STAR} className="d-star" view="0 0 60 60" />
                     <p className="note n-city">Ahmedabad, IN</p>
-                    <Doodle d={CROSS} className="d-cross" view="0 0 48 48" />
                     <p className="signature">Aman Patel</p>
-                    <Doodle d={SCRIBBLE} className="d-scribble" view="0 0 240 30" />
                     <div className="pin pin-knob">
                         <p className="note">pull me</p>
                         <Doodle d={ARROW} className="d-arrow" />
@@ -256,6 +288,7 @@ const Home = ({ onSelect }) => {
                             <p className="mono cta-label">PX‑01 / Reality selector</p>
                             <p className="cta-sub">Three reels, one world. Pull the lever to choose how you see my work.</p>
                             <p className="mono status" aria-live="polite">{status}</p>
+                            {shared && <p className="mono pulls">{plays.toLocaleString("en-IN")} pulls so far</p>}
                             <button type="button" className="pull" onClick={pull} disabled={busy}>Pull the lever <i aria-hidden>→</i></button>
                             <div className="cta-alt">
                                 <button type="button" onClick={() => enter(RECRUITER_WORLD)}>Skip the machine · View my work</button>
@@ -274,6 +307,12 @@ const Home = ({ onSelect }) => {
                 </nav>
                 <p className="mono scroll-hint" aria-hidden>Scroll ↓</p>
                 <div className="curtain" aria-hidden />
+                {debug && (
+                    <div className="debug-hud mono" role="status">
+                        <p>PX-01 / debug view</p><pre />
+                        <button type="button" onClick={() => setDebug(false)}>Close · or hold the lever again</button>
+                    </div>
+                )}
                 {!lit && <Boot target={progress} onDone={() => setLit(true)} />}
                 {picking && <WorldPicker onSelect={(id) => enter(id)} onClose={() => setPicking(false)} />}
             </section>
@@ -285,39 +324,68 @@ const Home = ({ onSelect }) => {
             </div>
 
             <footer ref={footer} className="foot">
-                <div className="foot-dots" aria-hidden>
-                    <Suspense fallback={null}><DotField active={footerOn} eventSource={footer} /></Suspense>
-                </div>
-                <div className="foot-head">
-                    <h2>Pick a <b>reality</b>,<br />or skip the machine<br />and say hello.</h2>
-                    <a className="block-btn" href={`mailto:${profile.email}`}>Email me</a>
-                </div>
-                <div className="cols">
-                    <div>
-                        <p className="mono">Realities</p>
-                        {worlds.map((w) => <button key={w.id} type="button" onClick={() => onSelect(w.id)}>{w.name}</button>)}
-                        <span className="soon">Album Rollout — soon</span>
+                <section ref={work} className="work" aria-labelledby="work-h" onPointerMove={onWorkMove}>
+                    <div className="work-head">
+                        <h2 id="work-h" className="mono">Selected work <span>({String(projects.length).padStart(2, "0")})</span></h2>
+                        <p className="mono">2025 — 2026 · built, shipped, on GitHub</p>
                     </div>
-                    <div>
-                        <p className="mono">Selected work</p>
-                        {projects.slice(0, 4).map((p) => <a key={p.id} href={p.link} target="_blank" rel="noreferrer">{p.title}</a>)}
+                    <ol className="work-list">
+                        {projects.map((p, i) => (
+                            <li key={p.id}>
+                                <a href={p.link} target="_blank" rel="noreferrer"
+                                    onPointerEnter={() => setPeek({ src: p.image, on: true })} onPointerLeave={() => setPeek((v) => ({ ...v, on: false }))}>
+                                    <span className="mono w-no">{String(i + 1).padStart(2, "0")}</span>
+                                    <span className="w-title">{p.title}</span>
+                                    <span className="w-desc">{p.description}</span>
+                                    <span className="mono w-date">{p.date}</span>
+                                    <i aria-hidden>↗</i>
+                                </a>
+                            </li>
+                        ))}
+                    </ol>
+                    {peek.src && <img className="peek" src={peek.src} alt="" data-on={peek.on || undefined} aria-hidden />}
+                </section>
+
+                <div className="land">
+                    <div className="foot-dots" aria-hidden>
+                        <Suspense fallback={null}><DotField active={footerOn} eventSource={footer} pulse={pulse} /></Suspense>
                     </div>
-                    <div>
-                        <p className="mono">Contact</p>
-                        <a href={`mailto:${profile.email}`}>Email</a>
-                        <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
-                        {socials.filter((s) => ["Github", "LinkedIn"].includes(s.text)).map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text === "Github" ? "GitHub" : s.text}</a>)}
+                    <div className="foot-head">
+                        <h2>Pick a <b>reality</b>,<br />or skip the machine<br />and <b>say hello.</b></h2>
+                        <div className="contact">
+                            <p className="mono now"><i aria-hidden>●</i> Now: open to full-stack roles · Ahmedabad, on-site</p>
+                            <button type="button" className="block-btn copy" onClick={copyEmail} aria-live="polite">
+                                {copied ? "Copied to clipboard ✓" : profile.email}<span className="mono">{copied ? "" : "Copy"}</span>
+                            </button>
+                            <div className="contact-alt">
+                                <a href={`mailto:${profile.email}`}>Write an email</a>
+                                <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
+                                {socials.filter((s) => s.text === "LinkedIn").map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">LinkedIn</a>)}
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p className="mono">Elsewhere</p>
-                        {socials.filter((s) => !["Github", "LinkedIn"].includes(s.text)).map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text}</a>)}
-                        <a href="/lab/machine.html">PX‑01 lab</a>
-                        <button type="button" onClick={() => hero.current.scrollIntoView({ behavior: "smooth" })}>Back to the machine</button>
+                    <div className="cols">
+                        <div>
+                            <p className="mono">Realities</p>
+                            {worlds.map((w) => <button key={w.id} type="button" onClick={() => onSelect(w.id)}>{w.name}</button>)}
+                        </div>
+                        <div>
+                            <p className="mono">Contact</p>
+                            <a href={`mailto:${profile.email}`}>Email</a>
+                            <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
+                            {socials.filter((s) => ["Github", "LinkedIn"].includes(s.text)).map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text === "Github" ? "GitHub" : s.text}</a>)}
+                        </div>
+                        <div>
+                            <p className="mono">Elsewhere</p>
+                            {socials.filter((s) => !["Github", "LinkedIn"].includes(s.text)).map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text}</a>)}
+                            <a href="/lab/machine.html">PX‑01 lab</a>
+                            <button type="button" onClick={() => hero.current.scrollIntoView({ behavior: "smooth" })}>Back to the machine</button>
+                        </div>
                     </div>
-                </div>
-                <div className="legal mono">
-                    <span>© 2026 Aman Patel. All realities reserved.</span>
-                    <span>Built in Ahmedabad · <Clock /></span>
+                    <div className="legal mono">
+                        <span>© 2026 Aman Patel. All realities reserved.</span>
+                        <span>Built in Ahmedabad · <Clock /></span>
+                    </div>
                 </div>
             </footer>
             <Cursor />
