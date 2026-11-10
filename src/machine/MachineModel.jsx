@@ -68,16 +68,18 @@ const useReelTexture = (reel) => useMemo(() => {
 // On stop, a reel picks the first slot ahead that shows `target` (a world index; nearest slot if none) and far
 // enough away to decelerate into without a speed jump. Later reels add extra slots, so they stop one by one.
 const STOP_EASE = 2.4;
-const Reel = ({ index, x, spinning, target }) => {
+const Reel = ({ index, x, spinning, target, onStop }) => {
     const ref = useRef();
     const { sharp, blur } = useReelTexture(index);
     const drum = useRef();
     const speed = useRef(0);
     const stop = useRef(null);
+    const spun = useRef(false);                     // report a lock only after a real spin, not on mount
     useFrame((_, dt) => {
         const r = ref.current.rotation;
         if (spinning) {
             stop.current = null;
+            spun.current = true;
             speed.current = THREE.MathUtils.damp(speed.current, 14 - index * 2, 3, dt);
             r.x += speed.current * dt;
         } else {
@@ -90,6 +92,7 @@ const Reel = ({ index, x, spinning, target }) => {
             const before = r.x;
             r.x = THREE.MathUtils.damp(r.x, stop.current, STOP_EASE, dt);
             speed.current = (r.x - before) / Math.max(dt, 1e-4);
+            if (spun.current && Math.abs(stop.current - r.x) < 0.004) { spun.current = false; r.x = stop.current; onStop?.(index); }
         }
         drum.current.map = speed.current > 5 ? blur : sharp;
     });
@@ -311,7 +314,7 @@ const Mechanism = ({ spinning }) => (
 /* ---------------------------------------------------------------- lever, LEDs */
 
 // Grab the knob and drag down: the arm follows with resistance, fires past 70% of travel, springs back otherwise.
-const Lever = ({ pulled, onPull }) => {
+const Lever = ({ pulled, onPull, onArm }) => {
     const pivot = useRef();
     const drag = useRef(null);                      // { startY, angle } while dragging
     useEffect(() => {
@@ -324,19 +327,20 @@ const Lever = ({ pulled, onPull }) => {
             if (!drag.current) return;
             // a past-70% drag fires; so does a plain tap on the knob (touch screens scroll instead of dragging)
             if (drag.current.angle > 0.66 || drag.current.angle < 0.03) onPull();
+            else onArm?.(false);                      // let go before the detent: back to idle
             drag.current = null; document.body.style.cursor = "";
         };
         window.addEventListener("pointermove", move);
         window.addEventListener("pointerup", up);
         return () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
-    }, [onPull]);
+    }, [onPull, onArm]);
     const hot = useRef(false);
     useFrame((_, dt) => {
         const target = drag.current ? drag.current.angle : pulled ? 0.9 : 0;
         pivot.current.rotation.x = THREE.MathUtils.damp(pivot.current.rotation.x, target, drag.current ? 20 : pulled ? 14 : 5, dt);
         mat.knob.emissiveIntensity = THREE.MathUtils.damp(mat.knob.emissiveIntensity, hot.current || drag.current ? 1.6 : 0, 8, dt);
     });
-    const grab = (e) => { e.stopPropagation(); drag.current = { startY: e.clientY, angle: 0 }; document.body.style.cursor = "grabbing"; };
+    const grab = (e) => { e.stopPropagation(); drag.current = { startY: e.clientY, angle: 0 }; document.body.style.cursor = "grabbing"; onArm?.(true); };
     return (
         <group position={[1.6, 0.1, 0.05]}>
             <mesh material={mat.black} rotation={[0, 0, Math.PI / 2]} position={[0.04, 0, 0]}><cylinderGeometry args={[0.3, 0.3, 0.08, 48]} /></mesh>
@@ -457,11 +461,12 @@ const GlintSweep = ({ spinning }) => {
 };
 
 // `target`: index into worlds the reels should land on (undefined = wherever they stop).
-export const Machine = ({ spinning, pulled, booted, onPull, target, ...props }) => (
+// `onReelStop(i)` fires when reel i physically locks after a spin; `onArm(bool)` when the lever is grabbed/released.
+export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, target, ...props }) => (
     <group {...props}>
         <Internals />
         <Mechanism spinning={spinning} />
-        {[-0.95, 0, 0.95].map((x, i) => <Reel key={i} index={i} x={x} spinning={spinning} target={target} />)}
+        {[-0.95, 0, 0.95].map((x, i) => <Reel key={i} index={i} x={x} spinning={spinning} target={target} onStop={onReelStop} />)}
         <Case />
 
         {/* printed bands */}
@@ -481,7 +486,7 @@ export const Machine = ({ spinning, pulled, booted, onPull, target, ...props }) 
         ))}
 
         <Leds spinning={spinning} booted={booted} />
-        <Lever pulled={pulled} onPull={onPull} />
+        <Lever pulled={pulled} onPull={onPull} onArm={onArm} />
         <GlintSweep spinning={spinning} />
         {[[-1.4, 0.6], [1.4, 0.6], [-1.4, -0.6], [1.4, -0.6]].map(([x, z], i) => (
             <mesh key={i} position={[x, -1.3, z]} material={mat.chrome}><cylinderGeometry args={[0.1, 0.12, 0.1, 24]} /></mesh>

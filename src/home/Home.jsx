@@ -1,13 +1,16 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { worlds, RECRUITER_WORLD } from "#worlds/registry.js";
+import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
 import { profile, projects, socials } from "#content/profile.js";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import sig from "./signature.json";
 import "./home.css";
 
-// Main screen (docs/DESIGN_DIRECTION.md §10): the machine floating in the dark over a giant "Portfolio",
-// my name written across it by hand, and a footer of dust you can touch.
+// Main screen (docs/DESIGN_DIRECTION.md §10–13): PX-01 floating in a dark exhibition space, the component archive
+// hanging either side, the giant "Portfolio" signed and annotated by hand, and a footer of dust you can touch.
+// Red handwriting: the script name across the word, a few notes, my real signature, "pull me" pinned to the lever,
+// and the result circle around the reels.
 const Studio = lazy(() => import("./Studio.jsx"));
 const DotField = lazy(() => import("./DotField.jsx"));
 
@@ -39,11 +42,13 @@ const Doodle = ({ d, className, view = "0 0 120 60", style }) => (
         {[].concat(d).map((p, i) => <path key={i} d={p} pathLength="1" style={{ "--i": i }} />)}
     </svg>
 );
-const ARROW = ["M6 50 C 30 8, 78 4, 110 26", "M96 14 L111 27 L93 33"];
+const ARROW = ["M6 8 C 40 4, 86 18, 112 50", "M96 46 L113 52 L112 34"];        // "pull me" → down-right to the knob
+const HINT = ["M6 50 C 30 8, 78 4, 110 26", "M96 14 L111 27 L93 33"];
 const STAR = ["M30 4 C 31 20, 34 26, 56 30 C 36 33, 32 38, 30 56 C 28 38, 24 33, 4 30 C 24 27, 29 20, 30 4"];
 const SCRIBBLE = ["M4 22 C 40 6, 80 30, 120 14 S 196 6, 236 20"];
 const LOOP = ["M14 34 C 6 10, 104 2, 112 24 C 118 46, 22 56, 8 38 C 2 28, 18 12, 44 9"];
 const CROSS = ["M8 8 L 40 38", "M38 6 L 10 40"];
+const RING = ["M18 34 C 10 8, 186 2, 194 28 C 200 54, 26 62, 12 40 C 6 30, 30 14, 70 10"];  // hand-drawn ellipse
 // My real signature (traced from a photo, src/home/signature.json): x in [-1, 1], y up → SVG space 200 wide.
 const SIG = sig.strokes.map((st) => "M" + st.map(([x, y]) => `${((x + 1) * 100).toFixed(1)} ${((0.55 - y) * 100).toFixed(1)}`).join(" L"));
 
@@ -107,44 +112,67 @@ const Cursor = () => {
 
 const MARQUEE = ["Pick a reality", "Desktop OS", "Editorial", "Terminal", "Album Rollout — soon", "Open to work"];
 
+// The machine as an explicit state machine, so a half-finished animation can never strand the UI:
+//   idle → armed (lever grabbed) → spinning → locking (reels report as they physically stop) → revealed → transitioning
+const LABEL = { idle: "", armed: "Armed — let go past the detent", spinning: "Spinning", locking: "Locking", revealed: "Reality selected", transitioning: "Entering" };
+const isTouch = () => matchMedia("(pointer: coarse)").matches;
+
 const Home = ({ onSelect }) => {
     const hero = useRef(null);
     const footer = useRef(null);
+    const enterBtn = useRef(null);
     const heroOn = useInView(hero);
     const footerOn = useInView(footer, "200px");
     const [fontsOk, setFontsOk] = useState(false);
     const [booted, setBooted] = useState(false);
-    const [spinning, setSpinning] = useState(false);
+    const [phase, setPhase] = useState("idle");
     const [pulled, setPulled] = useState(false);
-    const [landed, setLanded] = useState(null);
-    const [entering, setEntering] = useState(false);
-    const busy = useRef(false);
+    const [result, setResult] = useState(null);
     const [target, setTarget] = useState();
+    const [plays, setPlays] = useState(427);
+    const [picking, setPicking] = useState(false);
     const [progress, setProgress] = useState(8);
     const [lit, setLit] = useState(() => reduced());
+    const locked = useRef(0);
+    const phaseRef = useRef(phase);
+    phaseRef.current = phase;
     const bump = (v) => setProgress((p) => Math.max(p, v));
 
     useEffect(() => { monoReady.then(() => { setFontsOk(true); bump(35); }); }, []);
     // never trap anyone on the boot screen: a slow GPU or a lost WebGL context still gets the page after 9 s
     useEffect(() => { const t = setTimeout(() => { bump(100); setBooted(true); }, 9000); return () => clearTimeout(t); }, []);
+    useEffect(() => { if (phase === "revealed") enterBtn.current?.focus({ preventScroll: true }); }, [phase]);
 
-    // Pull → pick a world (no repeats this session) → reels land on its symbols → push into the window → load it.
+    // Pull → pick a world (no repeats this session) → reels spin → each reel locks on its symbol → reveal.
     const pull = () => {
-        if (busy.current) return;
-        busy.current = true;
+        if (phaseRef.current !== "idle" && phaseRef.current !== "armed") return;
         const world = pickWorld();
         world.load();                                         // the spin hides the chunk download
-        if (reduced()) { setLanded(world); setTimeout(() => onSelect(world.id), 400); return; }
+        setResult(world); setPlays((n) => n + 1);
+        if (reduced()) { setPhase("revealed"); return; }      // no spin, straight to the result
+        locked.current = 0;
         setTarget(worlds.indexOf(world));
-        setPulled(true); setSpinning(true); setLanded(null);
+        setPulled(true); setPhase("spinning");
         setTimeout(() => setPulled(false), 260);
-        setTimeout(() => setSpinning(false), 1400);
-        setTimeout(() => setLanded(world), 3000);
-        setTimeout(() => setEntering(true), 3700);
-        setTimeout(() => onSelect(world.id), 4700);
+        setTimeout(() => setPhase("locking"), 1300);          // spin time; the reels then decide when it's over
     };
+    const onReelStop = () => { if (++locked.current === 3) setPhase("revealed"); };
+    const onArm = (on) => setPhase((p) => (on && p === "idle" ? "armed" : !on && p === "armed" ? "idle" : p));
+    const enter = (id) => {
+        setPhase("transitioning");
+        setTimeout(() => onSelect(id), reduced() ? 0 : 950);   // camera push + fade to black
+    };
+    const again = () => { setPhase("idle"); setTimeout(() => pullRef.current(), 30); };
     const pullRef = useRef(pull);
     pullRef.current = pull;
+
+    // Annotations pinned to the 3D lever + reel window (written as CSS vars, no re-render per frame).
+    const onAnchors = ({ kx, ky, wx, wy, ww }) => {
+        const st = hero.current?.style;
+        if (!st) return;
+        st.setProperty("--kx", `${kx.toFixed(1)}px`); st.setProperty("--ky", `${ky.toFixed(1)}px`);
+        st.setProperty("--wx", `${wx.toFixed(1)}px`); st.setProperty("--wy", `${wy.toFixed(1)}px`); st.setProperty("--ww", `${ww.toFixed(1)}px`);
+    };
 
     // Space / Enter pulls, but only while the machine is on screen (otherwise Space should scroll).
     useEffect(() => {
@@ -159,67 +187,101 @@ const Home = ({ onSelect }) => {
         return () => window.removeEventListener("keydown", onKey);
     }, [heroOn]);
 
-    const status = landed ? `Landing in ${landed.name}` : spinning ? "Selecting a reality…" : matchMedia("(pointer: coarse)").matches ? "Tap the red knob" : "Drag the lever · Space";
+    const busy = phase !== "idle" && phase !== "armed";
+    const status = LABEL[phase] || (isTouch() ? "Tap the red knob" : "Drag the lever · Space");
 
     return (
-        <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-entering={entering || undefined}>
+        <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-phase={phase}
+            data-entering={phase === "transitioning" || undefined}>
             <section ref={hero} className="hero" aria-label="PX-01, the reality selector">
                 <h1 className="ident mono"><span>Aman Patel</span> — full-stack engineer, Ahmedabad <i aria-hidden>●</i> open to work</h1>
                 <p className="hero-word" aria-hidden>{"Portfolio".split("").map((c, i) => <span key={i} style={{ "--i": i }}>{c}</span>)}</p>
 
                 {fontsOk && (
                     <Suspense fallback={null}>
-                        <Studio active={heroOn} spinning={spinning} pulled={pulled} booted={booted}
-                            target={target} entering={entering} jackpot={!!landed} lit={lit} onPull={pull}
+                        <Studio active={heroOn} spinning={phase === "spinning"} pulled={pulled} booted={booted}
+                            target={target} entering={phase === "transitioning"} jackpot={phase === "revealed" || phase === "transitioning"} lit={lit}
+                            onPull={pull} onArm={onArm} onReelStop={onReelStop} onAnchors={onAnchors}
                             onCreated={() => bump(65)} onFrame={() => bump(100)} onBooted={() => setBooted(true)} />
                     </Suspense>
                 )}
 
                 <header className="bar">
-                    <MultiverseName scramble={spinning} />
+                    <MultiverseName scramble={phase === "spinning"} />
                     <p className="mono center">PX‑01 — Reality selector</p>
                     <p className="mono right"><Clock /></p>
                 </header>
 
+                {/* handwriting pinned to the machine: what to grab, and (after a win) what was chosen */}
                 <div className="ink" aria-hidden>
                     <span className="tag mono">[2026]</span>
-                    <svg className="sig-mark doodle" viewBox="0 -4 200 130" aria-hidden>
+                    <svg className="sig-mark doodle" viewBox="0 -4 200 130">
                         {SIG.map((d, i) => <path key={i} d={d} pathLength="1" style={{ "--i": i * 0.6 }} />)}
                         {sig.dots.map(([x, y], i) => <circle key={i} cx={(x + 1) * 100} cy={(0.55 - y) * 100} r="3" />)}
                     </svg>
                     <Doodle d={LOOP} className="d-loop" />
                     <p className="note n-role">full-stack dev</p>
-                    <Doodle d={ARROW} className="d-arrow" />
+                    <Doodle d={HINT} className="d-hint" />
                     <p className="note n-craft">+ 3D &amp; AI</p>
                     <Doodle d={STAR} className="d-star" view="0 0 60 60" />
                     <p className="note n-city">Ahmedabad, IN</p>
                     <Doodle d={CROSS} className="d-cross" view="0 0 48 48" />
                     <p className="signature">Aman Patel</p>
                     <Doodle d={SCRIBBLE} className="d-scribble" view="0 0 240 30" />
+                    <div className="pin pin-knob">
+                        <p className="note">pull me</p>
+                        <Doodle d={ARROW} className="d-arrow" />
+                    </div>
+                    <div className="pin pin-win"><Doodle d={RING} className="d-ring" view="0 0 206 64" /></div>
+                </div>
+
+                <div className="below">
+                    {phase === "revealed" || phase === "transitioning" ? (
+                        <section className="cta reveal" aria-live="polite" aria-label="Result">
+                            <p className="mono">PX‑01 / Result {String(plays).padStart(6, "0")}</p>
+                            <p className="mono red">Reality selected</p>
+                            <h3>{result.name}</h3>
+                            <p className="cta-sub">{result.tagline}</p>
+                            <dl className="reels-read">
+                                {["Era", "Medium", "Mood"].map((k, i) => <div key={k}><dt className="mono">{k}</dt><dd>{result.symbols[i]}</dd></div>)}
+                            </dl>
+                            <button ref={enterBtn} type="button" className="pull" onClick={() => enter(result.id)}>Enter this world <i aria-hidden>→</i></button>
+                            <div className="cta-alt">
+                                <button type="button" onClick={again}>Spin again</button>
+                                <button type="button" onClick={() => setPicking(true)}>Browse all worlds</button>
+                            </div>
+                        </section>
+                    ) : (
+                        <div className="cta">
+                            <p className="mono cta-label">PX‑01 / Reality selector</p>
+                            <p className="cta-sub">Three reels, one world. Pull the lever to choose how you see my work.</p>
+                            <p className="mono status" aria-live="polite">{status}</p>
+                            <button type="button" className="pull" onClick={pull} disabled={busy}>Pull the lever <i aria-hidden>→</i></button>
+                            <div className="cta-alt">
+                                <button type="button" onClick={() => enter(RECRUITER_WORLD)}>Skip the machine · View my work</button>
+                                <button type="button" className="phone-only" onClick={() => setPicking(true)}>All worlds</button>
+                                <a className="phone-only" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <nav className="tabs" aria-label="Go straight to a world">
                     {worlds.map((w) => (
-                        <button key={w.id} type="button" onClick={() => onSelect(w.id)}><i aria-hidden>↗</i>{w.name}</button>
+                        <button key={w.id} type="button" onClick={() => enter(w.id)}><i aria-hidden>↗</i>{w.name}</button>
                     ))}
                     <a href={profile.resume} target="_blank" rel="noreferrer"><i aria-hidden>↗</i>Résumé</a>
                 </nav>
-
-                <div className="cta">
-                    <p className="mono" aria-live="polite">{status}</p>
-                    <button type="button" className="pull" onClick={pull} disabled={spinning || !!landed}>Pull the lever <i aria-hidden>→</i></button>
-                    <button type="button" className="skip" onClick={() => onSelect(RECRUITER_WORLD)}>Just show me the work</button>
-                </div>
                 <p className="mono scroll-hint" aria-hidden>Scroll ↓</p>
                 <div className="curtain" aria-hidden />
                 {!lit && <Boot target={progress} onDone={() => setLit(true)} />}
+                {picking && <WorldPicker onSelect={(id) => enter(id)} onClose={() => setPicking(false)} />}
             </section>
 
             <div className="marquee" aria-hidden>
                 <div className="marquee-track">
                     {[0, 1].map((k) => <span key={k}>{MARQUEE.map((m) => <span key={m}>{m}<i>✺</i></span>)}</span>)}
                 </div>
-                <p className="marquee-note">— built by hand in Ahmedabad</p>
             </div>
 
             <footer ref={footer} className="foot">

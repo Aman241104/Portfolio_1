@@ -110,8 +110,8 @@ const Thing = ({ kind, ...p }) =>
 // Slots are in screen space (NDC) for the ring; positions are solved for the current screen shape with the
 // same framing as the camera, and pushed clear of the machine if a narrow screen makes it wider.
 const DESKTOP = [
-    { sx: -0.84, sy: 0.42, item: "react" }, { sx: -0.67, sy: 0.58, item: "enter" }, { sx: -0.5, sy: 0.42, item: "typescript" },
-    { sx: 0.5, sy: 0.42, item: "node" }, { sx: 0.67, sy: 0.58, item: "helmet" }, { sx: 0.84, sy: 0.42, item: "three" },
+    { sx: -0.88, sy: 0.52, item: "react" }, { sx: -0.71, sy: 0.7, item: "enter" }, { sx: -0.54, sy: 0.52, item: "typescript" },
+    { sx: 0.54, sy: 0.52, item: "node" }, { sx: 0.71, sy: 0.7, item: "helmet" }, { sx: 0.88, sy: 0.52, item: "three" },
 ];
 // phones: a small even row on cables above the machine, clear of the lever on the right
 const PHONE = [
@@ -131,18 +131,19 @@ const place = (aspect, framing) => {
         // inner columns: keep a gap from the machine on screens where it takes more width
         if (!phone && Math.abs(sx) < 0.7) sx = Math.sign(sx) * Math.max(Math.abs(sx), (sx < 0 ? -box.min.x : box.max.x) + 0.12);
         ray.setFromCamera({ x: sx, y: sy }, cam);
-        const t = ((phone ? -3 : -1.2) - cam.position.z) / ray.ray.direction.z;
-        return { pos: ray.ray.at(t, new THREE.Vector3()), item, seed: i + 1, cable: true };
+        const t = ((phone ? -3 : -3.2) - cam.position.z) / ray.ray.direction.z;   // set back: the archive frames, the machine leads
+        return { pos: ray.ray.at(t, new THREE.Vector3()), item, seed: i + 1, cable: true, phone };
     });
 };
 
+// The component archive: every object carries a catalogue number, like pieces in an exhibition.
 const BY_ID = {
-    react: { kind: "charm", icon: siReact, label: "REACT" },
-    typescript: { kind: "charm", icon: siTypescript, label: "TYPESCRIPT" },
-    node: { kind: "charm", icon: siNodedotjs, label: "NODE.JS" },
-    three: { kind: "charm", icon: siThreedotjs, label: "THREE.JS" },
-    enter: { kind: "key", label: "ENTER", material: m.redAnodised, ink: "#edeae3", wide: 1.7 },
-    helmet: { kind: "helmet" },
+    react: { kind: "charm", icon: siReact, label: "REACT", code: "UI-01", note: "Interfaces" },
+    typescript: { kind: "charm", icon: siTypescript, label: "TYPESCRIPT", code: "LANG-02", note: "Every line" },
+    node: { kind: "charm", icon: siNodedotjs, label: "NODE.JS", code: "RUNTIME-03", note: "APIs + agents" },
+    three: { kind: "charm", icon: siThreedotjs, label: "THREE.JS", code: "ENGINE-04", note: "This machine" },
+    enter: { kind: "key", label: "ENTER", material: m.redAnodised, ink: "#edeae3", wide: 1.7, code: "KEY-05", note: "Ship it" },
+    helmet: { kind: "helmet", code: "GEAR-06", note: "Bikes, wraps" },
 };
 
 // hairline display cable from the ring up out of frame
@@ -165,7 +166,7 @@ const Keychain = ({ spot, index, lit, jackpot }) => {
         const k = reduced ? 1 : t0.current === null ? 0 : clamp01((t - t0.current - 1.4 - index * 0.12) / 1.2);
         const pop = Math.sin(clamp01(burst.current / 1.4) * Math.PI);
         root.current.position.set(spot.pos.x, spot.pos.y + (1 - outBack(k, 1.1)) * 6 + Math.sin(t * 0.8 + index * 0.9) * 0.06 * still + pop * 0.25, spot.pos.z);
-        root.current.scale.setScalar(hover.current ? 1.08 : 1);
+        root.current.scale.setScalar((spot.phone ? 1 : 0.82) * (hover.current ? 1.08 : 1));
         root.current.visible = k > 0;
         // one gentle wave across the set (phase by position), facing front; touch/win = one full turn, settles front
         turned.current = THREE.MathUtils.damp(turned.current, turns.current, 2.4, dt);
@@ -180,6 +181,15 @@ const Keychain = ({ spot, index, lit, jackpot }) => {
             {spot.cable && <mesh geometry={cableGeo} material={cableMat} />}
             <Hardware />
             <group ref={swing}><Thing {...BY_ID[spot.item]} /></group>
+            {/* catalogue label on the display, not on the object: stays level while the piece sways; off during a win */}
+            <group visible={!jackpot}>
+            <Text font={MONO} fontSize={spot.phone ? 0.13 : 0.1} letterSpacing={0.12} color="#8a8780" anchorX="center" anchorY="top" position-y={-1.28}>
+                {BY_ID[spot.item].code}
+            </Text>
+            <Text font={MONO} fontSize={spot.phone ? 0.13 : 0.1} letterSpacing={0.08} color="#edeae3" anchorX="center" anchorY="top" position-y={-1.45}>
+                {BY_ID[spot.item].note.toUpperCase()}
+            </Text>
+            </group>
         </group>
     );
 };

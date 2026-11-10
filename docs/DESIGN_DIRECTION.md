@@ -467,3 +467,27 @@ marquee band before the footer, PX-01 favicon (svg + 32px + apple-touch), OG ima
   | Neon sign as a light source | cut with the big neon (see above) |
 - **Phones**: machine fills ~80% of the width at the visual centre (`framing()`), keychains above it, name line 2 rows.
 - `/` always opens on the machine; only `?style=` links go straight into a world.
+
+## 13. Refinement pass from the external critique (2026-11-10)
+Input: a long art-direction critique (score 8/10; "keep 75%, refine 25%"). Done:
+- **Machine state machine** (`src/home/Home.jsx`): idle → armed (lever grabbed) → spinning → locking (each reel reports
+  when it physically locks, `onReelStop`) → revealed → transitioning. No fake timers decide when the spin is over.
+- **Reveal card**: "PX-01 / Result 000428 · Reality selected · <world> · tagline · Era/Medium/Mood", then
+  Enter this world (focused for keyboard) / Spin again / Browse all worlds. A hand-drawn red ring circles the reels.
+- **"pull me" + arrow** pinned to the real 3D knob (scene projects knob + reel window to CSS vars `--kx/--ky/--wx/--wy/--ww`).
+  Hidden on phones (keychain row owns that space; status says "Tap the red knob").
+- **Component archive**: each hanging piece has a catalogue label (UI-01 Interfaces, LANG-02 Every line, RUNTIME-03
+  APIs + agents, ENGINE-04 This machine, KEY-05 Ship it, GEAR-06 Bikes, wraps). Labels hide during a win.
+- **World picker** restyled to the system (mono labels, hairline grid, W-01…), used for Browse all / All worlds.
+- **Mobile**: bottom stack (line → full-width primary → quiet secondary row: Skip the machine · All worlds · Résumé),
+  safe-area padding, clock + centre label hidden.
+- **Tried and reverted at Aman's call**: replacing "Portfolio" with "I build digital worlds." and removing most handwriting.
+  Aman prefers the giant "Portfolio" with the hand-written notes around it, so that stays.
+
+Not done yet (next session, in this order):
+1. Real-device check (Android Chrome + iOS Safari): frame rate, lever drag vs scroll, reveal card fit on small phones (≤ 360 px).
+2. Lighthouse / Core Web Vitals on production (LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1); low-tier render path if needed.
+3. Sound (lever ratchet, reel ticks, lock thunk) with a mute toggle, off by default.
+4. Content: 3–5 real case studies (problem → decisions → outcome; no invented metrics), from `constants/index.js` projects.
+5. World system: reels as Era/Interface/Personality mapped onto 8–12 art-directed worlds (not 64).
+6. Archive pieces clickable only once they lead somewhere real (e.g. a filtered project list per technology).

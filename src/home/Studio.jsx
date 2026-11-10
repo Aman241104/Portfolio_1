@@ -154,6 +154,25 @@ const Rig = ({ entering }) => {
     return null;
 };
 
+// Screen positions of the lever knob and the reel window, so DOM annotations ("pull me", the result circle)
+// stay pinned to the real 3D parts while the machine floats, leans and is dragged around.
+const KNOB = new THREE.Vector3(1.8, 1.46, 0.05), WIN_L = new THREE.Vector3(-1.45, 0.42, 0.85), WIN_R = new THREE.Vector3(1.45, 0.42, 0.85);
+const Anchors = ({ onAnchors }) => {
+    const ref = useRef();
+    const v = useMemo(() => new THREE.Vector3(), []);
+    const n = useRef(0);
+    useFrame(({ camera, size }) => {
+        if (!onAnchors || n.current++ % 2) return;                    // every other frame is plenty
+        const px = (local) => {
+            ref.current.localToWorld(v.copy(local)).project(camera);
+            return [(v.x * 0.5 + 0.5) * size.width, (-v.y * 0.5 + 0.5) * size.height];
+        };
+        const [kx, ky] = px(KNOB), [lx, ly] = px(WIN_L), [rx, ry] = px(WIN_R);
+        onAnchors({ kx, ky, wx: (lx + rx) / 2, wy: (ly + ry) / 2, ww: Math.hypot(rx - lx, ry - ly) });
+    });
+    return <group ref={ref} />;
+};
+
 // Reports the first rendered frame (after Preload compiled every shader), which ends the boot screen.
 const FirstFrame = ({ onFrame }) => {
     const done = useRef(false);
@@ -161,7 +180,7 @@ const FirstFrame = ({ onFrame }) => {
     return null;
 };
 
-export default function Studio({ spinning, pulled, booted, target, entering, jackpot, lit, onPull, onBooted, onFrame, onCreated, active }) {
+export default function Studio({ spinning, pulled, booted, target, entering, jackpot, lit, onPull, onArm, onReelStop, onAnchors, onBooted, onFrame, onCreated, active }) {
     const floatRef = useRef();
     const dropRef = useRef();
     useEffect(() => { onCreated?.(); }, [onCreated]);
@@ -203,7 +222,8 @@ export default function Studio({ spinning, pulled, booted, target, entering, jac
                     <Float ref={floatRef} enabled={!reduced} speed={1.3} rotationIntensity={0.18} floatIntensity={0.55} floatingRange={[-0.18, 0.18]}>
                         <PresentationControls global={false} cursor={!entering} snap speed={1.4} polar={[-0.35, 0.35]} azimuth={[-0.9, 0.9]} damping={0.25}>
                             <Lean>
-                                <Machine spinning={spinning} pulled={pulled} booted={booted} target={target} onPull={onPull} />
+                                <Machine spinning={spinning} pulled={pulled} booted={booted} target={target} onPull={onPull} onArm={onArm} onReelStop={onReelStop} />
+                                <Anchors onAnchors={onAnchors} />
                             </Lean>
                         </PresentationControls>
                     </Float>
