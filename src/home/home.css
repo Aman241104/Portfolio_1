@@ -560,3 +560,5 @@
 .hire-cv { flex-basis: 100%; text-align: right; text-transform: none !important; letter-spacing: .02em !important; }
 .hire-cv a { color: var(--bone); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(237, 234, 227, .3); }
 @media (max-width: 760px) { .hire-cv { text-align: left; } }
+.home .card-case { display: inline-block; margin-top: 12px; padding: 8px 12px; border: 1px solid var(--signal); border-radius: 999px; color: var(--bone); text-decoration: none; }
+@media (hover: hover) { .home .card-case:hover { background: var(--signal); } }

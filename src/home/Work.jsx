@@ -3,6 +3,7 @@ import { work, KINDS, shot } from "#content/work.js";
 import { profile, socials } from "#content/profile.js";
 import { sfx } from "#machine/sfx.js";
 import { track } from "../analytics.js";
+import { cases } from "#content/cases.js";
 
 // Everything I've built and shipped, made for a recruiter's first 30 seconds: résumé and contact up top, filters by
 // kind, real screenshots (Cloudinary) in a browser frame. The shot scrolls through the page on hover; on touch the card
@@ -127,6 +128,7 @@ export default function Work() {
                                 ? <a href={w.url} onClick={(e) => open(e, w)} aria-label={`${w.title}, open ${w.live ? "the live site" : "the project"}`}>{inner}</a>
                                 : <div className="card-static">{inner}</div>;
                         })()}
+                        {cases[w.slug] && <a className="card-case mono" href={`/case.html?p=${w.slug}`}>Case study →</a>}
                         {w.repo && w.repo !== w.url && <a className="card-code mono" href={w.repo} target="_blank" rel="noreferrer">Code ↗</a>}
                     </li>
                 ))}
