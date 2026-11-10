@@ -34,13 +34,13 @@ const TerminalWorld = ({ shell }) => {
     const endRef = useRef(null);
     const id = useRef(0);
 
-    const Cmd = ({ c, children }) => <button type="button" className="tty-cmd" onClick={() => run(c)}>{children || c}</button>;
-    const Ext = ({ href, children }) => <a className="tty-link" href={href} target="_blank" rel="noreferrer">{children}</a>;
+    const cmd = (c, children) => <button type="button" className="tty-cmd" onClick={() => run(c)}>{children || c}</button>;
+    const ext = (href, children) => <a className="tty-link" href={href} target="_blank" rel="noreferrer">{children}</a>;
     const row = (w, i) => (
         <div key={w.slug} className="tty-row">
-            <Cmd c={`cat ${i + 1}`}>[{String(i + 1).padStart(2, "0")}] {w.title}</Cmd>
+            {cmd(`cat ${i + 1}`, <>[{String(i + 1).padStart(2, "0")}] {w.title}</>)}
             <span className="dim"> · {w.year}</span>
-            {w.live && <span> · <Ext href={w.url}>● {host(w.url)}</Ext></span>}
+            {w.live && <span> · {ext(w.url, <>● {host(w.url)}</>)}</span>}
         </div>
     );
 
@@ -50,12 +50,12 @@ const TerminalWorld = ({ shell }) => {
             ...[["about", "who I am"], ["projects", "everything I've built (ls)"], ["cat <n>", "one project, with a preview"], ["live", "production sites I maintain"],
                 ["experience", "where I've worked"], ["skills", "toolkit"], ["cv", "tailored résumés"], ["contact", "email + socials"],
                 ["music", "what's on repeat"], ["worlds", "other ways to see this site"], ["theme", "amber | green | plain"], ["spin", "back to the machine (exit)"]]
-                .map(([c, d]) => <div key={c} className="tty-row"><Cmd c={c.split(" ")[0]}>{c.padEnd(12)}</Cmd><span className="dim">{d}</span></div>),
+                .map(([c, d]) => <div key={c} className="tty-row">{cmd(c.split(" ")[0], <>{c.padEnd(12)}</>)}<span className="dim">{d}</span></div>),
         ],
         about: () => [
             <p key="a">{profile.name}: full-stack engineer in Ahmedabad. {profile.line}</p>,
             <p key="b" className="dim">Now: {experience[0].role} at {experience[0].org}. Open to on-site or hybrid roles.</p>,
-            <p key="c">Next: <Cmd c="projects" /> · <Cmd c="live" /> · <Cmd c="cv" /></p>,
+            <p key="c">Next: {cmd("projects")} · {cmd("live")} · {cmd("cv")}</p>,
         ],
         projects: () => Object.entries(KINDS).flatMap(([k, label]) => [
             <p key={k} className="tty-h">── {label.toLowerCase()} ──</p>,
@@ -64,7 +64,7 @@ const TerminalWorld = ({ shell }) => {
         cat: (arg = "") => {
             if (arg === "about") return commands.about();
             const w = work[Number(arg) - 1];
-            if (!w) return [<p key="e">cat: {arg || "?"}: no such project. Try <Cmd c="projects" />.</p>];
+            if (!w) return [<p key="e">cat: {arg || "?"}: no such project. Try {cmd("projects")}.</p>];
             return [
                 <figure key="f" className="tty-shot"><img src={shot(w, 480)} alt={`${w.title} screenshot`} loading="lazy" /></figure>,
                 <p key="t" className="tty-h">{w.title} <span className="dim">· {KINDS[w.kind]} · {w.year}</span></p>,
@@ -72,19 +72,19 @@ const TerminalWorld = ({ shell }) => {
                 w.stack && <p key="s" className="dim">stack: {w.stack}</p>,
                 w.note && <p key="n" className="dim">{w.note}</p>,
                 <p key="x">
-                    {w.url && <Ext href={w.url}>[visit {host(w.url)} ↗]</Ext>}
+                    {w.url && ext(w.url, <>[visit {host(w.url)} ↗]</>)}
                     {cases[w.slug] && <> <a className="tty-link" href={`/case.html?p=${w.slug}`}>[read the case study →]</a></>}
                 </p>,
             ].filter(Boolean);
         },
         open: (n) => {
             const w = work[Number(n) - 1];
-            if (!w?.url) return [<p key="e">open: no project {n ?? ""}. Try <Cmd c="projects" />.</p>];
+            if (!w?.url) return [<p key="e">open: no project {n ?? ""}. Try {cmd("projects")}.</p>];
             window.open(w.url, "_blank", "noopener");
-            return [<p key="o">opening {w.title} → <Ext href={w.url}>{host(w.url)}</Ext></p>];
+            return [<p key="o">opening {w.title} → {ext(w.url, <>{host(w.url)}</>)}</p>];
         },
         live: () => [<p key="h" className="dim">in production today, still maintained:</p>, ...work.filter((w) => w.maintained).map((w) => (
-            <div key={w.slug} className="tty-row"><span className="ok">●</span> <Ext href={w.url}>{w.title}</Ext> <span className="dim">{host(w.url)}</span></div>
+            <div key={w.slug} className="tty-row"><span className="ok">●</span> {ext(w.url, <>{w.title}</>)} <span className="dim">{host(w.url)}</span></div>
         ))],
         experience: () => experience.map((x) => (
             <div key={x.role} className="tty-block">
@@ -101,22 +101,22 @@ const TerminalWorld = ({ shell }) => {
         resume: () => commands.cv(),
         contact: () => [
             <p key="e">email   <a className="tty-link" href={`mailto:${profile.email}`}>{profile.email}</a></p>,
-            ...socials.map((s) => <p key={s.text}>{s.text.toLowerCase().padEnd(8)}<Ext href={s.link}>{host(s.link.split("?")[0])}</Ext></p>),
+            ...socials.map((s) => <p key={s.text}>{s.text.toLowerCase().padEnd(8)}{ext(s.link, <>{host(s.link.split("?")[0])}</>)}</p>),
         ],
         music: () => [...onRepeat.slice(0, 8).map((t) => <p key={t.id}>♪ {t.title} <span className="dim">· {t.artist}</span></p>), <p key="r" className="dim">rotation: {topArtists.slice(0, 10).join(", ")}</p>],
         watching: () => [<p key="f">films: {watching.films.join(", ")}</p>, <p key="s">sitcoms: {watching.sitcoms.join(", ")}</p>],
-        worlds: () => worlds.map((w) => <div key={w.id} className="tty-row"><Cmd c={`go ${w.id}`}>{w.id.padEnd(10)}</Cmd><span className="dim">{w.tagline}</span></div>),
+        worlds: () => worlds.map((w) => <div key={w.id} className="tty-row">{cmd(`go ${w.id}`, w.id.padEnd(10))}<span className="dim">{w.tagline}</span></div>),
         go: (wid) => {
             if (!worlds.some((w) => w.id === wid)) return commands.worlds();
             setTimeout(() => shell.go(wid), 250); return [<p key="g">switching to {wid}…</p>];
         },
         spin: () => { setTimeout(shell.spin, 250); return [<p key="s">pulling the lever…</p>]; },
         theme: (t) => {
-            if (!["amber", "green", "plain"].includes(t)) return [<p key="t">themes: <Cmd c="theme amber" /> <Cmd c="theme green" /> <Cmd c="theme plain" /></p>];
+            if (!["amber", "green", "plain"].includes(t)) return [<p key="t">themes: {cmd("theme amber")} {cmd("theme green")} {cmd("theme plain")}</p>];
             setTheme(t); return [<p key="t">theme → {t}</p>];
         },
         whoami: () => [<p key="w">a visitor with good taste, apparently.</p>],
-        man: (c) => [<p key="m">{c ? `${c}: it does what it says. Try it.` : "What manual page do you want?"} See <Cmd c="help" />.</p>],
+        man: (c) => [<p key="m">{c ? `${c}: it does what it says. Try it.` : "What manual page do you want?"} See {cmd("help")}.</p>],
         sudo: (...a) => a.join(" ") === "hire aman"
             ? [<p key="1">[sudo] verifying offer… <span className="tty-bar" aria-hidden /></p>, <p key="2">permission granted. send it to <a className="tty-link" href={`mailto:${profile.email}`}>{profile.email}</a></p>]
             : [<p key="n">nice try.</p>],
@@ -133,7 +133,7 @@ const TerminalWorld = ({ shell }) => {
         if (name === "clear") { setLog([]); return; }
         if (name === "cd") name = args[0] === ".." || args[0] === "~" ? "spin" : "projects";
         const fn = commands[alias[name] || name];
-        const out = fn ? fn(...args) : [<p key="nf">{name}: command not found. Try <Cmd c="help" />.</p>];
+        const out = fn ? fn(...args) : [<p key="nf">{name}: command not found. Try {cmd("help")}.</p>];
         setLog((l) => [...l, { id: id.current++, cmd: text, out }]);
         setHistory((h) => [text, ...h]);
         setCursor(-1);
@@ -180,7 +180,7 @@ const TerminalWorld = ({ shell }) => {
                         <header className="tty-head">
                             <p className="tty-big" aria-hidden>अमन</p>
                             <p>tty1 · AHMEDABAD · {profile.name.toUpperCase()} · {experience[0].role.toUpperCase()}</p>
-                            <p className="dim">▸ tap anything highlighted, or type <Cmd c="help" />. Featured: {live.slice(0, 3).map((w, i) => <span key={w.slug}>{i ? " · " : ""}<Ext href={w.url}>{w.title}</Ext></span>)}</p>
+                            <p className="dim">▸ tap anything highlighted, or type {cmd("help")}. Featured: {live.slice(0, 3).map((w, i) => <span key={w.slug}>{i ? " · " : ""}{ext(w.url, <>{w.title}</>)}</span>)}</p>
                         </header>
                         <div className="tty-log" role="log" aria-live="polite" aria-label="Terminal output">
                             {log.map((e) => (
