@@ -104,13 +104,17 @@ const MOBILE_DOCK_IDS = ["finder", "contact", "resume", "terminal"];
 const mobileDockApps = mobileApps.filter((app) => MOBILE_DOCK_IDS.includes(app.id));
 const mobileGridApps = mobileApps.filter((app) => !MOBILE_DOCK_IDS.includes(app.id));
 
+// Project shots live on Cloudinary (account dhrcarq8g): f_auto/q_auto picks AVIF/WebP and the quality per browser.
+// Swap the width in the URL for smaller uses (e.g. .replace("w_1200", "w_720")).
+const cld = (id) => `https://res.cloudinary.com/dhrcarq8g/image/upload/f_auto,q_auto,w_1200/${id}`;
+
 const blogPosts = [
     {
         id: 1,
         date: "Jul 2026",
         title: "Job Search Automation Platform",
         description: "AI job search platform: 19-source scraper, experience-aware LLM scoring, validated one-page CVs, interview prep.",
-        image: "/images/projects/job-search-os.jpg",
+        image: cld("portfolio/projects/job-search-os"),
         link: "https://github.com/Aman241104/job-search",
     },
     {
@@ -118,7 +122,7 @@ const blogPosts = [
         date: "Jun 2026",
         title: "WhatsApp AI Agent — Multi-Tenant SaaS",
         description: "Multi-tenant WhatsApp Business AI SaaS with LLM agents, RLS tenant isolation, and a booking state machine.",
-        image: "/images/projects/whatsapp-ai.png",
+        image: cld("portfolio/projects/whatsapp-ai"),
         link: "https://whatsapp-ai-agent-inky.vercel.app",
     },
     {
@@ -126,7 +130,7 @@ const blogPosts = [
         date: "Dec 2025",
         title: "Awwwards Clone",
         description: "A modern web experience replicating the Awwwards voting platform.",
-        image: "/images/awwwards.png",
+        image: cld("portfolio/projects/awwwards"),
         link: "https://github.com/Aman241104/awwards_clone",
     },
     {
@@ -134,7 +138,7 @@ const blogPosts = [
         date: "Nov 2025",
         title: "Stock Market App",
         description: "Real-time stock tracking application with dynamic data visualization.",
-        image: "/images/stock-market-app.png",
+        image: cld("portfolio/projects/stock-market-app"),
         link: "https://github.com/Aman241104/stock_app_demo",
     },
     {
@@ -142,7 +146,7 @@ const blogPosts = [
         date: "Oct 2025",
         title: "3D Macbook Scroll Demo",
         description: "An interactive 3D experience featuring a scrolling Macbook animation.",
-        image: "/images/3D-macbook.png",
+        image: cld("portfolio/projects/3d-macbook"),
         link: "https://github.com/Aman241104/macbook_demo",
     },
 ];

@@ -150,7 +150,7 @@ const BY_ID = {
 const cableGeo = new THREE.CylinderGeometry(0.006, 0.006, 14, 6).translate(0, 7 + 0.42, 0);
 const cableMat = new THREE.MeshBasicMaterial({ color: "#4a4844" });
 
-const Keychain = ({ spot, index, lit, jackpot }) => {
+const Keychain = ({ spot, index, lit, jackpot, kick }) => {
     const root = useRef(), swing = useRef(), hover = useRef(false);
     const turns = useRef(0), turned = useRef(0);
     const t0 = useRef(null), burst = useRef(9), was = useRef(false);
@@ -170,7 +170,9 @@ const Keychain = ({ spot, index, lit, jackpot }) => {
         root.current.visible = k > 0;
         // one gentle wave across the set (phase by position), facing front; touch/win = one full turn, settles front
         turned.current = THREE.MathUtils.damp(turned.current, turns.current, 2.4, dt);
-        swing.current.rotation.z = Math.sin(t * 0.9 + index * 0.7) * 0.06 * still;
+        // scrolling jolts the display: pieces swing on their cables (the touch-screen answer to hover)
+        swing.current.rotation.z = Math.sin(t * 0.9 + index * 0.7) * 0.06 * still + kick.current * (index % 2 ? 1 : -0.8);
+        swing.current.rotation.x = kick.current * 1.4 * (1 + (index % 3) * 0.25);
         swing.current.rotation.y = turned.current + Math.sin(t * 0.6 + index * 0.7) * 0.28 * still;
     });
     return (
@@ -199,5 +201,16 @@ export default function Keychains({ lit, jackpot, framing }) {
     // re-place only when the screen shape changes meaningfully (rotate, resize), not every pixel
     const bucket = Math.round(aspect * 10) / 10;
     const spots = useMemo(() => place(bucket, framing), [bucket, framing]);
-    return spots.map((spot, i) => <Keychain key={`${bucket}-${i}`} spot={spot} index={i} lit={lit} jackpot={jackpot} />);
+    // scroll velocity → a decaying, springy kick shared by every piece
+    const kick = useRef(0), vel = useRef(0), lastY = useRef(null);
+    useFrame((_, dt) => {
+        if (reduced) return;
+        const y = window.scrollY, dy = lastY.current === null ? 0 : y - lastY.current;
+        lastY.current = y;
+        vel.current += THREE.MathUtils.clamp(dy, -80, 80) * 0.0016;      // impulse
+        vel.current -= kick.current * 40 * dt;                            // spring back
+        vel.current *= Math.exp(-3.2 * dt);                               // damping
+        kick.current = THREE.MathUtils.clamp(kick.current + vel.current * dt * 10, -0.6, 0.6);
+    });
+    return spots.map((spot, i) => <Keychain key={`${bucket}-${i}`} spot={spot} index={i} lit={lit} jackpot={jackpot} kick={kick} />);
 }

@@ -2,10 +2,13 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { worlds, RECRUITER_WORLD } from "#worlds/registry.js";
 import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
-import { profile, projects, socials } from "#content/profile.js";
+import { profile, socials } from "#content/profile.js";
+import Work from "./Work.jsx";
+import Experience from "./Experience.jsx";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import sig from "./signature.json";
 import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
+import { track } from "../analytics.js";
 import "./home.css";
 
 // Main screen (docs/DESIGN_DIRECTION.md §10–13): PX-01 floating in a dark exhibition space, the component archive
@@ -104,6 +107,95 @@ const Cursor = () => {
     return <div ref={ref} className="cursor" aria-hidden><span>Pull</span></div>;
 };
 
+// Bookend: the giant name at the foot of the page, signed like the hero. Letters lean up toward a mouse cursor;
+// on touch they wave in when the word scrolls into view, and any letter jumps when tapped.
+const SIGN = "Aman Patel".split("");
+const SignOff = () => {
+    const ref = useRef(null);
+    const [seen, setSeen] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) setSeen(true); el.dataset.live = e.isIntersecting ? "1" : ""; }, { threshold: 0.35 });
+        io.observe(el);
+        if (!matchMedia("(pointer: fine)").matches || reduced()) return () => io.disconnect();
+        const letters = [...el.querySelectorAll(".so-l")], lift = letters.map(() => 0);
+        let raf, mx = -1e4, my = -1e4;
+        const move = (e) => { mx = e.clientX; my = e.clientY; };
+        const loop = () => {
+            if (el.dataset.live) {
+                const r = el.getBoundingClientRect(), cy = r.top + r.height * 0.55;
+                letters.forEach((l, i) => {
+                    const cx = r.left + l.offsetLeft + l.offsetWidth / 2;     // offsets ignore transforms: no feedback
+                    const k = Math.max(0, 1 - Math.hypot(mx - cx, (my - cy) * 1.6) / 340);
+                    lift[i] += (k - lift[i]) * 0.14;
+                    l.style.setProperty("--lift", lift[i].toFixed(3));
+                });
+            }
+            raf = requestAnimationFrame(loop);
+        };
+        window.addEventListener("pointermove", move);
+        raf = requestAnimationFrame(loop);
+        return () => { io.disconnect(); window.removeEventListener("pointermove", move); cancelAnimationFrame(raf); };
+    }, []);
+    const jump = (e) => {
+        const l = e.target.closest(".so-l");
+        if (!l) return;
+        l.classList.remove("jump"); void l.offsetWidth; l.classList.add("jump");
+        sfx.ratchet();
+    };
+    return (
+        <div ref={ref} className="signoff" data-in={seen || undefined} onPointerDown={jump} aria-hidden>
+            <p className="so-word">{SIGN.map((c, i) => <span key={i} className={c === " " ? "so-l so-gap" : "so-l"} style={{ "--i": i }}>{c === " " ? "\u00a0" : c}</span>)}</p>
+            <svg className="so-sig doodle" viewBox="0 -4 200 130">
+                {SIG.map((d, i) => <path key={i} d={d} pathLength="1" style={{ "--i": i * 0.6 }} />)}
+                {sig.dots.map(([x, y], i) => <circle key={i} cx={(x + 1) * 100} cy={(0.55 - y) * 100} r="3" />)}
+            </svg>
+        </div>
+    );
+};
+
+// A note sent "through the machine": /api/contact stores it (Neon) and emails it (Resend). If the backend isn't
+// switched on, the same words open in the visitor's mail app instead, so nothing typed is ever lost.
+const ContactForm = ({ onSent }) => {
+    const [state, setState] = useState({ phase: "idle", msg: "" });
+    const submit = async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.currentTarget));
+        setState({ phase: "sending", msg: "" });
+        const mail = () => `mailto:${profile.email}?subject=${encodeURIComponent(`Hello from ${data.name || "your site"}`)}&body=${encodeURIComponent(data.message || "")}`;
+        try {
+            const r = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+            const d = await r.json().catch(() => ({}));
+            if (r.ok) { setState({ phase: "sent", msg: d.no ? `Ticket No. ${String(d.no).padStart(4, "0")}` : "" }); onSent(); sfx.win(); track("contact_sent"); return; }
+            if (r.status === 400 || r.status === 429) { setState({ phase: "idle", msg: d.error }); return; }
+            setState({ phase: "fallback", msg: d.error || "", href: mail() });
+        } catch { setState({ phase: "fallback", msg: "", href: mail() }); }
+    };
+    if (state.phase === "sent") return (
+        <div className="note-sent" role="status">
+            <p className="mono red">Delivered{state.msg ? ` · ${state.msg}` : ""}</p>
+            <p>Thanks. It's in my inbox, and my reply goes to the address you gave.</p>
+        </div>
+    );
+    return (
+        <form className="note" onSubmit={submit}>
+            <p className="mono">Or send a note through the machine</p>
+            <div className="note-row">
+                <input name="name" required maxLength={80} placeholder="Your name" autoComplete="name" aria-label="Your name" />
+                <input name="email" type="email" required maxLength={200} placeholder="Email" autoComplete="email" aria-label="Your email" />
+            </div>
+            <textarea name="message" required minLength={10} maxLength={4000} rows={3} placeholder="What are we building?" aria-label="Message" />
+            <input name="website" tabIndex={-1} autoComplete="off" className="hp" aria-hidden />
+            <div className="note-foot">
+                <p className="mono" aria-live="polite">
+                    {state.phase === "fallback" ? <a href={state.href}>{state.msg || "The machine is offline."} Open it in your mail app ↗</a> : state.msg}
+                </p>
+                <button type="submit" className="block-btn" disabled={state.phase === "sending"}>{state.phase === "sending" ? "Sending…" : "Send →"}</button>
+            </div>
+        </form>
+    );
+};
+
 // Sound is off until asked for. S toggles it from anywhere on the page.
 const SoundToggle = () => {
     const [on, setOn] = useState(soundOn);
@@ -142,19 +234,22 @@ const Home = ({ onSelect }) => {
     const [plays, setPlays] = useState(427);
     const [shared, setShared] = useState(false);       // true once the count comes from the shared counter (api/pulls.js)
     const [debug, setDebug] = useState(false);
-    const [peek, setPeek] = useState({ src: null, on: false });   // hover preview in the work list
     const [copied, setCopied] = useState(false);
     const [pulse, setPulse] = useState(0);                         // copy email → a ripple runs through the dunes
-    const work = useRef(null);
+    const ripple = (e) => {                                         // click / tap the dunes (not a link) → ring of light
+        if (e.target.closest("a, button, form, .signoff, .keys")) return;
+        setPulse((n) => n + 1);
+        track("dunes_tapped");
+        try { navigator.vibrate?.(10); } catch { /* ignore */ }
+    };
+    const pullAgain = () => {
+        hero.current.scrollIntoView({ behavior: reduced() ? "auto" : "smooth" });
+        setTimeout(() => { setPhase("idle"); setTimeout(() => pullRef.current(), 40); }, reduced() ? 0 : 1100);
+    };
     const copyEmail = () => {
         navigator.clipboard.writeText(profile.email)
-            .then(() => { setCopied(true); setPulse((n) => n + 1); sfx.coin(0); setTimeout(() => setCopied(false), 1800); })
+            .then(() => { track("email_copied"); setCopied(true); setPulse((n) => n + 1); sfx.coin(0); try { navigator.vibrate?.(15); } catch { /* ignore */ } setTimeout(() => setCopied(false), 1800); })
             .catch(() => { location.href = `mailto:${profile.email}`; });
-    };
-    const onWorkMove = (e) => {
-        const r = work.current.getBoundingClientRect();
-        work.current.style.setProperty("--px", `${e.clientX - r.left}px`);
-        work.current.style.setProperty("--py", `${e.clientY - r.top}px`);
     };
     const [picking, setPicking] = useState(false);
     const [progress, setProgress] = useState(8);
@@ -183,6 +278,7 @@ const Home = ({ onSelect }) => {
         const world = pickWorld();
         world.load();                                         // the spin hides the chunk download
         setResult(world); setPlays((n) => n + 1);
+        track("lever_pulled", { world: world.id });
         if (!import.meta.env.DEV) fetch("/api/pulls", { method: "POST" }).then((r) => (r.ok ? r.json() : null)).then((d) => { if (d?.pulls) setPlays(d.pulls); }).catch(() => {});
         if (reduced()) { setPhase("revealed"); return; }      // no spin, straight to the result
         locked.current = 0;
@@ -194,6 +290,7 @@ const Home = ({ onSelect }) => {
     const onReelStop = () => { if (++locked.current === 3) setPhase("revealed"); };
     const onArm = (on) => setPhase((p) => (on && p === "idle" ? "armed" : !on && p === "armed" ? "idle" : p));
     const enter = (id) => {
+        track("world_entered", { world: id });
         setPhase("transitioning");
         setTimeout(() => onSelect(id), reduced() ? 0 : 950);   // camera push + fade to black
     };
@@ -234,9 +331,9 @@ const Home = ({ onSelect }) => {
 
                 {fontsOk && (
                     <Suspense fallback={null}>
-                        <Studio active={heroOn} count={lit ? plays : 0} debug={debug} onDebug={() => setDebug((d) => !d)}
+                        <Studio active={heroOn} count={lit ? plays : 0} debug={debug} onDebug={() => { setDebug((d) => !d); track("debug_toggled"); }}
                             ticket={phase === "revealed" && result ? { no: plays, name: result.name, symbols: result.symbols } : null}
-                            onTicket={() => result && enter(result.id)} spinning={phase === "spinning"} pulled={pulled} booted={booted}
+                            onTicket={() => { if (!result) return; track("ticket_clicked", { world: result.id }); enter(result.id); }} spinning={phase === "spinning"} pulled={pulled} booted={booted}
                             target={target} entering={phase === "transitioning"} jackpot={phase === "revealed" || phase === "transitioning"} lit={lit}
                             onPull={pull} onArm={onArm} onReelStop={onReelStop} onAnchors={onAnchors}
                             onCreated={() => bump(65)} onFrame={() => bump(100)} onBooted={() => setBooted(true)} />
@@ -324,64 +421,53 @@ const Home = ({ onSelect }) => {
             </div>
 
             <footer ref={footer} className="foot">
-                <section ref={work} className="work" aria-labelledby="work-h" onPointerMove={onWorkMove}>
-                    <div className="work-head">
-                        <h2 id="work-h" className="mono">Selected work <span>({String(projects.length).padStart(2, "0")})</span></h2>
-                        <p className="mono">2025 — 2026 · built, shipped, on GitHub</p>
-                    </div>
-                    <ol className="work-list">
-                        {projects.map((p, i) => (
-                            <li key={p.id}>
-                                <a href={p.link} target="_blank" rel="noreferrer"
-                                    onPointerEnter={() => setPeek({ src: p.image, on: true })} onPointerLeave={() => setPeek((v) => ({ ...v, on: false }))}>
-                                    <span className="mono w-no">{String(i + 1).padStart(2, "0")}</span>
-                                    <span className="w-title">{p.title}</span>
-                                    <span className="w-desc">{p.description}</span>
-                                    <span className="mono w-date">{p.date}</span>
-                                    <i aria-hidden>↗</i>
-                                </a>
-                            </li>
-                        ))}
-                    </ol>
-                    {peek.src && <img className="peek" src={peek.src} alt="" data-on={peek.on || undefined} aria-hidden />}
-                </section>
+<Work />
+                <Experience />
 
-                <div className="land">
+                <div className="land" onClick={ripple}>
                     <div className="foot-dots" aria-hidden>
                         <Suspense fallback={null}><DotField active={footerOn} eventSource={footer} pulse={pulse} /></Suspense>
                     </div>
                     <div className="foot-head">
-                        <h2>Pick a <b>reality</b>,<br />or skip the machine<br />and <b>say hello.</b></h2>
+                        <div>
+                            <p className="mono land-hint">↳ The dunes are live. {isTouch() ? "Tap them." : "Move through them, click them."}</p>
+                            <h2>Pick a <b>reality</b>,<br />or skip the machine<br />and <b>say hello.</b></h2>
+                        </div>
                         <div className="contact">
                             <p className="mono now"><i aria-hidden>●</i> Now: open to full-stack roles · Ahmedabad, on-site</p>
                             <button type="button" className="block-btn copy" onClick={copyEmail} aria-live="polite">
                                 {copied ? "Copied to clipboard ✓" : profile.email}<span className="mono">{copied ? "" : "Copy"}</span>
                             </button>
-                            <div className="contact-alt">
-                                <a href={`mailto:${profile.email}`}>Write an email</a>
-                                <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
-                                {socials.filter((s) => s.text === "LinkedIn").map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">LinkedIn</a>)}
+                            <ContactForm onSent={() => setPulse((n) => n + 1)} />
+                        </div>
+                    </div>
+                    <nav className="keys" aria-label="Site index">
+                        {[
+                            ["Worlds", "Three ways to see this site", worlds.map((w) => ({ label: w.name, hint: w.tagline, onClick: () => onSelect(w.id), icon: "→" }))],
+                            ["Contact", "Résumé, email and profiles", [
+                                { label: "Résumé", hint: "One-page PDF", href: profile.resume, ext: true, icon: "↓" },
+                                { label: "Email", hint: profile.email, href: `mailto:${profile.email}`, icon: "↗" },
+                                ...socials.filter((x) => ["LinkedIn", "Github"].includes(x.text)).map((x) => ({ label: x.text === "Github" ? "GitHub" : x.text, hint: x.text === "Github" ? "Code and repos" : "Work history", href: x.link, ext: true, icon: "↗" })),
+                            ]],
+                            ["Social", "Elsewhere online", socials.filter((x) => !["LinkedIn", "Github"].includes(x.text)).map((x) => ({ label: x.text, hint: "Follow along", href: x.link, ext: true, icon: "↗" }))],
+                            ["Play", "For the curious", [
+                                { label: "Pull the lever again", hint: "Back up to PX-01", onClick: pullAgain, knob: true },
+                                { label: "PX-01 lab", hint: "The machine on its own", href: "/lab/machine.html", icon: "↗" },
+                            ]],
+                        ].map(([title, sub, items]) => (
+                            <div key={title} className="keys-group">
+                                <h3 className="mono">{title}</h3>
+                                <p className="keys-sub">{sub}</p>
+                                {items.map((k) => {
+                                    const body = <><span className="k-label">{k.label}</span><span className="k-hint">{k.hint}</span>{k.knob ? <i aria-hidden className="k-dot" /> : <i aria-hidden>{k.icon}</i>}</>;
+                                    return k.href
+                                        ? <a key={k.label} className="key" href={k.href} {...(k.ext ? { target: "_blank", rel: "noreferrer" } : {})}>{body}</a>
+                                        : <button key={k.label} type="button" className={k.knob ? "key knob" : "key"} onClick={k.onClick}>{body}</button>;
+                                })}
                             </div>
-                        </div>
-                    </div>
-                    <div className="cols">
-                        <div>
-                            <p className="mono">Realities</p>
-                            {worlds.map((w) => <button key={w.id} type="button" onClick={() => onSelect(w.id)}>{w.name}</button>)}
-                        </div>
-                        <div>
-                            <p className="mono">Contact</p>
-                            <a href={`mailto:${profile.email}`}>Email</a>
-                            <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
-                            {socials.filter((s) => ["Github", "LinkedIn"].includes(s.text)).map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text === "Github" ? "GitHub" : s.text}</a>)}
-                        </div>
-                        <div>
-                            <p className="mono">Elsewhere</p>
-                            {socials.filter((s) => !["Github", "LinkedIn"].includes(s.text)).map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text}</a>)}
-                            <a href="/lab/machine.html">PX‑01 lab</a>
-                            <button type="button" onClick={() => hero.current.scrollIntoView({ behavior: "smooth" })}>Back to the machine</button>
-                        </div>
-                    </div>
+                        ))}
+                    </nav>
+                    <SignOff />
                     <div className="legal mono">
                         <span>© 2026 Aman Patel. All realities reserved.</span>
                         <span>Built in Ahmedabad · <Clock /></span>

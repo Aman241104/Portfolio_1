@@ -549,3 +549,21 @@ Idea bank, ranked by wow ÷ effort (next sessions):
   and floats the project shot under the cursor (fine pointers only). Contact block: bigger Geist headline, "Now: open
   to full-stack roles · Ahmedabad, on-site", **copy-email button** (falls back to mailto) that sends a ring of light
   out of the dust machine across the dunes (`uBurst` in DotField). "Album Rollout — soon" removed everywhere (not built).
+
+### 14.3 Work, experience, footer, stack (same day, later)
+- **Work** (`src/home/Work.jsx`, data `content/work.js`): recruiter strip (résumé PDF, email, LinkedIn, GitHub) first,
+  then filters (Products / Client websites / Concepts & demos), cards = live-site screenshot in a browser frame
+  (Cloudinary `portfolio/work/<slug>`, captured by Playwright at 1440 wide). Hover scrolls the shot; on touch the card
+  crossing the middle of the screen does. Opening a live site: the shot grows to full screen, "Leaving PX-01 → host"
+  with a red progress line, then same-tab navigation (cmd/ctrl/middle-click = normal new tab; back button restores).
+  **Only projects Aman confirmed** (25). Excluded on purpose: astrology sites, both wishes sites, yashhuuuu,
+  DealLens, Docket, Prestine, gym-app, Remote Comedy. Unconfirmed screenshots stay out of the repo.
+- **Experience** (`src/home/Experience.jsx`, data `content/experience.js`): from the résumé. 10th/12th left off (not
+  usual on a portfolio; on request only).
+- **Footer**: contact form (`api/contact.js`: validate → Neon → Resend; mailto fallback keeps the text), copy-email,
+  dunes react to click/tap, index in four labelled groups (Worlds / Contact / Social / Play), giant "Aman Patel"
+  sign-off (letters lift toward the cursor, tap = jump), keychains swing when you scroll (the touch answer to hover),
+  all hover styles behind `@media (hover: hover)` (no sticky hover on phones).
+- **Stack**: Neon (`api/_db.js`, `DATABASE_URL`) for the pull counter + messages; Resend (`RESEND_API_KEY`) for email;
+  PostHog (`VITE_POSTHOG_KEY`, lazy, events only, no autocapture/recording); Cloudinary (cloud `dhrcarq8g`) for every
+  project image. Everything degrades quietly when its env var is missing.
