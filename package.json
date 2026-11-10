@@ -25,6 +25,7 @@
     "react-pdf": "^10.2.0",
     "react-snowfall": "^2.4.0",
     "react-tooltip": "^5.30.0",
+    "simple-icons": "^16.37.0",
     "snowfall": "^2.1.0",
     "tailwindcss": "^4.1.18",
     "three": "^0.186.1",

@@ -2,7 +2,7 @@ import { lazy } from "react";
 
 // The only contract a world has: an id, how it shows up on the reels, and a lazy component.
 // Only finished worlds go in here. That is what keeps the machine honest.
-// Lazy components are created once, here, never during render.
+// Lazy components are created once, here, never during render. `load()` preloads a world's chunk.
 export const worlds = [
     {
         id: "desktop",
@@ -10,7 +10,7 @@ export const worlds = [
         tagline: "The one you know. Windows, dock, Finder.",
         symbols: ["2026", "Desktop", "Calm"],
         accent: "#3b82f6",
-        Component: lazy(() => import("./desktop/index.jsx")),
+        load: () => import("./desktop/index.jsx"),
     },
     {
         id: "editorial",
@@ -18,7 +18,7 @@ export const worlds = [
         tagline: "Just the work, set like a magazine.",
         symbols: ["Now", "Magazine", "Clean"],
         accent: "#1d4ed8",
-        Component: lazy(() => import("./editorial/index.jsx")),
+        load: () => import("./editorial/index.jsx"),
     },
     {
         id: "terminal",
@@ -26,9 +26,12 @@ export const worlds = [
         tagline: "Type your way in.",
         symbols: ["1988", "Terminal", "Nerdy"],
         accent: "#22c55e",
-        Component: lazy(() => import("./terminal/index.jsx")),
+        load: () => import("./terminal/index.jsx"),
     },
 ];
+
+// One lazy component per world, from the same loader, so preloading on lever pull warms the chunk it will render.
+worlds.forEach((w) => { w.Component = lazy(w.load); });
 
 export const ALIASES = { classic: "editorial" };
 export const RECRUITER_WORLD = "editorial";

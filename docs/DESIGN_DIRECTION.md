@@ -371,3 +371,99 @@ Applied:
 3. Mark → **"अमन" yes**, plus the multiverse name across 11 scripts (§4b).
 
 D1 (style tile) will include the multiverse name as its first live prototype, since it's the identity piece everything else hangs on.
+
+---
+
+## 10. Main screen v1: "Dark Studio" (2026-11-10). Replaces the island as the home screen
+
+Brief from Aman: black background, proper lighting, the machine **floating** and properly interactive (IG reel ref);
+a **3D dot-matrix footer** you can touch (Acquire footer ref); type = **heavy grotesk + red handwritten script crossing it**
+(Portfolio/doodle, "Sony palli" script, Second Society red brush refs).
+
+### The screen, top to bottom
+| Layer | What | Rule |
+|---|---|---|
+| **Hero (100dvh)** | The PX-01 clear machine floating in a black void under one volumetric spotlight | One object, one light. No set, no island, no plinth |
+| Behind the machine | Giant **"Portfolio"** in Geist 800, bone, the machine floats *in front of* it | Poster layering: the object overlaps the top of the letters |
+| Over the word | **"Aman Patel"** in red handwritten script (Homemade Apple, `--signal`), drawn in left→right | The signature gesture (§5): it writes itself once, on load |
+| Doodles | 3–4 hand-drawn SVG marks (arrow, star, underline, circle) + tiny script notes: "full-stack dev", "+ 3D / AI", "Ahmedabad, IN" | Stroke-draw after the script. Red only |
+| Chrome | Top bar: multiverse name · `PX-01 REALITY SELECTOR` · IST clock. `[2026]` boxed tag. World tabs row `↗ Desktop OS  ↗ Editorial  ↗ Terminal  ↗ Résumé` (Sony palli ref) | Mono 11px, hairline underlines |
+| CTA | "Pull the lever →" (bone pill) + "Just show me the work" | Same as before; Space pulls only while the hero is on screen |
+| **Footer (≈100dvh)** | 3D dot dunes (~70k points, crest-streaked like the ref) + stars + the machine's silhouette made of dust standing on a ridge | Cursor lifts and parts the dots (ripple); slow wind drift; pauses off-screen |
+| Footer type | Mono headline, grey with one bright word: "Pick a **reality**, / or just say hello" + white "Email me" block button; 4 link columns (Worlds · Work · Contact · Elsewhere); hairline; © line | Acquire layout, our content |
+
+### Lighting (the "proper lighting" ask)
+- Pure-black void (`#050506`), no HDRI. Reflections come from an **Environment made only of Lightformers**: a top softbox,
+  two tall rim strips behind left/right, a low warm kicker. Chrome reads as bright strips on black, which is the product-shot look.
+- **Key:** drei volumetric `SpotLight` straight down onto the machine (visible cone in the haze), casting the float shadow.
+- **Power-on = loader:** spotlight ramps 0 → full over 1.6 s, LEDs boot-scan, then the type writes itself in.
+- Faint warm backdrop glow behind the machine for separation; film grain (Noise) + vignette; bloom only on LEDs/payline.
+
+### Interaction
+- **Floats:** slow bob + drift (drei `Float`), soft contact shadow far below that breathes with the height.
+- **Drag the machine** to turn it (spring snaps back, `PresentationControls`); it also leans toward the cursor.
+- **Lever:** drag down with resistance (existing), knob glows on hover. Pull → picks a world (no repeats per session) →
+  **reels physically land on that world's symbols** (staggered stops) → "Landing in Editorial" → camera pushes into
+  the reel window, fade to black → world loads (chunk import starts on pull).
+- Reduced motion: no float/sway, instant land. No WebGL: the old CSS machine is the fallback.
+
+### Files
+`src/machine/MachineModel.jsx` (machine split out of the lab, shared by lab + home) · `src/home/Home.jsx` (page + type) ·
+`src/home/Studio.jsx` (hero canvas) · `src/home/DotField.jsx` (footer canvas) · `src/home/home.css`.
+
+### Gate
+Screenshot hero + footer at 1440 and 390 wide; check: machine readable and lit, word readable around the machine,
+script legible, footer dots react to the cursor, ≥ 50 fps on this laptop, build passes.
+
+---
+
+## 11. Intro v2 + plan after the 17-site research (2026-11-10)
+Research: `docs/RESEARCH_PORTFOLIOS_2026-11.md`. The main finding is that nobody has a lit object you operate, so the machine stays the hero.
+
+### Shipped in v2
+| Beat | What happens | Time |
+|---|---|---|
+| Boot | Black screen, mono boot log, big `000→100` counter tied to **real** milestones (fonts 35 → 3D code 65 → first frame 100), red progress hairline. "Click anywhere to skip" after 2.5 s; hard cap 9 s | 0–~2 s |
+| Power-on | Everything squashes into a white line (CRT), line snaps shut, black lifts | 0.9 s |
+| Drop | Machine falls in through the beam from above the frame, 1.5 turns, slight overshoot, then floats | 1.5 s |
+| Light | Volumetric key light ramps up; dust drifts in the beam; 9 brass coins fan out into orbit behind it | 1.4 s |
+| Type | "Portfolio" rises letter by letter out of a blur; "Aman Patel" writes itself; doodles draw; identity line + UI fade in | ~2.5 s |
+| Win | Reels land → red flash from the window, coins burst out and fall back into orbit → push into the reel window | — |
+Also: identity h1 visible on every size (name, role, city, open-to-work dot), cursor ring (says PULL over the lever),
+marquee band before the footer, PX-01 favicon (svg + 32px + apple-touch), OG image, robots, sitemap, JSON-LD Person.
+
+### Next, ranked (intro + machine + every screen size)
+1. **Screen-size matrix pass**: 320, 375, 390, 430 (phones), 768, 1024 portrait and landscape (tablets), 1280, 1440, 1920, 2560, 21:9.
+   Rules: machine always fully in frame with the lever; word never clipped; ink notes collapse on <760px; landscape phones get
+   a side-by-side layout (machine left, type right) instead of a squashed stack.
+2. **Real-GPU performance budget**: ≥ 55 fps on a mid laptop, ≥ 45 on a mid Android. Tiers: drop transmission → physical
+   glass-lite + no Sparkles on low tier (detect by first-second frame time); DPR cap 1.5 on phones.
+3. **Lever feel**: ratchet detents (3 clicks) with haptic `navigator.vibrate(8)` on Android, overshoot on release.
+4. **Sound (opt-in)**: lever ratchet, reel ticks pitched by speed, coin chime on win. Toggle in the top bar.
+5. **Culture layer** (mannan lesson): Sidi Saiyyed jali tree as a dust silhouette in the footer field next to the machine;
+   multiverse name locks to the landed world's script.
+6. **Social proof**: one quote line or a "currently building" card (yashahire) in the footer, not the hero.
+7. **Ask-me-anything world** (aaabadcode/yashahire trend) as world #4 on the reels, not a chat box on the hero.
+8. **Returning visitors**: decide whether `/` always shows the machine (recommended for a public, SEO'd site) or resumes the last world.
+
+## 12. Keychains, signature, lighting (2026-11-10)
+- **Keychains** (replaced the coins, then the scatter): enamel-pin charms with the real logos (Simple Icons, CC0, `simple-icons`),
+  a red ENTER keycap and a racing helmet, each on a chrome split ring hanging from a hairline display cable. A designed layout:
+  desktop = 3 per side in a mirrored arc at one depth (same size); phones = a row of 3 above the machine. Lowered in on their
+  cables after power-on, one slow wave of sway across the set, facing front; a touch or a win gives one full turn that settles.
+  Slots live in screen space and are solved per aspect with the camera's `framing()`, pushed clear of the machine when needed.
+- **Signature**: traced from Aman's photo (blue-ink mask → skeleton → graph walk → spur prune → gap bridge → Gaussian smoothing →
+  resample; `src/home/signature.json`). A big neon version behind the machine was tried and cut (too loud, competes with the
+  object). It now sits small in red ink just above "Portfolio" and writes itself in after the doodles.
+- **Lighting pass** (options weighed → chosen):
+  | Option | Verdict |
+  |---|---|
+  | AgX tone mapping (vs ACES) | ✅ chrome highlights roll off naturally, reds stay red instead of shifting orange |
+  | Animated light sweep (a Lightformer strip crossing the env, every 7 s) | ✅ desktop; the classic product-reveal highlight. Off on phones (env cube re-render) |
+  | Cool top rim + faint red under-kicker | ✅ separates the case edges from the black; red ties it to the ink |
+  | Studio HDRI (Poly Haven) instead of Lightformers | ❌ softer but muddier on black; strips read more "product shot" |
+  | RectAreaLight softbox key | later: nicer soft speculars, costs a uniforms lib + per-material support |
+  | Bloom / N8AO post | ❌ breaks the transparent canvas the DOM word needs; revisit if the word moves into 3D |
+  | Neon sign as a light source | cut with the big neon (see above) |
+- **Phones**: machine fills ~80% of the width at the visual centre (`framing()`), keychains above it, name line 2 rows.
+- `/` always opens on the machine; only `?style=` links go straight into a world.

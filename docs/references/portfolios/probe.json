@@ -1,0 +1,721 @@
+{
+  "redoyan": {
+    "url": "https://www.redoyanulhaque.me/",
+    "title": "Redoyanul Haque - AI Developer | Python Engineer",
+    "fonts": [
+      "Geist"
+    ],
+    "libs": {
+      "three": true,
+      "gsap": true,
+      "lenis": true,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(0, 0, 0)",
+    "color": "rgb(234, 229, 236)",
+    "canvases": 1,
+    "videos": 1,
+    "cursorCustom": true,
+    "headings": [
+      "Hello! I'm",
+      "REDOYANUL HAQUE",
+      "AI ENGINEER",
+      "FULL-STACK DEVELOPER",
+      "My career & experience"
+    ],
+    "nav": [],
+    "height": 9353,
+    "text": "RedoyanulHaque AI ENGINEER FULL STACK DEVELOPER AI ENGINEER FULL STACK DEVELOPER AI ENGINEER FULL STACK DEVELOPER AI ENGINEER FULL STACK DEVELOPER LOADING 58% WELCOME RH redoyanul1234@gmail.com ABOUT ABOUT WORK WORK CONTACT CONTACT RESUME RESUME Hello! I'm REDOYANUL HAQUE An AI ENGINEER FULL-STACK DEVELOPER My career & experience Learning Something New Self-Development NOW Continuously exploring emerging technologies, researching advanced AI systems, and pushing the boundaries of what's possible in tech. AI Engineer Freelance & Projects 2025 Developing intelligent AI systems, chatbots, and machine learning solutions. Building next-gen conversational AI agents and JARVIS-like personal assista"
+  },
+  "aaabadcode": {
+    "url": "https://www.aaabadcode.com/",
+    "title": "Toukoum Portfolio",
+    "fonts": [
+      "ui-sans-serif"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": true,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "oklch(1 0 0)",
+    "color": "oklch(0.141 0.005 285.823)",
+    "canvases": 1,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "Hey, I'm Aaaaby 👋",
+      "AI Engineer"
+    ],
+    "nav": [],
+    "height": 900,
+    "text": "Toukoum Build your AI portfolio About Toukoum Hey, I'm Aaaaby 👋 AI Engineer Me Projects Skills Fun Contact"
+  },
+  "majd": {
+    "url": "https://majd-portfolio.framer.website/",
+    "title": "Majd",
+    "fonts": [
+      "sans-serif",
+      "Archivo"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": true,
+      "framer": true,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(250, 247, 243)",
+    "color": "rgb(0, 0, 0)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": false,
+    "headings": [
+      "SOFTWARE ENGINEER",
+      "©2026",
+      "Hey!",
+      "Services",
+      "Featured Projects",
+      "Testimonials"
+    ],
+    "nav": [
+      "Majd"
+    ],
+    "height": 7798,
+    "text": "U s e f o r F r e e M o r e T e m p l a t e s Majd SOFTWARE ENGINEER ©2026 /CREATING SINCE 2020 Hey! I’m Majd, a builder based in Syria, currently working on Templyo, a platform for high-quality Framer templates. I’m a software engineer and Framer creator with a strong focus on building modern, scalable, and conversion-driven web experiences. Over the years, I’ve created and shipped multiple SaaS products and Framer templates used by global customers, helping them launch faster. Get Started Fromideatolaunch.Clean,scalabledigitalproductsbuilttomovefast,staysimple,andperforminreal-worlduse,drivenbyclarity,structuredsystems,andintentionaldesign. Services Website Migration Web Migration Optimiza"
+  },
+  "aahanabobade": {
+    "url": "https://www.aahanabobade.com/",
+    "title": "Aahana Bobade | Portfolio",
+    "fonts": [
+      "JetBrains Mono",
+      "Syne"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(30, 30, 30)",
+    "color": "rgb(204, 204, 204)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "Aahana Bobade"
+    ],
+    "nav": [],
+    "height": 900,
+    "text": "✕ − ⤢ 🔍 aahana-bobade : portfolio Ctrl P File Edit View Go Run Terminal Help Copilot PORTFOLIO home.tsx about.html projects.js { } skills.json experience.ts contact.css README.md PDF Aahana_Bobade_Resume.pdf ↓ Aahana's Copilot AI main ↑1 ✦3 home.tsx ✕ aahana-bobade › src › home.tsx // hello world !! Welcome to my portfolio Aahana Bobade Backend Engineer AI / ML Dev Data Scientist @ EduVanceAI Turning data int| I live at the crossroads of backend engineering, AI/ML, and data science. I build systems that are genuinely intelligent and scalable. 📁 Projects 👤 About Me ✉ Contact 3+ YEARS 10+ PROJECTS ∞ CURIOSITY ↑ ALWAYS LEARNING GitHub LinkedIn Medium Tableau LeetCode Instagram Email Youtube "
+  },
+  "aahana-surya": {
+    "url": "https://aahana-surya.github.io/",
+    "title": "Aahana Surya",
+    "fonts": [
+      "JetBrains Mono",
+      "Instrument Serif",
+      "Inter Tight",
+      "Arial"
+    ],
+    "libs": {
+      "three": true,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(5, 7, 15)",
+    "color": "rgb(238, 241, 246)",
+    "canvases": 1,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "AahanaSurya",
+      "About Me",
+      "Projects",
+      "Reports",
+      "Experience",
+      "Skills"
+    ],
+    "nav": [
+      "AAHANA",
+      "ABOUT",
+      "PROJECTS",
+      "REPORTS",
+      "EXPERIENCE",
+      "SKILLS"
+    ],
+    "height": 900,
+    "text": "SKIP TO CONTENT Aahana Surya IGNITION 100 AAHANA ABOUT PROJECTS REPORTS EXPERIENCE SKILLS PERSONAL PORTFOLIO AahanaSurya SCROLL About Me NAME : Aahana Surya INSTITUTION : Northeastern University PROGRAM : Computer Science, Undergraduate CONCENTRATION : Artificial Intelligence MINOR : Robotics INTERESTS : Piano, Tennis, Fashion, Baking Projects CLUB SHIFT SCHEDULER CSP solver plus a Nash-stability search that staffs club shifts fairly, with a Flask web UI. CS4100 final project. VIEW PROJECT WORLD CUP PREDICTOR AI-powered Streamlit app that predicts match outcomes. Built for the IBM SkillsBuild Challenge. VIEW APP WEATHER APP Live forecasts and climate data for any location. Built for PM Accel"
+  },
+  "yashahire": {
+    "url": "https://yashahire.info/",
+    "title": "Yash Ahire",
+    "fonts": [
+      "-apple-system",
+      "Arial",
+      "Plus Jakarta Sans",
+      "Sacramento",
+      "Courier New",
+      "Georgia"
+    ],
+    "libs": {
+      "three": true,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(13, 13, 18)",
+    "color": "rgb(255, 255, 255)",
+    "canvases": 3,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "REEDL_",
+      "Hear Me",
+      "WallComm",
+      "Rmovie",
+      "Tech Stack",
+      "Visualizations"
+    ],
+    "nav": [],
+    "height": 5040,
+    "text": "👋 Say hi Home About Experience Projects Skills Switch to light Get in touch View resume > | ,I am Yash Ahire. I build things I'm Yash, a full-stack and AI engineer building production systems, from AI agent platforms to the design systems behind them. Worked across Banking, Healthcare and Construction management domains. Resume PET THE DOG Ask me anything REEDL_ FEATURES ABOUT CONTACT OPEN APP → TECH READING, REIMAGINED READ SMARTER. One article at a time. No noise, no sidebar. START READING → CURRENTLY BUILDING REEDL_ Four Claude agents run as production employees, sourcing, writing, and publishing engineering content end-to-end. A reel-style reading platform, one article at a time. Next.j"
+  },
+  "aakarsh": {
+    "url": "https://aakarsh-devhq.vercel.app/",
+    "title": "Aakarsh | DevHQ",
+    "fonts": [
+      "Inter",
+      "Font Awesome 6 Free",
+      "VALORANT",
+      "Arial"
+    ],
+    "libs": {
+      "three": true,
+      "gsap": true,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(11, 11, 11)",
+    "color": "rgb(255, 255, 255)",
+    "canvases": 1,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "Woah! You Landed on the Portfolio Website of The",
+      "Aakarsh Bibhaw - Software Developer Portfolio",
+      "DEVELOPER",
+      "About Me - Behind The Code!",
+      "Work Experience - Professional Journey!",
+      "Projects Showcase - What I've Built!"
+    ],
+    "nav": [
+      "Home",
+      "About",
+      "Experience",
+      "Projects",
+      "Skills",
+      "Certs",
+      "Profiles",
+      "Contact"
+    ],
+    "height": 8546,
+    "text": "Home About Experience Projects Skills Certs Profiles Contact Woah! You Landed on the Portfolio Website of The Aakarsh Bibhaw - Software Developer Portfolio DEVELOPER Aakarsh Bibhaw | CSE Undergrad LET'S CONNECT VIEW RESUME About Me - Behind The Code! I am someone who thrives on learning, problem-solving, and continuous growth. My personality blends curiosity, adaptability, and persistence, which helps me approach challenges with optimism and clarity. I value collaboration and clear communication, but I am equally comfortable taking initiative and working independently. At my core, I am driven by a desire to make an impact, stay open to new perspectives, and keep evolving both personally and "
+  },
+  "tajmirul": {
+    "url": "https://www.tajmirul.site/",
+    "title": "Portfolio - Tajmirul Islam",
+    "fonts": [
+      "Roboto Flex",
+      "Anton"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": true,
+      "lenis": true,
+      "framer": false,
+      "framerMotion": true,
+      "spline": false,
+      "next": true,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(33, 33, 33)",
+    "color": "rgb(222, 222, 222)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": false,
+    "headings": [
+      "FULL-STACK DEVELOPER",
+      "I believe in a user centered design approach, ensuring that every project I work on is tailored to meet the specific nee",
+      "MY STACK",
+      "MY EXPERIENCE",
+      "SELECTED PROJECTS"
+    ],
+    "nav": [],
+    "height": 5184,
+    "text": "SOCIAL Github Linkedin Facebook Old Version MENU Home About Me Experience Projects GET IN TOUCH tasmirolislam@gmail.com FULL-STACK DEVELOPER Hi! I'm Tajmirul. A frontend-focused Full-Stack Developer with 4+ years of experience in building high-performance, scalable, and responsive web solutions. LET'S TALK Available for full-time opportunities 4+ Years of Experience 7+ Completed Projects 10K+ Hours Worked I believe in a user centered design approach, ensuring that every project I work on is tailored to meet the specific needs of its users. This is me. Hi, I'm Tajmirul. I'm a frontend-focused full-stack developer dedicated to turning ideas into creative solutions. I specialize in creating sea"
+  },
+  "aadarshrai": {
+    "url": "https://aadarshrai.vercel.app/",
+    "title": "Aadarsh Rai",
+    "fonts": [
+      "Neue Montreal"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": true,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(28, 29, 32)",
+    "color": "rgb(28, 29, 32)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": false,
+    "headings": [
+      "Hello",
+      "Bonjour",
+      "नमस्ते",
+      "Ciao",
+      "Olá",
+      "こんにちは"
+    ],
+    "nav": [],
+    "height": 3790,
+    "text": "Menu © Code by Aadarsh Rai Work About Contact NAVIGATION Home Work About Contact SOCIALS LinkedIn GitHub Email View Located in Dubai, UAE AI & Machine Learning Engineer Aadarsh Rai — Aadarsh Rai — Building practical AI that solves real-world problems. I’m an aspiring AI and Machine Learning Engineer focused on building production-oriented machine learning systems and intelligent applications — from data collection and preprocessing to model training, evaluation, API development and deployment. About Me RECENT WORK MarketPulse Data Engineering & Development Plantix Deep Learning & Computer Vision IntelliCast NLP, LLM & RAG QuickShow Full-Stack Development More work 4"
+  },
+  "aadi": {
+    "url": "https://aadi.is-a.dev/",
+    "title": "aadi.is-dev",
+    "fonts": [
+      "Geist",
+      "Geist Mono"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": true,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": true,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "oklch(1 0 0)",
+    "color": "oklch(0.141 0.005 285.823)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": false,
+    "headings": [
+      "Navigation Menu",
+      "Command Palette",
+      "Aditya Domle",
+      "A coder by day, problem-solver by night!"
+    ],
+    "nav": [
+      "aadi.is-dev",
+      "Home",
+      "LinkedIn",
+      "Resume",
+      "GitHub"
+    ],
+    "height": 1006,
+    "text": "aadi.is-dev Home LinkedIn Resume Navigation Menu Search sections... ⌘ K Command Palette Search for a command to run... 16:48:45 Toggle theme GitHub Sections Introduction About Me Projects Skills & Tools Experience Education Contact Stats Aditya Domle A coder by day, problem-solver by night! I am a dedicated Software Engineer specializing in full-stack application development. I enjoy crafting responsive web solutions using modern technologies like Next.js, React, Tailwind CSS, Node.js, Express, and MongoDB, while also applying DevOps practices, continuously aiming to deliver high-quality, comprehensive, user-centric software solutions. Get Resume Send Mail About Me ©2026 · Built with Next.js"
+  },
+  "aaftab": {
+    "url": "https://aaftab.is-a.dev/",
+    "title": "Aaftab Vijapura | React Frontend Developer in Gujarat, India",
+    "fonts": [
+      "GeistSans",
+      "GeistMono",
+      "-apple-system",
+      "Roboto Flex"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": true,
+      "nuxt": false,
+      "astro": true,
+      "locomotive": false,
+      "barba": false,
+      "splitting": true,
+      "lottie": false
+    },
+    "bg": "rgb(11, 11, 12)",
+    "color": "rgb(243, 240, 234)",
+    "canvases": 1,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "Aaftab Vijapura | React Frontend Developer in Gujarat, India Aaftab Vijapura",
+      "Who I am",
+      "Three ways I turn ideas into working software.",
+      "How I think about building for the web.",
+      "The tools I reach for, and what they let me build.",
+      "Featured client applications & systems."
+    ],
+    "nav": [
+      "Home\nHome",
+      "Services\nServices",
+      "Skills\nSkills",
+      "Works\nWorks",
+      "Experience\nExperience",
+      "About\nAbout",
+      "Resume\nResume",
+      "Contact\nContact",
+      "AV",
+      "Guizye-Israel-New",
+      "Astro-IQ-React",
+      "Gharda-New"
+    ],
+    "height": 14702,
+    "text": "Skip to content AV Aaftab Vijapura Home Home Services Services Skills Skills Works Works Experience Experience About About Resume Resume Contact Contact 01INTRO 02WHO I AM 03WHAT I DO 04PHILOSOPHY 05ECOSYSTEM 06SELECTED WORK 07EXPERIENCE 08PROCESS 09CURRENT FOCUS 10WHY WORK WITH ME 11LET’S TALK Now: ASP.NET Full Stack Developer at Aerosol IO Limited Ahmedabad, Gujarat, India · 16:48 IST Aaftab Vijapura | React Frontend Developer in Gujarat, India Aaftab Vijapura React Frontend Developer I build modern, responsive web applications with React and TypeScript — reusable components, careful state, and clean API integration — and I now work across the full stack with ASP.NET. View my work Contact "
+  },
+  "aanandmadhav": {
+    "url": "https://aanandmadhav.com/",
+    "title": "Aanand Madhav - Product, UX and Technical Delivery",
+    "fonts": [
+      "Geist",
+      "Geist Mono",
+      "Instrument Serif"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": true,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(245, 241, 234)",
+    "color": "rgb(26, 24, 22)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "Builder. Brewer. Wanderer.",
+      "Good decisions. Real products.",
+      "A few things in rotation.",
+      "Curiosity, put to work.",
+      "Recent writing",
+      "There is life beyond the roadmap."
+    ],
+    "nav": [
+      "Home",
+      "Work",
+      "Lab",
+      "Writing",
+      "Life",
+      "Contact"
+    ],
+    "height": 5921,
+    "text": "Aanand Madhav SENIOR PM · UX Home Work Lab Writing Life Contact NEW DELHI · 16:49 IST ⌕ ⌘K Get in touch → Builder. Brewer. Wanderer. I’m Aanand. I bring product, UX and engineering together to build things that matter. Let’s build something → Open to full-time product leadership roles Good decisions. Real products. 9 yrs in Product, UX & delivery YAMU Media $300k+ Monthly revenue at some D2C brands Managing UX and development across D2C ecommerce brands. My work at YAMU ↗ MediaMen Services 1,000+ Qualified leads routed per day Product, UX and engineering for the UK debt and IVA market. Decision engine, integrations and a purpose-built CRM. My work at MediaMen ↗ My Debt Plan 1,000+ qualified "
+  },
+  "aathifzahir": {
+    "url": "https://aathifzahir.vercel.app/",
+    "title": "Aathif Zahir | Software Engineer & Designer",
+    "fonts": [
+      "sans-serif",
+      "Clash Display",
+      "Inter Display"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": true,
+      "framer": true,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(0, 0, 0)",
+    "color": "rgb(0, 0, 0)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "AATHIF",
+      "LATEST",
+      "PORTFOLIO",
+      "AATHIF©",
+      "LET'S WORK",
+      "TOGETHER"
+    ],
+    "nav": [
+      "CONTACT NOW"
+    ],
+    "height": 17633,
+    "text": "LOCAL/ 16:49:40 CONTACT NOW AATHIF BASED IN SRI LANKA AVAILABLE ALL AROUND WORLDWIDE SOFTWARE ENGINEER + GRAPHIC DESIGNER 01 //APPROACH THREE PHASES I'M AATHIF ZAHIR BASED IN SRI LANKA. I employed software engineering skills to build scalable and reliable applications. 01 02 03 DISCOVER AND ANALYSIS Discover opportunities and refine strategies for decisions. DESIGN AND IMPLEMENT Design and implement solutions to transform ideas. DELIVER AND MONITOR Ensure efficient execution and performance tracking. 02 //PORTFOLIO 2023 - 2026 LATEST PORTFOLIO My creative spirit comes alive in the digital realm, where I build software with focused intent and flowing code. Upstack FULL-STACK DEVELOPMENT ProIn"
+  },
+  "abbasraza": {
+    "url": "https://abbasraza.dev/",
+    "title": "Abbas Raza | Full Stack Developer & Blockchain Enthusiast",
+    "fonts": [
+      "ui-sans-serif",
+      "Geist"
+    ],
+    "libs": {
+      "three": true,
+      "gsap": true,
+      "lenis": true,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": true,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": true,
+      "lottie": false
+    },
+    "bg": "rgb(1, 10, 3)",
+    "color": "rgb(0, 0, 0)",
+    "canvases": 2,
+    "videos": 0,
+    "cursorCustom": true,
+    "headings": [
+      "Hi, I'm Abbas Raza",
+      "My Journey",
+      "My Skillset",
+      "Featured Projects",
+      "Latest Articles",
+      "Frequently Asked Questions"
+    ],
+    "nav": [],
+    "height": 964,
+    "text": "Skip to main content Skip to contact ABBAS RAZA · PORTFOLIO pulling focus… 76 % CLICK TO CONTINUE"
+  },
+  "aelradi": {
+    "url": "https://aelradi.engineer/",
+    "title": "Abdalla Elsiddig | AI & Robotics Engineer",
+    "fonts": [
+      "ui-sans-serif"
+    ],
+    "libs": {
+      "three": true,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": true,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(0, 0, 0)",
+    "canvases": 2,
+    "videos": 1,
+    "cursorCustom": true,
+    "headings": [
+      "ABDALLA ELRADI",
+      "Featured projects",
+      "AI automation systems",
+      "TECHNICAL SKILLS",
+      "Services",
+      "Availability"
+    ],
+    "nav": [],
+    "height": 11940,
+    "text": "CLICK ANYWHERE TO SKIP HOME PROJECTS AUTOMATIONS SKILLS SERVICES AVAILABILITY CERTIFICATES EXPERIENCE CONTACT AE INFORMATICS ENGINEER ABDALLA ELRADI CRAFT Demonstrated expertise in artificial intelligence, computer vision, IoT, and robotics, with 1.5+ years of professional experience building innovative systems. AI PYTHON OPENCV AUTOMATION MINDSET Excellence is a habit. Basketball taught me discipline, focus, and leadership — qualities I apply to every engineering challenge. “Build with purpose. Lead with vision.” LOCATION MANAMA, BAHRAIN 26.2235°N, 50.5876°E PORTFOLIO Featured projects 01 — ISLAMIC FINTECH Tarakum 1ST PLACE 02 — FULL-STACK WEB APP Door2Door Delivery Platform 03 — ROBOTICS A"
+  },
+  "mannan": {
+    "url": "https://www.mannan.io/",
+    "title": "Mannan Abdul",
+    "fonts": [
+      "Courier New",
+      "Arial"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": true,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "canvases": 27,
+    "videos": 0,
+    "cursorCustom": false,
+    "headings": [
+      "SELECTED WORK",
+      "PEOPLE WHO HAVE WORKED WITH ME."
+    ],
+    "nav": [
+      "~/",
+      "GITHUB",
+      "LINKEDIN",
+      "EMAIL"
+    ],
+    "height": 3608,
+    "text": "~/ GITHUB / LINKEDIN / EMAIL Tiny Lahore skyline rendered as scatter dots ISLAMABAD, PAKISTAN MANNAN ABDUL LEAD PRODUCT ENGINEER I LEAD PRODUCT ENGINEERING AT KITME. THE SIMPLEST WAY TO PUT WHAT I DO: YOU GIVE ME A GOAL AND I GET IT DONE. I LEAD, COORDINATE ACROSS TEAMS, RESEARCH, BUILD POCS, WHATEVER THE GOAL NEEDS, AND I DO IT IN A WAY THAT YOU CAN TRUST THE OUTPUT AND REST EASY. BEFORE KITME I SPENT FOUR YEARS DEEP IN REACT AND TYPESCRIPT AT INTENSEYE, BUILDING PRODUCT UI AND DATA-HEAVY DASHBOARDS, AND BEFORE THAT BUILT GEOSPATIAL DASHBOARDS WITH VUE.JS AT LAYERMARK. Tiny pixel workspace rendered as scatter dots SCROLL WHERE I GOT THINGS DONE. SELECTED WORK MY CURRENT JOB, THE ROLE BEFORE"
+  },
+  "abdulmateen": {
+    "url": "https://abdulmateenzwl.com/",
+    "title": "Abdul Mateen",
+    "fonts": [
+      "JetBrains Mono",
+      "Space Grotesk",
+      "Archivo Black"
+    ],
+    "libs": {
+      "three": false,
+      "gsap": false,
+      "lenis": false,
+      "framer": false,
+      "framerMotion": false,
+      "spline": false,
+      "next": false,
+      "nuxt": false,
+      "astro": false,
+      "locomotive": false,
+      "barba": false,
+      "splitting": false,
+      "lottie": false
+    },
+    "bg": "rgb(255, 248, 229)",
+    "color": "rgb(10, 10, 10)",
+    "canvases": 0,
+    "videos": 0,
+    "cursorCustom": false,
+    "headings": [
+      "OVERVIEW",
+      "WORK",
+      "PROJECTS",
+      "CERTIFICATIONS",
+      "EDUCATION",
+      "VOLUNTEERING"
+    ],
+    "nav": [
+      "ABDUL MATEEN",
+      "overview",
+      "work",
+      "projects",
+      "certifications",
+      "education",
+      "volunteering",
+      "contact",
+      "All 4 Roles",
+      "All 6 Projects",
+      "All 6 Certificates",
+      "All 2 Degrees"
+    ],
+    "height": 3360,
+    "text": "SKIP TO CONTENT ∆ 2026-06 · CONVERTX · GO MICROSERVICES · KUBERNETES · KONG · AUTOSCALING · CLEARED ∆ 2026-05 · GLASCODE · FORWARD DEPLOYED ENGINEER (SRE) · PENDING ∆ 2026-04 · END-TO-END ENCRYPTED MESSAGING · SIGNAL PROTOCOL · SPRING BOOT · CLEARED ∆ 2026-03 · GNOME SHELL EXTENSION · GJS · I3-STYLE TILING · CLEARED ∆ 2026-01 · DUBLIN BUSINESS SCHOOL · MSC INFORMATION SYSTEMS · PENDING ∆ 2025-09 · TECHLOGIX · ORACLE FLEXCUBE 12 → 14.7 · CLEARED ∆ 2025-03 · TECHNOSOFT SOLUTIONS · ASSOCIATE SOFTWARE ENGINEER · CLEARED ∆ BALANCE CARRIED FORWARD ·············· 2 YRS 2 MO ∆ 2026-06 · CONVERTX · GO MICROSERVICES · KUBERNETES · KONG · AUTOSCALING · CLEARED ∆ 2026-05 · GLASCODE · FORWARD DEPLOYED EN"
+  }
+}
