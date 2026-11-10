@@ -1,0 +1,54 @@
+/* tty1 · AHMEDABAD: an amber-phosphor CRT in a dark room. All CSS: scanlines, vignette, bloom, a breath of flicker. */
+.tty { --fg: #ffb000; --dim: rgba(255, 176, 0, .58); --bg: #120c02; --room: #050403;
+    min-height: 100dvh; background: radial-gradient(120% 90% at 50% 40%, #1b1206, var(--room) 70%); padding: clamp(10px, 3vw, 36px); padding-bottom: 150px;
+    color: var(--fg); font: 400 15px/1.55 "IBM Plex Mono", "Roboto Mono", ui-monospace, monospace; position: relative; }
+.tty-green { --fg: #7dff9b; --dim: rgba(125, 255, 155, .58); --bg: #04110a; }
+.tty-plain { --fg: #e9e6df; --dim: #a8a49c; --bg: #111; }
+.tty-glass { position: relative; max-width: 1100px; margin: 0 auto; min-height: calc(100dvh - 120px); background: radial-gradient(130% 120% at 50% 45%, color-mix(in srgb, var(--bg) 70%, #2a1a03), var(--bg) 60%);
+    border-radius: 22px / 18px; padding: clamp(18px, 3vw, 40px); box-shadow: 0 0 0 10px #0d0b08, 0 0 0 11px #2a241b, inset 0 0 90px rgba(0, 0, 0, .85), 0 30px 80px rgba(0, 0, 0, .7);
+    text-shadow: 0 0 2px currentColor, 0 0 9px color-mix(in srgb, var(--fg) 45%, transparent); overflow: hidden; animation: tty-flicker 6s infinite; }
+.tty-plain .tty-glass { text-shadow: none; animation: none; box-shadow: 0 0 0 1px #333; border-radius: 6px; }
+.tty-scan { position: fixed; inset: 0; pointer-events: none; z-index: 5; background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px), radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, .55)); mix-blend-mode: multiply; }
+.tty-plain .tty-scan { display: none; }
+@keyframes tty-flicker { 0%, 100% { opacity: 1; } 48% { opacity: .985; } 50% { opacity: .96; } 52% { opacity: .99; } }
+.tty p { margin: 0; }
+.tty .dim { color: var(--dim); }
+.tty-big { font: 400 clamp(64px, 12vw, 150px)/1 "Rozha One", serif; letter-spacing: .02em; margin-bottom: 6px !important; }
+.tty-head { padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px dashed var(--dim); font-family: "VT323", monospace; font-size: 22px; line-height: 1.25; }
+.tty-head .dim { font: 400 14px/1.6 "IBM Plex Mono", monospace; margin-top: 6px !important; }
+.tty-boot { font: 400 24px/1.35 "VT323", monospace; padding-top: 6vh; cursor: pointer; }
+.tty-boot .dim { margin-top: 26px !important; font-size: 18px; }
+.tty-log article { margin-bottom: 14px; }
+.tty-echo { color: var(--fg); }
+.tty-ps { color: var(--dim); margin-right: 8px; }
+.tty-out { padding-left: 2px; white-space: pre-wrap; word-break: break-word; }
+.tty-row { white-space: pre-wrap; }
+.tty-h { font-family: "VT323", monospace; font-size: 20px; letter-spacing: .03em; }
+.tty-block { margin-bottom: 10px; }
+.tty-block ul { margin: 4px 0 0; padding-left: 18px; }
+.tty-block li { padding-left: 2px; }
+.tty-cmd, .tty-link { font: inherit; color: var(--fg); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--dim); text-underline-offset: 3px; text-shadow: inherit; }
+.tty-cmd:hover, .tty-link:hover, .tty-cmd:focus-visible, .tty-link:focus-visible { background: var(--fg); color: var(--bg); text-shadow: none; outline: none; }
+.ok { color: var(--fg); }
+.tty-shot { margin: 6px 0 10px; width: min(440px, 100%); border: 1px solid var(--dim); position: relative; overflow: hidden; }
+.tty-shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; filter: grayscale(1) contrast(1.25) brightness(.9); image-rendering: pixelated; }
+.tty-shot::after { content: ""; position: absolute; inset: 0; background: var(--fg); mix-blend-mode: multiply; opacity: .85; }
+.tty-plain .tty-shot::after { display: none; }
+.tty-bar { display: inline-block; width: 90px; height: .7em; border: 1px solid var(--fg); vertical-align: middle; background: linear-gradient(var(--fg), var(--fg)) 0 0 / 0% 100% no-repeat; animation: tty-fill 1.2s steps(10) forwards; }
+@keyframes tty-fill { to { background-size: 100% 100%; } }
+.tty-input { display: flex; gap: 0; align-items: center; }
+.tty-input input { flex: 1; background: transparent; border: 0; outline: none; color: var(--fg); font: inherit; caret-color: var(--fg); text-shadow: inherit; min-width: 0; }
+.tty-dock { position: sticky; bottom: 14px; z-index: 6; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 1100px; margin: 14px auto 0; }
+.tty-dock button { font: 500 13px "IBM Plex Mono", monospace; color: var(--fg); background: rgba(0, 0, 0, .7); border: 1px solid var(--dim); border-radius: 4px; padding: 9px 12px; min-height: 40px; backdrop-filter: blur(6px); cursor: pointer; }
+.tty-dock button:active { background: var(--fg); color: var(--bg); }
+.tty[data-shake] .tty-glass { animation: tty-shake .4s; }
+@keyframes tty-shake { 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+@media (max-width: 640px) {
+    .tty { font-size: 13.5px; padding: 8px 8px 160px; }
+    .tty-glass { border-radius: 14px; padding: 16px 14px; box-shadow: 0 0 0 6px #0d0b08, inset 0 0 60px rgba(0, 0, 0, .85); }
+    .tty-head { font-size: 18px; }
+    .tty-dock { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 0 4px; scrollbar-width: none; }
+    .tty-dock button { flex: none; }
+}
+@media (prefers-reduced-motion: reduce) { .tty-glass, .tty-bar { animation: none !important; } .tty-bar { background-size: 100% 100%; } }
+@media (prefers-contrast: more) { .tty-glass { text-shadow: none; } .tty-scan { display: none; } }

@@ -1,134 +1,212 @@
 import { useEffect, useRef, useState } from "react";
-import { profile, projects, skills, socials } from "#content/profile.js";
+import { profile, socials } from "#content/profile.js";
 import { onRepeat, topArtists, watching } from "#content/taste.js";
 import { worlds } from "#worlds/registry.js";
-import { work, KINDS } from "../../../content/work.js";
+import { work, KINDS, shot } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
+import { skillGroups } from "../../../content/skills.js";
+import { cases } from "../../../content/cases.js";
+import "./crt.css";
 
-// World 3: a shell. Everything is a command; `help` lists them.
-const BANNER = [
-    "PORTFOLIO.exe — aman@portfolio (tty1)",
-    `${profile.name}: ${profile.role}.`,
-    "Type `help` to see what you can do. Tab completes.",
-    "",
+// World 3: tty1 · AHMEDABAD. An amber-phosphor workstation. Every command prints real React nodes, so anything
+// that looks like a link is one, and recruiters never have to type (tap a highlighted word or a chip in the dock).
+const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const live = work.filter((w) => w.live);
+const POST = [
+    "PX-01 BIOS v2026.11 · AHMEDABAD",
+    `MEM CHECK ............ ${work.length} PROJECTS OK`,
+    `NET .................. ${work.filter((w) => w.maintained).length} SITES IN PRODUCTION`,
+    `ROLE ................. ${experience[0].role.toUpperCase()}`,
+    "BOOTING tty1 .........",
 ];
 
-const commands = ({ go, spin }) => ({
-    help: () => [
-        "about           who I am",
-        "projects        what I've built   (open <n> to visit one)",
-        "experience      where I've worked + education",
-        "live            production sites I maintain",
-        "cv [version]    tailored résumé: fullstack | frontend | ai",
-        "skills          toolkit",
-        "music           what's on repeat",
-        "watching        films + sitcoms",
-        "contact         email + socials",
-        "resume          open my résumé",
-        "worlds          list portfolio worlds   (go <world> to switch)",
-        "spin            back to the machine",
-        "clear           clear the screen",
-    ],
-    about: () => [profile.line, "", "Currently: AI products, multi-agent systems, interfaces with motion."],
-    whoami: () => ["a visitor with good taste, apparently."],
-    projects: () => Object.entries(KINDS).flatMap(([k, label]) => [
-        `── ${label.toLowerCase()} ──`,
-        ...projects.map((p, i) => [p, i]).filter(([, i]) => work[i]?.kind === k)
-            .map(([p, i]) => `[${String(i + 1).padStart(2)}] ${innerWidth < 640 ? `${p.title} · ${p.date}` : `${p.title.padEnd(36)} ${p.date}`}${work[i].live ? "  ● live" : ""}`),
-        "",
-    ]).concat(["`open <n>` to visit one."]),
-    experience: () => experience.flatMap((x) => [`${x.when} · ${x.role} · ${x.org}`, ...x.points.map((p) => `  - ${p}`), ""]),
-    live: () => work.filter((w) => w.maintained).map((w) => `● ${innerWidth < 640 ? `${w.title}\n  ` : w.title.padEnd(34)} ${w.url.replace(/^https?:\/\/(www\.)?/, "")}`),
-    cv: (v = "fullstack") => {
-        if (!["fullstack", "frontend", "ai"].includes(v)) return ["cv: pick one of fullstack | frontend | ai"];
-        window.open(`/resume.html?for=${v}`, "_blank", "noopener");
-        return [`opening the ${v} résumé…`];
-    },
-    hire: () => [`great choice. résumé: \`cv\` · email: ${profile.email}`, "or try `sudo hire aman`."],
-    open: (n) => {
-        const p = projects[Number(n) - 1];
-        if (!p) return [`open: no project ${n ?? ""}. Try \`projects\`.`];
-        window.open(p.link, "_blank", "noopener");
-        return [`opening ${p.title} → ${p.link}`];
-    },
-    skills: () => skills.map((s) => `${s.category.padEnd(12)} ${s.items.join(", ")}`),
-    music: () => [...onRepeat.slice(0, 8).map((t) => `♪ ${t.title} — ${t.artist}`), "", `rotation: ${topArtists.slice(0, 10).join(", ")}`],
-    watching: () => [`films:   ${watching.films.join(", ")}`, `sitcoms: ${watching.sitcoms.join(", ")}`],
-    contact: () => [`email    ${profile.email}`, ...socials.map((s) => `${s.text.padEnd(8)} ${s.link.split("?")[0]}`)],
-    resume: () => { window.open(profile.resume, "_blank", "noopener"); return ["opening résumé…"]; },
-    worlds: () => worlds.map((w) => `${w.id.padEnd(10)} ${w.tagline}`),
-    go: (id) => { setTimeout(() => go(id), 250); return [`switching to ${id}…`]; },
-    spin: () => { setTimeout(spin, 250); return ["pulling the lever…"]; },
-    sudo: (...args) => args.join(" ") === "hire aman"
-        ? ["[sudo] permission granted.", `send the offer to ${profile.email} 🫡`]
-        : ["nice try."],
-});
-
 const TerminalWorld = ({ shell }) => {
-    const [lines, setLines] = useState(BANNER);
+    const [log, setLog] = useState([]);              // [{ id, cmd, out: ReactNode[] }]
     const [input, setInput] = useState("");
     const [history, setHistory] = useState([]);
     const [cursor, setCursor] = useState(-1);
+    const [booting, setBooting] = useState(() => { try { return !reduced() && !sessionStorage.getItem("px01-tty"); } catch { return false; } });
+    const [post, setPost] = useState(0);
+    const [theme, setTheme] = useState("amber");
+    const [shake, setShake] = useState(false);
     const inputRef = useRef(null);
     const endRef = useRef(null);
-    const cmds = commands(shell);
+    const id = useRef(0);
 
-    useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [lines]);
+    const Cmd = ({ c, children }) => <button type="button" className="tty-cmd" onClick={() => run(c)}>{children || c}</button>;
+    const Ext = ({ href, children }) => <a className="tty-link" href={href} target="_blank" rel="noreferrer">{children}</a>;
+    const row = (w, i) => (
+        <div key={w.slug} className="tty-row">
+            <Cmd c={`cat ${i + 1}`}>[{String(i + 1).padStart(2, "0")}] {w.title}</Cmd>
+            <span className="dim"> · {w.year}</span>
+            {w.live && <span> · <Ext href={w.url}>● {host(w.url)}</Ext></span>}
+        </div>
+    );
 
-    const run = (raw) => {
-        const [name, ...args] = raw.trim().split(/\s+/);
-        const echo = `aman@portfolio:~$ ${raw}`;
-        if (!name) return setLines((l) => [...l, echo]);
-        if (name === "clear") return setLines([]);
-        const fn = cmds[name.toLowerCase()];
-        const out = fn ? fn(...args) : [`${name}: command not found. Try \`help\`.`];
-        setLines((l) => [...l, echo, ...out, ""]);
-        setHistory((h) => [raw, ...h]);
+    const commands = {
+        help: () => [
+            <p key="h" className="dim">tap any highlighted word, or type it. Tab completes, ↑ recalls.</p>,
+            ...[["about", "who I am"], ["projects", "everything I've built (ls)"], ["cat <n>", "one project, with a preview"], ["live", "production sites I maintain"],
+                ["experience", "where I've worked"], ["skills", "toolkit"], ["cv", "tailored résumés"], ["contact", "email + socials"],
+                ["music", "what's on repeat"], ["worlds", "other ways to see this site"], ["theme", "amber | green | plain"], ["spin", "back to the machine (exit)"]]
+                .map(([c, d]) => <div key={c} className="tty-row"><Cmd c={c.split(" ")[0]}>{c.padEnd(12)}</Cmd><span className="dim">{d}</span></div>),
+        ],
+        about: () => [
+            <p key="a">{profile.name}: full-stack engineer in Ahmedabad. {profile.line}</p>,
+            <p key="b" className="dim">Now: {experience[0].role} at {experience[0].org}. Open to on-site or hybrid roles.</p>,
+            <p key="c">Next: <Cmd c="projects" /> · <Cmd c="live" /> · <Cmd c="cv" /></p>,
+        ],
+        projects: () => Object.entries(KINDS).flatMap(([k, label]) => [
+            <p key={k} className="tty-h">── {label.toLowerCase()} ──</p>,
+            ...work.map((w, i) => [w, i]).filter(([w]) => w.kind === k).map(([w, i]) => row(w, i)),
+        ]).concat(<p key="t" className="dim">tap a project for its preview.</p>),
+        cat: (arg = "") => {
+            if (arg === "about") return commands.about();
+            const w = work[Number(arg) - 1];
+            if (!w) return [<p key="e">cat: {arg || "?"}: no such project. Try <Cmd c="projects" />.</p>];
+            return [
+                <figure key="f" className="tty-shot"><img src={shot(w, 480)} alt={`${w.title} screenshot`} loading="lazy" /></figure>,
+                <p key="t" className="tty-h">{w.title} <span className="dim">· {KINDS[w.kind]} · {w.year}</span></p>,
+                <p key="l">{w.line}</p>,
+                w.stack && <p key="s" className="dim">stack: {w.stack}</p>,
+                w.note && <p key="n" className="dim">{w.note}</p>,
+                <p key="x">
+                    {w.url && <Ext href={w.url}>[visit {host(w.url)} ↗]</Ext>}
+                    {cases[w.slug] && <> <a className="tty-link" href={`/case.html?p=${w.slug}`}>[read the case study →]</a></>}
+                </p>,
+            ].filter(Boolean);
+        },
+        open: (n) => {
+            const w = work[Number(n) - 1];
+            if (!w?.url) return [<p key="e">open: no project {n ?? ""}. Try <Cmd c="projects" />.</p>];
+            window.open(w.url, "_blank", "noopener");
+            return [<p key="o">opening {w.title} → <Ext href={w.url}>{host(w.url)}</Ext></p>];
+        },
+        live: () => [<p key="h" className="dim">in production today, still maintained:</p>, ...work.filter((w) => w.maintained).map((w) => (
+            <div key={w.slug} className="tty-row"><span className="ok">●</span> <Ext href={w.url}>{w.title}</Ext> <span className="dim">{host(w.url)}</span></div>
+        ))],
+        experience: () => experience.map((x) => (
+            <div key={x.role} className="tty-block">
+                <p className="tty-h">{x.when} · {x.role}</p>
+                <p className="dim">{x.org} · {x.where}</p>
+                <ul>{x.points.map((p) => <li key={p}>{p}</li>)}</ul>
+            </div>
+        )),
+        skills: () => skillGroups.map((g) => <div key={g.group} className="tty-row"><span className="tty-h">{g.group.padEnd(16)}</span><span>{g.items.map(([n]) => n).join(", ")}</span></div>),
+        cv: (v) => {
+            if (v && ["fullstack", "frontend", "ai"].includes(v)) { window.open(`/resume.html?for=${v}`, "_blank", "noopener"); return [<p key="o">opening the {v} résumé…</p>]; }
+            return [<p key="p">pick one: <a className="tty-link" href="/resume.html?for=fullstack">[full-stack]</a> <a className="tty-link" href="/resume.html?for=frontend">[frontend]</a> <a className="tty-link" href="/resume.html?for=ai">[ai products]</a> <a className="tty-link" href={profile.resume} target="_blank" rel="noreferrer">[original pdf]</a></p>];
+        },
+        resume: () => commands.cv(),
+        contact: () => [
+            <p key="e">email   <a className="tty-link" href={`mailto:${profile.email}`}>{profile.email}</a></p>,
+            ...socials.map((s) => <p key={s.text}>{s.text.toLowerCase().padEnd(8)}<Ext href={s.link}>{host(s.link.split("?")[0])}</Ext></p>),
+        ],
+        music: () => [...onRepeat.slice(0, 8).map((t) => <p key={t.id}>♪ {t.title} <span className="dim">· {t.artist}</span></p>), <p key="r" className="dim">rotation: {topArtists.slice(0, 10).join(", ")}</p>],
+        watching: () => [<p key="f">films: {watching.films.join(", ")}</p>, <p key="s">sitcoms: {watching.sitcoms.join(", ")}</p>],
+        worlds: () => worlds.map((w) => <div key={w.id} className="tty-row"><Cmd c={`go ${w.id}`}>{w.id.padEnd(10)}</Cmd><span className="dim">{w.tagline}</span></div>),
+        go: (wid) => {
+            if (!worlds.some((w) => w.id === wid)) return commands.worlds();
+            setTimeout(() => shell.go(wid), 250); return [<p key="g">switching to {wid}…</p>];
+        },
+        spin: () => { setTimeout(shell.spin, 250); return [<p key="s">pulling the lever…</p>]; },
+        theme: (t) => {
+            if (!["amber", "green", "plain"].includes(t)) return [<p key="t">themes: <Cmd c="theme amber" /> <Cmd c="theme green" /> <Cmd c="theme plain" /></p>];
+            setTheme(t); return [<p key="t">theme → {t}</p>];
+        },
+        whoami: () => [<p key="w">a visitor with good taste, apparently.</p>],
+        man: (c) => [<p key="m">{c ? `${c}: it does what it says. Try it.` : "What manual page do you want?"} See <Cmd c="help" />.</p>],
+        sudo: (...a) => a.join(" ") === "hire aman"
+            ? [<p key="1">[sudo] verifying offer… <span className="tty-bar" aria-hidden /></p>, <p key="2">permission granted. send it to <a className="tty-link" href={`mailto:${profile.email}`}>{profile.email}</a></p>]
+            : [<p key="n">nice try.</p>],
+        rm: () => { if (!reduced()) { setShake(true); setTimeout(() => setShake(false), 500); } return [<p key="r">rm: permission denied. this portfolio is load-bearing.</p>]; },
+        coffee: () => [<p key="c">brewing… the build runs on it.</p>],
     };
+    const alias = { ls: "projects", dir: "projects", exit: "spin", hire: "contact", "?": "help" };
+
+    function run(raw) {
+        const text = raw.trim();
+        if (!text) return;
+        let [name, ...args] = text.split(/\s+/);
+        name = name.toLowerCase();
+        if (name === "clear") { setLog([]); return; }
+        if (name === "cd") name = args[0] === ".." || args[0] === "~" ? "spin" : "projects";
+        const fn = commands[alias[name] || name];
+        const out = fn ? fn(...args) : [<p key="nf">{name}: command not found. Try <Cmd c="help" />.</p>];
+        setLog((l) => [...l, { id: id.current++, cmd: text, out }]);
+        setHistory((h) => [text, ...h]);
+        setCursor(-1);
+    }
+
+    // boot (once per session) → `about`, so nobody lands on an empty prompt
+    useEffect(() => {
+        if (!booting) { if (!log.length) run("about"); return; }
+        if (post < POST.length) { const t = setTimeout(() => setPost(post + 1), 260); return () => clearTimeout(t); }
+        const t = setTimeout(() => { setBooting(false); try { sessionStorage.setItem("px01-tty", "1"); } catch { /* ignore */ } }, 700);
+        return () => clearTimeout(t);
+    }, [booting, post]); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        if (!booting) return;
+        const skip = () => { setPost(POST.length); setBooting(false); };
+        window.addEventListener("keydown", skip, { once: true });
+        return () => window.removeEventListener("keydown", skip);
+    }, [booting]);
+    useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [log]);
 
     const onKeyDown = (e) => {
-        if (e.key === "Enter") { run(input); setInput(""); setCursor(-1); }
-        else if (e.key === "ArrowUp" && history.length) {
+        if (e.key === "Enter") { run(input); setInput(""); }
+        else if (e.key === "ArrowUp" && history.length) { e.preventDefault(); const n = Math.min(cursor + 1, history.length - 1); setCursor(n); setInput(history[n]); }
+        else if (e.key === "ArrowDown") { e.preventDefault(); const n = cursor - 1; setCursor(n); setInput(n < 0 ? "" : history[n]); }
+        else if (e.key === "Tab") {
             e.preventDefault();
-            const next = Math.min(cursor + 1, history.length - 1);
-            setCursor(next); setInput(history[next]);
-        } else if (e.key === "ArrowDown") {
-            e.preventDefault();
-            const next = cursor - 1;
-            setCursor(next); setInput(next < 0 ? "" : history[next]);
-        } else if (e.key === "Tab") {
-            e.preventDefault();
-            const match = Object.keys(cmds).filter((c) => c.startsWith(input.trim()));
-            if (match.length === 1) setInput(match[0] + " ");
-            else if (match.length > 1) setLines((l) => [...l, match.join("  ")]);
+            const m = [...Object.keys(commands), ...Object.keys(alias)].filter((c) => c.startsWith(input.trim()));
+            if (m.length === 1) setInput(m[0] + " ");
+            else if (m.length > 1) setLog((l) => [...l, { id: id.current++, cmd: null, out: [<p key="m" className="dim">{m.join("  ")}</p>] }]);
         }
     };
 
     return (
-        <div className="min-h-dvh bg-[#0b0f0b] text-[#9ef0a8] font-roboto text-sm sm:text-[15px] p-4 sm:p-8 pb-24 cursor-text"
-            onClick={() => inputRef.current?.focus()}>
-            {/* tappable commands: typing on a phone keyboard is no fun */}
-            <div className="flex flex-wrap gap-2 mb-4" aria-label="Quick commands">
-                {["help", "projects", "experience", "live", "skills", "contact", "cv"].map((c) => (
-                    <button key={c} type="button" onClick={(e) => { e.stopPropagation(); run(c); }}
-                        className="border border-[#9ef0a8]/40 rounded px-2 py-1 text-xs hover:bg-[#9ef0a8]/10 active:bg-[#9ef0a8]/20">{c}</button>
-                ))}
+        <div className={`tty tty-${theme}`} data-shake={shake || undefined} onClick={(e) => { if (!e.target.closest("a, button")) inputRef.current?.focus(); }}>
+            <div className="tty-glass">
+                {booting ? (
+                    <div className="tty-boot" onClick={() => { setPost(POST.length); setBooting(false); }}>
+                        {POST.slice(0, post).map((l) => <p key={l}>{l}</p>)}
+                        {post >= POST.length && <p className="tty-big" aria-label="Aman">अमन</p>}
+                        <p className="dim">press any key or tap to skip</p>
+                    </div>
+                ) : (
+                    <>
+                        <header className="tty-head">
+                            <p className="tty-big" aria-hidden>अमन</p>
+                            <p>tty1 · AHMEDABAD · {profile.name.toUpperCase()} · {experience[0].role.toUpperCase()}</p>
+                            <p className="dim">▸ tap anything highlighted, or type <Cmd c="help" />. Featured: {live.slice(0, 3).map((w, i) => <span key={w.slug}>{i ? " · " : ""}<Ext href={w.url}>{w.title}</Ext></span>)}</p>
+                        </header>
+                        <div className="tty-log" role="log" aria-live="polite" aria-label="Terminal output">
+                            {log.map((e) => (
+                                <article key={e.id}>
+                                    {e.cmd && <p className="tty-echo"><span className="tty-ps">aman@tty1:~$</span> {e.cmd}</p>}
+                                    <div className="tty-out">{e.out}</div>
+                                </article>
+                            ))}
+                        </div>
+                        <label className="tty-input">
+                            <span className="tty-ps">aman@tty1:~$</span>
+                            <input ref={inputRef} autoFocus value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={onKeyDown}
+                                aria-label="Terminal command" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+                        </label>
+                        <div ref={endRef} />
+                    </>
+                )}
             </div>
-            <pre className="whitespace-pre-wrap break-words leading-relaxed">{lines.join("\n")}</pre>
-            <label className="flex gap-2">
-                <span className="text-[#5eead4] shrink-0">aman@portfolio:~$</span>
-                <input
-                    ref={inputRef}
-                    autoFocus
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    aria-label="Terminal command"
-                    autoCapitalize="off" autoCorrect="off" spellCheck={false}
-                    className="flex-1 bg-transparent outline-none caret-[#9ef0a8]"
-                />
-            </label>
-            <div ref={endRef} />
+            {!booting && (
+                <nav className="tty-dock" aria-label="Quick commands">
+                    {["projects", "live", "experience", "skills", "contact", "cv", "help"].map((c) => (
+                        <button key={c} type="button" onClick={() => run(c)}>{c}</button>
+                    ))}
+                </nav>
+            )}
+            <div className="tty-scan" aria-hidden />
         </div>
     );
 };
