@@ -1,12 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from "@tailwindcss/vite";
+import { seo } from "./seo.config.js";
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), seo()],
   build: {
     // ship the 3D machine lab alongside the site (Vite only builds index.html by default)
     rollupOptions: {

@@ -213,7 +213,7 @@ const socials = [
         text: "LinkedIn",
         icon: "/icons/linkedin.svg",
         bg: "#05b6f6",
-        link: "https://www.linkedin.com/in/aman-patel-88847a265?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+        link: "https://www.linkedin.com/in/aman-patel-fullstack",
     },
 ];
 
