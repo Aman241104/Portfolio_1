@@ -24,7 +24,7 @@ const Case = () => (
             <dl className="facts">{c.facts.filter(([k]) => k !== "Links").map(([k, v]) => <div key={k}><dt className="mono">{k}</dt><dd>{v}</dd></div>)}</dl>
             <p className="links">{c.links.map(([l, h]) => <a key={l} href={h} target="_blank" rel="noreferrer">{l} ↗</a>)}</p>
         </header>
-        <figure><img src={shot} alt={`${c.title} screenshot`} /></figure>
+        <figure><img src={shot} alt={`${c.title} screenshot`} fetchpriority="high" width="1600" height="1000" /></figure>
         {c.sections.map(([h, ps], i) => (
             <section key={h}>
                 <h2><span className="mono">{String(i + 1).padStart(2, "0")}</span>{h}</h2>
