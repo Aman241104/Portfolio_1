@@ -30,7 +30,7 @@ const Safari = () => {
 
                         <input
                             type="text"
-                            placeholder="Search or eneter Website name"
+                            placeholder="Search or enter website name"
                             className="flex-1"
                         />
                     </div>
@@ -44,22 +44,23 @@ const Safari = () => {
             </div>
 
             <div className="blog">
-                <h2>My Project's Repo On git</h2>
+                <h2>Everything I've shipped</h2>
 
                 <div className="space-y-8">
-                    {blogPosts.map(({id, title, image, date, link})=>(
+                    {blogPosts.map(({id, title, image, date, link, kind, description})=>(
                         <div key={id} className="blog-post">
                             <div className="col-span-2">
-                                <img src={image} alt={title} />
+                                <img src={image} alt={title} loading="lazy" />
                             </div>
 
                             <div className="content">
-                                <p>{date}</p>
+                                <p>{kind} · {date}</p>
                                 <h3>{title}</h3>
-                                <a href={link} target="_blank" rel="noopener">
-                                    Check out the full repo on git
+                                <p>{description}</p>
+                                {link !== "#" && <a href={link} target="_blank" rel="noopener">
+                                    {link.includes("github.com") ? "View the code on GitHub" : `Visit ${link.replace(/^https?:\/\/(www\.)?/, "")}`}
                                     <MoveRight className="icon" />
-                                </a>
+                                </a>}
                             </div>
                         </div>
                     ))}

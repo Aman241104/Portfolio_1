@@ -340,7 +340,7 @@ export const locations = {
     trash: TRASH_LOCATION,
 };
 
-const INITIAL_Z_INDEX = 1000;
+const INITIAL_Z_INDEX = 10;   // windows live in 10–900; the dock sits at 950 so it is never covered
 
 const WINDOW_CONFIG = {
     finder: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },

@@ -8,10 +8,11 @@
     width: 100dvw;
     height: 100dvh;
     overflow: hidden;
-    background-image: url("/images/wallpaper.png");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
+    /* PX-OS: the home brand's void, a faint dot grid and a warm red glow (CSS only, was a 1 MB PNG) */
+    background-color: #0b0b0b;
+    background-image: radial-gradient(60% 50% at 70% 30%, rgba(255, 46, 31, .16), transparent 70%),
+        radial-gradient(rgba(237, 234, 227, .14) 1px, transparent 1.2px);
+    background-size: 100% 100%, 16px 16px;
 }
 
 @layer base {
@@ -381,3 +382,7 @@
         }
     }
 }
+
+/* windows never run off-screen and never cover the dock */
+.world-desktop .os-window { max-height: calc(100dvh - 140px); max-width: calc(100dvw - 32px); overflow: auto; outline: none; }
+.world-desktop #dock { z-index: 950; }
