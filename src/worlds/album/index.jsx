@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { drawCover } from "./cover.js";
 import { work, KINDS, shot } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
@@ -25,36 +26,48 @@ const SIDES = [
 
 const Countdown = ({ onDone }) => {
     const [n, setN] = useState(3);
+    const btn = useRef(null);
+    useEffect(() => { btn.current?.focus(); }, []);
     useEffect(() => {
         if (n === 0) { const t = setTimeout(onDone, 450); return () => clearTimeout(t); }
         const t = setTimeout(() => setN(n - 1), 420);
         return () => clearTimeout(t);
     }, [n, onDone]);
     return (
-        <div className="drop" onClick={onDone} role="button" aria-label="Skip intro">
-            <p className="drop-k">The album drops in</p>
-            <p className="drop-n" key={n}>{n || "OUT NOW"}</p>
-            <p className="drop-k">tap to skip</p>
-        </div>
+        <button ref={btn} type="button" className="drop" onClick={onDone} onKeyDown={(e) => e.key === "Escape" && onDone()} aria-label="Skip the intro">
+            <span className="drop-k">The album drops in</span>
+            <span className="drop-n" key={n}>{n || "OUT NOW"}</span>
+            <span className="drop-k">tap or press Esc to skip</span>
+        </button>
     );
 };
 
 export default function AlbumWorld() {
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const [intro, setIntro] = useState(!reduced);
+    // the countdown plays once per session (visitors coming back skip straight to the record)
+    const [intro, setIntro] = useState(() => { try { return !reduced && !sessionStorage.getItem("px01-album-intro"); } catch { return !reduced; } });
+    const endIntro = () => { setIntro(false); try { sessionStorage.setItem("px01-album-intro", "1"); } catch { /* private mode */ } };
+    const cover = useRef(null);
+    useEffect(() => {
+        const draw = () => cover.current && drawCover(cover.current, work.map((w) => w.slug));
+        document.fonts?.ready.then(draw); draw();
+    }, []);
     let n = 0;
     const job = experience[0], edu = experience[1];
 
     return (
         <div className="album">
-            {intro && <Countdown onDone={() => setIntro(false)} />}
+            {intro && <Countdown onDone={endIntro} />}
             <header className="cover">
+                <canvas ref={cover} className="cover-art" width="900" height="900" role="img" aria-label="Generated cover art: one ring per project" />
+                <div className="cover-copy">
                 <p className="mono">Aman Patel · Self-released · Ahmedabad, {new Date().getFullYear()}</p>
                 <h1>SHIP<br />IT<span>(Deluxe)</span></h1>
                 <p className="cover-sub">{work.length} tracks · {work.filter((w) => w.live).length} out now on their own domains · {skillGroups.reduce((a, g) => a + g.items.length, 0)} instruments</p>
                 <div className="cover-cta">
                     <a href="#tracklist" className="btn">Play tracklist ↓</a>
                     <a href={profile.resume} target="_blank" rel="noreferrer" className="btn ghost">Press kit (résumé)</a>
+                </div>
                 </div>
             </header>
 
