@@ -1,3 +1,5 @@
+import { work, KINDS, shot } from "../content/work.js";
+import { skillGroups } from "../content/skills.js";
 const navLinks = [
     {
         id: 1,
@@ -104,87 +106,13 @@ const MOBILE_DOCK_IDS = ["finder", "contact", "resume", "terminal"];
 const mobileDockApps = mobileApps.filter((app) => MOBILE_DOCK_IDS.includes(app.id));
 const mobileGridApps = mobileApps.filter((app) => !MOBILE_DOCK_IDS.includes(app.id));
 
-// Project shots live on Cloudinary (account dhrcarq8g): f_auto/q_auto picks AVIF/WebP and the quality per browser.
-// Swap the width in the URL for smaller uses (e.g. .replace("w_1200", "w_720")).
-const cld = (id) => `https://res.cloudinary.com/dhrcarq8g/image/upload/f_auto,q_auto,w_1200/${id}`;
+// Projects and skills come from content/ (one source for every world: home, Desktop OS, Editorial, Terminal).
+const blogPosts = work.map((w, i) => ({
+    id: i + 1, date: String(w.year), title: w.title, description: w.line, kind: KINDS[w.kind],
+    image: shot(w, 900), link: w.url || w.repo || "#",
+}));
 
-const blogPosts = [
-    {
-        id: 1,
-        date: "Jul 2026",
-        title: "Job Search Automation Platform",
-        description: "AI job search platform: 19-source scraper, experience-aware LLM scoring, validated one-page CVs, interview prep.",
-        image: cld("portfolio/projects/job-search-os"),
-        link: "https://github.com/Aman241104/job-search",
-    },
-    {
-        id: 2,
-        date: "Jun 2026",
-        title: "WhatsApp AI Agent — Multi-Tenant SaaS",
-        description: "Multi-tenant WhatsApp Business AI SaaS with LLM agents, RLS tenant isolation, and a booking state machine.",
-        image: cld("portfolio/projects/whatsapp-ai"),
-        link: "https://whatsapp-ai-agent-inky.vercel.app",
-    },
-    {
-        id: 3,
-        date: "Dec 2025",
-        title: "Awwwards Clone",
-        description: "A modern web experience replicating the Awwwards voting platform.",
-        image: cld("portfolio/projects/awwwards"),
-        link: "https://github.com/Aman241104/awwards_clone",
-    },
-    {
-        id: 4,
-        date: "Nov 2025",
-        title: "Stock Market App",
-        description: "Real-time stock tracking application with dynamic data visualization.",
-        image: cld("portfolio/projects/stock-market-app"),
-        link: "https://github.com/Aman241104/stock_app_demo",
-    },
-    {
-        id: 5,
-        date: "Oct 2025",
-        title: "3D Macbook Scroll Demo",
-        description: "An interactive 3D experience featuring a scrolling Macbook animation.",
-        image: cld("portfolio/projects/3d-macbook"),
-        link: "https://github.com/Aman241104/macbook_demo",
-    },
-];
-
-const techStack = [
-    {
-        category: "Frontend",
-        items: ["React", "Next.js", "TypeScript", "GSAP", "Framer Motion"],
-    },
-    {
-        category: "Mobile",
-        items: ["React Native"],
-    },
-    {
-        category: "Styling",
-        items: ["Tailwind CSS", "Sass", "CSS"],
-    },
-    {
-        category: "Backend",
-        items: ["Node.js", "Express", "FastAPI", "REST APIs", "Server-Sent Events"],
-    },
-    {
-        category: "Database",
-        items: ["PostgreSQL", "Supabase", "MongoDB"],
-    },
-    {
-        category: "AI / LLM",
-        items: ["Gemini API", "Groq API", "Claude API", "LLM Tool-Calling", "Multi-Agent Systems"],
-    },
-    {
-        category: "Automation",
-        items: ["n8n", "Playwright", "Web Scraping"],
-    },
-    {
-        category: "Dev Tools",
-        items: ["Git", "GitHub", "Docker", "Vercel", "Render", "CI/CD"],
-    },
-];
+const techStack = skillGroups.map((g) => ({ category: g.group, items: g.items.map(([name]) => name) }));
 
 const socials = [
     {

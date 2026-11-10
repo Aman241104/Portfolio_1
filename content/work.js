@@ -3,65 +3,79 @@
 // Left out on purpose: astrology sites, the two wishes sites, yashhuuuu, DealLens, Docket, Prestine, Destination Anywhere.
 // `live: true` = the client's own production domain (checked 2026-11-10; jadetravels.co.in serves a blank WordPress,
 // akshartravels.in isn't theirs, so those stay on vercel.app). Screenshots live on Cloudinary under portfolio/work/<slug> (captured from the live sites); `img` overrides that id.
-export const KINDS = { product: "Products", client: "Client websites", concept: "Concepts & demos" };
+export const KINDS = { product: "Products", mobile: "Mobile apps", client: "Client websites", concept: "Concepts & demos" };
+
+// Card image on Cloudinary (also used by the other worlds and SEO).
+export const shot = (item, w = 900) => `https://res.cloudinary.com/dhrcarq8g/image/upload/f_auto,q_auto,w_${w}/${item.img || `portfolio/work/${item.slug}`}`;
 
 export const work = [
     {
-        slug: "job-search-os", kind: "product", year: 2026, title: "Job Search OS", img: "portfolio/projects/job-search-os",
+        slug: "job-search-os", kind: "product", year: 2026, maintained: true, title: "Job Search OS", img: "portfolio/projects/job-search-os",
         url: "https://job-search-zeta-ten.vercel.app", repo: "https://github.com/Aman241104/job-search",
         line: "AI job search platform: 19 sources scraped at once, two-stage LLM scoring, a tailored one-page CV and cover letter for every job.",
         stack: "Python · FastAPI · Next.js · Postgres · Cloud Run",
     },
     {
-        slug: "whatsapp-ai", kind: "product", year: 2026, title: "Pulse AI: WhatsApp agent SaaS",
+        slug: "whatsapp-ai", kind: "product", year: 2026, maintained: true, title: "Pulse AI: WhatsApp agent SaaS",
         url: "https://whatsapp-ai-agent-inky.vercel.app",
         line: "Multi-tenant SaaS where each business runs an LLM agent on its WhatsApp number, with row-level security, bookings and drip sequences.",
         stack: "Next.js · Supabase · Groq · Meta Cloud API",
     },
     {
-        slug: "zing-bliss", kind: "client", year: 2026, title: "Zing Bliss Events",
+        slug: "mindcore", kind: "mobile", year: 2026, title: "Mindcore",
+        url: "https://github.com/Aman241104/mind-core", repo: "https://github.com/Aman241104/mind-core",
+        line: "Android app: share a reel, post, link or screenshot and AI pulls out the repos, tools, certs and jobs in it, checks each one online, and answers questions about your library with sources.",
+        stack: "Kotlin · Jetpack Compose · AI extraction · v0.9.5",
+    },
+    {
+        slug: "huggsy", kind: "mobile", year: 2026, title: "Huggsy habit tracker",
+        line: "Cosy habit tracker for routines, water, sleep, journal and a little garden: a Next.js PWA plus a native Android app on one Supabase backend.",
+        stack: "Next.js · Jetpack Compose · Supabase", note: "Private repo · walkthrough on request",
+    },
+    {
+        slug: "zing-bliss", kind: "client", year: 2026, maintained: true, title: "Zing Bliss Events",
         url: "https://www.zingblissevents.com", live: true,
         line: "Event agency platform: marketing site, client-preference quiz, client portal and an admin CMS.",
         stack: "Next.js · GSAP · Lenis",
     },
     {
-        slug: "bni-ares", kind: "client", year: 2026, title: "BNI Ares",
+        slug: "bni-ares", kind: "client", year: 2026, maintained: true, title: "BNI Ares",
         url: "https://www.bniares.com", live: true,
         line: "Site and member roster for Ahmedabad West's Platinum BNI chapter: members, visitor sign-up and chapter stats.",
     },
     {
-        slug: "vitlead", kind: "client", year: 2026, title: "Vitlead",
+        slug: "vitlead", kind: "client", year: 2026, maintained: true, title: "Vitlead",
         url: "https://www.vitlead.com", live: true,
         line: "Lead-generation site for Australian mortgage brokers running suburb-targeted Meta ads.",
     },
     {
-        slug: "naam-transfer", kind: "client", year: 2026, title: "Naam Transfer",
+        slug: "naam-transfer", kind: "client", year: 2026, maintained: true, title: "Naam Transfer",
         url: "https://www.naamtransfer.com", live: true,
         line: "Electricity, gas and municipal name-transfer service in Ahmedabad, handled end to end online.",
     },
     {
-        slug: "cmj-events", kind: "client", year: 2026, title: "CMJ Events",
+        slug: "cmj-events", kind: "client", year: 2026, maintained: true, title: "CMJ Events",
         url: "https://www.clubmjevents.com", live: true,
         line: "Luxury wedding and event planner: destination weddings, corporate events, portfolio and enquiries.",
     },
     {
-        slug: "prihaan-spices", kind: "client", year: 2026, title: "Prihaan Spices",
+        slug: "prihaan-spices", kind: "client", year: 2026, maintained: true, title: "Prihaan Spices",
         url: "https://www.prihaanspices.in", live: true,
         line: "Storefront for spices, masalas and dry fruits, with WhatsApp ordering.",
     },
     {
-        slug: "aayush-packaging", kind: "client", year: 2026, title: "Aayush Packaging",
+        slug: "aayush-packaging", kind: "client", year: 2026, maintained: true, title: "Aayush Packaging",
         url: "https://aayush-packaging-coating-web.vercel.app",
         line: "11-page site for a flexible-packaging manufacturer in Ahmedabad: products, industries, infrastructure and enquiries.",
         stack: "Next.js · Tailwind · GSAP",
     },
     {
-        slug: "ekam-by-seri", kind: "client", year: 2026, title: "Ekam by Seri",
+        slug: "ekam-by-seri", kind: "client", year: 2026, maintained: true, title: "Ekam by Seri",
         url: "https://ekam-by-seri-web.vercel.app",
         line: "Storefront for handcrafted Lippan art and mirror-work décor made by Kutch artisans.",
     },
     {
-        slug: "advocate-jay-patel", kind: "client", year: 2026, title: "Advocate Jay Patel",
+        slug: "advocate-jay-patel", kind: "client", year: 2026, maintained: true, title: "Advocate Jay Patel",
         url: "https://advocate-jay-patel-web.vercel.app",
         line: "Practice site for a criminal and civil lawyer, including the Bar Council disclaimer flow.",
     },

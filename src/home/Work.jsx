@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { work, KINDS } from "#content/work.js";
+import { work, KINDS, shot } from "#content/work.js";
 import { profile, socials } from "#content/profile.js";
 import { sfx } from "#machine/sfx.js";
 import { track } from "../analytics.js";
@@ -8,8 +8,7 @@ import { track } from "../analytics.js";
 // kind, real screenshots (Cloudinary) in a browser frame. The shot scrolls through the page on hover; on touch the card
 // crossing the middle of the screen does it instead. Opening a live site plays a short "leaving PX-01" transition
 // (cmd/ctrl/middle-click still opens a normal new tab).
-const shot = (item, w) => `https://res.cloudinary.com/dhrcarq8g/image/upload/f_auto,q_auto,w_${w}/${item.img || `portfolio/work/${item.slug}`}`;
-const host = (u) => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
+const host = (u = "") => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
 const FIRST = 9;
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const touch = () => matchMedia("(pointer: coarse)").matches;
@@ -98,19 +97,27 @@ export default function Work() {
             <ul ref={list} className="cards">
                 {visible.map((w) => (
                     <li key={w.slug} className="card" data-slug={w.slug} data-active={active === w.slug || undefined}>
-                        <a href={w.url} onClick={(e) => open(e, w)} aria-label={`${w.title}, open the live site`}>
-                            <div className="card-shot">
-                                <div className="chrome" aria-hidden><i /><i /><i /><span>{host(w.url)}</span></div>
-                                <div className="card-img"><img src={shot(w, 720)} alt="" loading="lazy" /></div>
-                            </div>
-                            <div className="card-meta">
-                                <p className="mono">{KINDS[w.kind]} · {w.year}{w.live && <span className="live">● Live at {host(w.url).replace(/^www\./, "")}</span>}</p>
-                                <h3>{w.title} <i aria-hidden>↗</i></h3>
-                                <p className="card-line">{w.line}</p>
-                                {w.stack && <p className="mono card-stack">{w.stack}</p>}
-                            </div>
-                        </a>
-                        {w.repo && <a className="card-code mono" href={w.repo} target="_blank" rel="noreferrer">Code ↗</a>}
+                        {(() => {
+                            const inner = (
+                                <>
+                                    <div className="card-shot">
+                                        <div className="chrome" aria-hidden><i /><i /><i /><span>{w.url ? host(w.url) : "private build"}</span></div>
+                                        <div className="card-img"><img src={shot(w, 720)} alt="" loading="lazy" /></div>
+                                    </div>
+                                    <div className="card-meta">
+                                        <p className="mono">{KINDS[w.kind]} · {w.year}{w.live && <span className="live">● Live at {host(w.url).replace(/^www\./, "")}</span>}</p>
+                                        <h3>{w.title} {w.url && <i aria-hidden>↗</i>}</h3>
+                                        <p className="card-line">{w.line}</p>
+                                        {w.stack && <p className="mono card-stack">{w.stack}</p>}
+                                        {w.note && <p className="mono card-note">{w.note}</p>}
+                                    </div>
+                                </>
+                            );
+                            return w.url
+                                ? <a href={w.url} onClick={(e) => open(e, w)} aria-label={`${w.title}, open ${w.live ? "the live site" : "the project"}`}>{inner}</a>
+                                : <div className="card-static">{inner}</div>;
+                        })()}
+                        {w.repo && w.repo !== w.url && <a className="card-code mono" href={w.repo} target="_blank" rel="noreferrer">Code ↗</a>}
                     </li>
                 ))}
             </ul>

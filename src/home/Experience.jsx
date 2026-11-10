@@ -1,7 +1,7 @@
-import { experience, skills } from "#content/experience.js";
+import { experience } from "#content/experience.js";
 import { profile } from "#content/profile.js";
 
-// Experience + education + skills, straight from the résumé, in the same hairline system as Work.
+// Experience + education, straight from the résumé, in the same hairline system as Work.
 export default function Experience() {
     return (
         <section className="xp" aria-labelledby="xp-h">
@@ -22,9 +22,6 @@ export default function Experience() {
                     </li>
                 ))}
             </ol>
-            <dl className="skills">
-                {skills.map(([k, v]) => <div key={k}><dt className="mono">{k}</dt><dd>{v}</dd></div>)}
-            </dl>
         </section>
     );
 }

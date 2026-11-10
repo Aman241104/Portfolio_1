@@ -15,11 +15,4 @@ export const experience = [
     },
 ];
 
-export const skills = [
-    ["Languages", "JavaScript, TypeScript, Python, SQL, C++, Java"],
-    ["Frontend", "React, Next.js, Tailwind CSS, GSAP, Framer Motion, Three.js, React Query"],
-    ["Backend", "FastAPI, Node.js, Express, REST, Server-Sent Events, NextAuth"],
-    ["Data", "PostgreSQL, Supabase, MongoDB, MySQL, FAISS"],
-    ["AI", "Gemini, Claude, NVIDIA NIM, Groq, RAG, tool calling"],
-    ["Cloud & testing", "Docker, Cloud Run, Vercel, Cloudflare Workers, Pytest, Vitest, Jest, Playwright"],
-];
+export { skills } from "./skills.js";

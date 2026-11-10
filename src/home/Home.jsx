@@ -5,6 +5,8 @@ import { pickWorld } from "#machine/Machine.jsx";
 import { profile, socials } from "#content/profile.js";
 import Work from "./Work.jsx";
 import Experience from "./Experience.jsx";
+import Maintained from "./Maintained.jsx";
+import Skills from "./Skills.jsx";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import sig from "./signature.json";
 import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
@@ -422,7 +424,9 @@ const Home = ({ onSelect }) => {
 
             <footer ref={footer} className="foot">
 <Work />
+                <Maintained />
                 <Experience />
+                <Skills />
 
                 <div className="land" onClick={ripple}>
                     <div className="foot-dots" aria-hidden>
