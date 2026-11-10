@@ -2,7 +2,8 @@ import { useState } from "react";
 import { ChevronRight, ChevronLeft, Github, ExternalLink } from "lucide-react";
 import { locations } from "#constants";
 
-const projects = locations.work.children;
+// work.children are category folders (Products, Mobile apps, …); the phone list shows every project inside them
+const projects = locations.work.children.flatMap((c) => (c.children?.every((x) => x.kind === "folder") ? c.children : [c]));
 
 const ProjectDetail = ({ project, onBack }) => {
     const about = project.children.find((c) => c.name === "About Project.txt");
