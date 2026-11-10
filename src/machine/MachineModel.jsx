@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";
 import { worlds } from "#worlds/registry.js";
 import { sfx } from "./sfx.js";
@@ -529,6 +529,7 @@ const Payout = ({ jackpot }) => {
 const TICKET_H = 1.05;
 const Ticket = ({ ticket, onTicket }) => {
     const root = useRef(), paper = useRef(), t = useRef(0), hot = useRef(false);
+    const narrow = useThree((st) => st.size.width / st.size.height < 0.62);   // tall phones: shorter ticket so it clears the result card
     useFrame(({ clock }, dt) => {
         t.current = ticket ? t.current + dt : 0;
         if (ticket && t.current - dt < 0.45 && t.current >= 0.45) sfx.print();
@@ -541,7 +542,7 @@ const Ticket = ({ ticket, onTicket }) => {
     return (
         <group position={[0, -1.24, 0.92]}>
             <mesh material={mat.black}><boxGeometry args={[1.0, 0.035, 0.06]} /></mesh>
-            <group ref={root} visible={false} scale={1.3}>
+            <group ref={root} visible={false} scale={narrow ? 0.9 : 1.3}>
                 <group ref={paper}>
                     <group position={[0, -TICKET_H / 2, 0]}>
                         <mesh onClick={(e) => { e.stopPropagation(); onTicket?.(); }}

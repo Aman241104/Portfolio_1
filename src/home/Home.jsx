@@ -174,21 +174,21 @@ const ContactForm = ({ onSent }) => {
         } catch { setState({ phase: "fallback", msg: "", href: mail() }); }
     };
     if (state.phase === "sent") return (
-        <div className="note-sent" role="status">
+        <div className="msg-sent" role="status">
             <p className="mono red">Delivered{state.msg ? ` · ${state.msg}` : ""}</p>
             <p>Thanks. It's in my inbox, and my reply goes to the address you gave.</p>
         </div>
     );
     return (
-        <form className="note" onSubmit={submit}>
+        <form className="msg" onSubmit={submit}>
             <p className="mono">Or send a note through the machine</p>
-            <div className="note-row">
+            <div className="msg-row">
                 <input name="name" required maxLength={80} placeholder="Your name" autoComplete="name" aria-label="Your name" />
                 <input name="email" type="email" required maxLength={200} placeholder="Email" autoComplete="email" aria-label="Your email" />
             </div>
             <textarea name="message" required minLength={10} maxLength={4000} rows={3} placeholder="What are we building?" aria-label="Message" />
             <input name="website" tabIndex={-1} autoComplete="off" className="hp" aria-hidden />
-            <div className="note-foot">
+            <div className="msg-foot">
                 <p className="mono" aria-live="polite">
                     {state.phase === "fallback" ? <a href={state.href}>{state.msg || "The machine is offline."} Open it in your mail app ↗</a> : state.msg}
                 </p>
@@ -227,6 +227,8 @@ const Home = ({ onSelect }) => {
     const enterBtn = useRef(null);
     const heroOn = useInView(hero);
     const footerOn = useInView(footer, "200px");
+    const land = useRef(null);
+    const landOn = useInView(land);                  // the contact area (the quick dock hides there: same actions on screen)
     const [fontsOk, setFontsOk] = useState(false);
     const [booted, setBooted] = useState(false);
     const [phase, setPhase] = useState("idle");
@@ -428,7 +430,7 @@ const Home = ({ onSelect }) => {
                 <Experience />
                 <Skills />
 
-                <div className="land" onClick={ripple}>
+                <div ref={land} className="land" onClick={ripple}>
                     <div className="foot-dots" aria-hidden>
                         <Suspense fallback={null}><DotField active={footerOn} eventSource={footer} pulse={pulse} /></Suspense>
                     </div>
@@ -478,6 +480,13 @@ const Home = ({ onSelect }) => {
                     </div>
                 </div>
             </footer>
+            {/* phones: résumé and email stay one tap away once the machine is off screen */}
+            <nav className="dock-m" data-on={(!heroOn && !landOn) || undefined} aria-label="Quick actions">
+                <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "dock" })}>Résumé ↓</a>
+                <a href={`mailto:${profile.email}`}>Email</a>
+                <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>Work</button>
+                <button type="button" aria-label="Back to the machine" onClick={() => hero.current.scrollIntoView({ behavior: "smooth" })}><i className="k-dot" aria-hidden /></button>
+            </nav>
             <Cursor />
         </main>
     );

@@ -502,20 +502,57 @@
 .hero :is(.ink, .cta, .hero-word, .tabs, .ident, .scroll-hint) { filter: opacity(calc(1 - var(--dive, 0) * 1.8)); }
 
 /* contact note: hairline fields on the dunes */
-.note, .note-sent { width: min(460px, 100%); display: flex; flex-direction: column; gap: 12px; margin-top: 10px; cursor: auto; }
-.note-row { display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; }
-.note :is(input, textarea) {
+.msg, .msg-sent { width: min(460px, 100%); display: flex; flex-direction: column; gap: 12px; margin-top: 10px; cursor: auto; }
+.msg-row { display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; }
+.msg :is(input, textarea) {
     font: 400 15px/1.4 "Geist", sans-serif; color: var(--bone); background: rgba(5, 5, 6, .55); backdrop-filter: blur(3px);
     border: 0; border-bottom: 1px solid rgba(237, 234, 227, .22); padding: 12px 2px; outline: none; resize: vertical; border-radius: 0;
     transition: border-color .2s;
 }
-.note :is(input, textarea)::placeholder { color: rgba(237, 234, 227, .4); }
-.note :is(input, textarea):focus { border-bottom-color: var(--signal); }
-.note .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-.note-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-.note-foot .mono { text-transform: none; letter-spacing: .02em; }
-.note-foot a { color: var(--bone); }
-.home .note .block-btn:disabled { opacity: .6; cursor: progress; }
-.note-sent p:last-child { margin: 0; font: 400 15px/1.5 "Geist", sans-serif; color: var(--bone); }
-.note-sent .red { color: var(--signal); }
-@media (max-width: 760px) { .note-row { grid-template-columns: 1fr; } }
+.msg :is(input, textarea)::placeholder { color: rgba(237, 234, 227, .4); }
+.msg :is(input, textarea):focus { border-bottom-color: var(--signal); }
+.msg .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.msg-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.msg-foot .mono { text-transform: none; letter-spacing: .02em; }
+.msg-foot a { color: var(--bone); }
+.home .msg .block-btn:disabled { opacity: .6; cursor: progress; }
+.msg-sent p:last-child { margin: 0; font: 400 15px/1.5 "Geist", sans-serif; color: var(--bone); }
+.msg-sent .red { color: var(--signal); }
+@media (max-width: 760px) { .msg-row { grid-template-columns: 1fr; } }
+
+/* ------------------------------------------------------------ phones: swipe the work, compact index, quick dock */
+.swipe-hint, .dock-m { display: none; }
+@media (max-width: 760px) {
+    .cards {
+        display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+        margin: 0 calc(var(--gutter) * -1); padding: 4px var(--gutter) 6px; scrollbar-width: none;
+    }
+    .cards::-webkit-scrollbar { display: none; }
+    .card { flex: 0 0 84%; scroll-snap-align: center; animation: none; }
+    .card-line { font-size: 13.5px; }
+    .swipe-hint { display: flex; justify-content: space-between; margin-top: 18px !important; }
+    .swipe-hint span { color: var(--signal); }
+    .card-meta .live { display: table; margin: 8px 0 0; }
+    .filters { flex-wrap: nowrap; overflow-x: auto; margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); scrollbar-width: none; }
+    .home .filters button { flex: none; }
+    .keys { grid-template-columns: 1fr 1fr; gap: 22px 12px; }
+    .keys-group:first-child { grid-column: 1 / -1; }
+    .home .key { padding: 12px 30px 12px 12px; }
+    .key .k-label { font-size: 15px; }
+    .keys-group:not(:first-child) .k-hint { display: none; }
+    .keys-sub { font-size: 12px; margin-bottom: 10px; }
+    .dock-m {
+        display: flex; position: fixed; z-index: 60; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translate(-50%, 140%);
+        gap: 4px; padding: 6px; border-radius: 999px; background: rgba(20, 20, 22, .82); border: 1px solid rgba(237, 234, 227, .14);
+        backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 16px 40px rgba(0, 0, 0, .5);
+        transition: transform .5s cubic-bezier(.16, 1, .3, 1); white-space: nowrap;
+    }
+    .dock-m[data-on] { transform: translate(-50%, 0); }
+    .home .dock-m > * { font: 500 13px/1 "Geist", sans-serif; color: var(--bone); text-decoration: none; padding: 11px 14px; border-radius: 999px; display: inline-flex; align-items: center; }
+    .dock-m > a:first-child { background: var(--bone); color: #0b0b0c; }
+    .dock-m > *:active { transform: scale(.95); }
+    .dock-m .k-dot { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a7a, var(--signal) 45%, #8f140b); box-shadow: 0 0 14px rgba(255, 46, 31, .6); }
+}
+
+/* short laptop screens (1366×768 and below): the CTA's explainer line would run into the keychain labels */
+@media (min-width: 761px) and (max-height: 780px) { .cta-sub { display: none; } .cta { top: 54%; } }

@@ -12,6 +12,7 @@ const host = (u = "") => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
 const FIRST = 9;
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const touch = () => matchMedia("(pointer: coarse)").matches;
+const phone = () => matchMedia("(max-width: 760px)").matches;
 const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
 const Leaving = ({ item, rect }) => {
@@ -39,7 +40,9 @@ export default function Work() {
     const list = useRef(null);
 
     const shown = work.filter((w) => kind === "all" || w.kind === kind);
-    const visible = all ? shown : shown.slice(0, FIRST);
+    const [isPhone] = useState(phone);                  // phones: every card in one swipeable row
+    const visible = all || isPhone ? shown : shown.slice(0, FIRST);
+    const [at, setAt] = useState(0);
 
     // back from the project (bfcache) → drop the transition overlay
     useEffect(() => {
@@ -50,10 +53,14 @@ export default function Work() {
     // touch: the card in the middle of the screen is "hovered"
     useEffect(() => {
         if (!touch()) return;
-        const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setActive(e.target.dataset.slug)), { rootMargin: "-40% 0px -40% 0px" });
+        const io = new IntersectionObserver((es) => es.forEach((e) => {
+            if (!e.isIntersecting) return;
+            setActive(e.target.dataset.slug);
+            setAt([...list.current.children].indexOf(e.target));
+        }), isPhone ? { root: list.current, rootMargin: "0px -45% 0px -45%" } : { rootMargin: "-40% 0px -40% 0px" });
         list.current.querySelectorAll(".card").forEach((c) => io.observe(c));
         return () => io.disconnect();
-    }, [kind, all]);
+    }, [kind, all, isPhone]);
 
     const open = (e, item) => {
         track("project_opened", { project: item.slug, kind: item.kind });
@@ -86,7 +93,7 @@ export default function Work() {
                     {Object.entries({ all: "All", ...KINDS }).map(([k, label]) => {
                         const n = k === "all" ? work.length : work.filter((w) => w.kind === k).length;
                         return (
-                            <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => { setKind(k); setAll(false); }}>
+                            <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => { setKind(k); setAll(false); setAt(0); list.current?.scrollTo({ left: 0 }); }}>
                                 {label} <span className="mono">{n}</span>
                             </button>
                         );
@@ -121,7 +128,8 @@ export default function Work() {
                     </li>
                 ))}
             </ul>
-            {shown.length > FIRST && (
+            {isPhone && <p className="mono swipe-hint" aria-hidden><span>{String(at + 1).padStart(2, "0")} / {String(shown.length).padStart(2, "0")}</span> Swipe for more →</p>}
+            {!isPhone && shown.length > FIRST && (
                 <button type="button" className="more" onClick={() => setAll((v) => !v)}>
                     {all ? "Show fewer" : `Show all ${shown.length} ${kind === "all" ? "projects" : KINDS[kind].toLowerCase()}`}
                 </button>
