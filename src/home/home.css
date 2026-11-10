@@ -556,3 +556,7 @@
 
 /* short laptop screens (1366×768 and below): the CTA's explainer line would run into the keychain labels */
 @media (min-width: 761px) and (max-height: 780px) { .cta-sub { display: none; } .cta { top: 54%; } }
+
+.hire-cv { flex-basis: 100%; text-align: right; text-transform: none !important; letter-spacing: .02em !important; }
+.hire-cv a { color: var(--bone); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(237, 234, 227, .3); }
+@media (max-width: 760px) { .hire-cv { text-align: left; } }

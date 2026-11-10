@@ -14,6 +14,7 @@ export default defineConfig({
       input: {
         main: resolve(dirname(fileURLToPath(import.meta.url)), 'index.html'),
         lab: resolve(dirname(fileURLToPath(import.meta.url)), 'lab/machine.html'),
+        resume: resolve(dirname(fileURLToPath(import.meta.url)), 'resume.html'),
       },
     },
   },

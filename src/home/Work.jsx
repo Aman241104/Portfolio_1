@@ -84,6 +84,9 @@ export default function Work() {
                     <a href={`mailto:${profile.email}`}>Email</a>
                     {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
                     <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
+                    <p className="mono hire-cv">Tailored résumé: {[["fullstack", "Full-stack"], ["frontend", "Frontend"], ["ai", "AI products"]].map(([k, l], i) => (
+                        <span key={k}>{i ? " · " : ""}<a href={`/resume.html?for=${k}`} onClick={() => track("resume_opened", { from: "tailored", variant: k })}>{l}</a></span>
+                    ))}</p>
                 </div>
             </div>
 
