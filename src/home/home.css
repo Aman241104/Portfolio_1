@@ -717,3 +717,11 @@
 .mv-text { min-width: 4.4em; }
 /* desktop: the taller explainer sits a little lower, clear of the right-hand keychains; the "+3D & AI" note goes */
 @media (min-width: 761px) { .home .cta { top: 53%; } .n-craft { display: none; } .how { gap: 5px; } }
+/* eight worlds + résumé: one compact row that stops short of the peek bar */
+@media (min-width: 761px) {
+    .home .tabs { right: calc(var(--gutter) + 400px); gap: 8px 22px; flex-wrap: wrap; }
+    .home .tabs > * { font-size: 12.5px; padding-right: 6px; }
+}
+@media (min-width: 761px) and (max-width: 1280px) { .home .tabs { gap: 6px 16px; } .home .tabs > * { font-size: 12px; } }
+@media (min-width: 761px) and (max-width: 1439px) { .home .tabs { gap: 6px 12px; } .home .tabs > a { display: none; } }
+@media (min-width: 761px) and (max-width: 1180px) { .home .tabs { gap: 4px 9px; } .home .tabs > * { font-size: 11px; padding-right: 2px; } .home .tabs i { display: none; } }
