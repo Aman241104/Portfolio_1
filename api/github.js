@@ -1,7 +1,11 @@
 // Public GitHub activity for Mission Control: the last ~90 days of public events, summarised server-side
 // (daily commit counts, recent commits, repos touched) and cached 10 min at the edge, so visitors never hit
 // GitHub's unauthenticated rate limit. Public repos only; nothing private is ever visible here.
+import { work } from "../content/work.js";
+
 const USER = "Aman241104";
+// Only repositories of projects Aman has confirmed (content/work.js) plus this portfolio ever appear on the board.
+const SHOWN = new Set(["Portfolio_1", ...work.flatMap((w) => [w.url, w.repo]).filter((u) => u?.includes("github.com/")).map((u) => u.split("/")[4])]);
 
 export default async function handler(req, res) {
     const pages = await Promise.all([1, 2, 3].map((p) =>
@@ -12,6 +16,7 @@ export default async function handler(req, res) {
     const days = {}, repos = {}, last = {}, commits = [];   // commits = recent pushes (GitHub no longer sends messages publicly)
     for (const e of events) {
         const day = e.created_at.slice(0, 10), repo = e.repo?.name?.split("/")[1] || "?";
+        if (!SHOWN.has(repo)) continue;
         if (e.type === "PushEvent") {
             const n = e.payload?.size ?? e.payload?.commits?.length ?? 1;
             days[day] = (days[day] || 0) + n;
