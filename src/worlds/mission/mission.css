@@ -90,7 +90,7 @@ a.dp-row:focus-visible { outline: 2px solid var(--yel); outline-offset: -2px; }
 @media (max-width: 900px) {
     .dp-intro { grid-template-columns: 1fr; gap: 16px; }
     .dp-row { grid-template-columns: minmax(0, 1fr) 6.2em; gap: 6px 10px; font-size: 15px; padding: 10px 14px; }
-    .dp-row > :nth-child(1), .dp-row > :nth-child(4), .dp-row > :nth-child(6) { display: none; }
+    .dp-row:not(.dp-arow) > :nth-child(1), .dp-row:not(.dp-arow) > :nth-child(4), .dp-row:not(.dp-arow) > :nth-child(6) { display: none; }   /* arrivals keep their time */
     .dp-row .dp-via { grid-column: 1; grid-row: 2; }
     .dp-row .dp-status { grid-column: 2; grid-row: 1 / 3; align-self: center; }
     .dp-th { display: none; }

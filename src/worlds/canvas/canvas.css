@@ -35,8 +35,8 @@
 .bp-sheet { border: 1.5px solid var(--line); background: rgba(10, 40, 75, .35); cursor: pointer; display: flex; flex-direction: column; transition: background .25s, box-shadow .25s; }
 .bp-sheet:hover, .bp-sheet[data-on] { background: rgba(10, 40, 75, .7); box-shadow: 0 0 0 4px rgba(255, 226, 138, .25); border-color: var(--hi); }
 .bp-print { position: relative; height: 176px; margin: 10px 10px 0; overflow: hidden; background: var(--paper-2); border: 1px solid var(--faint); }
-.bp-print img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; pointer-events: none; filter: grayscale(1) contrast(1.4) brightness(1.1); mix-blend-mode: screen; opacity: .85; transition: filter .5s, mix-blend-mode .5s, opacity .5s; }
-.bp-print::after { content: ""; position: absolute; inset: 0; background: var(--paper); mix-blend-mode: multiply; transition: opacity .5s; pointer-events: none; }
+.bp-print img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; pointer-events: none; filter: grayscale(1) invert(1) contrast(1.25) brightness(1.05); mix-blend-mode: screen; opacity: .95; transition: filter .5s, mix-blend-mode .5s, opacity .5s; }
+.bp-print::after { content: ""; position: absolute; inset: 0; background: var(--paper); mix-blend-mode: multiply; opacity: .35; transition: opacity .5s; pointer-events: none; }
 .bp-sheet:hover .bp-print img, .bp-sheet[data-on] .bp-print img { filter: none; mix-blend-mode: normal; opacity: 1; }
 .bp-sheet:hover .bp-print::after, .bp-sheet[data-on] .bp-print::after { opacity: 0; }
 /* dimension lines with arrowheads */
