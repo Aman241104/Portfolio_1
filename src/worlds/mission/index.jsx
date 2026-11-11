@@ -2,147 +2,135 @@ import { useEffect, useMemo, useState } from "react";
 import { profile, socials } from "#content/profile.js";
 import { work, KINDS } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
-import { skillGroups } from "../../../content/skills.js";
+import { useFonts } from "../fonts.js";
+import Flap from "./Flap.jsx";
 import "./mission.css";
 
-// World 5: MISSION CONTROL. The portfolio as an ops room, on real data only: the live sites are health-checked
-// server-side (/api/status), GitHub activity comes from /api/github, everything else is counted from content/.
-// Latency sparklines build up live while the page is open (polled every 60s).
+// World 5: DEPARTURES. My live sites as a station's split-flap board, health-checked server-side every minute
+// (/api/status). Public GitHub pushes arrive on the second board (/api/github). The career runs as a metro line
+// whose next stop is the visitor's team. Swiss grid, black and signal yellow, red only when something is down.
+const FONTS = ["Barlow+Condensed:wght@500;600;700", "Barlow:wght@400;500;600"];
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
-const ago = (iso) => { const s = (Date.now() - new Date(iso)) / 1000; return s < 3600 ? `${Math.max(1, Math.round(s / 60))}m` : s < 86400 ? `${Math.round(s / 3600)}h` : `${Math.round(s / 86400)}d`; };
-const ist = () => new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour12: false });
+const hhmm = (d = new Date()) => d.toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" });
+const ago = (iso) => { const s = (Date.now() - new Date(iso)) / 1000; return s < 3600 ? `${Math.max(1, Math.round(s / 60))} MIN` : s < 86400 ? `${Math.round(s / 3600)} HRS` : `${Math.round(s / 86400)} DAYS`; };
 const fleet = work.filter((w) => w.maintained);
+const PLATFORM = { product: "1", mobile: "2", client: "3", concept: "4" };
+const verdict = (s) => (s == null ? ["CHECKING", ""] : !s.ok ? ["CANCELLED", "down"] : s.ms > 1500 ? ["DELAYED", "late"] : ["ON TIME", "ok"]);
 
-const Spark = ({ pts, w = 120, h = 28 }) => {
-    if (pts.length < 2) return <svg className="mc-spark" viewBox={`0 0 ${w} ${h}`} aria-hidden><line x1="0" x2={w} y1={h / 2} y2={h / 2} /></svg>;
-    const max = Math.max(...pts, 400), step = w / (pts.length - 1);
-    const d = pts.map((v, i) => `${i ? "L" : "M"}${(i * step).toFixed(1)},${(h - 2 - (v / max) * (h - 4)).toFixed(1)}`).join("");
-    return <svg className="mc-spark" viewBox={`0 0 ${w} ${h}`} aria-hidden><path d={d} /><circle cx={w} cy={h - 2 - (pts.at(-1) / max) * (h - 4)} r="2.2" /></svg>;
-};
-
-// stack telemetry: how many projects use each technology (counted from the work list's stack strings)
-const STACK = (() => {
+// the "lines": technologies by how many projects run on them
+const LINES = (() => {
     const n = {};
     work.forEach((w) => (w.stack || "").split(/\s*[·,]\s*/).map((s) => s.replace(/\(.*?\)/g, "").trim()).filter(Boolean).forEach((s) => { n[s] = (n[s] || 0) + 1; }));
-    return Object.entries(n).sort((a, b) => b[1] - a[1]).slice(0, 10);
+    return Object.entries(n).sort((a, b) => b[1] - a[1]).slice(0, 8);
 })();
 
-export default function MissionControl() {
-    const [now, setNow] = useState(ist);
-    const [hist, setHist] = useState({});           // slug → [ms…]
-    const [up, setUp] = useState({});               // slug → ok
+export default function Departures() {
+    useFonts(FONTS);
+    const [clock, setClock] = useState(hhmm);
+    const [sites, setSites] = useState({});
     const [checked, setChecked] = useState(null);
     const [gh, setGh] = useState(null);
-    const [pulls, setPulls] = useState(null);
 
-    useEffect(() => { const t = setInterval(() => setNow(ist()), 1000); return () => clearInterval(t); }, []);
+    useEffect(() => { const t = setInterval(() => setClock(hhmm()), 5000); return () => clearInterval(t); }, []);
     useEffect(() => {
-        const poll = () => fetch("/api/status").then((r) => r.json()).then((d) => {
-            setChecked(d);
-            setUp(Object.fromEntries(Object.entries(d.sites).map(([k, v]) => [k, v.ok])));
-            setHist((h) => Object.fromEntries(Object.entries(d.sites).map(([k, v]) => [k, [...(h[k] || []), v.ok ? v.ms : 0].slice(-24)])));
-        }).catch(() => {});
+        const poll = () => fetch("/api/status").then((r) => r.json()).then((d) => { setSites(d.sites || {}); setChecked(d); }).catch(() => {});
         poll(); const t = setInterval(poll, 60000);
-        fetch("/api/github").then((r) => r.json()).then(setGh).catch(() => setGh({ days: {}, commits: [], repos: [] }));
-        fetch("/api/pulls").then((r) => r.json()).then((d) => setPulls(d.pulls)).catch(() => {});
+        fetch("/api/github").then((r) => r.json()).then(setGh).catch(() => setGh({ commits: [], days: {} }));
         return () => clearInterval(t);
     }, []);
 
-    const nUp = Object.values(up).filter(Boolean).length, known = Object.keys(up).length;
-    const allGood = known && nUp === known;
-    // 13-week heatmap ending today (columns = weeks, rows = Mon..Sun)
-    const heat = useMemo(() => {
-        const out = [], today = new Date(); today.setHours(0, 0, 0, 0);
-        const start = new Date(today); start.setDate(start.getDate() - 90);
-        for (let i = 0; i < 91; i++) { const d = new Date(start); d.setDate(start.getDate() + i); const k = d.toISOString().slice(0, 10); out.push([k, gh?.days?.[k] || 0, d > today]); }
-        return out;
-    }, [gh]);
-    const ghTotal = gh ? Object.values(gh.days).reduce((a, b) => a + b, 0) : null;
-    const maxStack = STACK[0]?.[1] || 1;
+    const vals = Object.values(sites), up = vals.filter((s) => s.ok).length;
+    const at = checked ? hhmm(new Date(checked.checkedAt)) : "--:--";
+    const remark = vals.length
+        ? up === vals.length ? `ALL ${vals.length} SERVICES RUNNING · CHECKED FROM ${checked?.from === "sin1" ? "SINGAPORE" : "THE EDGE"} AT ${at} IST`
+            : `${vals.length - up} SERVICE${vals.length - up > 1 ? "S" : ""} DISRUPTED · ENGINEER NOTIFIED`
+        : "FETCHING LIVE STATUS…";
+    const pushes = useMemo(() => (gh?.commits || []).slice(0, 5), [gh]);
+    const total90 = gh ? Object.values(gh.days || {}).reduce((a, b) => a + b, 0) : null;
 
     return (
-        <div className="mc">
-            <header className="mc-top">
-                <div className="mc-id"><i className="mc-led" data-ok={allGood || undefined} /> MISSION CONTROL <span>· {profile.name.toUpperCase()} · FULL-STACK ENGINEER</span></div>
-                <div className="mc-status" role="status">{known ? (allGood ? `ALL SYSTEMS OPERATIONAL · ${nUp}/${known}` : `${nUp}/${known} SYSTEMS UP`) : "POLLING FLEET…"}</div>
-                <div className="mc-clock">AHMEDABAD {now} IST</div>
+        <div className="dp">
+            <header className="dp-sign">
+                <p className="dp-station"><b>Ahmedabad</b> <span>Aman Patel · Full-stack engineer</span></p>
+                <p className="dp-clock" aria-label={`${clock} IST`}><Flap text={clock.replace(":", "")} len={4} className="dp-clockflap" /><small>IST</small></p>
             </header>
 
-            <section className="mc-hero">
-                <div>
-                    <p className="mc-k">Operator</p>
-                    <h1>{profile.name}</h1>
-                    <p className="mc-sub">I build and keep AI products and client sites running. Everything on this screen is live: real health checks, real commits.</p>
-                    <div className="mc-cta">
-                        <a className="mc-btn" href={profile.resume} target="_blank" rel="noreferrer">Download résumé ↓</a>
-                        <a className="mc-btn ghost" href={`mailto:${profile.email}`}>Open a channel: email</a>
-                    </div>
-                </div>
-                <dl className="mc-vitals">
-                    {[
-                        [work.length, "projects shipped"], [fleet.length, "in production"], [work.filter((w) => w.kind === "client").length, "client sites"],
-                        [skillGroups.reduce((a, g) => a + g.items.length, 0), "tools in use"], [ghTotal ?? "—", "GitHub events · 90d"], [pulls ?? "—", "lever pulls, all time"],
-                    ].map(([v, l]) => <div key={l}><dd>{v}</dd><dt>{l}</dt></div>)}
-                </dl>
+            <section className="dp-intro">
+                <h1>Everything I keep running,<br />live.</h1>
+                <p>{fleet.length} sites and products I built and still maintain, health-checked from a server every minute. Nothing on this board is a mock-up.</p>
             </section>
 
-            <div className="mc-grid">
-                <section className="mc-panel mc-fleet" aria-labelledby="mc-fleet">
-                    <h2 id="mc-fleet">Fleet <span>{fleet.length} live sites · checked from {checked?.from === "sin1" ? "Singapore" : "the edge"} · every 60s</span></h2>
-                    <ul>
-                        {fleet.map((w) => {
-                            const h = hist[w.slug] || [], ok = up[w.slug];
-                            return (
-                                <li key={w.slug}>
-                                    <i className="mc-led" data-ok={ok || undefined} data-down={ok === false || undefined} aria-label={ok == null ? "checking" : ok ? "up" : "down"} />
-                                    <a href={w.url} target="_blank" rel="noreferrer"><b>{w.title}</b><small>{host(w.url)}</small></a>
-                                    <Spark pts={h} />
-                                    <span className="mc-ms">{ok ? `${h.at(-1)} ms` : ok === false ? "DOWN" : "…"}</span>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </section>
+            <section className="dp-board" aria-labelledby="dp-dep">
+                <div className="dp-board-head">
+                    <h2 id="dp-dep">Departures</h2>
+                    <p>Live sites · checked {at} IST</p>
+                </div>
+                <div className="dp-table">
+                <div className="dp-row dp-th" aria-hidden><span>Time</span><span>Destination</span><span>Via</span><span>Plat.</span><span>Status</span><span>Latency</span></div>
+                <ol>
+                    {fleet.map((w, i) => {
+                        const s = sites[w.slug], [v, tone] = verdict(s);
+                        return (
+                            <li key={w.slug}>
+                                <a className="dp-row" href={w.url} target="_blank" rel="noreferrer" data-tone={tone}>
+                                    <Flap text={at.replace(":", ".")} len={5} start={i * 60} />
+                                    <Flap text={w.title} len={18} start={i * 60 + 40} className="dp-dest" />
+                                    <span className="dp-via">{host(w.url)}</span>
+                                    <Flap text={PLATFORM[w.kind]} len={1} start={i * 60} className="dp-plat" />
+                                    <Flap text={v} len={9} start={i * 60 + 120} className="dp-status" />
+                                    <Flap text={s?.ok ? `${s.ms}MS` : s ? "----" : ""} len={6} start={i * 60 + 160} />
+                                </a>
+                            </li>
+                        );
+                    })}
+                </ol>
+                </div>
+                <p className="dp-remark" role="status"><span>Remarks</span><span className="dp-marquee"><i>{remark} · PLATFORM 1 PRODUCTS · 2 MOBILE · 3 CLIENT SITES · {remark}</i></span></p>
+            </section>
 
-                <section className="mc-panel mc-activity" aria-labelledby="mc-act">
-                    <h2 id="mc-act">Commit activity <span>github.com/{gh?.user || "Aman241104"} · public · 13 weeks</span></h2>
-                    <div className="mc-heat" role="img" aria-label={`${ghTotal ?? 0} public GitHub events in 90 days`}>
-                        {heat.map(([k, n, future]) => <i key={k} title={`${k}: ${n}`} data-l={future ? "x" : n === 0 ? 0 : n < 3 ? 1 : n < 6 ? 2 : n < 10 ? 3 : 4} />)}
-                    </div>
-                    <ol className="mc-feed">
-                        {(gh?.commits || []).slice(0, 6).map((c) => (
-                            <li key={c.at + c.repo}><span className="mc-t">{ago(c.at)} ago</span> pushed {c.n > 1 ? `${c.n} commits` : "a commit"} to <b>{c.repo}</b>{c.branch && c.branch !== "main" ? ` (${c.branch})` : ""}</li>
-                        ))}
-                        {gh && !gh.commits.length && <li className="mc-t">No public pushes in the window. Most client work lives in private repos.</li>}
-                    </ol>
-                </section>
-
-                <section className="mc-panel mc-stack" aria-labelledby="mc-stack">
-                    <h2 id="mc-stack">Stack telemetry <span>technologies by number of projects</span></h2>
-                    <ul>
-                        {STACK.map(([t, n]) => <li key={t}><span>{t}</span><i style={{ "--w": `${(n / maxStack) * 100}%` }} /><b>{n}</b></li>)}
-                    </ul>
-                </section>
-
-                <section className="mc-panel mc-log" aria-labelledby="mc-log">
-                    <h2 id="mc-log">Mission log <span>career</span></h2>
+            <div className="dp-split">
+                <section className="dp-board dp-arr" aria-labelledby="dp-arr">
+                    <div className="dp-board-head"><h2 id="dp-arr">Arrivals</h2><p>Public GitHub pushes{total90 != null ? ` · ${total90} in 90 days` : ""}</p></div>
                     <ol>
-                        {experience.map((x) => (
-                            <li key={x.role}><span className="mc-t">{x.when}</span><b>{x.role}</b><small>{x.org} · {x.where}</small></li>
+                        {pushes.map((c, i) => (
+                            <li key={c.at + c.repo} className="dp-row dp-arow">
+                                <Flap text={ago(c.at)} len={7} start={i * 70} />
+                                <Flap text={c.repo.replace(/[-_]/g, " ")} len={16} start={i * 70 + 50} className="dp-dest" />
+                                <Flap text={`${c.n} COMMIT${c.n > 1 ? "S" : ""}`} len={9} start={i * 70 + 100} />
+                            </li>
                         ))}
+                        {gh && !pushes.length && <li className="dp-empty">No public pushes this week. Most client work lives in private repositories.</li>}
                     </ol>
-                    <h2 className="mc-h2b">Payloads <span>by kind</span></h2>
-                    <ul className="mc-kinds">
-                        {Object.entries(KINDS).map(([k, l]) => <li key={k}><b>{work.filter((w) => w.kind === k).length}</b>{l}</li>)}
-                    </ul>
                 </section>
 
-                <section className="mc-panel mc-comms" aria-labelledby="mc-comms">
-                    <h2 id="mc-comms">Comms <span>open channel</span></h2>
-                    <a className="mc-big" href={`mailto:${profile.email}`}>{profile.email}</a>
-                    <p className="mc-links">{socials.map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text} ↗</a>)}</p>
+                <section className="dp-lines" aria-labelledby="dp-lines">
+                    <h2 id="dp-lines">Lines in service</h2>
+                    <p className="dp-cap">Technologies, by the number of projects running on them.</p>
+                    <ul>
+                        {LINES.map(([t, n]) => (
+                            <li key={t}><b>{t}</b><span className="dp-seg" aria-label={`${n} projects`}>{Array.from({ length: n }, (_, k) => <i key={k} />)}</span><em>{n}</em></li>
+                        ))}
+                    </ul>
                 </section>
             </div>
+
+            <section className="dp-route" aria-labelledby="dp-route">
+                <h2 id="dp-route">Route</h2>
+                <ol className="dp-map">
+                    {[...experience].reverse().map((x) => (
+                        <li key={x.role}><i aria-hidden /><span className="dp-when">{x.when.replace(" — ", "–")}</span><b>{x.org}</b><small>{x.role}</small></li>
+                    ))}
+                    <li className="dp-next"><i aria-hidden /><span className="dp-when">Next stop</span><b>Your team?</b>
+                        <small>Full-stack roles · Ahmedabad on-site or hybrid · available now</small>
+                        <span className="dp-cta"><a href={`mailto:${profile.email}`}>{profile.email}</a><a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a></span>
+                    </li>
+                </ol>
+            </section>
+
+            <footer className="dp-foot">
+                <p>{work.length} projects in total · {Object.entries(KINDS).map(([k, l]) => `${work.filter((w) => w.kind === k).length} ${l.toLowerCase()}`).join(" · ")}</p>
+                <p>{socials.map((s) => <a key={s.id} href={s.link} target="_blank" rel="noreferrer">{s.text}</a>)}</p>
+            </footer>
         </div>
     );
 }
