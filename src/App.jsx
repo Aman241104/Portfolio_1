@@ -22,6 +22,7 @@ const syncUrl = (id) => {
 
 const App = () => {
     const [worldId, setWorldId] = useState(initialWorld);
+    const [wipe, setWipe] = useState(false);   // only when arriving from the machine, never on a direct link
     const world = findWorld(worldId);
     useEffect(() => { setWorld(world?.id); }, [world]);
 
@@ -29,6 +30,7 @@ const App = () => {
         const next = findWorld(id);
         if (!next) return;
         setLast(next.id);
+        setWipe(!world);
         syncUrl(next.id);
         setWorldId(next.id);
     };
@@ -44,8 +46,11 @@ const App = () => {
     return (
         <>
             <WorldBoundary key={world.id}>
-                <Suspense fallback={<p className="min-h-dvh flex items-center justify-center font-georama text-neutral-400">Loading {world.name}…</p>}>
+                {/* One continuous move from the machine: the curtain faded to this world's paper, the loading screen holds
+                    that colour, and once the world is mounted the colour wipes up off it. */}
+                <Suspense fallback={<div className="world-wipe hold" style={{ background: world.paper }}><p>Loading {world.name}…</p></div>}>
                     <Component shell={{ go, spin: toMachine }} />
+                    {wipe && <div className="world-wipe" style={{ background: world.paper }} aria-hidden />}
                 </Suspense>
             </WorldBoundary>
             <CoinSlot current={world.id} onSpin={toMachine} onSelect={go} />

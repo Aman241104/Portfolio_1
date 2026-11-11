@@ -187,7 +187,7 @@
 .scroll-hint { position: absolute; right: var(--gutter); bottom: 24px; z-index: 4; }
 
 /* entering a world: everything but the machine goes, then black */
-.curtain { position: absolute; inset: 0; z-index: 10; background: #000; opacity: 0; pointer-events: none; transition: opacity .9s .1s ease-in; }
+.curtain { position: absolute; inset: 0; z-index: 10; background: var(--to, #000); opacity: 0; pointer-events: none; transition: opacity .9s .1s var(--ease-in-out); }
 .home[data-entering] .curtain { opacity: 1; }
 .home[data-entering] :is(.ink, .hero-word, .tabs, .cta, .bar, .ident) { opacity: 0 !important; transition: opacity .4s; }
 

@@ -6,6 +6,7 @@ import { lazy } from "react";
 export const worlds = [
     {
         id: "desktop",
+        paper: "#0b0b0b",   // the world's own background: the enter transition wipes in this colour
         name: "Desktop OS",
         tagline: "The one you know. Windows, dock, Finder.",
         symbols: ["2026", "Desktop", "Calm"],
@@ -14,6 +15,7 @@ export const worlds = [
     },
     {
         id: "editorial",
+        paper: "#f2f0ea",   // the world's own background: the enter transition wipes in this colour
         name: "Editorial",
         tagline: "Just the work, set like a magazine.",
         symbols: ["Now", "Magazine", "Clean"],
@@ -22,6 +24,7 @@ export const worlds = [
     },
     {
         id: "terminal",
+        paper: "#120c02",   // the world's own background: the enter transition wipes in this colour
         name: "Terminal",
         tagline: "Type your way in.",
         symbols: ["1988", "Terminal", "Nerdy"],
@@ -30,6 +33,7 @@ export const worlds = [
     },
     {
         id: "album",
+        paper: "#070707",   // the world's own background: the enter transition wipes in this colour
         name: "Album Rollout",
         tagline: "The portfolio, deluxe. Projects as a tracklist.",
         symbols: ["Y2K", "Album", "Loud"],
@@ -38,6 +42,7 @@ export const worlds = [
     },
     {
         id: "mission",
+        paper: "#0c0c0b",   // the world's own background: the enter transition wipes in this colour
         name: "Mission Control",
         tagline: "Live data: uptime, commits, the stack in numbers.",
         symbols: ["Live", "Dashboard", "Exact"],
@@ -46,6 +51,7 @@ export const worlds = [
     },
     {
         id: "ask",
+        paper: "#3f4c3e",   // the world's own background: the enter transition wipes in this colour
         name: "Ask Aman",
         tagline: "Ask anything. Answers cite the real work.",
         symbols: ["2030", "Chat", "Curious"],
@@ -54,6 +60,7 @@ export const worlds = [
     },
     {
         id: "canvas",
+        paper: "#123f6e",   // the world's own background: the enter transition wipes in this colour
         name: "Canvas",
         tagline: "The portfolio as a design file. Pan, zoom, click.",
         symbols: ["Draft", "Canvas", "Free"],
@@ -62,6 +69,7 @@ export const worlds = [
     },
     {
         id: "arcade",
+        paper: "#1b1b1b",   // the world's own background: the enter transition wipes in this colour
         name: "Arcade",
         tagline: "Break bricks, unlock projects.",
         symbols: ["8-Bit", "Arcade", "Wild"],

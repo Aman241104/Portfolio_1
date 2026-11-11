@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { worlds, RECRUITER_WORLD } from "#worlds/registry.js";
+import { worlds, RECRUITER_WORLD, findWorld } from "#worlds/registry.js";
 import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
 import { profile, socials } from "#content/profile.js";
@@ -321,6 +321,7 @@ const Home = ({ onSelect }) => {
     const onArm = (on) => setPhase((p) => (on && p === "idle" ? "armed" : !on && p === "armed" ? "idle" : p));
     const enter = (id) => {
         track("world_entered", { world: id });
+        hero.current?.style.setProperty("--to", findWorld(id)?.paper ?? "#000");   // fade to the next world's own paper
         setPhase("transitioning");
         setTimeout(() => onSelect(id), reduced() ? 0 : 950);   // camera push + fade to black
     };
@@ -395,7 +396,7 @@ const Home = ({ onSelect }) => {
                 </div>
 
                 <div className="below">
-                    {phase === "revealed" || phase === "transitioning" ? (
+                    {(phase === "revealed" || phase === "transitioning") && result ? (
                         <section className="cta reveal" aria-live="polite" aria-label="Result">
                             <p className="mono">PX‑01 / Result {String(plays).padStart(6, "0")}</p>
                             <p className="mono red">Reality selected</p>
