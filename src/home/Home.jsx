@@ -4,6 +4,7 @@ import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
 import { profile, socials } from "#content/profile.js";
 import Work from "./Work.jsx";
+import { work } from "../../content/work.js";
 import Experience from "./Experience.jsx";
 import Maintained from "./Maintained.jsx";
 import Skills from "./Skills.jsx";
@@ -402,12 +403,18 @@ const Home = ({ onSelect }) => {
                     ) : (
                         <div className="cta">
                             <p className="mono cta-label">PX‑01 / Reality selector</p>
-                            <p className="cta-sub">Three reels, one world. Pull the lever to choose how you see my work.</p>
+                            <p className="mono cta-kicker">Optional · a style picker</p>
+                            <ol className="how" aria-label="How the machine works">
+                                <li><b>1</b>Pull the lever</li>
+                                <li><b>2</b>Reels pick an era, medium &amp; mood</li>
+                                <li><b>3</b>Your ticket opens that version of this portfolio</li>
+                            </ol>
+                            <p className="how-m">Optional: pull the lever, the reels pick a design style, your ticket opens it.</p>
                             <p className="mono status" aria-live="polite">{status}</p>
                             {shared && <p className="mono pulls">{plays.toLocaleString("en-IN")} pulls so far</p>}
                             <button type="button" className="pull" onClick={pull} disabled={busy}>Pull the lever <i aria-hidden>→</i></button>
                             <div className="cta-alt">
-                                <button type="button" onClick={() => enter(RECRUITER_WORLD)}>Skip the machine · View my work</button>
+                                <button type="button" onClick={() => enter(RECRUITER_WORLD)}><span className="desk-only">Skip the machine · </span>View my work</button>
                                 <button type="button" className="phone-only" onClick={() => setPicking(true)}>All worlds</button>
                                 <a className="phone-only" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>
                             </div>
@@ -421,7 +428,12 @@ const Home = ({ onSelect }) => {
                     ))}
                     <a href={profile.resume} target="_blank" rel="noreferrer"><i aria-hidden>↗</i>Résumé</a>
                 </nav>
-                <p className="mono scroll-hint" aria-hidden>Scroll ↓</p>
+                {/* the false floor fix: say plainly that the portfolio continues below the machine */}
+                <button type="button" className="peek" onClick={() => document.querySelector(".stats")?.scrollIntoView({ behavior: "smooth" })}>
+                    <span className="mono">Or just scroll · it's all below</span>
+                    <span className="peek-list">{work.length} projects · Experience · Skills · Résumé · Contact</span>
+                    <i aria-hidden>↓</i>
+                </button>
                 <div className="curtain" aria-hidden />
                 {debug && (
                     <div className="debug-hud mono" role="status">

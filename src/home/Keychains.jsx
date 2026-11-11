@@ -115,7 +115,7 @@ const DESKTOP = [
 ];
 // phones: a small even row on cables above the machine, clear of the lever on the right
 const PHONE = [
-    { sx: -0.62, sy: 0.6, item: "react" }, { sx: -0.2, sy: 0.63, item: "enter" }, { sx: 0.22, sy: 0.6, item: "node" },
+    { sx: -0.62, sy: 0.46, item: "react" }, { sx: -0.2, sy: 0.49, item: "enter" }, { sx: 0.22, sy: 0.46, item: "node" },
 ];
 const place = (aspect, framing) => {
     const { dist, lookY } = framing(aspect);

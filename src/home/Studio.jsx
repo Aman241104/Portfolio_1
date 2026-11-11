@@ -155,7 +155,7 @@ const Lean = ({ children }) => {
 const TAN = Math.tan(THREE.MathUtils.degToRad(15));
 export const framing = (aspect) => ({
     // phones: the machine fills ~80% of the width and sits at the visual centre, keychains hang above it
-    dist: Math.max(aspect > 2.1 ? 11.6 : 12.6, (aspect < 0.8 ? 2.3 : 2.55) / (TAN * aspect)),
+    dist: Math.max(aspect > 2.1 ? 11.6 : 12.6, (aspect < 0.8 ? 2.62 : 2.55) / (TAN * aspect)),   // phones: a smaller machine leaves room to read
     lookY: aspect < 0.8 ? -0.75 : aspect < 1.2 ? -1.1 : -0.45,
 });
 

@@ -4,6 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";
 import { worlds } from "#worlds/registry.js";
 import { sfx } from "./sfx.js";
+import { receiptTexture, receiptGeometry } from "./receipt.js";
 
 // PX-01, the clear-case reality selector. Shared by the home screen (src/home) and the lab (/lab/machine.html).
 // Everything is code + PBR. Units ≈ decimetres. The machine is centred on its own origin.
@@ -539,38 +540,19 @@ const Ticket = ({ ticket, onTicket }) => {
         root.current.rotation.x = 0.14 * e + Math.sin(clock.elapsedTime * 1.4) * 0.025 * e - (hot.current ? 0.12 : 0);
     });
     const tk = ticket;
+    const sheet = useMemo(() => receiptGeometry(0.86, TICKET_H), []);
+    const tex = useMemo(() => (tk ? receiptTexture(tk, TICKET_H / 0.86) : null), [tk]);
+    useEffect(() => () => tex?.dispose(), [tex]);
     return (
         <group position={[0, -1.24, 0.92]}>
             <mesh material={mat.black}><boxGeometry args={[1.0, 0.035, 0.06]} /></mesh>
             <group ref={root} visible={false} scale={narrow ? 0.9 : 1.3}>
                 <group ref={paper}>
-                    <group position={[0, -TICKET_H / 2, 0]}>
-                        <mesh onClick={(e) => { e.stopPropagation(); onTicket?.(); }}
-                            onPointerOver={() => { hot.current = true; document.body.style.cursor = "pointer"; }}
-                            onPointerOut={() => { hot.current = false; document.body.style.cursor = ""; }}>
-                            <planeGeometry args={[0.86, TICKET_H]} />
-                            <meshStandardMaterial color="#f2eee4" roughness={0.9} side={THREE.DoubleSide} />
-                        </mesh>
-                        {tk && (
-                            <group position={[0, 0, 0.003]}>
-                                <Text font={MONO} fontSize={0.045} letterSpacing={0.12} color="#0b0b0c" anchorX="left" anchorY="top" position={[-0.38, 0.47, 0]}>PX-01</Text>
-                                <Text font={MONO} fontSize={0.045} letterSpacing={0.08} color="#0b0b0c" anchorX="right" anchorY="top" position={[0.38, 0.47, 0]}>{`No. ${String(tk.no).padStart(6, "0")}`}</Text>
-                                <mesh position={[0, 0.37, 0]}><planeGeometry args={[0.76, 0.004]} /><meshBasicMaterial color="#0b0b0c" /></mesh>
-                                <Text font={MONO} fontSize={0.04} letterSpacing={0.14} color={SIGNAL} anchorX="left" anchorY="top" position={[-0.38, 0.31, 0]}>REALITY SELECTED</Text>
-                                <Text font={MONO} fontSize={0.12} letterSpacing={-0.02} color="#0b0b0c" anchorX="left" anchorY="top" position={[-0.38, 0.24, 0]} maxWidth={0.76}>{tk.name.toUpperCase()}</Text>
-                                {["ERA", "MEDIUM", "MOOD"].map((l, i) => (
-                                    <group key={l} position={[-0.38 + i * 0.26, -0.02, 0]}>
-                                        <Text font={MONO} fontSize={0.03} letterSpacing={0.14} color="#77736b" anchorX="left" anchorY="top">{l}</Text>
-                                        <Text font={MONO} fontSize={0.045} color="#0b0b0c" anchorX="left" anchorY="top" position={[0, -0.05, 0]}>{tk.symbols[i].toUpperCase()}</Text>
-                                    </group>
-                                ))}
-                                {Array.from({ length: 19 }, (_, i) => (
-                                    <mesh key={i} position={[-0.36 + i * 0.04, -0.27, 0]}><planeGeometry args={[0.02, 0.004]} /><meshBasicMaterial color="#77736b" /></mesh>
-                                ))}
-                                <Text font={MONO} fontSize={0.05} letterSpacing={0.12} color={SIGNAL} anchorX="left" anchorY="middle" position={[-0.38, -0.39, 0]}>TEAR HERE TO ENTER →</Text>
-                            </group>
-                        )}
-                    </group>
+                    <mesh geometry={sheet} onClick={(e) => { e.stopPropagation(); onTicket?.(); }}
+                        onPointerOver={() => { hot.current = true; document.body.style.cursor = "pointer"; }}
+                        onPointerOut={() => { hot.current = false; document.body.style.cursor = ""; }}>
+                        <meshStandardMaterial map={tex} color={tex ? "#ffffff" : "#f2eee4"} roughness={0.92} metalness={0} alphaTest={0.5} side={THREE.DoubleSide} />
+                    </mesh>
                 </group>
             </group>
         </group>
