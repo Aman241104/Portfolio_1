@@ -23,7 +23,7 @@ const syncUrl = (id) => {
 const App = () => {
     const [worldId, setWorldId] = useState(initialWorld);
     const world = findWorld(worldId);
-    useEffect(() => setWorld(world?.id), [world]);
+    useEffect(() => { setWorld(world?.id); }, [world]);
 
     const go = (id) => {
         const next = findWorld(id);

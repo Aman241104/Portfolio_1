@@ -29,6 +29,7 @@ const TerminalWorld = ({ shell }) => {
     const [log, setLog] = useState([]);              // [{ id, cmd, out: ReactNode[] }]
     const [input, setInput] = useState("");
     const [history, setHistory] = useState([]);
+    const [skip, setSkip] = useState(false);   // output types on line by line; any key completes it
     const [cursor, setCursor] = useState(-1);
     const [booting, setBooting] = useState(() => { try { return !reduced() && !sessionStorage.getItem("px01-tty"); } catch { return false; } });
     const [post, setPost] = useState(0);
@@ -147,6 +148,7 @@ const TerminalWorld = ({ shell }) => {
         if (name === "cd") name = args[0] === ".." || args[0] === "~" ? "spin" : "projects";
         const fn = commands[alias[name] || name];
         const out = fn ? fn(...args) : [<p key="nf">{name}: command not found. Try {cmd("help")}.</p>];
+        setSkip(false);
         setLog((l) => [...l, { id: id.current++, cmd: text, out }]);
         setHistory((h) => [text, ...h]);
         setCursor(-1);
@@ -165,7 +167,7 @@ const TerminalWorld = ({ shell }) => {
         window.addEventListener("keydown", skip, { once: true });
         return () => window.removeEventListener("keydown", skip);
     }, [booting]);
-    useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [log]);
+    useEffect(() => { endRef.current?.scrollIntoView({ block: "end" }); }, [log]);   // braces: scrollIntoView returns a Promise in new Chrome
 
     // idle: a hint at 20s, the screensaver at 45s; any input resets. Waking prints how long you were away.
     useEffect(() => {
@@ -188,6 +190,7 @@ const TerminalWorld = ({ shell }) => {
     };
 
     const onKeyDown = (e) => {
+        if (e.key !== "Enter") setSkip(true);   // any key finishes the output that is still typing
         if (sound && e.key.length <= 1 || sound && ["Enter", "Backspace"].includes(e.key)) keyClick(e.key === "Enter");
         if (e.key === "Enter") { run(input); setInput(""); }
         else if (e.key === "ArrowUp" && history.length) { e.preventDefault(); const n = Math.min(cursor + 1, history.length - 1); setCursor(n); setInput(history[n]); }
@@ -216,7 +219,7 @@ const TerminalWorld = ({ shell }) => {
                             <p>tty1 · AHMEDABAD · {profile.name.toUpperCase()} · {experience[0].role.toUpperCase()}</p>
                             <p className="dim">▸ tap anything highlighted, or type {cmd("help")}. Featured: {live.slice(0, 3).map((w, i) => <span key={w.slug}>{i ? " · " : ""}{ext(w.url, <>{w.title}</>)}</span>)}</p>
                         </header>
-                        <div className="tty-log" role="log" aria-live="polite" aria-label="Terminal output">
+                        <div className="tty-log" role="log" aria-live="polite" aria-label="Terminal output" data-skip={skip || undefined}>
                             {log.map((e) => (
                                 <article key={e.id}>
                                     {e.cmd && <p className="tty-echo"><span className="tty-ps">aman@tty1:~$</span> {e.cmd}</p>}
