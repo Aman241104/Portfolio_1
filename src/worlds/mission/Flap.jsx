@@ -1,27 +1,51 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef } from "react";
 
-// One split-flap character: when its target changes it riffles through the drum (a few random flaps, each a real
-// top-half fold), then lands. `delay` staggers a row left to right, like a Solari board updating.
+// One split-flap character. When its target changes it riffles through the drum, then lands with a small settle.
+// The landing flip is a real leaf: the old character's top half folds down over the new one (WAAPI, transform only).
+// No React state per flip: React renders a cell once per target change; the riffle is plain DOM + compositor.
 const DRUM = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·.-:/";
 const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const FOLD = [{ transform: "perspective(220px) rotateX(0deg)", visibility: "visible" }, { transform: "perspective(220px) rotateX(-90deg)", visibility: "visible" }];
+const SETTLE = [{ transform: "translateY(0)" }, { transform: "translateY(.04em)" }, { transform: "translateY(0)" }];
 
-const Cell = ({ ch, delay }) => {
-    const [shown, setShown] = useState(reduced ? ch : " ");
-    const [tick, setTick] = useState(0);
-    const timer = useRef();
-    useEffect(() => {
-        if (reduced) { setShown(ch); return; }
-        let n = 0; const flips = 3 + Math.floor(Math.random() * 5);
-        const start = setTimeout(function flip() {
-            n++;
-            setShown(n >= flips ? ch : DRUM[Math.floor(Math.random() * DRUM.length)]);
-            setTick((t) => t + 1);
-            if (n < flips) timer.current = setTimeout(flip, 55);
-        }, delay);
-        return () => { clearTimeout(start); clearTimeout(timer.current); };
-    }, [ch, delay]);
-    return <span className="fl-c" key={tick} data-flip={tick > 0 || undefined}>{shown}</span>;
+// One frame loop drives every cell on the board: all DOM writes for a frame land together (one style pass),
+// instead of ~440 independent timers each forcing its own.
+const jobs = new Set();
+let raf = 0;
+const loop = (now) => {
+    for (const j of jobs) if (now >= j.at) j.step(now);
+    raf = jobs.size ? requestAnimationFrame(loop) : 0;
 };
+const schedule = (j) => { jobs.add(j); if (!raf) raf = requestAnimationFrame(loop); };
+
+const Cell = memo(({ ch, delay }) => {
+    const face = useRef(), leaf = useRef(), box = useRef();
+    useEffect(() => {
+        const f = face.current, l = leaf.current;
+        if (reduced) { f.textContent = ch; return; }
+        if (f.textContent === ch) return;
+        let n = 0;
+        const flips = 3 + Math.floor(Math.random() * 5);
+        const job = { at: performance.now() + delay, step(now) {
+            n++;
+            const last = n >= flips;
+            // The riffle is a blur of character swaps (paint only, contained); only the landing gets a real fold,
+            // which keeps the number of live compositor layers small while a whole board updates.
+            if (last) { l.firstChild.textContent = f.textContent; l.animate(FOLD, { duration: 140, easing: "cubic-bezier(.55,0,1,.45)" }); }
+            f.textContent = last ? ch : DRUM[Math.floor(Math.random() * DRUM.length)];
+            if (last) { jobs.delete(job); box.current.animate(SETTLE, { duration: 160, delay: 100, easing: "cubic-bezier(.34,1.56,.64,1)" }); }
+            else job.at = now + 62;
+        } };
+        schedule(job);
+        return () => jobs.delete(job);
+    }, [ch, delay]);
+    return (
+        <span className="fl-c" ref={box}>
+            <b ref={face}>{reduced ? ch : " "}</b>
+            <i ref={leaf} aria-hidden><b> </b></i>
+        </span>
+    );
+});
 
 // A fixed-width field of cells. Text is upper-cased and padded/truncated to `len`, like the real hardware.
 export default function Flap({ text, len, start = 0, className = "" }) {
