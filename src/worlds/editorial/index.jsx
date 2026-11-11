@@ -34,11 +34,13 @@ export default function EditorialWorld() {
 
     useGSAP(() => {
         if (reduced) return;
-        // the masthead sets letter by letter (each rises out of the rule), then the lead headline word by word
-        gsap.from(".ed-ch", { yPercent: 115, rotate: 8, duration: 1.1, stagger: 0.055, ease: "expo.out", delay: 0.1 });
-        gsap.from(".ed-mast > :not(h1)", { y: 24, opacity: 0, duration: 0.8, stagger: 0.06, ease: "power3.out", delay: 0.45 });
-        gsap.from(".ed-lead h2 .ed-w > span", { yPercent: 110, duration: 0.9, stagger: 0.04, ease: "expo.out", delay: 0.7 });
-        gsap.from(".ed-front > *", { y: 40, opacity: 0, duration: 0.9, stagger: 0.1, ease: "power3.out", delay: 0.2 });
+        // one press run, ~1.3 s: the masthead sets letter by letter straight up out of the rule (type doesn't tilt),
+        // the dateline and front page follow, then the lead headline word by word
+        gsap.timeline({ defaults: { ease: "expo.out" } })
+            .from(".ed-ch", { yPercent: 110, duration: 0.8, stagger: 0.035 }, 0.05)
+            .from(".ed-mast > :not(h1)", { y: 16, opacity: 0, duration: 0.6, stagger: 0.05, ease: "power3.out" }, 0.3)
+            .from(".ed-front > *", { y: 28, opacity: 0, duration: 0.7, stagger: 0.07, ease: "power3.out" }, 0.35)
+            .from(".ed-lead h2 .ed-w > span", { yPercent: 110, duration: 0.7, stagger: 0.03 }, 0.5);
         // print run: each section's rule draws across, then its content rises in, once. IntersectionObserver (not
         // ScrollTrigger positions) so late-loading fonts/images can never leave anything stuck invisible.
         const io = new IntersectionObserver((es) => es.forEach((e) => {

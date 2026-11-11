@@ -22,7 +22,12 @@ export default function Nudge() {
     useEffect(() => {
         if (seen()) return;
         let shown = false;
-        const show = (why) => { if (shown || seen()) return; shown = true; setOpen(true); track("nudge_shown", { why }); };
+        // never over the contact form: not while it is on screen or someone is typing in a field
+        const busy = () => {
+            const land = document.querySelector(".land")?.getBoundingClientRect();
+            return document.activeElement?.matches?.("input, textarea") || (land && land.top < innerHeight && land.bottom > 0);
+        };
+        const show = (why) => { if (shown || seen() || busy()) return; shown = true; setOpen(true); track("nudge_shown", { why }); };
         const onResume = () => setTimeout(() => show("resume"), 1500);
         const onScroll = () => { if (scrollY > innerHeight * 1.6) show("time"); };
         const t = setTimeout(() => { onScroll(); addEventListener("scroll", onScroll, { passive: true }); }, 40000);

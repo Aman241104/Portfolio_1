@@ -78,9 +78,10 @@ const Boot = ({ target, onDone }) => {
     // the count carries on from where it is when the next milestone arrives (it used to restart from 0 each time)
     const v = useRef(0);
     useEffect(() => {
-        let raf;
-        const tick = () => {
-            v.current = Math.min(target, v.current + Math.max(0.35, (target - v.current) * 0.08));
+        let raf, t0 = performance.now();
+        const tick = (t = t0) => {
+            const f = Math.min(4, (t - t0) / 16.7); t0 = t;           // time-based: same pace on a slow phone
+            v.current = Math.min(target, v.current + Math.max(0.35, (target - v.current) * (1 - Math.pow(0.92, f))) * Math.max(1, f));
             setN(Math.floor(v.current));
             if (v.current < target) raf = requestAnimationFrame(tick);
         };
@@ -286,7 +287,8 @@ const Home = ({ onSelect }) => {
     };
     const [picking, setPicking] = useState(false);
     const [progress, setProgress] = useState(8);
-    const [lit, setLit] = useState(() => reduced());
+    // the boot plays once per session; coming back from a world goes straight to the machine dropping in
+    const [lit, setLit] = useState(() => { try { return reduced() || !!sessionStorage.getItem("px01-booted"); } catch { return reduced(); } });
     const locked = useRef(0);
     const phaseRef = useRef(phase);
     phaseRef.current = phase;
@@ -455,7 +457,7 @@ const Home = ({ onSelect }) => {
                         <button type="button" onClick={() => setDebug(false)}>Close · or hold the lever again</button>
                     </div>
                 )}
-                {!lit && <Boot target={progress} onDone={() => setLit(true)} />}
+                {!lit && <Boot target={progress} onDone={() => { setLit(true); try { sessionStorage.setItem("px01-booted", "1"); } catch { /* private mode */ } }} />}
                 {picking && <WorldPicker onSelect={(id) => enter(id)} onClose={() => setPicking(false)} />}
             </section>
 

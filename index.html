@@ -41,7 +41,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@800&text=%E0%AA%85%E0%AA%AE%E0%AA%A8&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&text=%E3%82%A2%E3%83%9E%E3%83%B3&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&text=Aman&display=swap" />
-    <style>html,body{background:#050506}#root>main.seo a{color:#edeae3}#root>main.seo h2{color:#edeae3;font-size:15px}</style>
+    <style>html,body{background:var(--paper0,#050506)}#root>main.seo a{color:#edeae3}#root>main.seo h2{color:#edeae3;font-size:15px}
+      /* the crawler text: invisible while the app boots (no flash), shown after 3 s only if JavaScript never runs */
+      #root>main.seo{opacity:0;animation:seo-show 0s 3s forwards}@keyframes seo-show{to{opacity:1}}</style>
+    <!-- a direct world link paints that world's own paper from the first frame (keep in sync with registry.js `paper`) -->
+    <script>try{var w={desktop:"#0b0b0b",editorial:"#f2f0ea",classic:"#f2f0ea",terminal:"#120c02",album:"#070707",mission:"#0c0c0b",ask:"#3f4c3e",canvas:"#123f6e",arcade:"#1b1b1b"}[new URLSearchParams(location.search).get("style")];if(w)document.documentElement.style.setProperty("--paper0",w)}catch(e){}</script>
   </head>
   <body>
     <div id="root"></div>

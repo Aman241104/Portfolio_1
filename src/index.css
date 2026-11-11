@@ -19,6 +19,8 @@
     animation: world-wipe 280ms var(--ease-out) both; }
 .world-wipe.hold { position: relative; min-height: 100dvh; z-index: auto; animation: none; }
 .world-wipe p { font: 500 13px "Georama", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: rgba(128, 128, 128, .9); opacity: 0; animation: world-wait .3s .6s both; }
+.world-cover { position: fixed; inset: 0; z-index: 9999; pointer-events: none; animation: world-cover 300ms var(--ease-in-out) both; }
+@keyframes world-cover { from { opacity: 0; } }
 @keyframes world-wipe { to { opacity: 0; visibility: hidden; } }
 @keyframes world-wait { to { opacity: 1; } }
 
@@ -30,7 +32,7 @@ html,
 body {
     margin: 0;
     min-height: 100dvh;
-    background: #0a0a0a;
+    background: var(--paper0, #0a0a0a);   /* index.html sets --paper0 for direct world links */
     color: #f5f5f5;
 }
 

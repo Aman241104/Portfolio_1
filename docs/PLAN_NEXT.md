@@ -196,7 +196,8 @@ Runs the avoid-ai-design catalogue. Fetches references online.
 5. Ship.
 6. Re-review.
 
-Stop when all five reviewers score 85+. **Cap: 4 rounds per world.** If a world is still under 85 after round 4,
+Stop when all five reviewers score 85+. **Motion (animation critic) target revised by Aman 2026-11-11: 75–80/100 site-wide
+is enough; reached 77 in round 2, so motion polish stops there.** **Cap: 4 rounds per world.** If a world is still under 85 after round 4,
 it is either rethought (new direction) or marked *beta* (see Phase 3). It isn't polished forever.
 
 Order: the four newest worlds first (the freshest code), then the original four, then the four from Phase 1 as

@@ -27,14 +27,19 @@ export default function LiquidDock({ on, resume }) {
             TABS.forEach(({ sel }, k) => { const el = document.querySelector(sel); if (el && el.getBoundingClientRect().top < line) i = k; });
             setAt(i);
         };
+        // one read per frame, and a tab jump's lock ends when the smooth scroll actually ends (scrollend), not on a timer
+        let raf = 0;
+        const onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; spy(); }); };
+        const onEnd = () => { lock.current = 0; spy(); };
         spy();
-        addEventListener("scroll", spy, { passive: true });
-        return () => removeEventListener("scroll", spy);
+        addEventListener("scroll", onScroll, { passive: true });
+        addEventListener("scrollend", onEnd);
+        return () => { cancelAnimationFrame(raf); removeEventListener("scroll", onScroll); removeEventListener("scrollend", onEnd); };
     }, []);
 
     const go = (i) => {
         setAt(i);
-        lockFor(lock, 1100);                   // smooth scroll passes other sections: don't let the spy flicker
+        lockFor(lock, 3000);                   // smooth scroll passes other sections; released on scrollend (fallback cap 3 s)
         document.querySelector(TABS[i].sel)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
         track("dock_tab", { tab: TABS[i].label });
     };

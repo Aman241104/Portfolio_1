@@ -67,7 +67,7 @@
 /* Type-on: the newest output prints line by line, each line sweeping on in character steps like a teletype.
    Fast (45 ms a line) and any key completes it. Older entries never animate again. */
 @media (prefers-reduced-motion: no-preference) {
-    .tty-log > article:last-child .tty-out > * { animation: tty-type 260ms steps(28, end) both; }
+    .tty-log > article:last-child .tty-out > * { animation: tty-type clamp(120ms, calc(var(--n, 30) * 8ms), 700ms) steps(24, end) both; }
     .tty-log[data-skip] > article:last-child .tty-out > * { animation: none; }
     .tty-log > article:last-child .tty-echo { animation: tty-type 160ms steps(16, end) both; }
     .tty-log > article:last-child .tty-out > :nth-child(1) { animation-delay: 0ms; }

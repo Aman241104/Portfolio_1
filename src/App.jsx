@@ -22,22 +22,34 @@ const syncUrl = (id) => {
 
 const App = () => {
     const [worldId, setWorldId] = useState(initialWorld);
-    const [wipe, setWipe] = useState(false);   // only when arriving from the machine, never on a direct link
+    const [wipe, setWipe] = useState(false);   // only when arriving from another screen, never on a direct link
     const world = findWorld(worldId);
-    useEffect(() => { setWorld(world?.id); }, [world]);
+    useEffect(() => {
+        setWorld(world?.id);
+        document.documentElement.style.setProperty("--paper0", world?.paper ?? "#0a0a0a");
+    }, [world]);
 
+    const [cover, setCover] = useState(null);  // world → world: the next world's colour covers this one first
     const go = (id) => {
         const next = findWorld(id);
         if (!next) return;
-        setLast(next.id);
-        setWipe(!world);
-        syncUrl(next.id);
-        setWorldId(next.id);
+        const swap = () => {
+            setLast(next.id);
+            setWipe(true);
+            syncUrl(next.id);
+            setWorldId(next.id);
+            setCover(null);
+        };
+        if (!world || matchMedia("(prefers-reduced-motion: reduce)").matches) return swap();
+        setCover(next.paper);
+        setTimeout(swap, 300);
     };
 
     const toMachine = () => {
-        syncUrl(null);
-        setWorldId(null);
+        const back = () => { syncUrl(null); setWorldId(null); setCover(null); };
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return back();
+        setCover("#050506");
+        setTimeout(back, 300);
     };
 
     if (!world) return hasWebGL ? <Home onSelect={go} /> : <Machine onSelect={go} />;
@@ -54,6 +66,7 @@ const App = () => {
                 </Suspense>
             </WorldBoundary>
             <CoinSlot current={world.id} onSpin={toMachine} onSelect={go} />
+            {cover && <div className="world-cover" style={{ background: cover }} aria-hidden />}
         </>
     );
 };

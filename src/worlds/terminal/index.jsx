@@ -167,7 +167,11 @@ const TerminalWorld = ({ shell }) => {
         window.addEventListener("keydown", skip, { once: true });
         return () => window.removeEventListener("keydown", skip);
     }, [booting]);
-    useEffect(() => { endRef.current?.scrollIntoView({ block: "end" }); }, [log]);   // braces: scrollIntoView returns a Promise in new Chrome
+    useEffect(() => {
+        endRef.current?.scrollIntoView({ block: "end" });
+        // each new line types for as long as it is (CSS reads --n): one-word replies snap, long ones take their time
+        document.querySelectorAll(".tty-log > article:last-child .tty-out > *").forEach((el) => el.style.setProperty("--n", el.textContent.length));
+    }, [log]);   // braces: scrollIntoView returns a Promise in new Chrome
 
     // idle: a hint at 20s, the screensaver at 45s; any input resets. Waking prints how long you were away.
     useEffect(() => {

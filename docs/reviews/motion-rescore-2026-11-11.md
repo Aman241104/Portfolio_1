@@ -38,3 +38,17 @@ type-on; flap rewrite; off-screen 3D pause; reduced-motion world-wipe; the hero'
 - The Drawing "revision cloud": selecting a sheet draws a red-pen revision cloud, a leader line extends to the
   inspector title block; zoom snaps to drafting scales with a detent.
 - Liquid dock "surface tension": metaball puck that leaves a droplet behind; lag scales with scroll speed.
+
+---
+
+# Round 2 (after df34bf7 / 66da608): 77/100
+
+Choreography 15, Feel 15, Interaction 16, Creativity 17, Performance 6, Restraint & a11y 8.
+Hero 18 · Sections 15 · Dock 16 · Desktop 17/16 · Editorial 15 · Terminal 18 · Album 18 · Departures 19 · Ask 18 ·
+Drawing 19 · Arcade 17 · Home→world 15.
+
+Ranked: SEO text flash at frame 0 of every URL · world→world and Spin-back are cuts (boot replays) · Drawing intro
+heavy on phones · boot counter frame-based, overlay cascade to 3 s · Editorial intro jank + 8° letter rotation ·
+Departures riffles everything at once · Ask hero deleted in one frame, typewriter re-renders per char · Hiring nudge
+springs over the contact form · terminal type-on fixed 260 ms regardless of length · dock scroll-spy flicker.
+Ideas: "coin return" world transitions through the CoinSlot pill; section headers lock like reels; Editorial "press run".
