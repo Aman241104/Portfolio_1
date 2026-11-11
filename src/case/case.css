@@ -22,3 +22,30 @@ section li::marker { color: var(--signal); }
 footer { margin-top: 30px; border-top: 1px solid rgba(237, 234, 227, .15); padding-top: 28px; color: var(--smoke); }
 .next { display: flex; flex-direction: column; gap: 6px; text-decoration: none; font: 700 clamp(28px, 4vw, 44px)/1.05 "Geist", sans-serif; letter-spacing: -0.04em; color: var(--bone); margin-bottom: 26px; }
 @media (max-width: 640px) { .facts { grid-template-columns: 1fr; } }
+
+/* THE INDEX skin (?skin=ed): paper, ink, International Klein Blue; Schibsted + Newsreader; a drop cap and columns */
+body.ed-skin { background: #f2f0ea; color: #0a0a0a; font: 400 18px/1.6 "Newsreader", Georgia, serif; }
+.case-ed { max-width: 1080px; }
+.case-ed .mono { color: #002fa7; font-family: "Geist Mono", monospace; }
+.case-ed .case-nav { border-bottom: 1px solid #0a0a0a; }
+.case-ed .case-nav a { color: #0a0a0a; }
+.case-ed header { text-align: center; padding: 6vh 0 26px; border-bottom: 4px double #0a0a0a; }
+.case-ed h1 { font: 900 clamp(48px, 10vw, 130px)/.88 "Schibsted Grotesk", sans-serif; letter-spacing: -0.05em; }
+.case-ed .lede { margin: 14px auto 0; font-style: italic; color: #2a2926; max-width: 40ch; }
+.case-ed .facts { text-align: left; border-top: 1px solid #0a0a0a; }
+.case-ed .facts dt { color: #55534e; }
+.case-ed .links { justify-content: center; }
+.case-ed .links a { text-decoration-color: #002fa7; color: #002fa7; }
+.case-ed figure { margin: 30px 0; border: 0; border-radius: 0; background: #002fa7; }
+.case-ed figure img { filter: grayscale(1) contrast(1.15); mix-blend-mode: screen; transition: filter .5s, mix-blend-mode .5s; }
+.case-ed figure:hover img { filter: none; mix-blend-mode: normal; }
+.case-ed section { border-top: 1px solid rgba(10, 10, 10, .2); display: grid; grid-template-columns: 220px 1fr; gap: 0 40px; }
+.case-ed h2 { display: block; font: 800 24px/1.1 "Schibsted Grotesk", sans-serif; }
+.case-ed h2 .mono { display: block; color: #002fa7; margin-bottom: 6px; }
+.case-ed section ul { list-style: none; padding: 0; color: #1a1a18; columns: 2 300px; column-gap: 36px; display: block; }
+.case-ed section li { break-inside: avoid; margin-bottom: 12px; }
+.case-ed section:first-of-type li:first-child::first-letter { float: left; font: 900 64px/.8 "Schibsted Grotesk", sans-serif; color: #002fa7; margin: 6px 8px 0 0; }
+.case-ed footer { border-top: 4px double #0a0a0a; color: #55534e; }
+.case-ed .next { color: #0a0a0a; font-family: "Schibsted Grotesk", sans-serif; }
+.case-ed .next:hover { color: #002fa7; }
+@media (max-width: 760px) { .case-ed section { grid-template-columns: 1fr; } }

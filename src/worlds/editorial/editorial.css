@@ -93,3 +93,10 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 @media (max-width: 560px) { .ed-second { grid-template-columns: 1fr; } .ed-second .ed-duo { grid-row: auto; margin-bottom: 10px; } .ed-tools { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .ed-duo img { transition: none; } }
 @media (pointer: coarse) { .ed-ear a { padding: 10px 2px; } }
+
+/* letterpress reveal: each masthead letter rises from behind the rule; lead headline words likewise */
+.ed-mast h1 { overflow: hidden; }
+.ed-ch { display: inline-block; will-change: transform; }
+.ed-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; }
+.ed-w > span { display: inline-block; }
+.ed :is(h1, h2, h3, p, .ed-title, .ed-more) { font-variant-numeric: normal; }   /* tnum also widens , : . in Schibsted: keep it for the numeric columns only */

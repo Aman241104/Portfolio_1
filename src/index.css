@@ -63,3 +63,5 @@ body {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .lg { background: rgba(30, 30, 34, .85); } }
 }
 @media (pointer: coarse) { .coin-slot > * { min-height: 40px; } }
+/* the world pill floats over every world, light paper included: dark glass so its labels always read */
+.coin-slot.lg { background: rgba(12, 12, 14, .74); }

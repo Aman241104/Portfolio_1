@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { profile, socials } from "#content/profile.js";
@@ -19,7 +19,9 @@ const today = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "nu
 const Duo = ({ w, size = 900, className = "" }) => (
     <span className={`ed-duo ${className}`}><img src={shot(w, size)} alt="" loading="lazy" /></span>
 );
-const href = (w) => (cases[w.slug] ? `/case.html?p=${w.slug}` : w.url);
+const href = (w) => (cases[w.slug] ? `/case.html?p=${w.slug}&skin=ed` : w.url);
+const TITLE = "The Index";
+const words = (t) => t.split(" ").map((x, i) => <Fragment key={i}>{i > 0 && " "}<span className="ed-w"><span>{x}</span></span></Fragment>);
 
 export default function EditorialWorld() {
     const root = useRef(null);
@@ -32,7 +34,10 @@ export default function EditorialWorld() {
 
     useGSAP(() => {
         if (reduced) return;
-        gsap.from(".ed-mast > *", { y: 24, opacity: 0, duration: 0.8, stagger: 0.06, ease: "power3.out" });
+        // the masthead sets letter by letter (each rises out of the rule), then the lead headline word by word
+        gsap.from(".ed-ch", { yPercent: 115, rotate: 8, duration: 1.1, stagger: 0.055, ease: "expo.out", delay: 0.1 });
+        gsap.from(".ed-mast > :not(h1)", { y: 24, opacity: 0, duration: 0.8, stagger: 0.06, ease: "power3.out", delay: 0.45 });
+        gsap.from(".ed-lead h2 .ed-w > span", { yPercent: 110, duration: 0.9, stagger: 0.04, ease: "expo.out", delay: 0.7 });
         gsap.from(".ed-front > *", { y: 40, opacity: 0, duration: 0.9, stagger: 0.1, ease: "power3.out", delay: 0.2 });
         // print run: each section's rule draws across, then its content rises in, once. IntersectionObserver (not
         // ScrollTrigger positions) so late-loading fonts/images can never leave anything stuck invisible.
@@ -65,7 +70,7 @@ export default function EditorialWorld() {
         <div ref={root} className="ed">
             <header className="ed-mast">
                 <p className="ed-meta"><span>Ahmedabad</span><span>{today}</span><span>Vol. 2026 · {work.length} projects · {work.filter((w) => w.maintained).length} in production</span></p>
-                <h1>The Index</h1>
+                <h1 aria-label={TITLE}>{[...TITLE].map((c, i) => <span key={i} className="ed-ch" aria-hidden>{c === " " ? "\u00a0" : c}</span>)}</h1>
                 <p className="ed-deck"><em>The collected work of</em> {profile.name}, full-stack engineer. AI products, Android apps, live client sites.</p>
                 <nav className="ed-ear">
                     <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
@@ -78,7 +83,7 @@ export default function EditorialWorld() {
                 <a className="ed-lead" href={href(LEAD)}>
                     <Duo w={LEAD} size={1400} />
                     <p className="ed-kicker">Lead story · Product · {LEAD.year}</p>
-                    <h2>{LEAD.title}: an AI job search, built for one, then for many.</h2>
+                    <h2>{words(`${LEAD.title}: an AI job search, built for one, then for many.`)}</h2>
                     <p className="ed-standfirst">{LEAD.line}</p>
                     <p className="ed-more">Read the case study →</p>
                 </a>
