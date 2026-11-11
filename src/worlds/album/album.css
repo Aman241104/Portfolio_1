@@ -77,7 +77,13 @@
 .track-toggle { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(242, 240, 234, .25); background: none; color: var(--paper); font-size: 18px; line-height: 1; cursor: pointer; }
 .track[data-open] { background: rgba(242, 240, 234, .04); }
 .track[data-open] .track-toggle { background: var(--c); color: var(--ink); border-color: var(--c); }
-.track-more { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; padding: 10px 0 18px; animation: track-in .45s var(--ease-out); cursor: auto; }
+.track-more { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; padding: 10px 0 18px; cursor: auto;
+    /* opens to its real height (height: auto is interpolable here); browsers without it just fade in */
+    interpolate-size: allow-keywords; height: auto; overflow: clip;
+    transition: height var(--t-3) var(--ease-out), padding var(--t-3) var(--ease-out), opacity var(--t-3) var(--ease-out); }
+@starting-style { .track-more { height: 0; padding-block: 0; opacity: 0; } }
+.track-more > * { animation: track-in var(--t-3) var(--ease-out) both; }
+.track-more > :nth-child(2) { animation-delay: 80ms; }
 .track-more img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 6px; border: 1px solid rgba(242, 240, 234, .12); }
 .track-more p { margin: 0 0 10px; color: rgba(242, 240, 234, .8); }
 .track-links { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -113,13 +119,13 @@
         repeating-radial-gradient(circle, #0c0c0c 0 1.2px, #161616 1.6px 2.6px),
         #111;
     box-shadow: 0 30px 70px rgba(0, 0, 0, .7), inset 0 0 0 6px #0a0a0a, inset 0 0 0 7px rgba(255, 255, 255, .06);
-    animation: disc-out 1.4s .5s var(--ease-out) both; will-change: transform;
+    animation: disc-out 1.3s .95s var(--ease-out) both; will-change: transform;
 }
 /* light catching the grooves: a fixed sheen over the spinning record */
 .disc::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: conic-gradient(from 30deg, transparent 0 10%, rgba(255, 255, 255, .09) 14%, transparent 20% 52%, rgba(255, 255, 255, .07) 60%, transparent 66%); }
 .disc:active { cursor: grabbing; }
 .disc:focus-visible { outline: 3px solid var(--acid); outline-offset: 4px; }
-@keyframes disc-out { from { left: 2%; } }
+@keyframes disc-out { 0% { translate: -72% 0; rotate: -120deg; opacity: 0; } 1% { translate: -72% 0; rotate: -120deg; opacity: 1; } }   /* slides out of the sleeve, already turning */
 .disc-label {
     position: absolute; inset: 32%; border-radius: 50%; display: grid; place-content: center; text-align: center; background: var(--acid); color: var(--ink);
     transition: background .5s; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .15);
@@ -183,3 +189,12 @@
     .tour-dates li { font-size: 17px; }
 }
 .album { overflow-x: clip; }
+
+/* Arrival: the sleeve drops onto the table with a little weight, then the record slides out of it, turning. */
+@media (prefers-reduced-motion: no-preference) {
+    .sleeve { animation: sleeve-drop .9s var(--ease-spring) .2s both; }
+}
+@keyframes sleeve-drop { 0% { translate: 0 -60px; rotate: -7deg; scale: 1.08; opacity: 0; box-shadow: 0 90px 140px rgba(0, 0, 0, .3); } 60% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .disc { animation: none; } }
+/* The arrival waits behind the countdown and plays the moment the record is "out now". */
+.album[data-intro] .sleeve, .album[data-intro] .disc { animation-play-state: paused; }

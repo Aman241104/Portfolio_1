@@ -80,7 +80,7 @@ export default function AlbumWorld() {
     const job = experience[0], edu = experience[1];
 
     return (
-        <div ref={root} className="album" data-playing={playing || undefined} style={{ "--beat": `${BEAT_MS}ms` }}>
+        <div ref={root} className="album" data-intro={intro || undefined} data-playing={playing || undefined} style={{ "--beat": `${BEAT_MS}ms` }}>
             {intro && <Countdown onDone={endIntro} />}
             <header className="cover">
                 <Deck tracks={numbered} playing={playing} onOpen={openTrack}
