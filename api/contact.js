@@ -13,6 +13,11 @@ export const validate = (b) => {
     const email = String(b?.email ?? "").trim();
     const message = String(b?.message ?? "").trim();
     if (b?.website) return { spam: true };                              // honeypot: real people never see it
+    if (b?.kind === "lead") {                                           // the "Hiring?" card: email + optional role
+        if (!EMAIL.test(email) || email.length > 200) return { error: "That email doesn't look right." };
+        const role = message.slice(0, 200);
+        return { lead: true, role, name: "Hiring lead", email, message: `[lead] ${role || "no role given"}` };
+    }
     if (!name || name.length > 80) return { error: "Please add your name (up to 80 characters)." };
     if (!EMAIL.test(email) || email.length > 200) return { error: "That email doesn't look right." };
     if (message.length < 10 || message.length > 4000) return { error: "Write a little more (10 to 4000 characters)." };
@@ -45,11 +50,16 @@ export default async function handler(req, res) {
         }).catch(() => null);
         const r = await send({
             to: [TO], reply_to: v.email,
-            subject: `PX-01 · message from ${v.name}`,
+            subject: v.lead ? `PX-01 · hiring lead · ${v.email}${v.role ? ` · ${v.role}` : ""}` : `PX-01 · message from ${v.name}`,
             text: `${v.message}\n\n— ${v.name} <${v.email}>${id ? `\nmessage #${id}` : ""}`,
         });
         if (!r?.ok && !id) return res.status(502).json({ error: "Couldn't send right now. Email me instead." });
-        if (r?.ok) await send({                                   // confirmation to the sender; replies land with Aman
+        if (r?.ok && v.lead) await send({
+            to: [v.email], reply_to: TO,
+            subject: "Thanks for stopping by · Aman Patel",
+            text: `Hi,\n\nThanks for leaving your email on my portfolio. I'll send you a résumé tailored to ${v.role || "your role"} soon.\n\nIn the meantime: https://www.aman-patel.me\n\nAman Patel\nFull-stack engineer, Ahmedabad`,
+        });
+        else if (r?.ok) await send({                              // confirmation to the sender; replies land with Aman
             to: [v.email], reply_to: TO,
             subject: "Got your message · Aman Patel",
             text: `Hi ${v.name.split(" ")[0]},\n\nThanks for writing. Your message reached my inbox and I'll reply to this address.\n\nWhat you sent:\n> ${v.message.replace(/\n/g, "\n> ")}\n\nAman Patel\nFull-stack engineer, Ahmedabad\nhttps://www.aman-patel.me`,

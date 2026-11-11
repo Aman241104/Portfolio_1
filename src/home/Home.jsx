@@ -7,6 +7,9 @@ import Work from "./Work.jsx";
 import Experience from "./Experience.jsx";
 import Maintained from "./Maintained.jsx";
 import Skills from "./Skills.jsx";
+import Stats, { Tape } from "./Stats.jsx";
+import LiquidDock from "./LiquidDock.jsx";
+import Nudge from "./Nudge.jsx";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import sig from "./signature.json";
 import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
@@ -226,9 +229,21 @@ const Home = ({ onSelect }) => {
     const footer = useRef(null);
     const enterBtn = useRef(null);
     const heroOn = useInView(hero);
+    // phones: the world pill steps aside while the liquid dock is up (one floating bar, not two)
+    useEffect(() => { document.body.toggleAttribute("data-dock", !heroOn); return () => document.body.removeAttribute("data-dock"); }, [heroOn]);
+    // liquid glass: the light inside any .lg panel follows the cursor / finger
+    useEffect(() => {
+        const light = (e) => {
+            const el = e.target.closest?.(".lg");
+            if (!el) return;
+            const r = el.getBoundingClientRect();
+            el.style.setProperty("--gx", `${e.clientX - r.left}px`); el.style.setProperty("--gy", `${e.clientY - r.top}px`);
+        };
+        addEventListener("pointermove", light, { passive: true }); addEventListener("pointerdown", light, { passive: true });
+        return () => { removeEventListener("pointermove", light); removeEventListener("pointerdown", light); };
+    }, []);
     const footerOn = useInView(footer, "200px");
     const land = useRef(null);
-    const landOn = useInView(land);                  // the contact area (the quick dock hides there: same actions on screen)
     const [fontsOk, setFontsOk] = useState(false);
     const [booted, setBooted] = useState(false);
     const [phase, setPhase] = useState("idle");
@@ -425,10 +440,12 @@ const Home = ({ onSelect }) => {
             </div>
 
             <footer ref={footer} className="foot">
-<Work />
+<Stats />
+                <Work />
                 <Maintained />
                 <Experience />
                 <Skills />
+                <Tape items={["Say hello", "Résumé one tap away", "Replies from a real person", "Ahmedabad · IST", "Open to full-stack roles"]} tilt={1.4} />
 
                 <div ref={land} className="land" onClick={ripple}>
                     <div className="foot-dots" aria-hidden>
@@ -467,8 +484,8 @@ const Home = ({ onSelect }) => {
                                 {items.map((k) => {
                                     const body = <><span className="k-label">{k.label}</span><span className="k-hint">{k.hint}</span>{k.knob ? <i aria-hidden className="k-dot" /> : <i aria-hidden>{k.icon}</i>}</>;
                                     return k.href
-                                        ? <a key={k.label} className="key" href={k.href} {...(k.ext ? { target: "_blank", rel: "noreferrer" } : {})}>{body}</a>
-                                        : <button key={k.label} type="button" className={k.knob ? "key knob" : "key"} onClick={k.onClick}>{body}</button>;
+                                        ? <a key={k.label} className="key lg" href={k.href} {...(k.ext ? { target: "_blank", rel: "noreferrer" } : {})}>{body}</a>
+                                        : <button key={k.label} type="button" className={k.knob ? "key lg knob" : "key lg"} onClick={k.onClick}>{body}</button>;
                                 })}
                             </div>
                         ))}
@@ -480,13 +497,9 @@ const Home = ({ onSelect }) => {
                     </div>
                 </div>
             </footer>
-            {/* phones: résumé and email stay one tap away once the machine is off screen */}
-            <nav className="dock-m" data-on={(!heroOn && !landOn) || undefined} aria-label="Quick actions">
-                <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "dock" })}>Résumé ↓</a>
-                <a href={`mailto:${profile.email}`}>Email</a>
-                <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>Work</button>
-                <button type="button" aria-label="Back to the machine" onClick={() => hero.current.scrollIntoView({ behavior: "smooth" })}><i className="k-dot" aria-hidden /></button>
-            </nav>
+            {/* phones: Mindcore's liquid tab bar (sections + résumé), once the machine is off screen */}
+            <LiquidDock on={!heroOn} resume={profile.resume} />
+            <Nudge />
             <Cursor />
         </main>
     );

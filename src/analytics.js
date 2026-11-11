@@ -1,7 +1,7 @@
 // PostHog, loaded after the page is idle and only when VITE_POSTHOG_KEY is set (Vercel env). Never in `vite dev`.
 // Product events only (no autocapture, no session recording): what people do with the machine and the footer.
 const KEY = import.meta.env.VITE_POSTHOG_KEY;
-let ph = null;
+let ph = null, who = null;
 const queue = [];
 
 export const initAnalytics = () => {
@@ -13,12 +13,20 @@ export const initAnalytics = () => {
             disable_session_recording: true, respect_dnt: true,
         });
         ph = posthog;
+        if (who) ph.identify(...who);
         queue.splice(0).forEach(([e, p]) => ph.capture(e, p));
     }).catch(() => {});
     (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(start);
 };
 
 export const track = (event, props) => {
+    if (event === "resume_opened" && typeof window !== "undefined") window.dispatchEvent(new Event("px01:resume"));   // the nudge listens
     if (ph) ph.capture(event, props);
     else if (KEY && queue.length < 50) queue.push([event, props]);
+};
+
+// Only ever called with an email the visitor typed into the hiring card themselves.
+export const identify = (email, props) => {
+    if (ph) ph.identify(email, { email, ...props });
+    else who = [email, { email, ...props }];
 };
