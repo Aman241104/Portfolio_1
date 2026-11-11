@@ -37,7 +37,7 @@ const jsonLd = () => {
 };
 
 const body = () => `
-<main style="max-width:760px;margin:0 auto;padding:48px 20px;font:15px/1.6 system-ui,sans-serif;color:#8a8780">
+<main class="seo" style="max-width:760px;margin:0 auto;padding:48px 20px;font:15px/1.6 system-ui,sans-serif;color:#8a8780">
   <h1 style="color:#edeae3;margin:0">Aman Patel — Full-Stack Engineer in Ahmedabad</h1>
   <p>Full-stack engineer building web apps, AI products and 3D interfaces with React, Next.js, TypeScript and Python. Open to on-site or hybrid roles.
   <a href="/files/resume.pdf">Résumé (PDF)</a> · <a href="mailto:patelaman0241@gmail.com">patelaman0241@gmail.com</a> · ${SAME_AS.map((u) => `<a href="${u}">${esc(u.replace(/^https:\/\/(www\.)?/, ""))}</a>`).join(" · ")}</p>

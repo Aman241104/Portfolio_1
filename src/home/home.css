@@ -402,8 +402,9 @@
     .home:is([data-phase="revealed"], [data-phase="transitioning"]) :is(.hero-word, .ink > :not(.pin)) { opacity: 0 !important; transition: opacity .3s; }
     .pin-knob { display: none; }                  /* the keychain row owns that space; the status line says "Tap the red knob" */
     .n-role, .n-city, .tag { display: none; }
-    .signature { right: 3vw; font-size: 10.5vw; }
-    .n-craft { right: 5vw; font-size: 14px; }
+    /* phones: the signature sits in the gap above the word instead of across it (legibility at 20vw) */
+    .signature { right: 4vw; font-size: 8.5vw; bottom: calc(var(--word-bottom) + var(--word-h) - 1vw); }
+    .n-craft { display: none; }
     .sig-mark { left: var(--gutter); width: 70px; bottom: calc(var(--word-bottom) + var(--word-h) + 4px); }
     .work, .xp { padding-top: 9vh; }
     .hire { padding: 18px; margin-bottom: 7vh; }

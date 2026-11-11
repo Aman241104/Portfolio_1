@@ -130,9 +130,17 @@ const place = (aspect, framing) => {
     return (phone ? PHONE : DESKTOP).map(({ sx, sy, item }, i) => {
         // inner columns: keep a gap from the machine on screens where it takes more width
         if (!phone && Math.abs(sx) < 0.7) sx = Math.sign(sx) * Math.max(Math.abs(sx), (sx < 0 ? -box.min.x : box.max.x) + 0.12);
-        ray.setFromCamera({ x: sx, y: sy }, cam);
-        const t = ((phone ? -3 : -3.2) - cam.position.z) / ray.ray.direction.z;   // set back: the archive frames, the machine leads
-        return { pos: ray.ray.at(t, new THREE.Vector3()), item, seed: i + 1, cable: true, phone };
+        const at = (y) => { ray.setFromCamera({ x: sx, y }, cam); return ray.ray.at(((phone ? -3 : -3.2) - cam.position.z) / ray.ray.direction.z, new THREE.Vector3()); };
+        let pos = at(sy), scale = phone ? 1 : 0.82;
+        if (phone) {
+            // phones: the machine's height on screen depends on the aspect, so hang each piece (object + label,
+            // ~1.7 units under its ring) clear of the machine's real top; shrink if even the top of the screen is too low
+            const bottomY = (p, k) => new THREE.Vector3(p.x, p.y - 1.7 * k, p.z).project(cam).y;
+            const clear = box.max.y + 0.04;
+            for (let y = sy; y <= 0.82 && bottomY(pos, scale) < clear; y += 0.02) pos = at(y);
+            while (scale > 0.6 && bottomY(pos, scale) < clear) scale -= 0.05;
+        }
+        return { pos, item, seed: i + 1, cable: true, phone, scale };
     });
 };
 
@@ -166,7 +174,7 @@ const Keychain = ({ spot, index, lit, jackpot, kick }) => {
         const k = reduced ? 1 : t0.current === null ? 0 : clamp01((t - t0.current - 1.4 - index * 0.12) / 1.2);
         const pop = Math.sin(clamp01(burst.current / 1.4) * Math.PI);
         root.current.position.set(spot.pos.x, spot.pos.y + (1 - outBack(k, 1.1)) * 6 + Math.sin(t * 0.8 + index * 0.9) * 0.06 * still + pop * 0.25, spot.pos.z);
-        root.current.scale.setScalar((spot.phone ? 1 : 0.82) * (hover.current ? 1.08 : 1));
+        root.current.scale.setScalar(spot.scale * (hover.current ? 1.08 : 1));
         root.current.visible = k > 0;
         // one gentle wave across the set (phase by position), facing front; touch/win = one full turn, settles front
         turned.current = THREE.MathUtils.damp(turned.current, turns.current, 2.4, dt);
