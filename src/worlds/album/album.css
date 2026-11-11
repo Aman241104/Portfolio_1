@@ -69,8 +69,6 @@
 .album .btn:active { transform: scale(.97); }
 /* playing: the cover becomes the record, waveforms pump on the beat */
 .cover-art { transition: border-radius .8s cubic-bezier(.16, 1, .3, 1), box-shadow .8s; }
-.album[data-playing] .cover-art { border-radius: 50%; animation: album-spin 3.2s linear infinite; box-shadow: 0 0 0 10px #111, 0 40px 90px rgba(0, 0, 0, .6); }
-@keyframes album-spin { to { transform: rotate(360deg); } }
 .album[data-playing] .wave i { background: var(--c); animation: pump var(--beat) ease-in-out infinite alternate; animation-delay: var(--d); }
 .album[data-playing] .cover h1 { animation: album-thump var(--beat) ease-out infinite; }
 @keyframes album-thump { 0% { transform: scale(1.015); } 30% { transform: none; } }
@@ -91,7 +89,7 @@
     .wave { grid-column: 2 / -1; grid-row: 2; }
     .track-more { grid-template-columns: 1fr; gap: 12px; }
 }
-@media (prefers-reduced-motion: reduce) { .album[data-playing] .cover-art, .album[data-playing] .cover h1 { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .album[data-playing] .cover h1 { animation: none; } }
 .track .track-more img { width: 100%; height: auto; filter: none; }
 @media (max-width: 760px) {
     .cover-cta { flex-wrap: wrap; }
@@ -102,3 +100,86 @@
 .track-toggle { position: relative; }
 .track-toggle::before { content: ""; position: absolute; inset: -8px; }
 .liner { display: inline-block; padding: 10px 0; }
+
+/* ============================================================ the deck: sleeve + record you can scratch */
+.deck { display: grid; gap: 22px; }
+.deck-stage { position: relative; width: min(100%, 540px); aspect-ratio: 1.667; }
+.sleeve { position: absolute; left: 0; top: 0; width: 60%; aspect-ratio: 1; z-index: 2; box-shadow: 0 40px 90px rgba(0, 0, 0, .65); }
+.sleeve .cover-art { width: 100%; height: 100%; display: block; border-radius: 3px; box-shadow: 0 0 0 1px rgba(242, 240, 234, .08); }
+.disc {
+    position: absolute; top: 1.5%; left: 43%; width: 57%; aspect-ratio: 1; border-radius: 50%; z-index: 1; cursor: grab; touch-action: none;
+    background:
+        radial-gradient(circle, transparent 0 17%, rgba(255, 255, 255, .03) 17.5%, transparent 18%),
+        repeating-radial-gradient(circle, #0c0c0c 0 1.2px, #161616 1.6px 2.6px),
+        #111;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .7), inset 0 0 0 6px #0a0a0a, inset 0 0 0 7px rgba(255, 255, 255, .06);
+    animation: disc-out 1.4s .5s cubic-bezier(.16, 1, .3, 1) both; will-change: transform;
+}
+/* light catching the grooves: a fixed sheen over the spinning record */
+.disc::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: conic-gradient(from 30deg, transparent 0 10%, rgba(255, 255, 255, .09) 14%, transparent 20% 52%, rgba(255, 255, 255, .07) 60%, transparent 66%); }
+.disc:active { cursor: grabbing; }
+.disc:focus-visible { outline: 3px solid var(--acid); outline-offset: 4px; }
+@keyframes disc-out { from { left: 2%; } }
+.disc-label {
+    position: absolute; inset: 32%; border-radius: 50%; display: grid; place-content: center; text-align: center; background: var(--acid); color: var(--ink);
+    transition: background .5s; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .15);
+}
+.disc-label b { font: 400 clamp(26px, 4vw, 40px)/1 "Russo One", sans-serif; }
+.disc-label i { font: 700 9px/1 "Space Mono", monospace; letter-spacing: .2em; font-style: normal; margin-top: 4px; }
+.disc-label::after { content: ""; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--ink); }
+.album[data-era="b"] .disc-label { background: var(--b); }
+.album[data-era="deluxe"] .disc-label { background: var(--dlx); }
+.deck-read { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; min-height: 48px; }
+.deck-read .mono { flex-basis: 100%; color: var(--acid); }
+.deck-title { margin: 0; font: 600 20px/1.2 "Geist", sans-serif; letter-spacing: -0.02em; flex: 1; min-width: 0; }
+.deck-title .mono { color: #8d8a84; margin-right: 6px; }
+.deck-read .btn { padding: 10px 16px; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .disc { animation: none; } }
+
+/* ============================================================ B-sides: real songs via a visible YouTube embed */
+.bsides, .merch { max-width: 1200px; margin: 0 auto; padding: 70px 20px 0; }
+.bsides { --c: var(--b); }
+.bs-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; margin-top: 22px; }
+.bs-player { aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #111; box-shadow: 0 0 0 1px rgba(242, 240, 234, .1); }
+.bs-player iframe { width: 100%; height: 100%; border: 0; display: block; }
+.bs-idle { position: relative; width: 100%; height: 100%; border: 0; padding: 0; cursor: pointer; background: #000; color: var(--paper); }
+.bs-idle img { width: 100%; height: 100%; object-fit: cover; opacity: .55; display: block; }
+.bs-idle span { position: absolute; left: 18px; bottom: 16px; font: 600 16px "Geist", sans-serif; background: var(--b); color: var(--ink); padding: 10px 16px; border-radius: 999px; }
+.bs-list { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow: auto; scrollbar-width: thin; }
+.bs-list button { width: 100%; display: grid; grid-template-columns: 34px 56px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px 6px; border: 0; border-bottom: 1px solid rgba(242, 240, 234, .08); background: none; color: var(--paper); text-align: left; cursor: pointer; font: inherit; border-radius: 6px; }
+.bs-list button:hover, .bs-list button[aria-pressed="true"] { background: rgba(255, 61, 154, .12); }
+.bs-list button[aria-pressed="true"] .mono { color: var(--b); }
+.bs-list img { width: 56px; height: 42px; object-fit: cover; border-radius: 4px; }
+.bs-t b { display: block; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bs-t small { color: #a5a29b; font-size: 13px; }
+.bs-fine { margin-top: 14px !important; text-transform: none !important; letter-spacing: .02em !important; }
+
+/* ============================================================ merch table (the hire card) */
+.merch { --c: var(--acid); }
+.merch-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 26px 0 30px; }
+.album .merch-item {
+    position: relative; display: flex; flex-direction: column; gap: 6px; padding: 26px 22px 22px; border-radius: 6px; background: var(--paper); color: var(--ink);
+    transform: rotate(var(--r, -1deg)); transition: transform .35s cubic-bezier(.2, 1.4, .4, 1), box-shadow .35s; box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+}
+.merch-item:nth-child(2) { --r: .8deg; }
+.merch-item:nth-child(3) { --r: -.6deg; }
+.merch-item:hover { transform: rotate(0) translateY(-6px); box-shadow: 0 28px 60px rgba(0, 0, 0, .55); }
+.merch-item .mono { color: #6b6862; }
+.merch-item b { font: 400 clamp(28px, 3vw, 38px)/1 "Russo One", sans-serif; letter-spacing: -0.01em; }
+.merch-item small { color: #4a4843; font-size: 14px; word-break: break-word; }
+.merch-item i { margin-top: 10px; font-style: normal; font-weight: 600; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.merch-item i a { text-decoration: underline; text-decoration-color: var(--ink); text-underline-offset: 4px; padding: 8px 0; }
+.merch-item.hot { background: var(--acid); }
+.album[data-era="b"] .merch-item.hot { background: var(--b); }
+.album[data-era="deluxe"] .merch-item.hot { background: var(--dlx); color: var(--paper); }
+.merch-tag { position: absolute; top: -12px; right: 18px; padding: 6px 10px; background: var(--ink); color: var(--acid); font: 700 11px "Space Mono", monospace; letter-spacing: .14em; border-radius: 3px; transform: rotate(4deg); }
+.tour-dates { list-style: none; margin: 0; padding: 0; }
+.tour-dates li { display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(242, 240, 234, .12); font-size: 20px; }
+@media (max-width: 760px) {
+    .deck-stage { width: 100%; }
+    .bs-grid { grid-template-columns: 1fr; }
+    .bs-list { max-height: none; }
+    .merch-row { grid-template-columns: 1fr; gap: 22px; }
+    .tour-dates li { font-size: 17px; }
+}
+.album { overflow-x: clip; }

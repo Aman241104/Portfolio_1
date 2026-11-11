@@ -37,3 +37,15 @@ export const play = () => {
     clearInterval(timer); timer = setInterval(tick, 25); tick();
 };
 export const stop = () => { clearInterval(timer); timer = null; };
+
+// One scratch "tick" as the record crosses a track boundary: a short band-passed noise sweep whose pitch follows
+// the hand's speed. Made on the fly like the beat (no samples). Needs a user gesture first (pointerdown is one).
+export const scratch = (speed = 1) => {
+    ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === "suspended") ctx.resume();
+    const t = ctx.currentTime, s = ctx.createBufferSource(), f = ctx.createBiquadFilter();
+    s.buffer = noise(); f.type = "bandpass"; f.Q.value = 6;
+    const hz = 500 + Math.min(Math.abs(speed), 30) * 90;
+    f.frequency.setValueAtTime(hz, t); f.frequency.exponentialRampToValueAtTime(hz * (speed > 0 ? 2.2 : 0.45), t + 0.07);
+    s.connect(f).connect(env(t, 0.22, 0.08)); s.start(t); s.stop(t + 0.09);
+};

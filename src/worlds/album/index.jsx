@@ -7,10 +7,12 @@ import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
 import { onRepeat, watching } from "#content/taste.js";
 import { profile } from "#content/profile.js";
+import Deck from "./Deck.jsx";
 import "./album.css";
 
 // World 4: the portfolio as an album drop. Projects = tracklist, stack = features, case studies = liner notes,
-// concepts = deluxe edition, experience = credits. Original type and generated waveforms only: no cover art, no audio.
+// concepts = deluxe edition, experience = credits, résumé = merch. Original type, generated cover + beat; the only real
+// music is the B-sides player, an official (visible, no-cookie) YouTube embed loaded only when someone taps a song.
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 const Wave = ({ seed }) => {
@@ -54,7 +56,13 @@ export default function AlbumWorld() {
     const root = useRef(null);
     const [playing, setPlaying] = useState(false);
     const [open, setOpen] = useState(null);
-    const toggle = () => { if (playing) { stop(); setPlaying(false); } else { play(); setPlaying(true); } };
+    const [yt, setYt] = useState(null);
+    const toggle = () => { if (playing) { stop(); setPlaying(false); } else { setYt(null); play(); setPlaying(true); } };
+    const openTrack = (w) => {
+        setOpen(w.slug);
+        requestAnimationFrame(() => document.getElementById(`t-${w.slug}`)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }));
+    };
+    const listen = (id) => { stop(); setPlaying(false); setYt(id); };
     useEffect(() => () => stop(), []);
     // era colour follows the side you're reading (lime → pink → blue)
     useEffect(() => {
@@ -75,7 +83,8 @@ export default function AlbumWorld() {
         <div ref={root} className="album" data-playing={playing || undefined} style={{ "--beat": `${BEAT_MS}ms` }}>
             {intro && <Countdown onDone={endIntro} />}
             <header className="cover">
-                <canvas ref={cover} className="cover-art" width="900" height="900" role="img" aria-label="Generated cover art: one ring per project" />
+                <Deck tracks={numbered} playing={playing} onOpen={openTrack}
+                    sleeve={<canvas ref={cover} className="cover-art" width="900" height="900" role="img" aria-label="Generated cover art: one ring per project" />} />
                 <div className="cover-copy">
                 <p className="mono">Aman Patel · Self-released · Ahmedabad, {new Date().getFullYear()}</p>
                 <h1>SHIP<br />IT<span>(Deluxe)</span></h1>
@@ -99,7 +108,7 @@ export default function AlbumWorld() {
                                     const n = trackNo(w);
                                     const notes = cases[w.slug];
                                     return (
-                                        <li key={w.slug} className="track" data-open={open === w.slug || undefined}
+                                        <li key={w.slug} id={`t-${w.slug}`} className="track" data-open={open === w.slug || undefined}
                                             onClick={(e) => { if (!e.target.closest("a")) setOpen(open === w.slug ? null : w.slug); }}>
                                             <span className="tn mono">{String(n).padStart(2, "0")}</span>
                                             <img src={shot(w, 160)} alt="" loading="lazy" />
@@ -150,20 +159,54 @@ export default function AlbumWorld() {
                 </dl>
             </section>
 
-            <section className="samples">
-                <h2>Samples &amp; influences</h2>
-                <p>On repeat while building this: {onRepeat.slice(0, 6).map((t) => `${t.title} (${t.artist})`).join(", ")}.</p>
-                <p>Rewatching {watching.sitcoms.slice(0, 3).join(", ")}.</p>
+            <section className="bsides" aria-labelledby="bs-h">
+                <div className="side-head"><h2 id="bs-h">B-sides</h2><p className="mono">What I code to · tap a song to play it</p></div>
+                <div className="bs-grid">
+                    <div className="bs-player">
+                        {yt ? (
+                            <iframe key={yt} src={`https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&modestbranding=1`} title="B-side player"
+                                allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen loading="lazy" />
+                        ) : (
+                            <button type="button" className="bs-idle" onClick={() => listen(onRepeat[0].id)}>
+                                <img src={`https://i.ytimg.com/vi/${onRepeat[0].id}/hqdefault.jpg`} alt="" loading="lazy" />
+                                <span>▶ {onRepeat[0].title} · {onRepeat[0].artist}</span>
+                            </button>
+                        )}
+                    </div>
+                    <ol className="bs-list">
+                        {onRepeat.map((t, i) => (
+                            <li key={t.id}>
+                                <button type="button" aria-pressed={yt === t.id} onClick={() => listen(t.id)}>
+                                    <span className="mono">{String.fromCharCode(66)}{i + 1}</span>
+                                    <img src={`https://i.ytimg.com/vi/${t.id}/default.jpg`} alt="" loading="lazy" />
+                                    <span className="bs-t"><b>{t.title}</b><small>{t.artist}{t.note ? ` · ${t.note}` : ""}</small></span>
+                                </button>
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+                <p className="mono bs-fine">Songs play from YouTube, by their artists. Also rewatching: {watching.sitcoms.slice(0, 3).join(", ")}.</p>
             </section>
 
-            <section className="tour">
-                <h2>Tour dates</h2>
-                <ul>
+            <section className="merch" aria-labelledby="merch-h">
+                <div className="side-head"><h2 id="merch-h">Merch table</h2><p className="mono">Everything free · take what you need</p></div>
+                <div className="merch-row">
+                    <a className="merch-item" href={profile.resume} target="_blank" rel="noreferrer">
+                        <span className="merch-tag">FREE</span><span className="mono">The tee</span><b>Résumé</b><small>One page, PDF. Fits every role.</small><i>Download ↓</i>
+                    </a>
+                    <div className="merch-item">
+                        <span className="merch-tag">FREE</span><span className="mono">The poster set</span><b>Tailored résumés</b><small>Pick the cut for the job.</small>
+                        <i>{[["fullstack", "Full-stack"], ["frontend", "Frontend"], ["ai", "AI products"]].map(([k, l]) => <a key={k} href={`/resume.html?for=${k}`}>{l} →</a>)}</i>
+                    </div>
+                    <a className="merch-item hot" href={`mailto:${profile.email}`}>
+                        <span className="merch-tag">FREE</span><span className="mono">The vinyl</span><b>Book a show</b><small>{profile.email}</small><i>Email me →</i>
+                    </a>
+                </div>
+                <ul className="tour-dates">
                     <li><b>Ahmedabad</b><span className="mono">on-site · available now</span></li>
-                    <li><b>Hybrid</b><span className="mono">Gujarat · available now</span></li>
+                    <li><b>Gujarat</b><span className="mono">hybrid · available now</span></li>
                     <li><b>Remote</b><span className="mono">anywhere · available now</span></li>
                 </ul>
-                <a className="btn" href={`mailto:${profile.email}`}>Book a show: {profile.email}</a>
             </section>
         </div>
     );
