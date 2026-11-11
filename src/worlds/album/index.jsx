@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { drawCover } from "./cover.js";
+import { play, stop, BEAT_MS } from "./beat.js";
 import { work, KINDS, shot } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
@@ -13,8 +14,10 @@ import "./album.css";
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 const Wave = ({ seed }) => {
-    let h = hash(seed);
-    const bars = Array.from({ length: 40 }, () => { h = (h * 1103515245 + 12345) >>> 0; return 18 + (h % 82); });
+    const bars = Array.from({ length: 40 }).reduce((acc) => {
+        const h = ((acc.h * 1103515245 + 12345) >>> 0);
+        return { h, v: [...acc.v, 18 + (h % 82)] };
+    }, { h: hash(seed), v: [] }).v;
     return <span className="wave" aria-hidden>{bars.map((v, i) => <i key={i} style={{ "--h": `${v}%`, "--d": `${(i % 7) * 60}ms` }} />)}</span>;
 };
 
@@ -48,15 +51,28 @@ export default function AlbumWorld() {
     const [intro, setIntro] = useState(() => { try { return !reduced && !sessionStorage.getItem("px01-album-intro"); } catch { return !reduced; } });
     const endIntro = () => { setIntro(false); try { sessionStorage.setItem("px01-album-intro", "1"); } catch { /* private mode */ } };
     const cover = useRef(null);
+    const root = useRef(null);
+    const [playing, setPlaying] = useState(false);
+    const [open, setOpen] = useState(null);
+    const toggle = () => { if (playing) { stop(); setPlaying(false); } else { play(); setPlaying(true); } };
+    useEffect(() => () => stop(), []);
+    // era colour follows the side you're reading (lime → pink → blue)
+    useEffect(() => {
+        const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && root.current?.setAttribute("data-era", e.target.dataset.era)), { rootMargin: "-45% 0px -45% 0px" });
+        root.current?.querySelectorAll(".side").forEach((el) => io.observe(el));
+        return () => io.disconnect();
+    }, []);
     useEffect(() => {
         const draw = () => cover.current && drawCover(cover.current, work.map((w) => w.slug));
         document.fonts?.ready.then(draw); draw();
     }, []);
-    let n = 0;
+    // track numbers run across the sides: A, then B, then Deluxe
+    const numbered = SIDES.flatMap((side) => work.filter((w) => side.kinds.includes(w.kind)));
+    const trackNo = (w) => numbered.indexOf(w) + 1;
     const job = experience[0], edu = experience[1];
 
     return (
-        <div className="album">
+        <div ref={root} className="album" data-playing={playing || undefined} style={{ "--beat": `${BEAT_MS}ms` }}>
             {intro && <Countdown onDone={endIntro} />}
             <header className="cover">
                 <canvas ref={cover} className="cover-art" width="900" height="900" role="img" aria-label="Generated cover art: one ring per project" />
@@ -65,7 +81,8 @@ export default function AlbumWorld() {
                 <h1>SHIP<br />IT<span>(Deluxe)</span></h1>
                 <p className="cover-sub">{work.length} tracks · {work.filter((w) => w.live).length} out now on their own domains · {skillGroups.reduce((a, g) => a + g.items.length, 0)} instruments</p>
                 <div className="cover-cta">
-                    <a href="#tracklist" className="btn">Play tracklist ↓</a>
+                    <button type="button" className="btn" onClick={toggle} aria-pressed={playing}>{playing ? "❚❚ Pause the record" : "▶ Play the record"}</button>
+                    <a href="#tracklist" className="btn ghost">Tracklist ↓</a>
                     <a href={profile.resume} target="_blank" rel="noreferrer" className="btn ghost">Press kit (résumé)</a>
                 </div>
                 </div>
@@ -75,14 +92,15 @@ export default function AlbumWorld() {
                 {SIDES.map((side) => {
                     const tracks = work.filter((w) => side.kinds.includes(w.kind));
                     return (
-                        <section key={side.id} className={`side side-${side.id}`}>
+                        <section key={side.id} className={`side side-${side.id}`} data-era={side.id}>
                             <div className="side-head"><h2>{side.label}</h2><p className="mono">{side.note} · {tracks.length} tracks</p></div>
                             <ol>
                                 {tracks.map((w) => {
-                                    n += 1;
+                                    const n = trackNo(w);
                                     const notes = cases[w.slug];
                                     return (
-                                        <li key={w.slug} className="track">
+                                        <li key={w.slug} className="track" data-open={open === w.slug || undefined}
+                                            onClick={(e) => { if (!e.target.closest("a")) setOpen(open === w.slug ? null : w.slug); }}>
                                             <span className="tn mono">{String(n).padStart(2, "0")}</span>
                                             <img src={shot(w, 160)} alt="" loading="lazy" />
                                             <div className="tt">
@@ -98,6 +116,21 @@ export default function AlbumWorld() {
                                                 </p>
                                             </div>
                                             <Wave seed={w.slug} />
+                                            <button type="button" className="track-toggle" aria-expanded={open === w.slug} aria-label={`More about ${w.title}`}>{open === w.slug ? "−" : "+"}</button>
+                                            {open === w.slug && (
+                                                <div className="track-more">
+                                                    <img src={shot(w, 1100)} alt={`${w.title} screenshot`} />
+                                                    <div>
+                                                        <p className="mono">Track {String(n).padStart(2, "0")} · {KINDS[w.kind]}</p>
+                                                        <p>{w.line}</p>
+                                                        {w.stack && <p className="mono">feat. {w.stack}</p>}
+                                                        <p className="track-links">
+                                                            {w.url && <a className="btn" href={w.url} target="_blank" rel="noreferrer">{w.url.includes("github.com") ? "Code ↗" : `Listen live: ${host(w.url)} ↗`}</a>}
+                                                            {notes && <a className="btn ghost" href={`/case.html?p=${w.slug}`}>Liner notes →</a>}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </li>
                                     );
                                 })}
