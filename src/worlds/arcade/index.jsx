@@ -20,7 +20,9 @@ const level = () => {
     const bw = (W - 40 - (COLS - 1) * 6) / COLS;
     return ordered.map((p, i) => ({ p, x: 20 + (i % COLS) * (bw + 6), y: 60 + Math.floor(i / COLS) * 26, w: bw, h: 20, alive: true }));
 };
-const fresh = () => ({ bricks: level(), score: 0, lives: 3, caps: [], parts: [], pad: { x: W / 2 - 50, w: 100 }, ball: { x: W / 2, y: H - 60, vx: 0, vy: 0, stuck: true } });
+const reducedMotion = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Juice state: hit-stop (ms frozen on impact), shake (px, decays), white crack flashes, combo pops.
+const fresh = () => ({ bricks: level(), score: 0, lives: 3, caps: [], parts: [], flashes: [], pops: [], stop: 0, shake: 0, combo: 0, pad: { x: W / 2 - 50, w: 100 }, ball: { x: W / 2, y: H - 60, vx: 0, vy: 0, stuck: true } });
 
 export default function ShipBreaker() {
     useFonts(FONTS);
@@ -57,10 +59,14 @@ export default function ShipBreaker() {
             if (b.vy > 0 && b.y > H - 34 && b.y < H - 22 && b.x > p.x - 4 && b.x < p.x + p.w + 4) {
                 const t = (b.x - (p.x + p.w / 2)) / (p.w / 2), sp = Math.min(9, Math.hypot(b.vx, b.vy) + 0.06);
                 b.vx = sp * Math.sin(t * 1.05); b.vy = -sp * Math.cos(t * 1.05); b.y = H - 34;
+                g.combo = 0; p.squash = 6;
             }
             for (const k of g.bricks) {
                 if (!k.alive || b.x < k.x - 5 || b.x > k.x + k.w + 5 || b.y < k.y - 5 || b.y > k.y + k.h + 5) continue;
-                k.alive = false; g.score += 100;
+                k.alive = false; g.combo += 1; g.score += 100 * g.combo;
+                g.stop = 40; g.shake = Math.max(g.shake, 3);          // hit-stop: the world holds its breath for 40 ms
+                g.flashes.push({ x: k.x, y: k.y, w: k.w, h: k.h, life: 9 });
+                if (g.combo > 1) g.pops.push({ x: k.x + k.w / 2, y: k.y, text: `x${g.combo} COMBO`, life: 48 });
                 const ox = Math.min(Math.abs(b.x - k.x), Math.abs(b.x - k.x - k.w)), oy = Math.min(Math.abs(b.y - k.y), Math.abs(b.y - k.y - k.h));
                 if (ox < oy) b.vx *= -1; else b.vy *= -1;
                 for (let i = 0; i < 12; i++) g.parts.push({ x: k.x + k.w / 2, y: k.y + k.h / 2, vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6, life: 26, c: COLORS[k.p.kind] });
@@ -75,7 +81,7 @@ export default function ShipBreaker() {
             }
             g.caps = g.caps.filter((cp) => !cp.done && cp.y < H);
             if (b.y > H + 10) {
-                g.lives -= 1;
+                g.lives -= 1; g.shake = 14; g.combo = 0;
                 if (g.lives <= 0) setHud({ score: g.score, lives: 0, state: "over" });
                 else { g.pad = { x: W / 2 - 50, w: g.pad.w }; g.ball = { x: W / 2, y: H - 60, vx: 0, vy: 0, stuck: true }; setHud({ score: g.score, lives: g.lives, state: "ready" }); }
                 return;
@@ -84,7 +90,10 @@ export default function ShipBreaker() {
         };
         const draw = (t) => {
             const g = game.current;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, W, H);
+            if (g.shake > 0.3 && !reducedMotion) ctx.translate((Math.random() - 0.5) * g.shake, (Math.random() - 0.5) * g.shake);
+            g.shake *= 0.86;
             ctx.textBaseline = "middle"; ctx.textAlign = "center";
             ctx.font = "700 8px Silkscreen, monospace";
             for (const k of g.bricks) {
@@ -94,6 +103,8 @@ export default function ShipBreaker() {
                 ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.fillRect(k.x, k.y + k.h - 2, k.w, 2);
                 ctx.fillStyle = k.p.kind === "client" ? "#fff" : "#111"; ctx.fillText(k.p.title.slice(0, 12).toUpperCase(), k.x + k.w / 2, k.y + k.h / 2 + 1);
             }
+            for (const f of g.flashes) { ctx.fillStyle = `rgba(255,255,255,${f.life / 9})`; ctx.fillRect(f.x - (9 - f.life), f.y - (9 - f.life) / 2, f.w + (9 - f.life) * 2, f.h + 9 - f.life); f.life--; }
+            g.flashes = g.flashes.filter((f) => f.life > 0);
             for (const pt of g.parts) { pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.18; pt.life--; ctx.fillStyle = pt.c; ctx.fillRect(Math.round(pt.x), Math.round(pt.y), 4, 4); }
             g.parts = g.parts.filter((pt) => pt.life > 0);
             ctx.font = "700 9px Silkscreen, monospace";
@@ -101,8 +112,18 @@ export default function ShipBreaker() {
                 ctx.fillStyle = "#ffd23f"; ctx.fillRect(cp.x - 36, cp.y - 8, 72, 16);
                 ctx.fillStyle = "#111"; ctx.fillText(cp.s.slice(0, 11).toUpperCase(), cp.x, cp.y + 1);
             }
-            const p = g.pad; ctx.fillStyle = "#f2efe8"; ctx.fillRect(Math.round(p.x), H - 30, p.w, 10);
-            ctx.fillStyle = "#e8392b"; ctx.fillRect(Math.round(p.x), H - 30, 8, 10); ctx.fillRect(Math.round(p.x + p.w - 8), H - 30, 8, 10);
+            // the paddle squashes on contact and springs back
+            const p = g.pad, sq = reducedMotion ? 0 : (p.squash || 0); p.squash = sq * 0.8;
+            ctx.fillStyle = "#f2efe8"; ctx.fillRect(Math.round(p.x - sq), H - 30 + sq / 2, p.w + sq * 2, 10 - sq / 2);
+            ctx.fillStyle = "#e8392b"; ctx.fillRect(Math.round(p.x - sq), H - 30 + sq / 2, 8, 10 - sq / 2); ctx.fillRect(Math.round(p.x + p.w + sq - 8), H - 30 + sq / 2, 8, 10 - sq / 2);
+            ctx.textAlign = "center";
+            for (const pp of g.pops) {
+                const age = 48 - pp.life, sc = reducedMotion ? 1 : age < 8 ? 0.6 + age * 0.08 : 1.24 - Math.min(0.24, (age - 8) * 0.03);
+                ctx.save(); ctx.translate(pp.x, pp.y - age * 0.6); ctx.scale(sc, sc);
+                ctx.font = "400 14px Silkscreen, monospace"; ctx.fillStyle = `rgba(255,210,63,${Math.min(1, pp.life / 16)})`; ctx.fillText(pp.text, 0, 0);
+                ctx.restore(); pp.life--;
+            }
+            g.pops = g.pops.filter((pp) => pp.life > 0);
             ctx.fillStyle = "#f2efe8"; ctx.fillRect(Math.round(g.ball.x) - 5, Math.round(g.ball.y) - 5, 10, 10);   // a square ball, like the hardware
             // HUD painted on the glass
             ctx.font = "400 14px Silkscreen, monospace"; ctx.textAlign = "left"; ctx.fillStyle = "#e8392b"; ctx.fillText("1UP", 16, 20);
@@ -110,12 +131,14 @@ export default function ShipBreaker() {
             ctx.textAlign = "center"; ctx.fillStyle = "#e8392b"; ctx.fillText("HI-SCORE", W / 2 - 40, 20);
             ctx.fillStyle = "#f2efe8"; ctx.fillText(String(Math.max(g.score, hiRef.current)).padStart(6, "0"), W / 2 + 50, 20);
             ctx.textAlign = "right"; ctx.fillStyle = "#ffd23f"; ctx.fillText("■ ".repeat(Math.max(0, g.lives)).trim(), W - 16, 20);
-            if (hudRef.current === "attract" && Math.floor(t / 600) % 2 === 0) { ctx.textAlign = "center"; ctx.fillStyle = "#ffd23f"; ctx.font = "400 22px Silkscreen, monospace"; ctx.fillText("INSERT COIN", W / 2, H - 80); }
+            if (hudRef.current === "attract" && (reducedMotion || Math.floor(t / 600) % 2 === 0)) { ctx.textAlign = "center"; ctx.fillStyle = "#ffd23f"; ctx.font = "400 22px Silkscreen, monospace"; ctx.fillText("INSERT COIN", W / 2, H - 80); }
         };
         const loop = (t) => {
-            acc += Math.min(100, t - prev); prev = t;
-            const st = hudRef.current;
-            if (st === "play" || st === "ready") while (acc >= 1000 / 120) { step(); acc -= 1000 / 120; } else acc = 0;
+            const dt = Math.min(100, t - prev); prev = t;
+            const st = hudRef.current, g = game.current;
+            if (g.stop > 0) { g.stop -= dt; acc = 0; }        // hit-stop: physics paused, drawing goes on
+            else if (st === "play" || st === "ready") { acc += dt; while (acc >= 1000 / 120 && g.stop <= 0) { step(); acc -= 1000 / 120; } }
+            else acc = 0;
             draw(t);
             raf = requestAnimationFrame(loop);
         };
