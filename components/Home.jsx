@@ -4,6 +4,7 @@ import {useGSAP} from "@gsap/react";
 import { Draggable } from "gsap/Draggable";
 import useWindowStore from "#store/window.js";
 import useLocationStore from "#store/location.js";
+import { Folder } from "lucide-react";
 
 const projects = locations.work?.children ?? [];
 
@@ -27,12 +28,16 @@ const Home = () => {
         <section id="home">
             <ul>
                 {projects.map((project) => (
-                    <li key={project.id} className={clsx("group folder", project.windowPosition)} onClick={() => handleOpenProjectFinder(project)}>
-                        <img src="/images/folder.png" alt={project.name} />
-                        <p>{project.name}</p>
+                    <li key={project.id} className={clsx("group folder px-folder", project.windowPosition)}>
+                        <button type="button" onDoubleClick={() => handleOpenProjectFinder(project)} onClick={() => handleOpenProjectFinder(project)} aria-label={`Open ${project.name}`}>
+                            <Folder strokeWidth={1.25} aria-hidden />
+                            <b>{project.children.length}</b>
+                            <p>{project.name}</p>
+                        </button>
                     </li>
                 ))}
             </ul>
+            <p className="px-note" aria-hidden>← start here</p>
         </section>
     )
 }

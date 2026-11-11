@@ -386,3 +386,65 @@
 /* windows never run off-screen and never cover the dock */
 .world-desktop .os-window { max-height: calc(100dvh - 140px); max-width: calc(100dvw - 32px); overflow: auto; outline: none; }
 .world-desktop #dock { z-index: 950; }
+
+/* ============================================================ PX-OS skin: the home brand (void, bone, red ink,
+   Geist), square bone windows, text controls, line icons. Overrides the macOS-template styles above. */
+.world-desktop { --px-bone: #edeae3; --px-ink: #0b0b0b; --px-red: #ff2e1f; --px-smoke: #8a8780; font-family: "Geist", system-ui, sans-serif; }
+.world-desktop .px-menubar { background: rgba(11, 11, 11, .82); color: var(--px-bone); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(237, 234, 227, .1); padding: 8px 18px; font: 500 13px "Geist", sans-serif; }
+.world-desktop .px-menubar button { color: inherit; background: none; border: 0; font: inherit; padding: 2px 4px; cursor: pointer; }
+.world-desktop .px-menubar button:hover { color: #fff; text-decoration: underline; text-decoration-color: var(--px-red); text-underline-offset: 4px; }
+.world-desktop .px-mark { display: flex; align-items: center; gap: 8px; font: 700 13px "Geist Mono", monospace; letter-spacing: .12em; }
+.world-desktop .px-mark i { width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a7a, var(--px-red) 45%, #8f140b); }
+.world-desktop .px-status { display: flex; align-items: center; gap: 6px; color: #3ddc84; font: 500 12px "Geist Mono", monospace; }
+.world-desktop .px-status i { width: 7px; height: 7px; border-radius: 50%; background: #3ddc84; animation: px-pulse 2s infinite; }
+@keyframes px-pulse { 50% { opacity: .3; } }
+.world-desktop .px-menubar time { font: 500 12px "Geist Mono", monospace; color: var(--px-smoke); }
+
+/* desktop greeting */
+.world-desktop #welcome { color: var(--px-bone); text-align: center; pointer-events: none; }
+.world-desktop .px-label { font: 500 11px "Geist Mono", monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--px-smoke); margin: 0; }
+.world-desktop .px-title { margin: 14px 0 0; font: 800 clamp(48px, 7vw, 110px)/.9 "Geist", sans-serif; letter-spacing: -0.05em; }
+.world-desktop .px-sub { margin: 18px 0 0; color: rgba(237, 234, 227, .65); font-size: 16px; }
+.world-desktop .px-sub kbd { font: 500 12px "Geist Mono", monospace; border: 1px solid rgba(237, 234, 227, .3); border-radius: 4px; padding: 1px 6px; }
+.world-desktop .px-note { position: absolute; left: 180px; top: 70px; pointer-events: none; margin: 0; font: 400 24px "Homemade Apple", cursive; color: var(--px-red); transform: rotate(-6deg); }
+
+/* folders */
+.world-desktop .px-folder button { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; color: var(--px-bone); cursor: pointer; position: relative; padding: 6px; border-radius: 6px; }
+.world-desktop .px-folder svg { width: 58px; height: 58px; color: var(--px-bone); fill: rgba(237, 234, 227, .06); transition: transform .2s, color .2s; }
+.world-desktop .px-folder b { position: absolute; top: 4px; right: 2px; min-width: 20px; height: 20px; border-radius: 10px; background: var(--px-red); color: #fff; font: 600 11px/20px "Geist Mono", monospace; text-align: center; }
+.world-desktop .px-folder p { font: 500 13px "Geist", sans-serif; margin: 0; padding: 1px 6px; border-radius: 3px; }
+.world-desktop .px-folder button:hover svg, .world-desktop .px-folder button:focus-visible svg { transform: translateY(-2px); color: #fff; }
+.world-desktop .px-folder button:focus-visible { outline: 2px solid var(--px-red); }
+
+/* windows: bone panels, square, hard shadow */
+.world-desktop .os-window { border-radius: 4px !important; border: 1px solid var(--px-ink); box-shadow: 8px 8px 0 rgba(0, 0, 0, .55), 0 30px 80px rgba(0, 0, 0, .45) !important; overflow: hidden; }
+.world-desktop .os-window.is-max { inset: 44px 16px 104px 16px !important; width: auto !important; height: auto !important; max-height: none; transform: none !important; }
+.world-desktop #window-header { background: var(--px-bone) !important; border-bottom: 1px solid var(--px-ink) !important; color: var(--px-ink) !important; font-family: "Geist Mono", monospace; border-radius: 0 !important; }
+.world-desktop #window-controls { gap: 4px; }
+.world-desktop .px-ctl { width: 24px; height: 22px; display: grid; place-items: center; background: none; border: 1px solid var(--px-ink); border-radius: 2px; color: var(--px-ink); font: 600 13px/1 "Geist Mono", monospace; cursor: pointer; }
+.world-desktop .px-ctl:hover { background: var(--px-ink); color: var(--px-bone); }
+.world-desktop .px-ctl.close:hover { background: var(--px-red); border-color: var(--px-red); color: #fff; }
+
+/* dock → shelf */
+.world-desktop #dock .dock-container { background: rgba(11, 11, 11, .78); border: 1px solid rgba(237, 234, 227, .14); border-radius: 10px; padding: 6px; gap: 2px; align-items: stretch; backdrop-filter: blur(12px); }
+.world-desktop #dock .dock-icon { width: auto; height: auto; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 12px 6px; border-radius: 6px; color: var(--px-bone); background: none; border: 0; position: relative; transition: transform .15s, background .2s; }
+.world-desktop #dock .dock-icon svg { width: 24px; height: 24px; }
+.world-desktop #dock .dock-icon span { font: 500 10px "Geist Mono", monospace; letter-spacing: .06em; color: var(--px-smoke); }
+.world-desktop #dock .dock-icon:hover { transform: translateY(-2px); background: rgba(237, 234, 227, .07); }
+.world-desktop #dock .dock-icon[aria-pressed="true"]::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: 0; height: 2px; background: var(--px-red); border-radius: 2px; }
+.world-desktop #dock .tooltip { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .world-desktop .px-status i { animation: none; } }
+/* finder interior */
+.world-desktop .os-window .sidebar { background: #f6f4ef; border-right: 1px solid rgba(11, 11, 11, .12); }
+.world-desktop .os-window .sidebar h3 { font: 500 10.5px "Geist Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--px-smoke); }
+.world-desktop .os-window .sidebar li.active { background: var(--px-ink) !important; color: var(--px-bone) !important; }
+.world-desktop .os-window .content li svg { color: var(--px-ink); fill: rgba(255, 46, 31, .08); transition: transform .2s; }
+.world-desktop .os-window .content li:hover svg { transform: translateY(-2px); color: var(--px-red); }
+@media (max-width: 640px) { .world-desktop .px-note { display: none; } }
+.world-desktop #finder:not(.is-max) { height: min(560px, calc(100dvh - 160px)); }
+.world-desktop #finder { display: flex; flex-direction: column; }
+.world-desktop #finder > .flex { flex: 1; min-height: 0; }
+.world-desktop .os-window .sidebar { padding: 16px 12px; }
+.world-desktop .px-folder p, .world-desktop .group:hover .px-folder p, .world-desktop .px-folder button:hover p { background: none !important; }
+.world-desktop .px-folder button:hover p, .world-desktop .px-folder button:focus-visible p { background: var(--px-red) !important; color: #fff; }
+.world-desktop .os-window .content li p { max-width: 112px; text-align: center; line-height: 1.25; overflow-wrap: anywhere; }

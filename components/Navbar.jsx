@@ -1,38 +1,30 @@
-import React from 'react'
-import {navIcons, navLinks} from "../constants";
-import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import { navLinks } from "../constants";
 import useWindowStore from "#store/window.js";
+
+// PX-OS menubar: the OS the slot machine runs. Mark, menus, availability and a live Ahmedabad clock.
+const istTime = () => new Date().toLocaleString("en-GB", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 const Navbar = () => {
     const { openWindow } = useWindowStore();
+    const [now, setNow] = useState(istTime);
+    useEffect(() => { const t = setInterval(() => setNow(istTime()), 20000); return () => clearInterval(t); }, []);
 
     return (
-        <nav>
+        <nav className="px-menubar">
             <div>
-                <img src="/images/logo.svg" alt="logo" />
-                <p className="font-bold">Aman's Portfolio</p>
-
+                <p className="px-mark"><i aria-hidden />PX-OS</p>
                 <ul>
-                    {navLinks.map(({ id, name,type}) => (
-                      <li key={id} onClick={() => openWindow(type)}>
-                          <p>{name}</p>
-                      </li>
+                    {navLinks.map(({ id, name, type }) => (
+                        <li key={id}><button type="button" onClick={() => openWindow(type)}>{name}</button></li>
                     ))}
                 </ul>
             </div>
-
             <div>
-                <ul>
-                    {navIcons.map(({id, img}) => (
-                      <li key={id}>
-                          <img src={img} alt={`icon-${id}`} className="icon-hover" />
-                      </li>
-                    ))}
-                </ul>
-
-                <time>{dayjs().format("ddd MMM D h:mm A")}</time>
+                <p className="px-status"><i aria-hidden />Open to work</p>
+                <time>{now} IST</time>
             </div>
         </nav>
-    )
-}
-export default Navbar
+    );
+};
+export default Navbar;

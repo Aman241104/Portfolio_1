@@ -1,6 +1,10 @@
 import React from 'react'
 import { WindowControls } from "#components";
-import { Search } from "lucide-react";
+import { Search, Folder, FileText, Link2, Image, FileType } from "lucide-react";
+
+// PX-OS line icons instead of macOS PNGs
+const ICON = { txt: FileText, url: Link2, img: Image, pdf: FileType };
+const ItemIcon = ({ item, size }) => { const I = item.kind === "folder" ? Folder : ICON[item.fileType] || FileText; return <I size={size} strokeWidth={1.25} aria-hidden />; };
 import WindowWrapper from "#hoc/WindowWrapper.jsx";
 import { locations } from "#constants";
 import useLocationStore from "#store/location.js";
@@ -32,11 +36,7 @@ const Finder = () => {
                         : "not-active"
                 )}
             >
-                <img
-                    src={item.icon}
-                    className="w-4"
-                    alt={item.name}
-                />
+                <ItemIcon item={item} size={16} />
                 <p className="text-sm font-medium truncate">
                     {item.name}
                 </p>
@@ -69,7 +69,7 @@ const Finder = () => {
                 <ul className="content">
                     {activeLocation?.children.map((item) => (
                         <li key={item.id} className={item.position} onClick={() => openItem(item)}>
-                            <img src={item.icon} alt={item.name} />
+                            <ItemIcon item={item} size={52} />
                             <p>{item.name}</p>
                         </li>
                     ))}
