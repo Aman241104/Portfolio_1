@@ -32,7 +32,7 @@ export const mat = {
 
 /* ---------------------------------------------------------------- reels */
 
-const SLOTS = 12;
+const SLOTS = 16;                                   // a multiple of the 8 worlds: every symbol appears evenly
 const SLOT_ANGLE = (Math.PI * 2) / SLOTS;
 const SLOT_OFFSET = SLOT_ANGLE / 2;
 
