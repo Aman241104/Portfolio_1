@@ -31,3 +31,28 @@ screensaver, sound, `theme plain`.
 **Album** P0 (done 2026-11-10): accessible skippable intro once per session, countdown overlap fix, mobile padding/CTA,
 generated cover, Archivo instead of Instrument Serif. P1: WebAudio beat (opt-in), expandable track rows with scrubbable
 waveform, R3F disc with scratch, era crossfade. P2: merch-drop hire card, booklet case pages, beat-synced type.
+
+## Roadmap (2026-11-11, after the mobile + liquid-glass pass)
+
+Done this pass: mobile Résumé buttons were invisible (SEO fallback CSS leak), keychains clear the machine on every
+phone, Mindcore liquid glass + liquid tab dock, numbers strip + tape, gentle "Hiring?" card (Neon/Resend/PostHog
+identify), footer dots morph `</>` `{ }` `AP` `>_` and scatter under cursor/finger, Desktop world → PX-OS.
+
+Next, in order (mobile first: recruiters judge on phones):
+1. Mobile audit of every world at 360/390/430 (overlaps, tap targets ≥44px, safe areas, no horizontal scroll).
+2. Desktop world, phone version: restyle the iOS springboard as PX-OS (line icons, glass dock, no Apple PNGs).
+3. Editorial: letter-by-letter headline reveal; case.html in the same broadsheet skin.
+4. Album: scratchable record, merch-style "hire me" card (see Album ideas below).
+5. Terminal: screensaver after idle, key sounds, an idle reaction.
+
+### Album ideas (deeper pass)
+- Real songs: yes, through official embeds only (a visible YouTube or Spotify player; YouTube's terms need it on
+  screen, ≥200×200). The ids in content/taste.js are YouTube already. Hosting MP3s of other artists = copyright, no.
+  Plan: a "B-sides: what I code to" side with a small visible player that slides out of the sleeve.
+- The record is the nav: drag/scratch the disc (R3F or CSS conic) to scrub through tracks = projects; letting go
+  snaps to the nearest track with a needle-drop sound.
+- Liner notes = case studies: each track expands into credits (stack as "personnel", role, year, label = client).
+- Tracklist runtime = real numbers ("26 tracks · 11 still charting" = live sites).
+- Merch table hire card: "Tour dates" = availability, "Merch" = résumé PDF / tailored variants as a tee, poster, vinyl.
+- Era switch (data-era) gets a sleeve-flip transition; a "Deluxe" bonus disc for concepts & demos.
+- Mobile: the sleeve is a full-width swipe carousel; the disc spins under the thumb; haptics via navigator.vibrate.
