@@ -23,7 +23,7 @@
 .rd-drawer { position: sticky; top: 24px; align-self: start; display: grid; gap: 0; padding-top: 34px; }
 .rd-drawer-label { margin: 0 0 12px; font: 700 13px "Hanken Grotesk", sans-serif; color: #c6cbbd; }
 .rd-file { position: relative; display: grid; gap: 2px; text-align: left; margin-top: -10px; padding: 18px 16px 16px; border: 0; border-radius: 4px; background: var(--card); color: var(--type);
-    box-shadow: 0 -1px 0 rgba(0, 0, 0, .06), 0 6px 14px rgba(0, 0, 0, .18); cursor: pointer; transition: transform .25s cubic-bezier(.2, 1.4, .4, 1); animation: rd-file-in .5s var(--d) both; }
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, .06), 0 6px 14px rgba(0, 0, 0, .18); cursor: pointer; transition: transform .25s var(--ease-spring); animation: rd-file-in .5s var(--d) both; }
 .rd-file:first-of-type { margin-top: 0; }
 .rd-file:nth-of-type(even) { background: #f6efdd; }
 .rd-file:hover, .rd-file:focus-visible { transform: translateX(10px); z-index: 2; outline: none; }
@@ -46,7 +46,7 @@
         repeating-linear-gradient(180deg, transparent 0 25px, var(--rule) 25px 26px) 0 52px / 100% calc(100% - 52px) no-repeat,
         linear-gradient(180deg, transparent 51px, rgba(214, 56, 44, .45) 51px 52px, transparent 52px),
         var(--card);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 14px 30px rgba(0, 0, 0, .28); animation: rd-drop .55s cubic-bezier(.2, 1.2, .35, 1) both; }
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 14px 30px rgba(0, 0, 0, .28); animation: rd-drop .55s var(--ease-spring) both; }
 @keyframes rd-drop { from { opacity: 0; transform: translateY(-40px) rotate(calc(var(--t) * -4)); } }
 .rd-card-head { display: flex; justify-content: space-between; height: 34px; align-items: center; margin-bottom: 18px; font: 700 12px "Courier Prime", monospace; letter-spacing: .08em; text-transform: uppercase; color: #7a6f5e; }
 .rd-body, .rd-body p { margin: 0; font: 400 17px/26px "Courier Prime", "Courier New", monospace; }
@@ -67,7 +67,7 @@
 .rd-err { margin: 0; font: 400 16px "Courier Prime", monospace; color: var(--red); }
 /* the rubber stamp */
 .rd-stamp { position: absolute; right: 22px; top: 54px; display: grid; justify-items: center; padding: 6px 14px; border: 3px solid var(--red); border-radius: 6px; color: var(--red);
-    transform: rotate(-8deg); mix-blend-mode: multiply; opacity: .88; animation: rd-stamp .35s .25s cubic-bezier(.3, 1.6, .5, 1) both;
+    transform: rotate(-8deg); mix-blend-mode: multiply; opacity: .88; animation: rd-stamp .35s .25s var(--ease-spring) both;
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.6' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.6' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .rd-stamp b { font: 800 30px/1 "Hanken Grotesk", sans-serif; letter-spacing: .12em; }

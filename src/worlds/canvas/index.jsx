@@ -52,7 +52,7 @@ export default function CanvasWorld() {
     const apply = useCallback((v, animate = false) => {
         view.current = v;
         if (board.current) {
-            board.current.style.transition = animate && !reduced ? "transform .7s cubic-bezier(.2, .9, .2, 1)" : "none";
+            board.current.style.transition = animate && !reduced ? "transform .7s var(--ease-out)" : "none";
             board.current.style.transform = `translate(${v.x}px, ${v.y}px) scale(${v.k})`;
         }
         setV(v);

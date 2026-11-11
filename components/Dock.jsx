@@ -12,10 +12,10 @@ const Dock = () => {
     return (
         <section id="dock">
             <div className="dock-container">
-                {dockApps.filter((a) => a.canOpen && ICONS[a.id]).map(({ id, name }) => {
+                {dockApps.filter((a) => a.canOpen && ICONS[a.id]).map(({ id, name }, i) => {
                     const Icon = ICONS[id];
                     return (
-                        <button key={id} type="button" className="dock-icon" aria-label={name} aria-pressed={!!windows[id]?.isOpen}
+                        <button key={id} type="button" className="dock-icon" style={{ "--i": i }} aria-label={name} aria-pressed={!!windows[id]?.isOpen}
                             data-tooltip-id="dock-tooltip" data-tooltip-content={name} onClick={() => toggleApp(id)}>
                             <Icon strokeWidth={1.5} aria-hidden />
                             <span>{name}</span>

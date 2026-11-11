@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import { ease } from "../../motion.js";
 
 // One split-flap character. When its target changes it riffles through the drum, then lands with a small settle.
 // The landing flip is a real leaf: the old character's top half folds down over the new one (WAAPI, transform only).
@@ -31,9 +32,9 @@ const Cell = memo(({ ch, delay }) => {
             const last = n >= flips;
             // The riffle is a blur of character swaps (paint only, contained); only the landing gets a real fold,
             // which keeps the number of live compositor layers small while a whole board updates.
-            if (last) { l.firstChild.textContent = f.textContent; l.animate(FOLD, { duration: 140, easing: "cubic-bezier(.55,0,1,.45)" }); }
+            if (last) { l.firstChild.textContent = f.textContent; l.animate(FOLD, { duration: 140, easing: ease.snap }); }
             f.textContent = last ? ch : DRUM[Math.floor(Math.random() * DRUM.length)];
-            if (last) { jobs.delete(job); box.current.animate(SETTLE, { duration: 160, delay: 100, easing: "cubic-bezier(.34,1.56,.64,1)" }); }
+            if (last) { jobs.delete(job); box.current.animate(SETTLE, { duration: 160, delay: 100, easing: ease.spring }); }
             else job.at = now + 62;
         } };
         schedule(job);

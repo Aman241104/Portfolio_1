@@ -27,8 +27,8 @@ const Home = () => {
     return (
         <section id="home">
             <ul>
-                {projects.map((project) => (
-                    <li key={project.id} className={clsx("group folder px-folder", project.windowPosition)}>
+                {projects.map((project, i) => (
+                    <li key={project.id} style={{ "--i": i }} className={clsx("group folder px-folder", project.windowPosition)}>
                         <button type="button" onDoubleClick={() => handleOpenProjectFinder(project)} onClick={() => handleOpenProjectFinder(project)} aria-label={`Open ${project.name}`}>
                             <Folder strokeWidth={1.25} aria-hidden />
                             <b>{project.children.length}</b>

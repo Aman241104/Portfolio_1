@@ -79,7 +79,7 @@
 .cv-btn.ghost { border-color: var(--line); color: var(--line) !important; }
 
 /* the draughtsman's pencil, drifting from sheet to sheet */
-.cv-mate { left: 0; top: 0; transition: transform 1.6s cubic-bezier(.45, 0, .2, 1); pointer-events: none; display: flex; align-items: flex-start; z-index: 3; }
+.cv-mate { left: 0; top: 0; transition: transform 1.6s var(--ease-in-out); pointer-events: none; display: flex; align-items: flex-start; z-index: 3; }
 .cv-mate svg { width: 26px; height: 26px; fill: var(--hi); stroke: var(--bar); stroke-width: 1; }
 .cv-mate span { margin: 18px 0 0 -2px; padding: 2px 8px; background: var(--hi); color: var(--bar); font: 700 12px "B612 Mono", monospace; white-space: nowrap; }
 /* inspector: a detail callout */

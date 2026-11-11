@@ -13,7 +13,7 @@ const Springboard = () => {
     return (
         <div className="h-full w-full flex flex-col pt-14 pb-28 px-5 overflow-y-auto">
             {/* widgets: who + what, before any app icon */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="px-widgets grid grid-cols-2 gap-3 mb-6">
                 <button type="button" onClick={() => openApp("resume")} className="lg text-left rounded-3xl p-4 active:scale-[.97] transition">
                     <p className="text-[10px] uppercase tracking-widest text-emerald-300">● Open to work</p>
                     <p className="text-white text-lg font-semibold leading-tight mt-2">{profile.name}</p>
@@ -29,10 +29,10 @@ const Springboard = () => {
                 </button>
             </div>
             <div className="grid grid-cols-4 gap-y-6">
-                {mobileGridApps.map(({ id, name }) => {
+                {mobileGridApps.map(({ id, name }, i) => {
                     const Icon = APP_ICONS[id];
                     return (
-                        <button key={id} type="button" onClick={() => openApp(id)} className="px-app flex flex-col items-center gap-1.5 active:scale-90 transition-transform">
+                        <button key={id} type="button" style={{ "--i": i }} onClick={() => openApp(id)} className="px-app flex flex-col items-center gap-1.5 active:scale-90 transition-transform">
                             <span className="lg size-14 rounded-[18px] grid place-items-center"><Icon size={26} strokeWidth={1.5} aria-hidden /></span>
                             <span className="text-white/85 text-[11px] font-medium tracking-wide">{name}</span>
                         </button>
