@@ -29,14 +29,14 @@ export default function ShipBreaker() {
     const cv = useRef(null), game = useRef(null), keys = useRef({});
     const [hud, setHud] = useState({ score: 0, lives: 3, state: "attract" });    // attract · ready · play · over · won
     const [got, setGot] = useState([]);
-    const [all, setAll] = useState(false);
+    const [all, setAll] = useState(() => typeof window !== "undefined" && matchMedia("(max-width: 760px)").matches);   // phones: the work is open by default
     const [toast, setToast] = useState(null);
     const [scores, setScores] = useState([]);
     const [initials, setInitials] = useState("");
     const [saved, setSaved] = useState(null);       // null · "saving" · "saved" · error text
     const hudRef = useRef("attract"), launchRef = useRef(null);
 
-    useEffect(() => { game.current = fresh(); fetch("/api/scores").then((r) => r.json()).then((d) => setScores(d.scores || [])).catch(() => {}); }, []);
+    useEffect(() => { game.current = fresh(); fetch("/api/scores").then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => setScores(d.scores || [])).catch(() => setScores(null)); }, []);
 
     const launch = () => {
         const g = game.current;
@@ -152,13 +152,13 @@ export default function ShipBreaker() {
         return () => { cancelAnimationFrame(raf); removeEventListener("keydown", kd); removeEventListener("keyup", ku); };
     }, []);
     const hiRef = useRef(0);
-    useEffect(() => { hudRef.current = hud.state; launchRef.current = launch; hiRef.current = scores[0]?.score || 0; });
+    useEffect(() => { hudRef.current = hud.state; launchRef.current = launch; hiRef.current = scores?.[0]?.score || 0; });
     useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 1400); return () => clearTimeout(t); }, [toast]);
 
     const aim = (e) => { const r = cv.current.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * W; const g = game.current; g.pad.x = Math.max(0, Math.min(W - g.pad.w, x - g.pad.w / 2)); };
     const hold = (k, v) => () => { keys.current[k] = v; };
     const start = () => { if (hud.state === "attract") setHud((h) => ({ ...h, state: "ready" })); else launch(); };
-    const qualifies = hud.score > 0 && (scores.length < 10 || hud.score > (scores.at(-1)?.score ?? 0));
+    const qualifies = hud.score > 0 && ((scores?.length ?? 0) < 10 || hud.score > (scores?.at(-1)?.score ?? 0));
     const submit = async (e) => {
         e.preventDefault();
         if (initials.length !== 3) return;
@@ -171,11 +171,12 @@ export default function ShipBreaker() {
         } catch (x) { setSaved(x.message); }
     };
     const unlocked = all ? work.map((w) => w.slug) : got;
-    const board = (
+    // honest board: real scores, or say there are none yet / the board is offline (never a fake row of zeros)
+    const board = !scores?.length ? <p className="sb-empty">{scores === null ? "Score board offline. Your game still counts." : "No scores yet. Be the first name on the board."}</p> : (
         <ol className="sb-scores">
-            {(scores.length ? scores : Array.from({ length: 5 }, () => null)).slice(0, 10).map((s, i) => (
-                <li key={i} data-me={saved === "saved" && s?.initials === initials && s?.score === hud.score ? "" : undefined}>
-                    <span>{["1ST", "2ND", "3RD"][i] || `${i + 1}TH`}</span><b>{s?.initials || "---"}</b><em>{s ? String(s.score).padStart(6, "0") : "000000"}</em><small>{s ? `${s.unlocked}/${work.length}` : ""}</small>
+            {scores.slice(0, 10).map((s, i) => (
+                <li key={i} data-me={saved === "saved" && s.initials === initials && s.score === hud.score ? "" : undefined}>
+                    <span>{["1ST", "2ND", "3RD"][i] || `${i + 1}TH`}</span><b>{s.initials}</b><em>{String(s.score).padStart(6, "0")}</em><small>{`${s.unlocked}/${work.length}`}</small>
                 </li>
             ))}
         </ol>
@@ -184,7 +185,7 @@ export default function ShipBreaker() {
     return (
         <div className="sb">
             <div className="sb-cab">
-                <header className="sb-marquee"><p>SHIP<span>·</span>BREAKER</p><small>Every brick is a project · Est. 2026 · Ahmedabad</small></header>
+                <header className="sb-marquee"><p>SHIP<span>·</span>BREAKER</p><small>Aman Patel · Full-stack engineer · Ahmedabad · every brick is a project</small></header>
                 <div className="sb-bezel">
                     <div className="sb-screen">
                         <canvas ref={cv} width={W} height={H} aria-label="Brick breaker. Each brick is a project Aman built." role="img"
@@ -207,7 +208,7 @@ export default function ShipBreaker() {
                                         <button type="submit" disabled={initials.length !== 3 || saved === "saving"}>{saved === "saving" ? "Saving" : "Enter"}</button>
                                         {saved && saved !== "saving" && <p className="sb-err">{saved}</p>}
                                     </form>
-                                ) : {board}}
+                                ) : board}
                                 <div className="sb-row"><button type="button" onClick={launch}>Play again</button><button type="button" className="ghost" onClick={() => setAll(true)}>Show all projects</button></div>
                             </div>
                         )}
@@ -231,7 +232,7 @@ export default function ShipBreaker() {
                 <div className="sb-panel" aria-label="Controls">
                     <button type="button" className="sb-key" aria-label="Move left" onPointerDown={hold("ArrowLeft", true)} onPointerUp={hold("ArrowLeft", false)} onPointerLeave={hold("ArrowLeft", false)}>◀</button>
                     <button type="button" className="sb-key" aria-label="Move right" onPointerDown={hold("ArrowRight", true)} onPointerUp={hold("ArrowRight", false)} onPointerLeave={hold("ArrowRight", false)}>▶</button>
-                    <p className="sb-coin"><i /> 1 credit = free</p>
+                    <a className="sb-mail" href={`mailto:${profile.email}`}>Email Aman</a>
                     <button type="button" className="sb-fire" onClick={start}>{hud.state === "attract" ? "Start" : "Launch"}</button>
                 </div>
             </div>
@@ -246,12 +247,17 @@ export default function ShipBreaker() {
                         const open = unlocked.includes(w.slug);
                         return (
                             <li key={w.slug} data-open={open || undefined} style={{ "--c": COLORS[w.kind] }}>
-                                {open ? (
-                                    <a href={cases[w.slug] ? `/case.html?p=${w.slug}` : w.url || "#"} target={cases[w.slug] ? undefined : "_blank"} rel="noreferrer">
+                                {open ? ((cases[w.slug] || w.url) ? (
+                                    <a href={cases[w.slug] ? `/case.html?p=${w.slug}` : w.url} target={cases[w.slug] ? undefined : "_blank"} rel="noreferrer">
                                         <img src={shot(w, 360)} alt="" loading="lazy" />
                                         <b>{w.title}</b><small>{KINDS[w.kind]} · {w.year}</small>
                                     </a>
-                                ) : <span className="sb-locked"><i>?</i><small>{KINDS[w.kind]}</small></span>}
+                                ) : (
+                                    <div className="sb-nolink">
+                                        <img src={shot(w, 360)} alt="" loading="lazy" />
+                                        <b>{w.title}</b><small>{KINDS[w.kind]} · {w.year} · private build</small>
+                                    </div>
+                                )) : <span className="sb-locked"><i>?</i><small>{KINDS[w.kind]}</small></span>}
                             </li>
                         );
                     })}

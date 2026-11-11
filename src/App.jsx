@@ -1,8 +1,8 @@
-import { Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { setWorld } from "./analytics.js";
 import { findWorld } from "#worlds/registry.js";
 import { setLast } from "#shell/storage.js";
-import Machine from "#machine/Machine.jsx";
+const Machine = lazy(() => import("#machine/Machine.jsx"));   // only for browsers without WebGL 2 (keeps GSAP off every other page)
 import Home from "./home/Home.jsx";
 import CoinSlot from "#shell/CoinSlot.jsx";
 import WorldBoundary from "#shell/WorldBoundary.jsx";
@@ -52,7 +52,7 @@ const App = () => {
         setTimeout(back, 300);
     };
 
-    if (!world) return hasWebGL ? <Home onSelect={go} /> : <Machine onSelect={go} />;
+    if (!world) return hasWebGL ? <Home onSelect={go} /> : <Suspense fallback={null}><Machine onSelect={go} /></Suspense>;
 
     const { Component } = world;
     return (

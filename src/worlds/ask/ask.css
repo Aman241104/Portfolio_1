@@ -131,3 +131,11 @@
     .rd-file { padding-bottom: 16px; }
 }
 @media (max-width: 900px) { .rd-stamp { padding: 4px 9px; top: 44px; } .rd-stamp b { font-size: 20px; } .rd-stamp span { font-size: 9px; } .rd-matched { margin-right: 112px; } }
+.rd-who { margin: 0 0 10px; font: 700 13px/1.4 "Hanken Grotesk", sans-serif; letter-spacing: .02em; color: #e8e2cf; }
+.rd-switch { margin-top: 14px; padding: 12px 16px; min-height: 44px; border: 1.5px solid var(--card); border-radius: 4px; background: none; color: var(--card);
+    font: 700 15px "Hanken Grotesk", sans-serif; cursor: pointer; transition: background var(--t-2) var(--ease-out), color var(--t-2) var(--ease-out); }
+.rd-switch:hover, .rd-switch:focus-visible { background: var(--card); color: var(--type); outline: none; }
+.rd-write input:focus-visible, .rd-write textarea:focus-visible { outline: 2px solid var(--red); outline-offset: 4px; border-radius: 2px; }
+.rd-file:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.rd-tabs button { min-height: 44px; }
+.rd-who a, .rd-err a { display: inline-block; padding-block: 12px; }

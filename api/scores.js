@@ -3,7 +3,7 @@
 import { sql, ipOf } from "./_db.js";
 import { work } from "../content/work.js";
 
-const MAX = work.length * 100 + 60 * 50;            // every brick + a generous number of skill capsules
+const MAX = 100 * (work.length * (work.length + 1)) / 2 + 60 * 50;   // every brick in one unbroken combo (brick k scores 100·k) + generous capsules
 const BLOCK = new Set(["ASS", "FUK", "FUC", "SEX", "KKK", "NIG", "CUM", "DIK", "TIT", "FAG"]);
 let ready = null;
 const ensure = () => (ready ??= sql`create table if not exists px01_scores (id bigserial primary key, initials text not null, score int not null,
@@ -12,7 +12,7 @@ const top = () => sql`select initials, score, unlocked from px01_scores order by
 
 export default async function handler(req, res) {
     res.setHeader("Cache-Control", "no-store");
-    if (!sql) return res.status(200).json({ scores: [], configured: false });
+    if (!sql) return res.status(503).json({ scores: [], error: "Scores are offline." });
     try {
         await ensure();
         if (req.method === "GET") return res.status(200).json({ scores: await top() });
@@ -28,6 +28,6 @@ export default async function handler(req, res) {
         await sql`insert into px01_scores (initials, score, unlocked, ip) values (${initials}, ${score}, ${unlocked}, ${ip})`;
         return res.status(200).json({ ok: true, scores: await top() });
     } catch {
-        return res.status(200).json({ scores: [], error: "Scores are offline." });
+        return res.status(503).json({ scores: [], error: "Scores are offline." });   // an error, so the cabinet can say so
     }
 }

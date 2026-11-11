@@ -43,7 +43,7 @@ const Cell = memo(({ ch, delay }) => {
         return () => jobs.delete(job);
     }, [ch, delay]);
     return (
-        <span className="fl-c" ref={box}>
+        <span className="fl-c" ref={box} aria-hidden>
             <b ref={face}>{reduced ? ch : " "}</b>
             <i ref={leaf} aria-hidden><b> </b></i>
         </span>
@@ -53,5 +53,11 @@ const Cell = memo(({ ch, delay }) => {
 // A fixed-width field of cells. Text is upper-cased and padded/truncated to `len`, like the real hardware.
 export default function Flap({ text, len, start = 0, className = "" }) {
     const t = String(text ?? "").toUpperCase().slice(0, len).padEnd(len, " ");
-    return <span className={`fl ${className}`} aria-label={String(text ?? "")}>{[...t].map((c, i) => <Cell key={i} ch={c} delay={start + i * 28} />)}</span>;
+    // screen readers get the real text once; the riffling cells are decoration (aria-label on a plain span is ignored)
+    return (
+        <span className={`fl ${className}`}>
+            <span className="sr-only">{String(text ?? "")}</span>
+            {[...t].map((c, i) => <Cell key={i} ch={c} delay={start + i * 28} />)}
+        </span>
+    );
 }

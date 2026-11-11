@@ -37,7 +37,7 @@ export const initAnalytics = () => {
         posthog.init(KEY, {
             api_host: import.meta.env.VITE_POSTHOG_HOST || "https://us.i.posthog.com",
             person_profiles: "identified_only", autocapture: false, capture_pageview: true,
-            disable_session_recording: true, respect_dnt: true,
+            disable_session_recording: true, disable_surveys: true, respect_dnt: true,
         });
         ph = posthog;
         if (who) ph.identify(...who);

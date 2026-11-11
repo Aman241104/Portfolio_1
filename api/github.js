@@ -9,22 +9,27 @@ export default async function handler(req, res) {
             headers: { "User-Agent": "aman-patel.me mission-control", Accept: "application/vnd.github+json" }, signal: AbortSignal.timeout(8000),
         }).then((r) => (r.ok ? r.json() : [])).catch(() => [])));
     const events = pages.flat().filter((e) => e && e.type);
-    const days = {}, repos = {}, commits = [];   // commits = recent pushes (GitHub no longer sends messages publicly)
+    const days = {}, repos = {}, last = {}, commits = [];   // commits = recent pushes (GitHub no longer sends messages publicly)
     for (const e of events) {
         const day = e.created_at.slice(0, 10), repo = e.repo?.name?.split("/")[1] || "?";
         if (e.type === "PushEvent") {
             const n = e.payload?.size ?? e.payload?.commits?.length ?? 1;
             days[day] = (days[day] || 0) + n;
             repos[repo] = (repos[repo] || 0) + n;
+            if (!last[repo] || e.created_at > last[repo]) last[repo] = e.created_at;
             commits.push({ repo, n, branch: (e.payload?.ref || "").replace("refs/heads/", ""), at: e.created_at });
         } else if (["CreateEvent", "PullRequestEvent", "ReleaseEvent"].includes(e.type)) {
             days[day] = (days[day] || 0) + 1;
         }
     }
+    // GitHub answered nothing at all: say so (the board shows "unavailable", never a fake "0 pushes")
+    if (!events.length) { res.setHeader("Cache-Control", "public, s-maxage=60"); return res.status(502).json({ error: "github unavailable" }); }
     res.setHeader("Cache-Control", "public, s-maxage=600, stale-while-revalidate=3600");
     res.status(200).json({
         user: USER, events: events.length, days,
         repos: Object.entries(repos).sort((a, b) => b[1] - a[1]).slice(0, 6),
         commits: commits.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8),
+        // one arrival per repository: latest push and its 90-day commit count
+        arrivals: Object.entries(last).sort((a, b) => b[1].localeCompare(a[1])).slice(0, 6).map(([repo, at]) => ({ repo, at, n: repos[repo] })),
     });
 }

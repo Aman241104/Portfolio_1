@@ -123,3 +123,8 @@ a.dp-row:focus-visible { outline: 2px solid var(--yel); outline-offset: -2px; }
 }
 @keyframes dp-rise { from { opacity: 0; translate: 0 24px; } }
 @keyframes dp-rule { from { border-top-color: transparent; clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.dp-who { margin: 14px 0 0; font: 500 15px/1.5 "Barlow", sans-serif; color: var(--chr) !important; max-width: 60ch; }
+.dp-cta-top { margin-top: 16px; }
+.dp-cta-top a { min-height: 44px; display: inline-flex; align-items: center; }
+@media (prefers-reduced-motion: no-preference) { .dp-intro .dp-who, .dp-intro .dp-cta-top { animation: dp-rise var(--t-4) var(--ease-out) .26s both; } }
+@media (prefers-reduced-motion: reduce) { .dp-marquee { white-space: normal; mask-image: none; } .dp-marquee i { padding-left: 0; animation: none; } }   /* still readable, just still */

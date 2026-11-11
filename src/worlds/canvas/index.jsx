@@ -56,6 +56,8 @@ export default function CanvasWorld() {
     const [vstate, setV] = useState({ x: 0, y: 0, k: 0.4 }); // for the minimap + zoom readout
     const [vpSize, setVpSize] = useState({ w: 0, h: 0 });
     const [focus, setFocus] = useState(null);
+    // phones open on a plain scrolling print of the same drawing (readable, no pan/zoom work); the full sheet is one tap away
+    const [list, setList] = useState(() => typeof window !== "undefined" && matchMedia("(max-width: 760px)").matches);
     const [mate, setMate] = useState({ x: 300, y: 300, label: "A.P." });
     const pts = useRef(new Map()), last = useRef(null), start = useRef([0, 0]);
     const vel = useRef([0, 0]), coast = useRef(0);   // pan momentum (px/ms) and its rAF
@@ -94,6 +96,7 @@ export default function CanvasWorld() {
         apply({ k, x: cx - (cx - v.x) * (k / v.k), y: cy - (cy - v.y) * (k / v.k) }, animate);
     };
     const onWheel = (e) => {
+        if (list) return;
         e.preventDefault(); cancelAnimationFrame(coast.current);
         const r = vp.current.getBoundingClientRect();
         if (e.ctrlKey || e.metaKey) zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.01));
@@ -133,7 +136,7 @@ export default function CanvasWorld() {
     useEffect(() => () => cancelAnimationFrame(coast.current), []);
 
     // capture only once the pointer really drags, so a plain click still reaches the sheet under it
-    const down = (e) => { if (e.target.closest("a, button")) return; stop(); vel.current = [0, 0]; pts.current.set(e.pointerId, [e.clientX, e.clientY, performance.now()]); start.current = [e.clientX, e.clientY]; last.current = null; };
+    const down = (e) => { if (list || e.target.closest("a, button")) return; stop(); vel.current = [0, 0]; pts.current.set(e.pointerId, [e.clientX, e.clientY, performance.now()]); start.current = [e.clientX, e.clientY]; last.current = null; };
     const move = (e) => {
         if (!pts.current.has(e.pointerId)) return;
         if (!vp.current.hasPointerCapture(e.pointerId) && Math.hypot(e.clientX - start.current[0], e.clientY - start.current[1]) > 4) vp.current.setPointerCapture(e.pointerId);
@@ -173,12 +176,13 @@ export default function CanvasWorld() {
         return () => clearInterval(t);
     }, [items, reduced]);
 
-    const open = (it) => { setFocus(it.p); fitTo(it.x, it.y, FW, FH, 40); };
+    const open = (it) => { setFocus(it.p); if (!list) fitTo(it.x, it.y, FW, FH, 40); };
     const MM = 180 / W;
 
     return (
-        <div className="cv">
+        <div className="cv" data-list={list || undefined}>
             <header className="cv-bar">
+                <button type="button" className="cv-mode" onClick={() => { setList(!list); setFocus(null); }}>{list ? "Open the full drawing" : "Plain view"}</button>
                 <p className="cv-file"><b>AP-2026-001</b> Portfolio, general arrangement</p>
                 <nav className="cv-jump" aria-label="Go to section">
                     {sections.map((s) => <button key={s.id} type="button" onClick={() => { setFocus(null); fitTo(s.x, s.y, s.w, s.h); }}>{s.label}</button>)}
@@ -196,7 +200,7 @@ export default function CanvasWorld() {
                     <section className="bp-cover">
                         <p className="bp-dwg">Dwg. no. AP-2026-001 · General arrangement</p>
                         <h1>Aman Patel</h1>
-                        <p>Full-stack engineer, Ahmedabad. {work.length} projects drawn to scale on this sheet. Drag to move, scroll or pinch to zoom, click a sheet to inspect it.</p>
+                        <p>Full-stack engineer, Ahmedabad. {work.length} projects drawn to scale on this sheet. {list ? "Tap a sheet to inspect it." : "Drag to move, scroll or pinch to zoom, click a sheet to inspect it."}</p>
                     </section>
                     <p className="bp-hand bp-hire" style={{ left: 1180, top: 70 }}>open to work · full-stack · on-site or hybrid ↘</p>
                     {sections.map((s) => <div key={s.id} className="bp-zone" style={{ left: s.x, top: s.y, width: s.w, height: s.h, "--i": sections.indexOf(s) }}><span>Zone {String.fromCharCode(65 + sections.indexOf(s))} · {s.label}</span></div>)}
@@ -204,7 +208,8 @@ export default function CanvasWorld() {
                         if (it.type === "frame") {
                             const no = work.indexOf(it.p) + 1;
                             return (
-                                <article key={i} className="bp-sheet" data-on={focus === it.p || undefined} style={{ left: it.x, top: it.y, width: FW, height: FH, "--i": i }} onClick={() => open(it)}>
+                                <article key={i} className="bp-sheet" data-on={focus === it.p || undefined} style={{ left: it.x, top: it.y, width: FW, height: FH, "--i": i }} onClick={() => open(it)}
+                                    role="button" tabIndex={0} aria-label={`${it.p.title}, ${KINDS[it.p.kind]} ${it.p.year}. Inspect`} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(it); } }}>
                                     {focus === it.p && (
                                         <svg className="bp-cloud" aria-hidden width={CLOUD.w} height={CLOUD.h} style={{ left: -CLOUD.pad, top: -CLOUD.pad }} viewBox={`-4 -4 ${CLOUD.w + 8} ${CLOUD.h + 8}`}>
                                             <path d={CLOUD.d} pathLength="1" />
@@ -261,8 +266,8 @@ export default function CanvasWorld() {
             </div>
 
             {focus && (
-                <aside className="cv-inspect">
-                    <button type="button" className="cv-x" aria-label="Close" onClick={() => setFocus(null)}>×</button>
+                <aside className="cv-inspect" aria-label={`${focus.title}, details`} onKeyDown={(e) => { if (e.key === "Escape") setFocus(null); }}>
+                    <button type="button" className="cv-x" aria-label="Close" autoFocus onClick={() => setFocus(null)}>×</button>
                     <p className="cv-tag">Sheet {String(work.indexOf(focus) + 1).padStart(2, "0")} · {KINDS[focus.kind]} · {focus.year}</p>
                     <h2>{focus.title}</h2>
                     <p>{focus.line}</p>

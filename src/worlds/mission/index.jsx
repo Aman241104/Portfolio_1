@@ -15,7 +15,7 @@ const hhmm = (d = new Date()) => d.toLocaleTimeString("en-GB", { timeZone: "Asia
 const ago = (iso) => { const s = (Date.now() - new Date(iso)) / 1000; return s < 3600 ? `${Math.max(1, Math.round(s / 60))} MIN` : s < 86400 ? `${Math.round(s / 3600)} HRS` : `${Math.round(s / 86400)} DAYS`; };
 const fleet = work.filter((w) => w.maintained);
 const PLATFORM = { product: "1", mobile: "2", client: "3", concept: "4" };
-const verdict = (s) => (s == null ? ["CHECKING", ""] : !s.ok ? ["CANCELLED", "down"] : s.ms > 1500 ? ["DELAYED", "late"] : ["ON TIME", "ok"]);
+const verdict = (s, off) => (s == null ? [off ? "NO DATA" : "CHECKING", ""] : !s.ok ? ["CANCELLED", "down"] : s.ms > 1500 ? ["DELAYED", "late"] : ["ON TIME", "ok"]);
 
 // the "lines": technologies by how many projects run on them
 const LINES = (() => {
@@ -30,12 +30,13 @@ export default function Departures() {
     const [sites, setSites] = useState({});
     const [checked, setChecked] = useState(null);
     const [gh, setGh] = useState(null);
+    const [off, setOff] = useState(false);   // the status check itself failed: say so, don't spin "checking" forever
 
     useEffect(() => { const t = setInterval(() => setClock(hhmm()), 5000); return () => clearInterval(t); }, []);
     useEffect(() => {
-        const poll = () => fetch("/api/status").then((r) => r.json()).then((d) => { setSites(d.sites || {}); setChecked(d); }).catch(() => {});
+        const poll = () => fetch("/api/status").then((r) => r.json()).then((d) => { setSites(d.sites || {}); setChecked(d); setOff(false); }).catch(() => setOff(true));
         poll(); const t = setInterval(poll, 60000);
-        fetch("/api/github").then((r) => r.json()).then(setGh).catch(() => setGh({ commits: [], days: {} }));
+        fetch("/api/github").then((r) => (r.ok ? r.json() : Promise.reject())).then(setGh).catch(() => setGh({ error: true, commits: [], days: {} }));
         return () => clearInterval(t);
     }, []);
 
@@ -44,9 +45,9 @@ export default function Departures() {
     const remark = vals.length
         ? up === vals.length ? `ALL ${vals.length} SERVICES RUNNING · CHECKED FROM ${checked?.from === "sin1" ? "SINGAPORE" : "THE EDGE"} AT ${at} IST`
             : `${vals.length - up} SERVICE${vals.length - up > 1 ? "S" : ""} DISRUPTED · ENGINEER NOTIFIED`
-        : "FETCHING LIVE STATUS…";
-    const pushes = useMemo(() => (gh?.commits || []).slice(0, 5), [gh]);
-    const total90 = gh ? Object.values(gh.days || {}).reduce((a, b) => a + b, 0) : null;
+        : off ? "STATUS BOARD OFFLINE · THE SITES THEMSELVES STILL OPEN NORMALLY · TAP ANY ROW" : "FETCHING LIVE STATUS…";
+    const pushes = useMemo(() => (gh?.arrivals || []).slice(0, 5), [gh]);
+    const total90 = gh && !gh.error ? Object.values(gh.days || {}).reduce((a, b) => a + b, 0) : null;
 
     return (
         <div className="dp">
@@ -58,6 +59,12 @@ export default function Departures() {
             <section className="dp-intro">
                 <h1>Everything I keep running,<br />live.</h1>
                 <p>{fleet.length} sites and products I built and still maintain, health-checked from a server every minute. Nothing on this board is a mock-up.</p>
+                <p className="dp-who">{experience[0].role} at {experience[0].org} since {experience[0].when.split(" — ")[0]} · {experience[1].role}, LDCE {experience[1].when.split(" — ")[1]} · open to on-site or hybrid roles</p>
+                <p className="dp-cta dp-cta-top">
+                    <a href={`mailto:${profile.email}`}>{profile.email}</a>
+                    <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
+                    {socials.filter((x) => /linkedin|github/i.test(x.text || x.id)).map((x) => <a key={x.id} href={x.link} target="_blank" rel="noreferrer">{x.text}</a>)}
+                </p>
             </section>
 
             <section className="dp-board" aria-labelledby="dp-dep">
@@ -69,7 +76,7 @@ export default function Departures() {
                 <div className="dp-row dp-th" aria-hidden><span>Time</span><span>Destination</span><span>Via</span><span>Plat.</span><span>Status</span><span>Latency</span></div>
                 <ol>
                     {fleet.map((w, i) => {
-                        const s = sites[w.slug], [v, tone] = verdict(s);
+                        const s = sites[w.slug], [v, tone] = verdict(s, off);
                         return (
                             <li key={w.slug}>
                                 <a className="dp-row" href={w.url} target="_blank" rel="noreferrer" data-tone={tone}>
@@ -90,16 +97,17 @@ export default function Departures() {
 
             <div className="dp-split">
                 <section className="dp-board dp-arr" aria-labelledby="dp-arr">
-                    <div className="dp-board-head"><h2 id="dp-arr">Arrivals</h2><p>Public GitHub pushes{total90 != null ? ` · ${total90} in 90 days` : ""}</p></div>
+                    <div className="dp-board-head"><h2 id="dp-arr">Arrivals</h2><p>Public repositories, latest push first{total90 != null ? ` · ${total90} commits in 90 days` : ""}</p></div>
                     <ol>
                         {pushes.map((c, i) => (
                             <li key={c.at + c.repo} className="dp-row dp-arow">
                                 <Flap text={ago(c.at)} len={7} start={i * 70} />
                                 <Flap text={c.repo.replace(/[-_]/g, " ")} len={16} start={i * 70 + 50} className="dp-dest" />
-                                <Flap text={`${c.n} COMMIT${c.n > 1 ? "S" : ""}`} len={9} start={i * 70 + 100} />
+                                <Flap text={`${c.n} COMMIT${c.n > 1 ? "S" : ""}`} len={11} start={i * 70 + 100} />
                             </li>
                         ))}
-                        {gh && !pushes.length && <li className="dp-empty">No public pushes this week. Most client work lives in private repositories.</li>}
+                        {gh?.error && <li className="dp-empty">GitHub isn't answering right now, so arrivals are paused. The live sites above are checked separately.</li>}
+                        {gh && !gh.error && !pushes.length && <li className="dp-empty">No public pushes in 90 days. Most client work lives in private repositories.</li>}
                     </ol>
                 </section>
 

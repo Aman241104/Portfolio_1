@@ -18,9 +18,13 @@ const tilt = (i) => [-1.2, 0.8, -0.4, 1.3, -0.9, 0.5][i % 6];
 // **bold**, "- " list lines, [n] → footnote superscripts
 const Typed = ({ text, sources }) => text.replace(/\s+(\[\d+\])/g, "$1").split(/\n+/).map((line, li) => {   // footnotes hug their word
     const list = /^\s*[-*•]\s+/.test(line), body = line.replace(/^\s*[-*•]\s+/, "");
-    const parts = body.split(/(\*\*[^*]+\*\*|\[\d+\])/g).map((p, i) => {
+    const parts = body.split(/(\*\*[^*]+\*\*|\[\d+\])/g).map((p, i, arr) => {
         const c = p.match(/^\[(\d+)\]$/);
-        if (c) { const s = sources[+c[1] - 1]; return s ? <sup key={i}><a href={s.url} target="_blank" rel="noreferrer" title={s.title}>{c[1]}</a></sup> : null; }
+        if (c) {
+            const s = sources[+c[1] - 1];
+            const after = /^\[\d+\]$/.test(arr[i - 2] || "") && arr[i - 1] === "";   // a run like [2][4] reads ²˒⁴, never ²⁴
+            return s ? <sup key={i}>{after && "˒"}<a href={s.url} target="_blank" rel="noreferrer" title={s.title}>{c[1]}</a></sup> : null;
+        }
         if (/^\*\*/.test(p)) return <b key={i}>{p.slice(2, -2)}</b>;
         return <Fragment key={i}>{p}</Fragment>;
     });
@@ -51,8 +55,8 @@ const Card = ({ turn, i }) => {
                     </div>
                 )}
                 {a?.matched?.length > 0 && <p className="rd-matched">{a.matched.join(" · ")}</p>}
-                {a?.error && <p className="rd-err">{a.error}</p>}
-                {full && <div className="rd-body"><Typed text={full.slice(0, n)} sources={a.sources} />{n < full.length && <i className="rd-caret" />}</div>}
+                {a?.error && <p className="rd-err">{a.error} <a href={`mailto:${profile.email}`}>{profile.email}</a></p>}
+                {full && <div className="rd-body" aria-hidden={n < full.length || undefined}><Typed text={full.slice(0, n)} sources={a.sources} />{n < full.length && <i className="rd-caret" />}</div>}
                 {a && !full && !a.error && !a.matched && <p className="rd-body">Nothing in the file answers that. Ask Aman directly: <a href={`mailto:${profile.email}`}>{profile.email}</a></p>}
                 {a?.sources?.length > 0 && n >= full.length && (
                     <ol className="rd-notes">
@@ -81,10 +85,11 @@ export default function ReferenceDesk() {
         setThread((t) => [...t, { q: label, kind, a: null }]);
         let a;
         try {
-            const r = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            // never leave someone watching "pulling the file…" for half a minute: give up after 15 s
+            const r = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: AbortSignal.timeout(15000) });
             a = await r.json();
             if (!r.ok) a = { error: a.error || "The desk is busy. Email works too." };
-        } catch { a = { error: "Can't reach the desk. Email works too." }; }
+        } catch { a = { error: "Can't reach the desk right now. Ask again in a moment, or write to him:" }; }
         setThread((t) => t.map((x, i) => (i === t.length - 1 ? { ...x, a } : x)));
         setBusy(false);
     };
@@ -115,13 +120,15 @@ export default function ReferenceDesk() {
                 <main className="rd-main">
                     {!thread.length && (
                         <section className="rd-intro">
+                            <p className="rd-who">Aman Patel · Full-stack engineer · Ahmedabad · open to on-site or hybrid roles</p>
                             <h1>{tab === "ask" ? "Ask about Aman. The answer comes with its references." : "Paste a job. See what fits."}</h1>
                             <p>{tab === "ask"
                                 ? `Every answer is typed from his own file: ${work.length} projects, his experience, skills and case studies, footnoted so you can check it.`
                                 : "Matching skills get stamped, the closest projects and experience are footnoted, and gaps are named honestly when the summary is on."}</p>
+                            {tab === "ask" && <button type="button" className="rd-switch" onClick={() => setTab("match")}>Hiring? Paste your job description and see the fit →</button>}
                         </section>
                     )}
-                    <div className="rd-thread" aria-live="polite">
+                    <div className="rd-thread" aria-live="polite" aria-busy={busy || undefined}>
                         {thread.map((t, i) => <Card key={i} turn={t} i={i} />)}
                         <div ref={end} />
                     </div>

@@ -49,6 +49,16 @@ const llm = async (messages) => {
 const ctx = (srcs) => srcs.map((c, i) => `[${i + 1}] ${c.title}: ${c.text}`).join("\n");
 const cite = (srcs) => srcs.map((c, i) => ({ n: i + 1, title: c.title, url: c.url }));
 
+// Model output → clean text whose footnotes are exactly the sources it uses, numbered in order of first use.
+// Strips provider artefacts (【1†source】 markers, "(Word count: 108)") and never lists a source the text doesn't cite.
+export const tidy = (text, srcs) => {
+    let t = text.replace(/【(\d+)[^】]*】/g, "[$1]").replace(/\(?\s*word count:?\s*\d+\s*\)?\.?/gi, "").trim();
+    const order = [];
+    t.replace(/\[(\d+)\]/g, (_, n) => { n = +n; if (n >= 1 && n <= srcs.length && !order.includes(n)) order.push(n); return ""; });
+    t = t.replace(/\[(\d+)\]/g, (m, n) => (order.includes(+n) ? `[${order.indexOf(+n) + 1}]` : ""));
+    return { text: t.replace(/[ \t]+\n/g, "\n").replace(/ {2,}/g, " "), sources: order.map((n, i) => ({ n: i + 1, title: srcs[n - 1].title, url: srcs[n - 1].url })) };
+};
+
 export default async function handler(req, res) {
     res.setHeader("Cache-Control", "no-store");
     if (req.method !== "POST") return res.status(405).end();
@@ -64,11 +74,13 @@ export default async function handler(req, res) {
         const srcs = retrieve(jd, 8);
         const answer = await llm([{ role: "system", content: SYSTEM }, { role: "user", content:
             `Job description:\n${jd}\n\nSources:\n${ctx(srcs)}\n\nGive: (1) a one-line fit summary, (2) the strongest matching experience/projects with citations, (3) honest gaps (requirements the sources don't show). Under 170 words.` }]).catch(() => null);
-        out = { mode: answer ? "ai" : "retrieval", answer: answer?.text || null, via: answer?.via, matched, sources: cite(srcs) };
+        const tidied = answer && tidy(answer.text, srcs);
+        out = { mode: answer ? "ai" : "retrieval", answer: tidied?.text || null, via: answer?.via, matched, sources: tidied ? tidied.sources : cite(srcs) };
     } else {
         const srcs = retrieve(q, 6);
         const answer = srcs.length ? await llm([{ role: "system", content: SYSTEM }, { role: "user", content: `Question: ${q}\n\nSources:\n${ctx(srcs)}` }]).catch(() => null) : null;
-        out = { mode: answer ? "ai" : "retrieval", answer: answer?.text || null, via: answer?.via, sources: cite(srcs), facts: answer ? undefined : srcs.slice(0, 4).map((c) => c.text) };
+        const tidied = answer && tidy(answer.text, srcs);
+        out = { mode: answer ? "ai" : "retrieval", answer: tidied?.text || null, via: answer?.via, sources: tidied ? tidied.sources : cite(srcs).slice(0, 4), facts: answer ? undefined : srcs.slice(0, 4).map((c) => c.text) };
     }
     if (sql) sql`create table if not exists px01_asks (id bigserial primary key, q text, kind text, mode text, created_at timestamptz default now())`
         .then(() => sql`insert into px01_asks (q, kind, mode) values (${(q || jd).slice(0, 500)}, ${jd ? "jd" : "q"}, ${out.via || out.mode})`).catch(() => {});
