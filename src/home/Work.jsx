@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useLiquid } from "../liquid.js";
+
+const LENS = { edge: 30, amount: 34 };
 import { work, KINDS, shot } from "#content/work.js";
 import { profile, socials } from "#content/profile.js";
 import { sfx } from "#machine/sfx.js";
@@ -73,9 +76,11 @@ export default function Work() {
         setTimeout(() => window.location.assign(item.url), 1050);
     };
 
+    const hire = useRef(null);
+    useLiquid(hire, LENS);
     return (
         <section className="work" aria-labelledby="work-h">
-            <div className="hire lg">
+            <div ref={hire} className="hire lg">
                 <div>
                     <p className="mono">For recruiters</p>
                     <p className="hire-line">Full-stack engineer in Ahmedabad, open to on-site or hybrid roles. Résumé, contact and {work.length} projects, all on this page.</p>

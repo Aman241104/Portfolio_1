@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { liquid } from "../liquid.js";
+
+const LENS = { edge: 26, amount: 30 };
 import { X } from "lucide-react";
 import { track, identify } from "../analytics.js";
 
@@ -13,6 +16,8 @@ export default function Nudge() {
     const [open, setOpen] = useState(false);
     const [state, setState] = useState("idle");
     const [err, setErr] = useState("");
+    const card = useRef(null);
+    useEffect(() => (open ? liquid(card.current, LENS) : undefined), [open]);   // the card mounts when it opens
 
     useEffect(() => {
         if (seen()) return;
@@ -44,7 +49,7 @@ export default function Nudge() {
 
     if (!open) return null;
     return (
-        <aside className="nudge lg" role="dialog" aria-label="Hiring?">
+        <aside ref={card} className="nudge lg" role="dialog" aria-label="Hiring?">
             <button type="button" className="nudge-x" onClick={close} aria-label="No thanks"><X size={16} /></button>
             {state === "sent" ? (
                 <p className="nudge-done">Thanks. You'll hear from me soon. <span className="mono">— Aman</span></p>

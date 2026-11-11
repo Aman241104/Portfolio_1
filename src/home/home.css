@@ -402,8 +402,7 @@
     .home:is([data-phase="revealed"], [data-phase="transitioning"]) :is(.hero-word, .ink > :not(.pin)) { opacity: 0 !important; transition: opacity .3s; }
     .pin-knob { display: none; }                  /* the keychain row owns that space; the status line says "Tap the red knob" */
     .n-role, .n-city, .tag { display: none; }
-    /* phones: the signature sits in the gap above the word instead of across it (legibility at 20vw) */
-    .signature { right: 4vw; font-size: 8.5vw; bottom: calc(var(--word-bottom) + var(--word-h) - 1vw); }
+    .signature { right: 3vw; font-size: 10.5vw; }
     .n-craft { display: none; }
     .sig-mark { left: var(--gutter); width: 70px; bottom: calc(var(--word-bottom) + var(--word-h) + 4px); }
     .work, .xp { padding-top: 9vh; }
@@ -565,9 +564,9 @@
 @media (hover: hover) { .home .card-case:hover { background: var(--signal); } }
 
 /* ============================================================ liquid glass on the home page */
-.home .hire.lg { border: 0; border-radius: 22px; background: linear-gradient(100deg, rgba(255, 46, 31, .13), rgba(22, 22, 26, .42) 55%); }
-.home .key.lg { border: 0; border-radius: 16px; margin: 0 0 8px; background: rgba(22, 22, 26, .4); }
-.home .filters button { -webkit-backdrop-filter: blur(8px) saturate(1.8); backdrop-filter: blur(8px) saturate(1.8); background: rgba(22, 22, 26, .42); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), inset 0 0 0 1px rgba(255, 255, 255, .1); border-color: transparent; }
+.home .hire.lg { border: 0; border-radius: 22px; background: linear-gradient(100deg, rgba(255, 46, 31, .12), rgba(255, 255, 255, .02) 55%); }
+.home .key.lg { border: 0; border-radius: 16px; margin: 0 0 8px; background: rgba(255, 255, 255, .03); }
+.home .filters button { -webkit-backdrop-filter: blur(2px) saturate(1.7); backdrop-filter: blur(2px) saturate(1.7); background: rgba(255, 255, 255, .04); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), inset 0 0 0 1px rgba(255, 255, 255, .1); border-color: transparent; }
 
 /* ============================================================ numbers strip + tape */
 .stats { position: relative; padding: 0 0 7vh; overflow: hidden; }
@@ -618,7 +617,6 @@
     /* pressed: the puck becomes a lens (rim + Mindcore's chromatic fringe + lift) */
     .ld-tabs[data-press] .ld-puck {
         transition: background .2s, box-shadow .2s; background: rgba(255, 255, 255, .05);
-        -webkit-backdrop-filter: blur(1px) saturate(2.2); backdrop-filter: blur(1px) saturate(2.2);
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .4), inset 4px 0 7px -3px rgba(255, 50, 100, .6), inset -4px 0 7px -3px rgba(40, 170, 255, .6), 0 10px 26px rgba(0, 0, 0, .45);
     }
     .ld-tab {
@@ -663,3 +661,9 @@
 .nudge-done { margin: 4px 30px 4px 0; font: 500 16px/1.4 "Geist", sans-serif; }
 @media (max-width: 760px) { .nudge { left: 12px; right: 12px; width: auto; bottom: calc(86px + env(safe-area-inset-bottom)); } }
 @media (prefers-reduced-motion: reduce) { .nudge { animation: none; } }
+.ld-tabs:not([data-press]) .ld-puck { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.nudge input:not(.hp) { background: rgba(255, 255, 255, .06); }
+/* glass that carries text over content keeps a tint for legibility (Mindcore: tint .4); the lens does the rest */
+.home .nudge.lg { background: rgba(10, 10, 12, .62); }
+.ld-tabs.lg, .ld-act.lg { background: rgba(10, 10, 12, .5); }
+.ld-tab span, .ld-tab svg { filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .7)); }

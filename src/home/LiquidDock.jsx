@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Briefcase, Route, Layers, AtSign, FileDown } from "lucide-react";
 import { track } from "../analytics.js";
+import { useLiquid } from "../liquid.js";
+
+const BAR = { edge: 20, amount: 22, extra: "blur(3px) saturate(1.7) brightness(1.05)" }, PUCK = { edge: 18, amount: 30, fringe: 0.22, extra: "saturate(2)" }, ACT = { edge: 22, amount: 28 };
 
 // Phones: Mindcore's liquid tab bar, ported. A glass capsule of four sections with a puck that follows the page
 // (scroll spy); press and the puck swells into a lens, drag it across the tabs and it stretches with speed, let go
@@ -13,7 +16,8 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 export default function LiquidDock({ on, resume }) {
     const [at, setAt] = useState(0);
-    const bar = useRef(null), puck = useRef(null), drag = useRef(null), lock = useRef(0);
+    const bar = useRef(null), puck = useRef(null), act = useRef(null), drag = useRef(null), lock = useRef(0);
+    useLiquid(bar, BAR); useLiquid(puck, PUCK); useLiquid(act, ACT);
 
     useEffect(() => {
         const spy = () => {
@@ -75,7 +79,7 @@ export default function LiquidDock({ on, resume }) {
                     </button>
                 ))}
             </div>
-            <a className="ld-act lg" href={resume} target="_blank" rel="noreferrer" aria-label="Résumé (PDF)"
+            <a ref={act} className="ld-act lg" href={resume} target="_blank" rel="noreferrer" aria-label="Résumé (PDF)"
                 onClick={() => track("resume_opened", { from: "dock" })}>
                 <FileDown size={24} strokeWidth={1.75} aria-hidden /><span>CV</span>
             </a>

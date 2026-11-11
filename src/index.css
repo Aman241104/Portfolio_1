@@ -30,19 +30,31 @@ body {
     @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 }
 
-/* ============================================================ Liquid glass (Mindcore's "Liquid" preset, ported):
-   vibrancy = saturate, blur 8, surface tint .42, rim highlight, and a light that follows the finger/cursor
-   (--gx/--gy, set by one pointer listener on the home page). Lens refraction is Chromium-only on the web: skipped. */
+/* ============================================================ Liquid glass: clear, not frosted.
+   Chromium gets a real lens from src/liquid.js (.lg-live: rim refraction + chromatic fringe); everywhere else this
+   clear fallback: a breath of blur, vibrancy, and the rim light that sells the thickness of the glass. */
 .lg {
-    background: rgba(22, 22, 26, .42);
-    -webkit-backdrop-filter: blur(8px) saturate(1.8); backdrop-filter: blur(8px) saturate(1.8);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .26), inset 0 -1px 0 rgba(255, 255, 255, .06), inset 0 0 0 1px rgba(255, 255, 255, .1), 0 12px 32px rgba(0, 0, 0, .38);
+    background: rgba(255, 255, 255, .035);
+    -webkit-backdrop-filter: blur(2.5px) saturate(1.7) brightness(1.06); backdrop-filter: blur(2.5px) saturate(1.7) brightness(1.06);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .42), inset 0 -1px 0 rgba(255, 255, 255, .1),
+        inset 0 0 0 .5px rgba(255, 255, 255, .14), inset 0 0 24px rgba(255, 255, 255, .045),
+        0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .32);
     position: relative; isolation: isolate;
 }
+/* the rim: a hairline that catches light top-left and bottom-right, like the edge of a thick lens */
+.lg::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; z-index: -1;
+    background: linear-gradient(135deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, .1) 28%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, .08) 72%, rgba(255, 255, 255, .5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* specular: a soft highlight that follows the cursor / finger (--gx/--gy) */
 .lg::after {
     content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
-    background: radial-gradient(180px circle at var(--gx, 50%) var(--gy, -30%), rgba(255, 255, 255, .17), transparent 65%), linear-gradient(180deg, rgba(255, 255, 255, .07), transparent 45%);
-    opacity: .65; transition: opacity .35s;
+    background: radial-gradient(140px circle at var(--gx, 30%) var(--gy, -10%), rgba(255, 255, 255, .14), transparent 70%);
+    opacity: .7; transition: opacity .35s; mix-blend-mode: plus-lighter;
 }
 .lg:hover::after, .lg[data-press]::after { opacity: 1; }
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .lg { background: rgba(22, 22, 26, .9); } }
+.lg-live { background: rgba(255, 255, 255, .02); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .lg { background: rgba(30, 30, 34, .85); } }
