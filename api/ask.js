@@ -16,12 +16,13 @@ salaries or skills. Refer to him as Aman, in the third person. Be concise: 2–5
 
 // Providers, fastest first. Each is any OpenAI-compatible endpoint; a provider is skipped when its key isn't set.
 // On a timeout, 429 or 5xx the next one takes over; the whole chain has a hard budget so a visitor never waits long.
-const PROVIDERS = [
-    { id: "groq", key: "GROQ_API_KEY", base: "https://api.groq.com/openai/v1", model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile", ms: 9000 },
-    { id: "nvidia", key: "NVIDIA_API_KEY", base: "https://integrate.api.nvidia.com/v1", model: process.env.NVIDIA_MODEL || "meta/llama-3.3-70b-instruct", ms: 12000 },
-    { id: "gemini", key: "LLM_API_KEY", base: process.env.LLM_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai", model: process.env.LLM_MODEL && !/2\.0/.test(process.env.LLM_MODEL) ? process.env.LLM_MODEL : "gemini-3.5-flash-lite", ms: 15000 },   // lite: ~1.4s; the full flash models "think" for 30s+
+const PROVIDERS = [                                     // models re-checked 2026-11-11 (older Llama ids were retired)
+    { id: "groq", key: "GROQ_API_KEY", base: "https://api.groq.com/openai/v1", model: process.env.GROQ_MODEL || "openai/gpt-oss-120b", ms: 8000 },
+    { id: "groq-qwen", key: "GROQ_API_KEY", base: "https://api.groq.com/openai/v1", model: "qwen/qwen3.8-27b", ms: 6000 },
+    { id: "nvidia", key: "NVIDIA_API_KEY", base: "https://integrate.api.nvidia.com/v1", model: process.env.NVIDIA_MODEL || "nvidia/nemotron-3.5-lightning-30b-a3b", ms: 7000 },
+    { id: "gemini", key: "LLM_API_KEY", base: process.env.LLM_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai", model: process.env.LLM_MODEL && !/2\.0/.test(process.env.LLM_MODEL) ? process.env.LLM_MODEL : "gemini-3.5-flash-lite", ms: 12000 },   // lite: ~1.4s; the full flash models "think" for 30s+
 ];
-const BUDGET = 45000;
+const BUDGET = 32000;
 
 const llm = async (messages) => {
     const t0 = Date.now();
@@ -38,7 +39,7 @@ const llm = async (messages) => {
             });
             if (!r.ok) continue;                                            // 401/429/5xx → next provider
             const j = await r.json();
-            const text = j.choices?.[0]?.message?.content?.trim();
+            const text = j.choices?.[0]?.message?.content?.replace(/[\u2010\u2011]/g, "-").replace(/[\u202f\u00a0]/g, " ").trim();   // typewriter-safe
             if (text) return { text, via: p.id, ms: Date.now() - t0 };
         } catch { /* timeout or network → next provider */ }
     }
