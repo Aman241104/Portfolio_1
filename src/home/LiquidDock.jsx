@@ -52,9 +52,14 @@ export default function LiquidDock({ on, resume }) {
         if (!d) return;
         if (Math.abs(e.clientX - d.x0) > 6) d.moved = true;
         const x = clamp(e.clientX - d.left - d.w / 2, 0, d.w * (TABS.length - 1));
-        const v = clamp(Math.abs(e.clientX - d.last) / 30, 0, 0.2);   // speed → stretch (Mindcore: scaleX /= 1 - v*.75)
+        // speed → stretch, low-passed so it flows instead of jittering per event (Mindcore: scaleX /= 1 - v*.75)
+        d.v = (d.v || 0) * 0.7 + clamp(Math.abs(e.clientX - d.last) / 30, 0, 0.2) * 0.3;
         d.last = e.clientX; d.x = x;
+        const v = d.v;
         puck.current.style.transform = `translateX(${x}px) scale(${1.28 + v}, ${1.28 - v * 0.6})`;
+        // when the finger rests, the liquid relaxes back to round
+        clearTimeout(d.rest);
+        d.rest = setTimeout(() => { if (drag.current === d) { d.v = 0; puck.current.style.transform = `translateX(${d.x}px) scale(1.28)`; } }, 90);
         const r = bar.current.getBoundingClientRect();
         bar.current.style.setProperty("--gx", `${e.clientX - r.left}px`);
         bar.current.style.setProperty("--gy", "50%");

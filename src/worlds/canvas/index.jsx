@@ -14,6 +14,17 @@ const FONTS = ["B612+Mono:wght@400;700", "B612:wght@400;700", "Architects+Daught
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const FW = 340, FH = 300, GAP = 48;
 
+// A drafter's revision cloud: scalloped arcs walked around a rectangle, drawn on with stroke-dashoffset when a sheet
+// is selected. Built once (every sheet is the same size).
+const CLOUD = (() => {
+    const pad = 22, w = FW + pad * 2, h = FH + pad * 2, r = 16;
+    const pts = [];
+    const edge = (x0, y0, x1, y1) => { const n = Math.round(Math.hypot(x1 - x0, y1 - y0) / (r * 1.6)); for (let i = 0; i < n; i++) pts.push([x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n]); };
+    edge(0, 0, w, 0); edge(w, 0, w, h); edge(w, h, 0, h); edge(0, h, 0, 0);
+    const d = pts.map(([x, y], i) => { const [nx, ny] = pts[(i + 1) % pts.length]; return `${i ? "" : `M${x} ${y}`}A${r} ${r} 0 0 1 ${nx} ${ny}`; }).join("");
+    return { d, w, h, pad };
+})();
+
 // layout: one section per kind, laid out as rows of frames; then skills, career and contact boards
 const build = () => {
     const items = [], sections = [];
@@ -135,8 +146,9 @@ export default function CanvasWorld() {
         } else {
             const v = view.current, b = bounds(v);
             let dx = e.clientX - prev[0], dy = e.clientY - prev[1];
-            if (over(v.x, b.minX, b.maxX)) dx *= 0.35;          // rubber band: the further out, the heavier
-            if (over(v.y, b.minY, b.maxY)) dy *= 0.35;
+            // rubber band: resistance grows with how far past the edge you already are
+            dx /= 1 + Math.abs(over(v.x, b.minX, b.maxX)) / 80;
+            dy /= 1 + Math.abs(over(v.y, b.minY, b.maxY)) / 80;
             const dt = Math.max(1, now - prev[2]);
             vel.current = [vel.current[0] * 0.6 + (dx / dt) * 0.4, vel.current[1] * 0.6 + (dy / dt) * 0.4];
             apply({ ...v, x: v.x + dx, y: v.y + dy });
@@ -193,6 +205,12 @@ export default function CanvasWorld() {
                             const no = work.indexOf(it.p) + 1;
                             return (
                                 <article key={i} className="bp-sheet" data-on={focus === it.p || undefined} style={{ left: it.x, top: it.y, width: FW, height: FH, "--i": i }} onClick={() => open(it)}>
+                                    {focus === it.p && (
+                                        <svg className="bp-cloud" aria-hidden width={CLOUD.w} height={CLOUD.h} style={{ left: -CLOUD.pad, top: -CLOUD.pad }} viewBox={`-4 -4 ${CLOUD.w + 8} ${CLOUD.h + 8}`}>
+                                            <path d={CLOUD.d} pathLength="1" />
+                                            <text x={CLOUD.w - 6} y={-10}>△ REV {String.fromCharCode(64 + Math.min(26, no % 26 || 26))}</text>
+                                        </svg>
+                                    )}
                                     <span className="bp-dim bp-dim-x" aria-hidden><i />1440<i /></span>
                                     <span className="bp-dim bp-dim-y" aria-hidden><i />900<i /></span>
                                     <div className="bp-print"><img src={shot(it.p, 520)} alt="" loading="lazy" draggable={false} /></div>

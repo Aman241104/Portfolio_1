@@ -133,3 +133,11 @@
 @keyframes bp-develop { 0% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes bp-fade { from { opacity: 0; translate: 0 6px; } }
 @keyframes bp-write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* Selecting a sheet: a red-pen revision cloud is drawn round it, then the revision tag is written. */
+.bp-cloud { position: absolute; overflow: visible; pointer-events: none; z-index: 3; }
+.bp-cloud path { fill: none; stroke: #ff6a4d; stroke-width: 2.5; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1;
+    animation: bp-cloud .9s var(--ease-in-out) forwards; filter: drop-shadow(0 0 6px rgba(255, 106, 77, .35)); }
+.bp-cloud text { font: 400 20px "Architects Daughter", cursive; fill: #ff6a4d; text-anchor: end; opacity: 0; animation: bp-fade .3s var(--ease-out) .8s forwards; }
+@keyframes bp-cloud { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .bp-cloud path { animation: none; stroke-dashoffset: 0; } .bp-cloud text { animation: none; opacity: 1; } }
