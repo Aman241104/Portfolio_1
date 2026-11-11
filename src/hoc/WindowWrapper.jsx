@@ -17,6 +17,7 @@ const WindowWrapper = (Component, windowKey) => {
 
         // Mounted lags isOpen on close so the window can animate away before it unmounts.
         const [mounted, setMounted] = useState(isOpen);
+        const origin = useRef("50% 100%");
         if (isOpen && !mounted) setMounted(true);
 
         useGSAP(() => {
@@ -24,16 +25,16 @@ const WindowWrapper = (Component, windowKey) => {
             if (!el) return;
             if (!isOpen) {
                 if (reduced()) return setMounted(false);
-                gsap.to(el, { scale: 0.94, opacity: 0, y: 8, duration: 0.18, ease: "power2.in", onComplete: () => setMounted(false) });
+                // close mirrors open: back into the icon it came from, accelerating away
+                gsap.to(el, { scale: 0.12, opacity: 0, transformOrigin: origin.current, duration: 0.26, ease: "power3.in", onComplete: () => setMounted(false) });
                 return;
             }
             el.style.display = "block";
             if (reduced()) { gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2 }); return; }
             const r = el.getBoundingClientRect();
-            const o = press ? `${press.x - r.left}px ${press.y - r.top}px` : "50% 100%";
-            gsap.fromTo(el,
-                { scale: 0.12, opacity: 0, transformOrigin: o },
-                { scale: 1, opacity: 1, duration: 0.55, ease: "expo.out", clearProps: "transformOrigin" });
+            origin.current = press ? `${press.x - r.left}px ${press.y - r.top}px` : "50% 100%";
+            gsap.fromTo(el, { scale: 0.12, transformOrigin: origin.current }, { scale: 1, duration: 0.55, ease: "expo.out" });
+            gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" });   // solid early, never a ghost
         }, [isOpen, mounted])
 
         useGSAP(() => {

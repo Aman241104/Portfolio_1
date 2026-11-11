@@ -75,16 +75,19 @@ const Boot = ({ target, onDone }) => {
     useEffect(() => { const t = setTimeout(() => setSkip(true), 2500); return () => clearTimeout(t); }, []);
     const finish = useRef(onDone);
     finish.current = onDone;
+    // the count carries on from where it is when the next milestone arrives (it used to restart from 0 each time)
+    const v = useRef(0);
     useEffect(() => {
-        let raf, v = 0;
+        let raf;
         const tick = () => {
-            v = Math.min(target, v + Math.max(0.35, (target - v) * 0.08));
-            setN(Math.floor(v));
-            if (v < target) raf = requestAnimationFrame(tick);
+            v.current = Math.min(target, v.current + Math.max(0.35, (target - v.current) * 0.08));
+            setN(Math.floor(v.current));
+            if (v.current < target) raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(raf);
     }, [target]);
+    const skipNow = () => { if (!skip) return; v.current = 100; setN(100); };
     const out = n >= 100;
     useEffect(() => {
         if (!out) return;
@@ -92,7 +95,7 @@ const Boot = ({ target, onDone }) => {
         return () => clearTimeout(t);
     }, [out]);
     return (
-        <div className="boot" data-out={out || undefined} data-skip={skip || undefined} aria-hidden onClick={() => skip && setN(100)}>
+        <div className="boot" data-out={out || undefined} data-skip={skip || undefined} aria-hidden onClick={skipNow}>
             <div className="boot-log mono">{BOOT_LINES.filter(([at]) => n >= at).map(([, l]) => <p key={l}>{l}</p>)}</div>
             <p className="boot-hint mono">{skip ? "Click anywhere to skip" : isTouch() ? "Sound is off · switch it on top right" : "Sound is off · press S for clicks and coins"}</p>
             <div className="boot-line" />
@@ -291,7 +294,7 @@ const Home = ({ onSelect }) => {
 
     useEffect(() => { monoReady.then(() => { setFontsOk(true); bump(35); }); }, []);
     // never trap anyone on the boot screen: a slow GPU or a lost WebGL context still gets the page after 9 s
-    useEffect(() => { const t = setTimeout(() => { bump(100); setBooted(true); }, 9000); return () => clearTimeout(t); }, []);
+    useEffect(() => { const t = setTimeout(() => { bump(100); setBooted(true); }, 5000); return () => clearTimeout(t); }, []);
     useEffect(() => { if (phase === "revealed") { enterBtn.current?.focus({ preventScroll: true }); sfx.win(); } }, [phase]);
     useEffect(() => { if (lit) sfx.power(); }, [lit]);
     // Shared pull counter. Not configured (or local dev) → keep the house number and say nothing about it.

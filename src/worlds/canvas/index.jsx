@@ -64,7 +64,15 @@ export default function CanvasWorld() {
         apply({ k, x: r.width / 2 - (x + w / 2) * k, y: r.height / 2 - (y + h / 2) * k }, true);
     }, [apply]);
     // phones open on the title block (readable), wide screens on the first zones
-    useEffect(() => { if (innerWidth < 760) fitTo(0, 0, 1150, 900, 12); else fitTo(0, 0, Math.min(W, 1900), 1300, 30); }, [fitTo, W]);
+    useEffect(() => {
+        if (innerWidth < 760) fitTo(0, 0, 1150, 900, 12); else fitTo(0, 0, Math.min(W, 1900), 1300, 30);
+        // Only what is on screen drafts itself on arrival; everything else is simply already drawn (keeps raster cheap).
+        const v = view.current, r = vp.current.getBoundingClientRect();
+        board.current.querySelectorAll(".bp-sheet, .bp-zone").forEach((el) => {
+            const x = parseFloat(el.style.left) * v.k + v.x, y = parseFloat(el.style.top) * v.k + v.y;
+            if (x > r.width || y > r.height || x + el.offsetWidth * v.k < 0 || y + el.offsetHeight * v.k < 0) el.dataset.still = "";
+        });
+    }, [fitTo, W]);
     useEffect(() => {
         const ro = new ResizeObserver(([e]) => setVpSize({ w: e.contentRect.width, h: e.contentRect.height }));
         ro.observe(vp.current); return () => ro.disconnect();

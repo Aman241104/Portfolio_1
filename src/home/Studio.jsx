@@ -33,7 +33,7 @@ const KeyLight = ({ lit, onBooted }) => {
     const done = useRef(false);
     useFrame(({ clock }) => {
         const t = since(clock);
-        const k = reduced ? 1 : t === null ? 0 : clamp01((t - 0.35) / 1.4);
+        const k = reduced ? 1 : t === null ? 0 : clamp01((t - 0.1) / 0.9);
         ref.current.intensity = KEY * outCubic(k);
         if (k === 1 && !done.current) { done.current = true; onBooted(); }
     });
@@ -48,7 +48,7 @@ const Entrance = ({ lit, innerRef: ref, children }) => {
     const since = useSince(lit);
     useFrame(({ clock }) => {
         const t = since(clock);
-        const k = reduced ? 1 : t === null ? 0 : clamp01(t / 1.5);
+        const k = reduced ? 1 : t === null ? 0 : clamp01(t / 1.1);
         ref.current.position.y = (1 - outBack(k, 1.2)) * 9;
         ref.current.rotation.y = (1 - outCubic(k)) * Math.PI * 1.5;
         ref.current.visible = k > 0;

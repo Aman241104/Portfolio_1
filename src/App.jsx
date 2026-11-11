@@ -47,7 +47,7 @@ const App = () => {
         <>
             <WorldBoundary key={world.id}>
                 {/* One continuous move from the machine: the curtain faded to this world's paper, the loading screen holds
-                    that colour, and once the world is mounted the colour wipes up off it. */}
+                    that colour, and once the world is mounted it dissolves into the world's own arrival. */}
                 <Suspense fallback={<div className="world-wipe hold" style={{ background: world.paper }}><p>Loading {world.name}…</p></div>}>
                     <Component shell={{ go, spin: toMachine }} />
                     {wipe && <div className="world-wipe" style={{ background: world.paper }} aria-hidden />}

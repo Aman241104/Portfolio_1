@@ -14,6 +14,8 @@ const SETTLE = [{ transform: "translateY(0)" }, { transform: "translateY(.04em)"
 const jobs = new Set();
 let raf = 0;
 const loop = (now) => {
+    // the world's fonts are still loading (fonts.js): hold the board, shifting every job, so it riffles in the real face
+    if ("fontsWait" in document.documentElement.dataset) { for (const j of jobs) j.at += 16.7; raf = requestAnimationFrame(loop); return; }
     for (const j of jobs) if (now >= j.at) j.step(now);
     raf = jobs.size ? requestAnimationFrame(loop) : 0;
 };
@@ -26,7 +28,7 @@ const Cell = memo(({ ch, delay }) => {
         if (reduced) { f.textContent = ch; return; }
         if (f.textContent === ch) return;
         let n = 0;
-        const flips = 3 + Math.floor(Math.random() * 5);
+        const flips = 2 + Math.floor(Math.random() * 3);   // 2–4 riffles: reads as a riffle, half the DOM writes
         const job = { at: performance.now() + delay, step(now) {
             n++;
             const last = n >= flips;
@@ -35,7 +37,7 @@ const Cell = memo(({ ch, delay }) => {
             if (last) { l.firstChild.textContent = f.textContent; l.animate(FOLD, { duration: 140, easing: ease.snap }); }
             f.textContent = last ? ch : DRUM[Math.floor(Math.random() * DRUM.length)];
             if (last) { jobs.delete(job); box.current.animate(SETTLE, { duration: 160, delay: 100, easing: ease.spring }); }
-            else job.at = now + 62;
+            else job.at = now + 70;
         } };
         schedule(job);
         return () => jobs.delete(job);
