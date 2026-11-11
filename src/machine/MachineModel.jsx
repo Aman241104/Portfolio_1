@@ -529,29 +529,47 @@ const Payout = ({ jackpot }) => {
 // Win ticket: prints out of a slot under the case, curls toward you, and is the way in (click = enter the world).
 const TICKET_H = 1.05;
 const Ticket = ({ ticket, onTicket }) => {
-    const root = useRef(), paper = useRef(), t = useRef(0), hot = useRef(false);
+    const root = useRef(), paper = useRef(), slot = useRef(), t = useRef(0), hot = useRef(false);
     const narrow = useThree((st) => st.size.width / st.size.height < 0.62);   // tall phones: shorter ticket so it clears the result card
-    useFrame(({ clock }, dt) => {
-        t.current = ticket ? t.current + dt : 0;
-        if (ticket && t.current - dt < 0.45 && t.current >= 0.45) sfx.print();
-        const k = THREE.MathUtils.clamp((t.current - 0.45) / 1.0, 0, 1), e = 1 - Math.pow(1 - k, 3);
-        root.current.visible = k > 0;
-        paper.current.scale.y = Math.max(e, 0.001);
-        root.current.rotation.x = 0.14 * e + Math.sin(clock.elapsedTime * 1.4) * 0.025 * e - (hot.current ? 0.12 : 0);
-    });
+    // fed out of the slot at full size (never stretched): everything above the slot is clipped away
+    const clip = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
+    const wp = useMemo(() => new THREE.Vector3(), []);
     const tk = ticket;
     const sheet = useMemo(() => receiptGeometry(0.86, TICKET_H), []);
     const tex = useMemo(() => (tk ? receiptTexture(tk, TICKET_H / 0.86) : null), [tk]);
-    useEffect(() => () => tex?.dispose(), [tex]);
+    useEffect(() => () => { tex?.map.dispose(); tex?.bump.dispose(); }, [tex]);
+    useFrame(({ clock }, dt) => {
+        t.current = ticket ? t.current + dt : 0;
+        if (ticket && t.current - dt < 0.45 && t.current >= 0.45) sfx.print();
+        // the printer feeds in steps, like a real thermal head, then the paper settles
+        const k = THREE.MathUtils.clamp((t.current - 0.45) / 1.1, 0, 1), e = Math.min(1, k + Math.sin(k * 40) * 0.008 * (1 - k));
+        root.current.visible = k > 0;
+        paper.current.position.y = (1 - e) * TICKET_H;
+        slot.current.getWorldPosition(wp); clip.constant = wp.y + 0.01;
+        const s = clock.elapsedTime;
+        root.current.rotation.x = 0.14 * e + Math.sin(s * 1.4) * 0.025 * e - (hot.current ? 0.12 : 0);
+        // flutter: a slow breeze through the free end
+        if (k > 0) {
+            const p = sheet.attributes.position, b = sheet.userData.base;
+            for (let i = 0; i < p.count; i++) {
+                const y = b[i * 3 + 1], x = b[i * 3], f = -y / TICKET_H;
+                p.array[i * 3 + 2] = b[i * 3 + 2] + Math.sin(s * 2.1 + y * 7 + x * 3) * 0.006 * f * f;
+            }
+            p.needsUpdate = true; sheet.computeVertexNormals();
+        }
+    });
     return (
         <group position={[0, -1.24, 0.92]}>
-            <mesh material={mat.black}><boxGeometry args={[1.0, 0.035, 0.06]} /></mesh>
+            <mesh ref={slot} material={mat.black}><boxGeometry args={[1.0, 0.035, 0.06]} /></mesh>
             <group ref={root} visible={false} scale={narrow ? 0.9 : 1.3}>
                 <group ref={paper}>
                     <mesh geometry={sheet} onClick={(e) => { e.stopPropagation(); onTicket?.(); }}
                         onPointerOver={() => { hot.current = true; document.body.style.cursor = "pointer"; }}
                         onPointerOut={() => { hot.current = false; document.body.style.cursor = ""; }}>
-                        <meshStandardMaterial map={tex} color={tex ? "#ffffff" : "#f2eee4"} roughness={0.92} metalness={0} alphaTest={0.5} side={THREE.DoubleSide} />
+                        <meshPhysicalMaterial map={tex?.map} bumpMap={tex?.bump} bumpScale={1.5} color="#ffffff"
+                            roughness={0.97} metalness={0} sheen={0.55} sheenRoughness={0.85} sheenColor="#fff6e6"
+                            emissiveMap={tex?.map} emissive="#ffffff" emissiveIntensity={0.26}
+                            clippingPlanes={[clip]} alphaTest={0.5} side={THREE.DoubleSide} />
                     </mesh>
                 </group>
             </group>

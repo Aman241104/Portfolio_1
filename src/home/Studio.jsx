@@ -252,7 +252,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
         <Canvas className="studio" frameloop={active ? "always" : "never"} dpr={coarse ? [1, 1.5] : [1, 1.75]}
             camera={{ position: [0, 0.2, 14], fov: 30 }}
             gl={{ alpha: true, antialias: true, toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.3 }}
-            onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}>
+            onCreated={({ gl }) => { gl.setClearColor(0x000000, 0); gl.localClippingEnabled = true; }}>   {/* the ticket feeds out of its slot */}
             <GlassSurface />
             <Rig entering={entering} />
             <KeyLight lit={lit} onBooted={onBooted} />

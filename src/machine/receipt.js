@@ -54,6 +54,11 @@ export const receiptTexture = (tk, aspect) => {
     y += 64;
     text("THANK YOU FOR PLAYING", W / 2, 14, { align: "center", alpha: 0.55, track: 0.2 });
     g.filter = "none";
+    // thermal-printer flaws: a couple of faint dropout streaks through the print, and stock yellowing at the edges
+    for (let i = 0; i < 3; i++) { const sy = 90 + rnd(tk.no + i) * (H - 260); g.fillStyle = "rgba(246, 241, 230, .45)"; g.fillRect(0, sy, W, 1 + rnd(i + 4) * 2); }
+    const edge = g.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.35, W / 2, H * 0.45, Math.max(W, H) * 0.75);
+    edge.addColorStop(0, "rgba(200, 175, 120, 0)"); edge.addColorStop(1, "rgba(200, 175, 120, .22)");
+    g.fillStyle = edge; g.fillRect(0, 0, W, H);
     // perforation + tear prompt
     const py = H - 64;
     g.fillStyle = "rgba(0,0,0,.0)"; g.globalCompositeOperation = "destination-out";
@@ -65,9 +70,26 @@ export const receiptTexture = (tk, aspect) => {
     for (let xx = 0, k = 0; xx <= W; xx += 9, k++) g.lineTo(xx, H - 5 - (k % 2 ? 7 : 0) - rnd(k) * 5);
     g.lineTo(W, H); g.closePath(); g.fill(); g.globalCompositeOperation = "source-over";
 
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
-    return t;
+    const map = new THREE.CanvasTexture(c);
+    map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 4;
+
+    // bump: the surface the light rakes across — grain, fibres, a fold crease, a few soft wrinkles
+    const b = document.createElement("canvas"); b.width = W / 2; b.height = Math.round(H / 2);
+    const bg2 = b.getContext("2d"), bi = bg2.createImageData(b.width, b.height), bd = bi.data;
+    for (let i = 0; i < bd.length; i += 4) { const n = 128 + (Math.random() - 0.5) * 60; bd[i] = bd[i + 1] = bd[i + 2] = n; bd[i + 3] = 255; }
+    bg2.putImageData(bi, 0, 0);
+    bg2.strokeStyle = "rgba(255,255,255,.35)"; bg2.lineWidth = 0.8;
+    for (let i = 0; i < 70; i++) { const x = rnd(i + 40) * b.width, y = rnd(i + 70) * b.height, a = rnd(i + 11) * 6.28, l = 4 + rnd(i + 2) * 10; bg2.beginPath(); bg2.moveTo(x, y); bg2.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); bg2.stroke(); }
+    const fy = b.height * 0.47, crease = bg2.createLinearGradient(0, fy - 6, 0, fy + 6);
+    crease.addColorStop(0, "rgba(255,255,255,0)"); crease.addColorStop(0.45, "rgba(255,255,255,.55)"); crease.addColorStop(0.55, "rgba(0,0,0,.5)"); crease.addColorStop(1, "rgba(0,0,0,0)");
+    bg2.fillStyle = crease; bg2.fillRect(0, fy - 6, b.width, 12);
+    for (let i = 0; i < 4; i++) {
+        const x = rnd(tk.no + i * 3) * b.width, y = rnd(tk.no + i * 5) * b.height, r = 20 + rnd(i) * 40;
+        const w = bg2.createRadialGradient(x, y, 0, x, y, r); w.addColorStop(0, "rgba(255,255,255,.18)"); w.addColorStop(1, "rgba(255,255,255,0)");
+        bg2.fillStyle = w; bg2.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    const bump = new THREE.CanvasTexture(b);
+    return { map, bump };
 };
 
 // Sheet geometry: hangs from the slot (top edge at y=0), curls toward the viewer at the bottom, with a soft cross-bow.
@@ -77,9 +99,12 @@ export const receiptGeometry = (w, h) => {
     const p = geo.attributes.position;
     for (let i = 0; i < p.count; i++) {
         const x = p.getX(i), y = p.getY(i), k = -y / h;                 // 0 at the slot → 1 at the bottom
-        p.setZ(i, 0.2 * k ** 2.4 + 0.018 * (1 - (2 * x / w) ** 2) * k);
+        const fold = -0.014 * Math.max(0, 1 - Math.abs(k - 0.47) / 0.05);          // a soft fold where it was creased
+        const wrinkle = 0.004 * Math.sin(x * 23 + k * 9) * Math.sin(k * 17 + 1.3) * k;
+        p.setZ(i, 0.2 * k ** 2.4 + 0.018 * (1 - (2 * x / w) ** 2) * k + fold + wrinkle);
         p.setY(i, y + 0.05 * k ** 3);                                     // the curl pulls the bottom up a touch
     }
     geo.computeVertexNormals();
+    geo.userData.base = Float32Array.from(p.array);                       // rest shape, for the flutter
     return geo;
 };
