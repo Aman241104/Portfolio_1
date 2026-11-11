@@ -33,7 +33,10 @@ const Card = ({ turn, i }) => {
     const [n, setN] = useState(() => (matchMedia("(prefers-reduced-motion: reduce)").matches ? 1e9 : 0));
     useEffect(() => {
         if (!full || n >= full.length) return;
-        const t = setTimeout(() => setN((x) => x + 3), 14);                  // the typewriter: a few characters a tick
+        // the typewriter has a rhythm: a few characters a tick, a beat at commas, a longer one at full stops and line ends
+        const ch = full[n - 1] || "";
+        const wait = ch === "\n" ? 120 : /[.!?]/.test(ch) ? 90 : /[,;:]/.test(ch) ? 45 : 12 + Math.random() * 10;
+        const t = setTimeout(() => setN((x) => x + (wait > 30 ? 1 : 3)), wait);
         return () => clearTimeout(t);
     }, [n, full]);
     return (
@@ -103,7 +106,7 @@ export default function ReferenceDesk() {
                 <aside className="rd-drawer" aria-label="Suggested questions">
                     <p className="rd-drawer-label">Card catalogue</p>
                     {DRAWER.map(([tag, text], i) => (
-                        <button key={tag} type="button" className="rd-file" style={{ "--d": `${i * 40}ms` }} onClick={() => { setTab("ask"); ask(text); }} disabled={busy}>
+                        <button key={tag} type="button" className="rd-file" style={{ "--d": `${380 + i * 70}ms`, "--r": `${(i % 2 ? 1 : -1) * (1 + (i % 3))}deg` }} onClick={() => { setTab("ask"); ask(text); }} disabled={busy}>
                             <span className="rd-file-tab">{tag}</span><span className="rd-file-q">{text}</span>
                         </button>
                     ))}

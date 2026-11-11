@@ -31,7 +31,14 @@
 .rd-file:disabled { opacity: .7; cursor: progress; }
 .rd-file-tab { position: absolute; top: -9px; right: 14px; padding: 2px 10px; background: inherit; border-radius: 4px 4px 0 0; font: 700 11px "Hanken Grotesk", sans-serif; letter-spacing: .04em; }
 .rd-file-q { font: 400 15px/1.35 "Courier Prime", monospace; }
-@keyframes rd-file-in { from { opacity: 0; transform: translateY(10px); } }
+@keyframes rd-file-in { from { opacity: 0; transform: translate(-14px, -34px) rotate(var(--r, -2deg)); } }
+/* Arrival: the drawer slides out of the desk, cards are dealt into it, then the first one is pulled and dropped back as
+   a hint that they come out. Pressing a card pulls it the same way. */
+.rd-drawer { animation: rd-drawer-out .7s var(--ease-out) .15s both; }
+@keyframes rd-drawer-out { from { opacity: 0; translate: -60px 0; } }
+.rd-file:first-of-type { animation: rd-file-in .5s var(--d) both, rd-pull .9s var(--ease-spring) 1.5s; }
+@keyframes rd-pull { 40% { translate: 22px 0; rotate: 1.5deg; } }
+.rd-file:active { transform: translateX(28px) rotate(1.5deg); transition-duration: var(--t-1); }
 
 .rd-intro { padding: 8vh 0 3vh; }
 .rd-intro h1 { margin: 0; font: 700 clamp(36px, 4.6vw, 60px)/1.02 "Hanken Grotesk", sans-serif; letter-spacing: -0.035em; max-width: 15ch; }
@@ -111,7 +118,7 @@
     .rd-matched { margin-right: 100px; font-size: 14px; }
     .rd-write { bottom: 10px; }
 }
-@media (prefers-reduced-motion: reduce) { .rd-card, .rd-file, .rd-stamp { animation: none; } .rd-caret { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .rd-card, .rd-file, .rd-file:first-of-type, .rd-stamp, .rd-drawer { animation: none; } .rd-caret { animation: none; } }
 /* fixes: tag ink, folder never covers the stamped card, catalogue cards clear the next tab */
 .rd .rd-tag { color: var(--type); }
 .rd-folder { position: static; }
