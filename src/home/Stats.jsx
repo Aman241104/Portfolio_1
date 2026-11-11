@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { work } from "../../content/work.js";
 import { skillGroups } from "../../content/skills.js";
 
@@ -12,8 +11,15 @@ const STATS = [
     [skillGroups.reduce((n, g) => n + g.items.length, 0), "", "Tools used in projects"],
     [8.67, "", "CGPA, B.E. at LDCE"],
 ];
-const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-const fmt = (v, to) => (Number.isInteger(to) ? Math.round(v) : v.toFixed(2));
+// Odometer: each digit is a strip of 0–9 (twice, so it rolls past once) that slides to its value when the row is
+// revealed. The real number is the accessible text; the strips are decoration.
+const Odo = ({ value }) => (
+    <b aria-label={String(value)}>
+        {[...String(value)].map((c, i, all) => /\d/.test(c)
+            ? <span key={i} className="odo" aria-hidden style={{ "--d": +c + 10, "--k": all.length - i }}><span>{"01234567890123456789".split("").map((d, j) => <i key={j}>{d}</i>)}</span></span>
+            : <span key={i} aria-hidden>{c}</span>)}
+    </b>
+);
 
 export function Tape({ items, tilt = -1.6 }) {
     const row = items.map((t) => <span key={t}>{t}<i aria-hidden>✶</i></span>);
@@ -25,34 +31,14 @@ export function Tape({ items, tilt = -1.6 }) {
 }
 
 export default function Stats() {
-    const root = useRef(null);
-    useEffect(() => {
-        const nums = [...root.current.querySelectorAll("[data-to]")];
-        if (reduced) return;
-        nums.forEach((n) => { n.textContent = "0"; });
-        const io = new IntersectionObserver(([e]) => {
-            if (!e.isIntersecting) return;
-            io.disconnect();
-            const t0 = performance.now();
-            const tick = (t) => {
-                const k = Math.min(1, (t - t0) / 1400), ease = 1 - Math.pow(1 - k, 4);
-                nums.forEach((n, i) => { const to = +n.dataset.to; n.textContent = fmt(to * Math.min(1, ease * (1 + i * 0.04)), to); });
-                if (k < 1) requestAnimationFrame(tick);
-                else nums.forEach((n) => { n.textContent = fmt(+n.dataset.to, +n.dataset.to); });
-            };
-            requestAnimationFrame(tick);
-        }, { threshold: 0.4 });
-        io.observe(root.current);
-        return () => io.disconnect();
-    }, []);
     return (
-        <section ref={root} className="stats" aria-label="In numbers">
+        <section className="stats" aria-label="In numbers">
             <Tape items={["Open to work", "Full-stack engineer", "React · Node · Python", "Ahmedabad, India", "On-site or hybrid", "Available now"]} />
-            <dl className="stats-row">
-                {STATS.map(([n, suf, label]) => (
-                    <div key={label} className="stat">
+            <dl className="stats-row" data-reveal>
+                {STATS.map(([n, suf, label], i) => (
+                    <div key={label} className="stat" style={{ "--i": i }}>
                         <dt className="mono">{label}</dt>
-                        <dd><b data-to={n}>{n}</b>{suf && <sup>{suf}</sup>}</dd>
+                        <dd><Odo value={n} />{suf && <sup>{suf}</sup>}</dd>
                     </div>
                 ))}
             </dl>

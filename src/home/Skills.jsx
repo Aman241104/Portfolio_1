@@ -26,14 +26,14 @@ export default function Skills() {
             </div>
             <div className="skill-groups">
                 {skillGroups.map((g) => (
-                    <div key={g.group} className="skill-group">
+                    <div key={g.group} className="skill-group" data-reveal>
                         <h3 className="mono">{g.group}</h3>
                         <p className="keys-sub">{g.note}</p>
                         <ul>
-                            {g.items.map(([name, icon]) => {
+                            {g.items.map(([name, icon], k) => {
                                 const i = find(icon);
                                 return (
-                                    <li key={name} style={i ? { "--brand": `#${i.hex}` } : undefined}>
+                                    <li key={name} style={{ "--i": k, ...(i && { "--brand": `#${i.hex}` }) }}>
                                         {i ? <svg viewBox="0 0 24 24" aria-hidden><path d={i.path} /></svg> : <b aria-hidden>{name.slice(0, 1)}</b>}
                                         {name}
                                     </li>

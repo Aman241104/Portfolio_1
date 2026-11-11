@@ -44,12 +44,12 @@ export default function Maintained() {
                 </p>
             </div>
             <p className="kept-intro">Sites and products I built that are in production today. I still ship fixes, content and features on them.</p>
-            <ol className="kept-list">
-                {list.map((w) => {
+            <ol className="kept-list" data-reveal>
+                {list.map((w, i) => {
                     const ms = status[w.slug];
                     const state = ms === undefined ? "wait" : ms < 0 ? "down" : "up";
                     return (
-                        <li key={w.slug}>
+                        <li key={w.slug} style={{ "--i": i }}>
                             <a href={w.url} target="_blank" rel="noreferrer">
                                 <i className="dot" data-state={state} aria-hidden />
                                 <span className="kept-name">{w.title}</span>

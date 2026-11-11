@@ -36,6 +36,17 @@ const Leaving = ({ item, rect }) => {
     );
 };
 
+// Hover tilt: the screenshot leans toward the pointer (mouse only; touch gets the press scale instead).
+const tilt = (e) => {
+    if (e.pointerType !== "mouse") return;
+    const shot = e.target.closest?.(".card-shot");
+    if (!shot) return;
+    const r = shot.getBoundingClientRect();
+    shot.style.setProperty("--ry", `${((e.clientX - r.left) / r.width - 0.5) * 7}deg`);
+    shot.style.setProperty("--rx", `${((e.clientY - r.top) / r.height - 0.5) * -6}deg`);
+};
+const untilt = (e) => e.currentTarget.querySelectorAll(".card-shot").forEach((s) => { s.style.removeProperty("--rx"); s.style.removeProperty("--ry"); });
+
 export default function Work() {
     const [kind, setKind] = useState("all");
     const [all, setAll] = useState(false);
@@ -110,9 +121,9 @@ export default function Work() {
                 </div>
             </div>
 
-            <ul ref={list} className="cards">
-                {visible.map((w) => (
-                    <li key={w.slug} className="card" data-slug={w.slug} data-active={active === w.slug || undefined}>
+            <ul ref={list} className="cards" data-reveal onPointerMove={tilt} onPointerLeave={untilt}>
+                {visible.map((w, i) => (
+                    <li key={w.slug} style={{ "--i": Math.min(i, 6) }} className="card" data-slug={w.slug} data-active={active === w.slug || undefined}>
                         {(() => {
                             const inner = (
                                 <>

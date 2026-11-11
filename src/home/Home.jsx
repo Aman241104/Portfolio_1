@@ -40,6 +40,15 @@ const useInView = (ref, margin = "0px") => {
     return inView;
 };
 
+// One observer for the whole scroll story: each [data-reveal] block gets data-in once, CSS does the rest.
+const useReveal = (root) => useEffect(() => {
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+        if (e.isIntersecting) { e.target.dataset.in = ""; io.unobserve(e.target); }
+    }), { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+    root.current.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+}, [root]);
+
 const Clock = () => {
     const [now, setNow] = useState(() => new Date());
     useEffect(() => { const t = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(t); }, []);
@@ -244,6 +253,7 @@ const Home = ({ onSelect }) => {
         return () => { removeEventListener("pointermove", light); removeEventListener("pointerdown", light); };
     }, []);
     const footerOn = useInView(footer, "200px");
+    useReveal(footer);
     const land = useRef(null);
     const [fontsOk, setFontsOk] = useState(false);
     const [booted, setBooted] = useState(false);
