@@ -65,3 +65,15 @@ Next, in order (mobile first: recruiters judge on phones):
 Liquid glass v2: src/liquid.js (SVG lens per element, Chromium) + clear-glass fallback in index.css.
 Next ideas: R3F 3D vinyl for Album; Terminal `ssh` into each project; Editorial classifieds page (skills);
 Lighthouse pass on worlds (home is WebGL: use PostHog web-vitals).
+
+## Future worlds (Aman's ideas, 2026-11-11) — after the 4 new worlds ship polished
+1. **Handheld FPS / creature-RPG homage**: a first-person or top-down game that pays homage to the PSP / Game Boy era
+   and creature-collecting RPGs. Homage by genre and feel only: original creatures, sprites, music and names; no
+   Nintendo/Sony/Game Freak characters, logos, fonts or sounds (legal + "don't recreate an existing game").
+2. **Open-world low-poly ride**: a 3D low-poly world (R3F) the visitor rides through on a bike — Aman's travel/bikes
+   side; projects as places along the road. Needs a perf budget (instancing, LOD, mobile tilt/joystick).
+3. **Y2K old-school web page**: GeoCities-era homage (tiled backgrounds, marquees, hit counter, guestbook via Neon,
+   under-construction GIFs drawn originally, 88×31 buttons). Distinct from Album's Y2K music angle.
+4. **Desktop classics (XP / Vista era)**: a retro desktop OS homage — original wallpaper/icons in the Luna/Aero
+   *spirit* (glass title bars, Start menu, solitaire-ish easter egg), not Microsoft's actual assets or logos.
+   Must differ clearly from PX-OS (today's Desktop world).
