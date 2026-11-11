@@ -56,3 +56,12 @@ Next, in order (mobile first: recruiters judge on phones):
 - Merch table hire card: "Tour dates" = availability, "Merch" = résumé PDF / tailored variants as a tee, poster, vinyl.
 - Era switch (data-era) gets a sleeve-flip transition; a "Deluxe" bonus disc for concepts & demos.
 - Mobile: the sleeve is a full-width swipe carousel; the disc spins under the thumb; haptics via navigator.vibrate.
+
+### Done 2026-11-11 (second pass)
+1 ✓ mobile audit (no overflow, 44px targets, glass CSS moved to @layer components so utilities win)
+2 ✓ PX-OS phone springboard + liquid dock · 3 ✓ Editorial letterpress reveal + broadsheet case skin (?skin=ed)
+4 ✓ Album: scratchable record deck, B-sides (no-cookie YouTube, visible, on tap), merch-table hire card
+5 ✓ Terminal: opt-in key sounds (`sound`), idle hint at 20s, DVD-style screensaver at 45s, welcome-back line
+Liquid glass v2: src/liquid.js (SVG lens per element, Chromium) + clear-glass fallback in index.css.
+Next ideas: R3F 3D vinyl for Album; Terminal `ssh` into each project; Editorial classifieds page (skills);
+Lighthouse pass on worlds (home is WebGL: use PostHog web-vitals).

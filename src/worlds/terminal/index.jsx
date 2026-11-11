@@ -6,12 +6,15 @@ import { work, KINDS, shot } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
+import { Screensaver } from "./idle.jsx";
+import { keyClick } from "./keyclick.js";
 import "./crt.css";
 
 // World 3: tty1 · AHMEDABAD. An amber-phosphor workstation. Every command prints real React nodes, so anything
 // that looks like a link is one, and recruiters never have to type (tap a highlighted word or a chip in the dock).
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const secondsSince = (t) => Math.round((Date.now() - t) / 1000);
 const live = work.filter((w) => w.live);
 const POST = [
     "PX-01 BIOS v2026.11 · AHMEDABAD",
@@ -30,6 +33,9 @@ const TerminalWorld = ({ shell }) => {
     const [post, setPost] = useState(0);
     const [theme, setTheme] = useState("amber");
     const [shake, setShake] = useState(false);
+    const [sound, setSound] = useState(false);       // key clicks: opt-in, never a surprise
+    const [idle, setIdle] = useState(0);             // 0 awake · 1 hint in the prompt · 2 screensaver
+    const away = useRef(0);
     const inputRef = useRef(null);
     const endRef = useRef(null);
     const id = useRef(0);
@@ -49,7 +55,7 @@ const TerminalWorld = ({ shell }) => {
             <p key="h" className="dim">tap any highlighted word, or type it. Tab completes, ↑ recalls.</p>,
             ...[["about", "who I am"], ["projects", "everything I've built (ls)"], ["cat <n>", "one project, with a preview"], ["live", "production sites I maintain"],
                 ["experience", "where I've worked"], ["skills", "toolkit"], ["cv", "tailored résumés"], ["contact", "email + socials"],
-                ["music", "what's on repeat"], ["worlds", "other ways to see this site"], ["theme", "amber | green | plain"], ["spin", "back to the machine (exit)"]]
+                ["music", "what's on repeat"], ["worlds", "other ways to see this site"], ["theme", "amber | green | plain"], ["sound", "key clicks on | off"], ["screensaver", "go idle"], ["spin", "back to the machine (exit)"]]
                 .map(([c, d]) => <div key={c} className="tty-row">{cmd(c.split(" ")[0], <>{c.padEnd(12)}</>)}<span className="dim">{d}</span></div>),
         ],
         about: () => [
@@ -122,6 +128,12 @@ const TerminalWorld = ({ shell }) => {
             : [<p key="n">nice try.</p>],
         rm: () => { if (!reduced()) { setShake(true); setTimeout(() => setShake(false), 500); } return [<p key="r">rm: permission denied. this portfolio is load-bearing.</p>]; },
         coffee: () => [<p key="c">brewing… the build runs on it.</p>],
+        sound: (v) => {
+            const on = v === "on" ? true : v === "off" ? false : !sound;
+            setSound(on); if (on) keyClick(true);
+            return [<p key="s">key sounds {on ? "on" : "off"}. {cmd(on ? "sound off" : "sound on")}</p>];
+        },
+        screensaver: () => { setTimeout(() => { away.current = Date.now(); setIdle(2); }, 300); return [<p key="z" className="dim">dimming the phosphor…</p>]; },
     };
     const alias = { ls: "projects", dir: "projects", exit: "spin", hire: "contact", "?": "help" };
 
@@ -154,7 +166,28 @@ const TerminalWorld = ({ shell }) => {
     }, [booting]);
     useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [log]);
 
+    // idle: a hint at 20s, the screensaver at 45s; any input resets. Waking prints how long you were away.
+    useEffect(() => {
+        if (booting) return;
+        let last = Date.now();
+        const poke = () => { last = Date.now(); setIdle((v) => (v === 1 ? 0 : v)); };
+        const t = setInterval(() => {
+            const q = Date.now() - last;
+            setIdle((v) => (v === 2 ? 2 : q > 45000 && !reduced() ? (away.current = last, 2) : q > 20000 ? 1 : v));
+        }, 1000);
+        const evs = ["keydown", "pointerdown", "pointermove", "scroll", "wheel"];
+        evs.forEach((e) => window.addEventListener(e, poke, { passive: true }));
+        return () => { clearInterval(t); evs.forEach((e) => window.removeEventListener(e, poke)); };
+    }, [booting]);
+    const wake = () => {
+        const s = secondsSince(away.current);
+        setIdle(0);
+        setLog((l) => [...l, { id: id.current++, cmd: null, out: [<p key="w">welcome back. you were away {s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`} · while you were gone, {work.filter((w) => w.maintained).length} sites stayed up. try {cmd("sudo hire aman")}</p>] }]);
+        inputRef.current?.focus();
+    };
+
     const onKeyDown = (e) => {
+        if (sound && e.key.length <= 1 || sound && ["Enter", "Backspace"].includes(e.key)) keyClick(e.key === "Enter");
         if (e.key === "Enter") { run(input); setInput(""); }
         else if (e.key === "ArrowUp" && history.length) { e.preventDefault(); const n = Math.min(cursor + 1, history.length - 1); setCursor(n); setInput(history[n]); }
         else if (e.key === "ArrowDown") { e.preventDefault(); const n = cursor - 1; setCursor(n); setInput(n < 0 ? "" : history[n]); }
@@ -193,7 +226,7 @@ const TerminalWorld = ({ shell }) => {
                         <label className="tty-input">
                             <span className="tty-ps">aman@tty1:~$</span>
                             <input ref={inputRef} autoFocus value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={onKeyDown}
-                                aria-label="Terminal command" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+                                placeholder={idle === 1 ? "try: sudo hire aman" : undefined} aria-label="Terminal command" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
                         </label>
                         <div ref={endRef} />
                     </>
@@ -204,8 +237,10 @@ const TerminalWorld = ({ shell }) => {
                     {["projects", "live", "experience", "skills", "contact", "cv", "help"].map((c) => (
                         <button key={c} type="button" onClick={() => run(c)}>{c}</button>
                     ))}
+                    <button type="button" aria-pressed={sound} onClick={() => run(sound ? "sound off" : "sound on")}>{sound ? "♪ on" : "♪ off"}</button>
                 </nav>
             )}
+            {idle === 2 && <Screensaver onWake={wake} />}
             <div className="tty-scan" aria-hidden />
         </div>
     );
