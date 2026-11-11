@@ -12,7 +12,7 @@ const StatusBar = () => {
 
     return (
         <div className="fixed top-0 inset-x-0 z-[60] h-11 flex items-center justify-between px-6 text-white text-sm font-semibold select-none">
-            <span>{now.format("h:mm A")}</span>
+            <span className="flex items-center gap-2"><i className="px-dot" aria-hidden />{now.format("h:mm A")}</span>
             <div className="flex items-center gap-1.5">
                 <Signal size={15} />
                 <Wifi size={15} />

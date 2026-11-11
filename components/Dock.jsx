@@ -1,10 +1,9 @@
 import { Tooltip } from "react-tooltip";
-import { FolderOpen, Globe, Images, AtSign, SquareTerminal, Gamepad2, Music } from "lucide-react";
+import { APP_ICONS as ICONS } from "#mobile/icons.js";
 import { dockApps } from "#constants/index.js";
 import useWindowStore from "#store/window.js";
 
 // PX-OS shelf: original line icons, labelled, a 2px lift on hover. (Was Apple PNGs + Gaussian magnification.)
-const ICONS = { finder: FolderOpen, safari: Globe, photos: Images, contact: AtSign, terminal: SquareTerminal, game: Gamepad2, music: Music };
 
 const Dock = () => {
     const { openWindow, closeWindow, windows } = useWindowStore();

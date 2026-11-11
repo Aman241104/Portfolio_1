@@ -6,13 +6,8 @@ const NAMES = [
     { text: "अमन", font: "'Rozha One', serif", weight: 400, label: "HI" },
     { text: "અમન", font: "'Baloo Bhai 2', sans-serif", weight: 800, label: "GU" },
     { text: "アマン", font: "'Dela Gothic One', sans-serif", weight: 400, label: "JA" },
-    { text: "ਅਮਨ", font: "'Baloo Paaji 2', sans-serif", weight: 800, label: "PA" },
-    { text: "아만", font: "'Black Han Sans', sans-serif", weight: 400, label: "KO" },
-    { text: "আমন", font: "'Baloo Da 2', sans-serif", weight: 800, label: "BN" },
-    { text: "أمان", font: "'Lalezar', sans-serif", weight: 400, label: "AR" },
-    { text: "அமன்", font: "'Baloo Thambi 2', sans-serif", weight: 800, label: "TA" },
-    { text: "АМАН", font: "'Russo One', sans-serif", weight: 400, label: "RU" },
-    { text: "అమన్", font: "'Baloo Tammudu 2', sans-serif", weight: 800, label: "TE" },
+    { text: "Aman", font: "'UnifrakturMaguntia', serif", weight: 400, label: "DE" },
+    { text: "Aman", font: "'Instrument Serif', serif", weight: 400, label: "FR", italic: true },
 ];
 
 const FRAME = 1000 / 12;
@@ -45,7 +40,7 @@ const MultiverseName = ({ scramble = false, hold = 1100 }) => {
     const n = NAMES[i];
     return (
         <span className="mv" aria-label="Aman Patel" data-glitch={glitch || undefined}>
-            <span aria-hidden className="mv-text" data-text={n.text} style={{ fontFamily: n.font, fontWeight: n.weight }}>{n.text}</span>
+            <span aria-hidden className="mv-text" data-text={n.text} style={{ fontFamily: n.font, fontWeight: n.weight, fontStyle: n.italic ? "italic" : undefined }}>{n.text}</span>
             <span aria-hidden className="mv-tag">{n.label}</span>
         </span>
     );

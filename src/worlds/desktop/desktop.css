@@ -448,3 +448,13 @@
 .world-desktop .px-folder p, .world-desktop .group:hover .px-folder p, .world-desktop .px-folder button:hover p { background: none !important; }
 .world-desktop .px-folder button:hover p, .world-desktop .px-folder button:focus-visible p { background: var(--px-red) !important; color: #fff; }
 .world-desktop .os-window .content li p { max-width: 112px; text-align: center; line-height: 1.25; overflow-wrap: anywhere; }
+
+/* ============================================================ PX-OS on phones */
+.px-dock { display: flex; justify-content: space-around; padding: 8px 6px; border-radius: 30px; background: rgba(10, 10, 12, .38); }
+.px-dock button { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 60px; padding: 6px 4px; border: 0; background: none; color: #edeae3; font: 500 10px "Geist Mono", monospace; letter-spacing: .06em; border-radius: 18px; -webkit-tap-highlight-color: transparent; transition: transform .3s cubic-bezier(.2, 1.5, .4, 1); }
+.px-dock button:active { transform: scale(1.12); }
+.px-dock button span { color: rgba(237, 234, 227, .7); }
+.px-dock .is-hot svg { color: #ff2e1f; }
+.px-app svg { color: #edeae3; }
+.px-dot { width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a7a, #ff2e1f 45%, #8f140b); }
+.world-desktop .px-dock-wrap { -webkit-backdrop-filter: none; backdrop-filter: none; background: none; padding: 0; margin: 0; }

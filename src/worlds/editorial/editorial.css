@@ -92,3 +92,4 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 }
 @media (max-width: 560px) { .ed-second { grid-template-columns: 1fr; } .ed-second .ed-duo { grid-row: auto; margin-bottom: 10px; } .ed-tools { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .ed-duo img { transition: none; } }
+@media (pointer: coarse) { .ed-ear a { padding: 10px 2px; } }

@@ -1,26 +1,29 @@
+import { useRef } from "react";
 import { mobileDockApps } from "#constants";
 import useMobileNavStore from "#store/mobileNav.js";
+import { APP_ICONS } from "#mobile/icons.js";
+import { useLiquid } from "../liquid.js";
 
-// Real iOS convention: dock icons carry no label (unlike springboard icons).
+// PX-OS phone dock: one liquid-glass capsule (real lens on Chromium), line icons with short mono labels.
+const LENS = { edge: 22, amount: 24, extra: "blur(2px) saturate(1.7) brightness(1.05)" };
+
 const MobileDock = () => {
     const { openApp } = useMobileNavStore();
-
+    const bar = useRef(null);
+    useLiquid(bar, LENS);
     return (
-        <div className="fixed bottom-5 inset-x-6 z-[60]">
-            <div className="bg-white/20 backdrop-blur-md rounded-3xl px-4 py-3 flex items-center justify-between">
-                {mobileDockApps.map(({ id, name, icon }) => (
-                    <button
-                        key={id}
-                        type="button"
-                        onClick={() => openApp(id)}
-                        aria-label={name}
-                        className="active:scale-90 transition-transform"
-                    >
-                        <img src={`/images/${icon}`} alt={name} className="size-14 rounded-2xl shadow-lg" />
-                    </button>
-                ))}
+        <nav className="px-dock-wrap fixed bottom-4 inset-x-4 z-[60]" aria-label="Dock">
+            <div ref={bar} className="px-dock lg">
+                {mobileDockApps.map(({ id, name }) => {
+                    const Icon = APP_ICONS[id];
+                    return (
+                        <button key={id} type="button" onClick={() => openApp(id)} className={id === "resume" ? "is-hot" : undefined}>
+                            <Icon size={24} strokeWidth={1.6} aria-hidden /><span>{name === "Resume" ? "CV" : name}</span>
+                        </button>
+                    );
+                })}
             </div>
-        </div>
+        </nav>
     );
 };
 

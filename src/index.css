@@ -30,6 +30,8 @@ body {
     @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 }
 
+/* in the components layer: Tailwind utilities (fixed, bg-*, rounded-*) on the same element win; page CSS (unlayered) too */
+@layer components {
 /* ============================================================ Liquid glass: clear, not frosted.
    Chromium gets a real lens from src/liquid.js (.lg-live: rim refraction + chromatic fringe); everywhere else this
    clear fallback: a breath of blur, vibrancy, and the rim light that sells the thickness of the glass. */
@@ -40,8 +42,9 @@ body {
         inset 0 1px 0 rgba(255, 255, 255, .42), inset 0 -1px 0 rgba(255, 255, 255, .1),
         inset 0 0 0 .5px rgba(255, 255, 255, .14), inset 0 0 24px rgba(255, 255, 255, .045),
         0 1px 2px rgba(0, 0, 0, .3), 0 14px 34px rgba(0, 0, 0, .32);
-    position: relative; isolation: isolate;
+    isolation: isolate;
 }
+.lg { position: relative; }
 /* the rim: a hairline that catches light top-left and bottom-right, like the edge of a thick lens */
 .lg::before {
     content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; z-index: -1;
@@ -58,3 +61,5 @@ body {
 .lg:hover::after, .lg[data-press]::after { opacity: 1; }
 .lg-live { background: rgba(255, 255, 255, .02); }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .lg { background: rgba(30, 30, 34, .85); } }
+}
+@media (pointer: coarse) { .coin-slot > * { min-height: 40px; } }
