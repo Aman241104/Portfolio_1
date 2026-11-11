@@ -34,6 +34,21 @@ export default function EditorialWorld() {
         if (reduced) return;
         gsap.from(".ed-mast > *", { y: 24, opacity: 0, duration: 0.8, stagger: 0.06, ease: "power3.out" });
         gsap.from(".ed-front > *", { y: 40, opacity: 0, duration: 0.9, stagger: 0.1, ease: "power3.out", delay: 0.2 });
+        // print run: each section's rule draws across, then its content rises in, once. IntersectionObserver (not
+        // ScrollTrigger positions) so late-loading fonts/images can never leave anything stuck invisible.
+        const io = new IntersectionObserver((es) => es.forEach((e) => {
+            if (!e.isIntersecting) return;
+            io.unobserve(e.target);
+            gsap.fromTo(e.target, { "--rule": 0 }, { "--rule": 1, duration: 1.1, ease: "power3.inOut" });
+            gsap.to(e.target.querySelectorAll(".ed-in"), { y: 0, opacity: 1, duration: 0.7, stagger: 0.035, ease: "power3.out" });
+        }), { rootMargin: "0px 0px -15% 0px" });
+        gsap.utils.toArray(".ed-sec").forEach((sec) => {
+            const items = sec.querySelectorAll("h2, .ed-tabs, .ed-xp, .ed-live li, .ed-tools > div, .ed-pull, .ed-email, .ed-table li:not(.ed-th)");
+            items.forEach((el) => el.classList.add("ed-in"));
+            gsap.set(items, { y: 22, opacity: 0 });
+            io.observe(sec);
+        });
+        return () => io.disconnect();
     }, { scope: root });
 
     // one preview image follows the cursor over the index (fine pointers only, never under reduced motion)

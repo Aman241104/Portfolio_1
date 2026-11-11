@@ -35,7 +35,9 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 .ed-second h3 { font-size: 24px; font-weight: 800; line-height: 1.05; }
 .ed-second p { margin: 6px 0 0; font-size: 15.5px; }
 /* sections */
-.ed-sec { max-width: 1320px; margin: 0 auto; padding: 46px 0; border-bottom: 1px solid var(--ink); }
+@property --rule { syntax: "<number>"; inherits: false; initial-value: 1; }
+.ed-sec { max-width: 1320px; margin: 0 auto; padding: 46px 0; position: relative; }
+.ed-sec::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--ink); transform: scaleX(var(--rule)); transform-origin: left; }
 .ed-sec h2 { font-size: clamp(30px, 3.5vw, 46px); font-weight: 800; margin-bottom: 18px; }
 .ed-sec-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
 .ed-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
