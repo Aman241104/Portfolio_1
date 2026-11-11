@@ -1,5 +1,6 @@
 import { work, KINDS, shot } from "../content/work.js";
 import { skillGroups } from "../content/skills.js";
+import { cases } from "../content/cases.js";
 const navLinks = [
     {
         id: 1,
@@ -227,7 +228,7 @@ const GRID_SLOTS = [
     "top-144 left-5", "top-144 left-35", "top-144 left-65",
     "top-172 left-5", "top-172 left-35", "top-172 left-65",
 ];
-const FILE_SLOTS = ["top-10 left-10", "top-10 left-50", "top-40 left-10", "top-40 left-50"];
+const FILE_SLOTS = ["top-10 left-10", "top-10 left-50", "top-40 left-10", "top-40 left-50", "top-70 left-10"];
 const hostOf = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 let fileId = 1000;
 const projectFolder = (w, i) => ({
@@ -238,6 +239,7 @@ const projectFolder = (w, i) => ({
         { name: "Screenshot.png", icon: "/images/image.png", fileType: "img", imageUrl: shot(w, 1200) },
         w.url && !w.url.includes("github.com") && { name: w.live ? "Live Site" : "Live Demo", icon: "/images/safari.png", fileType: "url", href: w.url },
         (w.repo || (w.url || "").includes("github.com")) && { name: "GitHub Repo", icon: "/images/safari.png", fileType: "url", href: w.repo || w.url },
+        cases[w.slug] && { name: "Case Study", icon: "/images/txt.png", fileType: "url", href: `/case.html?p=${w.slug}` },
     ].filter(Boolean).map((f, j) => ({ id: fileId++, kind: "file", position: FILE_SLOTS[j], ...f })),
 });
 const WORK_LOCATION = {
