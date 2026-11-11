@@ -8,6 +8,7 @@ import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
 import { Screensaver } from "./idle.jsx";
 import { keyClick } from "./keyclick.js";
+import { track } from "../../analytics.js";
 import "./crt.css";
 
 // World 3: tty1 · AHMEDABAD. An amber-phosphor workstation. Every command prints real React nodes, so anything
@@ -86,7 +87,7 @@ const TerminalWorld = ({ shell }) => {
         open: (n) => {
             const w = work[Number(n) - 1];
             if (!w?.url) return [<p key="e">open: no project {n ?? ""}. Try {cmd("projects")}.</p>];
-            window.open(w.url, "_blank", "noopener");
+            window.open(w.url, "_blank", "noopener"); track("live_site_visited", { host: host(w.url) });
             return [<p key="o">opening {w.title} → {ext(w.url, <>{host(w.url)}</>)}</p>];
         },
         live: () => [<p key="h" className="dim">in production today, still maintained:</p>, ...work.filter((w) => w.maintained).map((w) => (
@@ -101,7 +102,7 @@ const TerminalWorld = ({ shell }) => {
         )),
         skills: () => skillGroups.map((g) => <div key={g.group} className="tty-row"><span className="tty-h">{g.group.padEnd(16)}</span><span>{g.items.map(([n]) => n).join(", ")}</span></div>),
         cv: (v) => {
-            if (v && ["fullstack", "frontend", "ai"].includes(v)) { window.open(`/resume.html?for=${v}`, "_blank", "noopener"); return [<p key="o">opening the {v} résumé…</p>]; }
+            if (v && ["fullstack", "frontend", "ai"].includes(v)) { window.open(`/resume.html?for=${v}`, "_blank", "noopener"); track("resume_opened", { from: "world", variant: v }); return [<p key="o">opening the {v} résumé…</p>]; }
             return [<p key="p">pick one: <a className="tty-link" href="/resume.html?for=fullstack">[full-stack]</a> <a className="tty-link" href="/resume.html?for=frontend">[frontend]</a> <a className="tty-link" href="/resume.html?for=ai">[ai products]</a> <a className="tty-link" href={profile.resume} target="_blank" rel="noreferrer">[original pdf]</a></p>];
         },
         resume: () => commands.cv(),

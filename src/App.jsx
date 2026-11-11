@@ -1,4 +1,5 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { setWorld } from "./analytics.js";
 import { findWorld } from "#worlds/registry.js";
 import { setLast } from "#shell/storage.js";
 import Machine from "#machine/Machine.jsx";
@@ -22,6 +23,7 @@ const syncUrl = (id) => {
 const App = () => {
     const [worldId, setWorldId] = useState(initialWorld);
     const world = findWorld(worldId);
+    useEffect(() => setWorld(world?.id), [world]);
 
     const go = (id) => {
         const next = findWorld(id);
