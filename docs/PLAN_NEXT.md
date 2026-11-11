@@ -1,12 +1,13 @@
 # PX-01: the next plan (written 2026-11-11)
 
 Goal: every world is a portfolio Aman could send on its own and impress with, each one scored **85+ by all
-four reviewers**, and the slot machine sends visitors to the strongest worlds more often, without starving any.
+five reviewers**, and the slot machine sends visitors to the strongest worlds more often, without starving any.
 
 Three phases, in order:
 
 1. Build four new worlds to the same bar as the last four.
-2. Review and improve every world with four reviewer agents until each scores 85+ from all of them.
+2. Review and improve every world with five reviewer agents (developer, recruiter, critic, designer, animation)
+   until each scores 85+ from all of them.
 3. Rank the worlds and route traffic by evidence, not by gut feel.
 
 ---
@@ -83,7 +84,7 @@ last because it needs the most performance work.
 
 ---
 
-## Phase 2: the review cycle (four reviewers, scored /100)
+## Phase 2: the review cycle (five reviewers, scored /100)
 
 ### The reviewers
 
@@ -140,6 +141,22 @@ Fetches references online: Awwwards SOTD and SOTM, Codrops, comparable creative-
 
 Runs the avoid-ai-design catalogue. Fetches references online.
 
+**Animation critic** (added 2026-11-11: Aman: "we lack a lot in that department")
+
+| Criterion | Weight |
+|---|---|
+| Choreography: entrances, transitions and hierarchy in time, not one shared fade-up | 20 |
+| Feel: easing, springs, follow-through, nothing linear or robotic | 20 |
+| Interaction feedback: hover, press, drag, scroll, and the touch equivalents | 20 |
+| Creativity: motion that belongs to this world's idea and nowhere else | 20 |
+| Performance: 60 fps on a mid phone, transform/opacity only, no jank or layout thrash | 10 |
+| Restraint and accessibility: purposeful, honours reduced motion | 10 |
+
+- Records each world as video or frame sequences (Playwright), not only stills.
+- Measures frame timing.
+- Fetches references online: Awwwards motion honorees, Codrops, GSAP showcase.
+- Uses the motion-design skills (web-motion-auditor, site-motion-excellence-director, gsap-*) as its checklist.
+
 ### What every reviewer gets
 
 - Screenshots at 1440×900, 1366×768, 390×844 and 360×740, plus a scroll capture.
@@ -179,7 +196,7 @@ Runs the avoid-ai-design catalogue. Fetches references online.
 5. Ship.
 6. Re-review.
 
-Stop when all four reviewers score 85+. **Cap: 4 rounds per world.** If a world is still under 85 after round 4,
+Stop when all five reviewers score 85+. **Cap: 4 rounds per world.** If a world is still under 85 after round 4,
 it is either rethought (new direction) or marked *beta* (see Phase 3). It isn't polished forever.
 
 Order: the four newest worlds first (the freshest code), then the original four, then the four from Phase 1 as
@@ -187,7 +204,7 @@ each lands.
 
 ### Cost note
 
-- Each review round for one world is 4 agent runs with browsing. 12 worlds × up to 4 rounds can mean around 190
+- Each review round for one world is 5 agent runs with browsing. 12 worlds × up to 4 rounds can mean around 240
   runs, but most worlds should pass in 2–3 rounds.
 - Reviews are judgment work, so they run on Claude, not on the free delegated models (see CLAUDE.md).
 - Screenshots, measurements and report merging are mechanical and can be delegated.
@@ -206,7 +223,7 @@ each lands.
 
 **1. Quality gate.**
 
-- A world enters the machine's random pool only after all four reviewers score it 85+.
+- A world enters the machine's random pool only after all five reviewers score it 85+.
 - Below that, it's *beta*: reachable from "All worlds" and its own URL, never served by surprise.
 
 **2. Measure each world properly.** Every PostHog event already fires; it also needs a `world` property, so
@@ -262,6 +279,7 @@ Everyone else gets the full exploring router.
 
 1. Add `world` to every analytics event, set up the scoring query, and ship the quality gate. A small job;
    unlocks Phase 3 data collection while everything else is built.
-2. Phase 2 review cycle on the 4 newest worlds, then the original 4.
+2. A whole-site motion pass first (home + all 8 worlds), then the Phase 2 review cycle on the 4 newest worlds,
+   then the original 4.
 3. Phase 1 builds, each going straight through the review loop: 2001, LONGHORN, POCKET, RIDE.
 4. Turn on the learning router once the gated worlds have about 100 visits each.
