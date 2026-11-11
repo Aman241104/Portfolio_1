@@ -102,7 +102,7 @@ const Machine = ({ onSelect }) => {
                     <div className="flex gap-2 sm:gap-3" role="group" aria-label="Reels">
                         {REELS.map((r) => (
                             <div key={r} className="relative h-24 sm:h-28 w-24 sm:w-36 overflow-hidden rounded-xl bg-neutral-100 text-neutral-900 shadow-inner">
-                                <div ref={(el) => (strips.current[r] = el)}>
+                                <div ref={(el) => { strips.current[r] = el; }}>
                                     {Array.from({ length: LOOPS }, (_, loop) =>
                                         worlds.map((w) => (
                                             <div key={`${loop}-${w.id}`} className="h-24 sm:h-28 flex items-center justify-center text-base sm:text-xl font-bold uppercase tracking-wide">

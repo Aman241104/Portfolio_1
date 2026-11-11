@@ -405,7 +405,7 @@ const Leds = ({ spinning, booted }) => {
             {Array.from({ length: 9 }, (_, i) => (
                 <mesh key={i} position={[i * 0.075, 0, 0]}>
                     <sphereGeometry args={[0.022, 16, 16]} />
-                    <meshStandardMaterial ref={(m) => (refs.current[i] = m)} color="#2a0b09" emissive={SIGNAL} emissiveIntensity={0} toneMapped={false} />
+                    <meshStandardMaterial ref={(m) => { refs.current[i] = m; }} color="#2a0b09" emissive={SIGNAL} emissiveIntensity={0} toneMapped={false} />
                 </mesh>
             ))}
         </group>
@@ -522,7 +522,7 @@ const Payout = ({ jackpot }) => {
         if (t.current >= 0) t.current += dt;
     });
     return Array.from({ length: COINS }, (_, i) => (
-        <mesh key={i} ref={(m) => (refs.current[i] = m)} visible={false} material={brass}><cylinderGeometry args={[0.075, 0.075, 0.025, 32]} /></mesh>
+        <mesh key={i} ref={(m) => { refs.current[i] = m; }} visible={false} material={brass}><cylinderGeometry args={[0.075, 0.075, 0.025, 32]} /></mesh>
     ));
 };
 

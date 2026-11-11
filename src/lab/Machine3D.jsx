@@ -381,7 +381,7 @@ const Birds = () => {
         });
     });
     return birds.map((b, i) => (
-        <group key={i} ref={(g) => (refs.current[i] = g)} scale={b.s}>
+        <group key={i} ref={(g) => { refs.current[i] = g; }} scale={b.s}>
             <mesh geometry={wing} material={ink} />
             <mesh geometry={wing} material={ink} />
         </group>

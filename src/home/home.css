@@ -708,3 +708,12 @@
     .home .below { gap: 9px; padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
     .home .pull { padding-top: 12px; padding-bottom: 12px; }
 }
+
+/* layout stability (CLS): the hand-drawn pins move with `translate` (never counted as layout shift), the win ring
+   stays out of the render tree until a win, and the language tag keeps one spot however wide the name is */
+.pin { left: 0; top: 0; translate: var(--kx, -999px) var(--ky, -999px); }
+.pin-win { left: 0; top: 0; translate: var(--wx, -999px) var(--wy, -999px); visibility: hidden; }
+.home:is([data-phase="revealed"], [data-phase="transitioning"]) .pin-win { visibility: visible; }
+.mv-text { min-width: 4.4em; }
+/* desktop: the taller explainer sits a little lower, clear of the right-hand keychains; the "+3D & AI" note goes */
+@media (min-width: 761px) { .home .cta { top: 53%; } .n-craft { display: none; } .how { gap: 5px; } }

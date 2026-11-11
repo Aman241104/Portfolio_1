@@ -406,8 +406,8 @@ const Home = ({ onSelect }) => {
                             <p className="mono cta-kicker">Optional · a style picker</p>
                             <ol className="how" aria-label="How the machine works">
                                 <li><b>1</b>Pull the lever</li>
-                                <li><b>2</b>Reels pick an era, medium &amp; mood</li>
-                                <li><b>3</b>Your ticket opens that version of this portfolio</li>
+                                <li><b>2</b>Reels pick a design style</li>
+                                <li><b>3</b>Your ticket opens that version</li>
                             </ol>
                             <p className="how-m">Optional: pull the lever, the reels pick a design style, your ticket opens it.</p>
                             <p className="mono status" aria-live="polite">{status}</p>
