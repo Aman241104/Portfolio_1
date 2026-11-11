@@ -47,6 +47,7 @@ export default function CanvasWorld() {
     const [focus, setFocus] = useState(null);
     const [mate, setMate] = useState({ x: 300, y: 300, label: "A.P." });
     const pts = useRef(new Map()), last = useRef(null), start = useRef([0, 0]);
+    const vel = useRef([0, 0]), coast = useRef(0);   // pan momentum (px/ms) and its rAF
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const apply = useCallback((v, animate = false) => {
@@ -69,32 +70,79 @@ export default function CanvasWorld() {
         ro.observe(vp.current); return () => ro.disconnect();
     }, []);
 
-    const zoomAt = (cx, cy, f) => {
+    const zoomAt = (cx, cy, f, animate = false) => {
         const v = view.current, k = Math.min(3, Math.max(0.12, v.k * f));
-        apply({ k, x: cx - (cx - v.x) * (k / v.k), y: cy - (cy - v.y) * (k / v.k) });
+        apply({ k, x: cx - (cx - v.x) * (k / v.k), y: cy - (cy - v.y) * (k / v.k) }, animate);
     };
     const onWheel = (e) => {
-        e.preventDefault();
+        e.preventDefault(); cancelAnimationFrame(coast.current);
         const r = vp.current.getBoundingClientRect();
         if (e.ctrlKey || e.metaKey) zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.01));
         else apply({ ...view.current, x: view.current.x - e.deltaX, y: view.current.y - e.deltaY });
     };
     useEffect(() => { const el = vp.current; el.addEventListener("wheel", onWheel, { passive: false }); return () => el.removeEventListener("wheel", onWheel); });
 
+    // Physics: the sheet has mass. Drag tracks velocity; release coasts it out with exponential decay; past the edge of
+    // the drawing it pulls with resistance (rubber band) and springs back when let go.
+    const bounds = (v) => {
+        const r = vp.current.getBoundingClientRect(), m = 160;
+        const minX = Math.min(m, r.width - W * v.k - m), minY = Math.min(m, r.height - H * v.k - m);
+        return { minX, maxX: m, minY, maxY: m };
+    };
+    const over = (val, lo, hi) => (val < lo ? val - lo : val > hi ? val - hi : 0);
+    const stop = () => { cancelAnimationFrame(coast.current); coast.current = 0; };
+    const release = () => {
+        if (reduced) return;
+        let [vx, vy] = vel.current, t0 = performance.now();
+        const step = (t) => {
+            const dt = Math.min(32, t - t0); t0 = t;
+            const v = view.current, b = bounds(v);
+            const ox = over(v.x, b.minX, b.maxX), oy = over(v.y, b.minY, b.maxY);
+            const decay = Math.pow(0.94, dt / 16.7);
+            vx *= decay; vy *= decay;
+            // outside the drawing: momentum is soaked up and the sheet eases back to the edge (damped, can't overshoot)
+            const pull = 1 - Math.pow(0.8, dt / 16.7);
+            if (ox) vx *= 0.5;
+            if (oy) vy *= 0.5;
+            apply({ ...v, x: v.x + vx * dt - ox * pull, y: v.y + vy * dt - oy * pull });
+            if (Math.abs(vx) + Math.abs(vy) > 0.01 || Math.abs(ox) + Math.abs(oy) > 0.5) coast.current = requestAnimationFrame(step);
+            else coast.current = 0;
+        };
+        coast.current = requestAnimationFrame(step);
+    };
+
+    useEffect(() => () => cancelAnimationFrame(coast.current), []);
+
     // capture only once the pointer really drags, so a plain click still reaches the sheet under it
-    const down = (e) => { if (e.target.closest("a, button")) return; pts.current.set(e.pointerId, [e.clientX, e.clientY]); start.current = [e.clientX, e.clientY]; last.current = null; };
+    const down = (e) => { if (e.target.closest("a, button")) return; stop(); vel.current = [0, 0]; pts.current.set(e.pointerId, [e.clientX, e.clientY, performance.now()]); start.current = [e.clientX, e.clientY]; last.current = null; };
     const move = (e) => {
         if (!pts.current.has(e.pointerId)) return;
         if (!vp.current.hasPointerCapture(e.pointerId) && Math.hypot(e.clientX - start.current[0], e.clientY - start.current[1]) > 4) vp.current.setPointerCapture(e.pointerId);
-        const prev = pts.current.get(e.pointerId); pts.current.set(e.pointerId, [e.clientX, e.clientY]);
+        const prev = pts.current.get(e.pointerId), now = performance.now(); pts.current.set(e.pointerId, [e.clientX, e.clientY, now]);
         const all = [...pts.current.values()];
         if (all.length === 2) {
             const r = vp.current.getBoundingClientRect(), d = Math.hypot(all[0][0] - all[1][0], all[0][1] - all[1][1]);
             if (last.current) zoomAt((all[0][0] + all[1][0]) / 2 - r.left, (all[0][1] + all[1][1]) / 2 - r.top, d / last.current);
-            last.current = d;
-        } else apply({ ...view.current, x: view.current.x + e.clientX - prev[0], y: view.current.y + e.clientY - prev[1] });
+            last.current = d; vel.current = [0, 0];
+        } else {
+            const v = view.current, b = bounds(v);
+            let dx = e.clientX - prev[0], dy = e.clientY - prev[1];
+            if (over(v.x, b.minX, b.maxX)) dx *= 0.35;          // rubber band: the further out, the heavier
+            if (over(v.y, b.minY, b.maxY)) dy *= 0.35;
+            const dt = Math.max(1, now - prev[2]);
+            vel.current = [vel.current[0] * 0.6 + (dx / dt) * 0.4, vel.current[1] * 0.6 + (dy / dt) * 0.4];
+            apply({ ...v, x: v.x + dx, y: v.y + dy });
+        }
     };
-    const up = (e) => { pts.current.delete(e.pointerId); if (pts.current.size < 2) last.current = null; };
+    const up = (e) => {
+        const had = pts.current.get(e.pointerId);
+        pts.current.delete(e.pointerId);
+        if (pts.current.size < 2) last.current = null;
+        if (pts.current.size === 0 && had) {
+            if (performance.now() - had[2] > 80) vel.current = [0, 0];   // held still before letting go: no fling
+            release();
+        }
+    };
 
     // the collaborator: drifts from frame to frame, sometimes "commenting"
     useEffect(() => {
@@ -116,9 +164,9 @@ export default function CanvasWorld() {
                     {sections.map((s) => <button key={s.id} type="button" onClick={() => { setFocus(null); fitTo(s.x, s.y, s.w, s.h); }}>{s.label}</button>)}
                 </nav>
                 <div className="cv-zoom">
-                    <button type="button" aria-label="Zoom out" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 0.8); }}>−</button>
+                    <button type="button" aria-label="Zoom out" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 0.8, true); }}>−</button>
                     <span>Scale {vstate.k >= 1 ? `${vstate.k.toFixed(1)}:1` : `1:${(1 / vstate.k).toFixed(1)}`}</span>
-                    <button type="button" aria-label="Zoom in" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 1.25); }}>+</button>
+                    <button type="button" aria-label="Zoom in" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 1.25, true); }}>+</button>
                     <button type="button" className="cv-fit" onClick={() => { setFocus(null); fitTo(0, 0, W, H, 30); }}>Whole sheet</button>
                 </div>
             </header>
@@ -131,12 +179,12 @@ export default function CanvasWorld() {
                         <p>Full-stack engineer, Ahmedabad. {work.length} projects drawn to scale on this sheet. Drag to move, scroll or pinch to zoom, click a sheet to inspect it.</p>
                     </section>
                     <p className="bp-hand bp-hire" style={{ left: 1180, top: 70 }}>open to work · full-stack · on-site or hybrid ↘</p>
-                    {sections.map((s) => <div key={s.id} className="bp-zone" style={{ left: s.x, top: s.y, width: s.w, height: s.h }}><span>Zone {String.fromCharCode(65 + sections.indexOf(s))} · {s.label}</span></div>)}
+                    {sections.map((s) => <div key={s.id} className="bp-zone" style={{ left: s.x, top: s.y, width: s.w, height: s.h, "--i": sections.indexOf(s) }}><span>Zone {String.fromCharCode(65 + sections.indexOf(s))} · {s.label}</span></div>)}
                     {items.map((it, i) => {
                         if (it.type === "frame") {
                             const no = work.indexOf(it.p) + 1;
                             return (
-                                <article key={i} className="bp-sheet" data-on={focus === it.p || undefined} style={{ left: it.x, top: it.y, width: FW, height: FH }} onClick={() => open(it)}>
+                                <article key={i} className="bp-sheet" data-on={focus === it.p || undefined} style={{ left: it.x, top: it.y, width: FW, height: FH, "--i": i }} onClick={() => open(it)}>
                                     <span className="bp-dim bp-dim-x" aria-hidden><i />1440<i /></span>
                                     <span className="bp-dim bp-dim-y" aria-hidden><i />900<i /></span>
                                     <div className="bp-print"><img src={shot(it.p, 520)} alt="" loading="lazy" draggable={false} /></div>

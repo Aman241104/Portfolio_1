@@ -101,3 +101,22 @@
     .cv-inspect { top: auto; bottom: 120px; left: 12px; right: 12px; width: auto; }
 }
 @media (prefers-reduced-motion: reduce) { .cv-mate { transition: none; } }
+
+/* Arrival: the drawing is drafted in front of you. Zone outlines and sheet borders are drawn on (clip sweep from the
+   corner), dimension lines extend, then each print develops out of an over-exposed white like a cyanotype. */
+@media (prefers-reduced-motion: no-preference) {
+    .bp-cover h1 { animation: bp-draw 1.1s var(--ease-in-out) .15s both; }
+    .bp-cover p { animation: bp-fade var(--t-3) var(--ease-out) .7s both; }
+    .bp-zone { animation: bp-draw 1.2s var(--ease-in-out) calc(.2s + var(--i, 0) * .12s) both; }
+    .bp-sheet { animation: bp-draw .8s var(--ease-in-out) calc(.45s + var(--i, 0) * 45ms) both; }
+    .bp-dim i { animation: bp-extend var(--t-3) var(--ease-out) calc(.9s + var(--i, 0) * 45ms) both; }
+    .bp-print::before { content: ""; position: absolute; inset: 0; z-index: 1; background: #f2f7ff; pointer-events: none;
+        animation: bp-develop 1.4s var(--ease-out) calc(1s + var(--i, 0) * 60ms) both; }
+    .bp-block { animation: bp-fade var(--t-3) var(--ease-out) calc(1.1s + var(--i, 0) * 45ms) both; }
+    .bp-hand { animation: bp-write 1.2s var(--ease-in-out) 1.6s both; }
+}
+@keyframes bp-draw { from { clip-path: inset(0 100% 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes bp-extend { from { scale: 0 1; } }
+@keyframes bp-develop { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes bp-fade { from { opacity: 0; translate: 0 6px; } }
+@keyframes bp-write { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
