@@ -36,6 +36,38 @@ export const worlds = [
         accent: "#c8ff2e",
         load: () => import("./album/index.jsx"),
     },
+    {
+        id: "mission",
+        name: "Mission Control",
+        tagline: "Live data: uptime, commits, the stack in numbers.",
+        symbols: ["Live", "Dashboard", "Exact"],
+        accent: "#3ddc84",
+        load: () => import("./mission/index.jsx"),
+    },
+    {
+        id: "ask",
+        name: "Ask Aman",
+        tagline: "Ask anything. Answers cite the real work.",
+        symbols: ["2030", "Chat", "Curious"],
+        accent: "#ff8a5c",
+        load: () => import("./ask/index.jsx"),
+    },
+    {
+        id: "canvas",
+        name: "Canvas",
+        tagline: "The portfolio as a design file. Pan, zoom, click.",
+        symbols: ["Draft", "Canvas", "Free"],
+        accent: "#0d99ff",
+        load: () => import("./canvas/index.jsx"),
+    },
+    {
+        id: "arcade",
+        name: "Arcade",
+        tagline: "Break bricks, unlock projects.",
+        symbols: ["8-Bit", "Arcade", "Wild"],
+        accent: "#ff3df2",
+        load: () => import("./arcade/index.jsx"),
+    },
 ];
 
 // One lazy component per world, from the same loader, so preloading on lever pull warms the chunk it will render.

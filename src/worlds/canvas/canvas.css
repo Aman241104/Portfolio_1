@@ -1,0 +1,103 @@
+/* THE DRAWING: a cyanotype on a drafting table. Prussian blue paper, white linework, a fine/major drafting grid,
+   B612 (the Airbus cockpit face) for lettering, Architects Daughter for the draughtsman's notes. */
+.cv { --paper: #123f6e; --paper-2: #0f3660; --line: rgba(232, 242, 255, .88); --faint: rgba(232, 242, 255, .5); --grid: rgba(200, 225, 255, .08); --grid-2: rgba(200, 225, 255, .16);
+    --hi: #ffe28a; --bar: #0a2647; position: fixed; inset: 0; background: var(--paper); color: var(--line); font: 400 14px/1.45 "B612", "Helvetica Neue", sans-serif; overflow: hidden; }
+.cv a { color: inherit; }
+/* the table's edge: a dark drafting rail with the drawing number and the scale */
+.cv-bar { position: absolute; z-index: 5; top: 0; left: 0; right: 0; height: 50px; display: flex; align-items: center; gap: 16px; padding: 0 14px; background: var(--bar); border-bottom: 1px solid var(--faint);
+    font: 400 12px "B612 Mono", monospace; letter-spacing: .04em; }
+.cv-file { margin: 0; white-space: nowrap; color: var(--faint); } .cv-file b { color: var(--line); font-weight: 700; margin-right: 8px; }
+.cv-jump { display: flex; gap: 2px; flex: 1; overflow-x: auto; scrollbar-width: none; }
+.cv-jump button, .cv-zoom button { border: 0; background: none; color: var(--line); padding: 8px 10px; font: 400 12px "B612 Mono", monospace; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+.cv-jump button:hover, .cv-zoom button:hover { color: var(--hi); }
+.cv-zoom { display: flex; align-items: center; gap: 2px; }
+.cv-zoom span { min-width: 92px; text-align: center; font: 700 12px "B612 Mono", monospace; color: var(--hi); }
+.cv-fit { border: 1px solid var(--line) !important; }
+.cv-vp { position: absolute; inset: 50px 0 0; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; background-color: var(--paper);
+    background-image: linear-gradient(var(--grid-2) 1px, transparent 1px), linear-gradient(90deg, var(--grid-2) 1px, transparent 1px),
+        linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+        radial-gradient(120% 90% at 50% 40%, transparent 50%, rgba(5, 20, 40, .45));
+    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px, 100% 100%; }
+.cv-vp:active { cursor: grabbing; }
+.cv-board { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.cv-board > * { position: absolute; }
+
+.bp-cover { left: 0; top: 0; width: 1120px; }
+.bp-dwg { margin: 0; font: 400 15px "B612 Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.bp-cover h1 { margin: 10px 0 0; font: 700 156px/.9 "B612", sans-serif; letter-spacing: -0.03em; text-transform: uppercase; }
+.bp-cover p:last-child { margin: 22px 0 0; font-size: 24px; max-width: 46ch; color: var(--line); }
+.bp-hand { margin: 0; font: 400 26px/1.3 "Architects Daughter", cursive; color: var(--hi); }
+.bp-hire { transform: rotate(-3deg); max-width: 320px; }
+.bp-zone { border: 1.5px dashed var(--faint); pointer-events: none; }
+.bp-zone span { position: absolute; left: -1.5px; top: -34px; padding: 4px 10px; border: 1.5px solid var(--faint); border-bottom: 0; font: 700 14px "B612 Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+
+/* a project, drawn as a sheet */
+.bp-sheet { border: 1.5px solid var(--line); background: rgba(10, 40, 75, .35); cursor: pointer; display: flex; flex-direction: column; transition: background .25s, box-shadow .25s; }
+.bp-sheet:hover, .bp-sheet[data-on] { background: rgba(10, 40, 75, .7); box-shadow: 0 0 0 4px rgba(255, 226, 138, .25); border-color: var(--hi); }
+.bp-print { position: relative; height: 176px; margin: 10px 10px 0; overflow: hidden; background: var(--paper-2); border: 1px solid var(--faint); }
+.bp-print img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; pointer-events: none; filter: grayscale(1) contrast(1.4) brightness(1.1); mix-blend-mode: screen; opacity: .85; transition: filter .5s, mix-blend-mode .5s, opacity .5s; }
+.bp-print::after { content: ""; position: absolute; inset: 0; background: var(--paper); mix-blend-mode: multiply; transition: opacity .5s; pointer-events: none; }
+.bp-sheet:hover .bp-print img, .bp-sheet[data-on] .bp-print img { filter: none; mix-blend-mode: normal; opacity: 1; }
+.bp-sheet:hover .bp-print::after, .bp-sheet[data-on] .bp-print::after { opacity: 0; }
+/* dimension lines with arrowheads */
+.bp-dim { position: absolute; display: flex; align-items: center; gap: 6px; font: 400 11px "B612 Mono", monospace; color: var(--faint); pointer-events: none; white-space: nowrap; }
+.bp-dim i { flex: 1; height: 1px; background: var(--faint); position: relative; }
+.bp-dim-x { left: 0; right: 0; top: -22px; }
+.bp-dim-x i:first-child::before, .bp-dim-x i:last-child::after { content: ""; position: absolute; top: -3.5px; border: 4px solid transparent; }
+.bp-dim-x i:first-child::before { left: -2px; border-right-color: var(--faint); border-left: 0; }
+.bp-dim-x i:last-child::after { right: -2px; border-left-color: var(--faint); border-right: 0; }
+.bp-dim-y { top: 10px; height: 176px; left: -30px; flex-direction: column; writing-mode: vertical-rl; transform: rotate(180deg); }
+.bp-dim-y i { width: 1px; height: auto; flex: 1; }
+.bp-note { position: absolute; right: -10px; top: 132px; margin: 0; padding: 2px 8px; font: 400 17px "Architects Daughter", cursive; color: var(--hi); background: var(--paper); transform: rotate(-4deg); pointer-events: none; }
+/* the title block */
+.bp-block { margin: 10px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); flex: 1; }
+.bp-block div { padding: 4px 6px; border-left: 1px solid var(--faint); min-width: 0; }
+.bp-block div:nth-child(2) { border-left: 0; }
+.bp-block .bp-title { grid-column: 1 / -1; border-left: 0; border-bottom: 1px solid var(--line); }
+.bp-block dt { font: 400 9px "B612 Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.bp-block dd { margin: 0; font: 700 13px "B612", sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bp-title dd { font-size: 17px; }
+
+/* tables: bill of materials, revision history */
+.bp-table { width: 920px; border-collapse: collapse; border: 1.5px solid var(--line); font: 400 15px/1.45 "B612", sans-serif; }
+.bp-table caption { text-align: left; padding: 0 0 10px; font: 700 14px "B612 Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.bp-table th { padding: 8px 12px; text-align: left; border: 1px solid var(--line); font: 700 12px "B612 Mono", monospace; letter-spacing: .08em; text-transform: uppercase; background: rgba(10, 40, 75, .5); }
+.bp-table td { padding: 10px 12px; border: 1px solid var(--faint); vertical-align: top; }
+.bp-bom td:first-child, .bp-bom td:last-child, .bp-rev td:first-child, .bp-rev td:last-child { font: 700 14px "B612 Mono", monospace; text-align: center; width: 64px; }
+.bp-bom td:nth-child(2) { width: 180px; font-weight: 700; }
+.bp-rev td:nth-child(2) { width: 170px; font-family: "B612 Mono", monospace; font-size: 13px; }
+.bp-next td { color: var(--hi); border-style: dashed; }
+/* approval */
+.bp-approve { width: 920px; display: grid; gap: 18px; justify-items: start; }
+.bp-stampbox { padding: 26px 30px; border: 3px double var(--line); display: grid; gap: 10px; transform: rotate(-1.5deg); }
+.bp-stampbox p { margin: 0; font: 700 22px "B612 Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+.bp-stampbox a { font: 700 54px/1 "B612", sans-serif; letter-spacing: -0.02em; text-decoration: none; color: var(--hi); word-break: break-all; }
+.bp-sign { font: 400 14px "B612 Mono", monospace !important; letter-spacing: .08em !important; display: flex; gap: 12px; align-items: end; color: var(--faint); }
+.bp-sign span { width: 160px; border-bottom: 1px solid var(--faint); }
+.bp-btn, .cv-btn { display: inline-block; padding: 12px 18px; border: 1.5px solid var(--hi); color: var(--hi) !important; text-decoration: none; font: 700 14px "B612 Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
+.bp-btn:hover, .cv-btn:hover { background: var(--hi); color: var(--bar) !important; }
+.cv-btn.ghost { border-color: var(--line); color: var(--line) !important; }
+
+/* the draughtsman's pencil, drifting from sheet to sheet */
+.cv-mate { left: 0; top: 0; transition: transform 1.6s cubic-bezier(.45, 0, .2, 1); pointer-events: none; display: flex; align-items: flex-start; z-index: 3; }
+.cv-mate svg { width: 26px; height: 26px; fill: var(--hi); stroke: var(--bar); stroke-width: 1; }
+.cv-mate span { margin: 18px 0 0 -2px; padding: 2px 8px; background: var(--hi); color: var(--bar); font: 700 12px "B612 Mono", monospace; white-space: nowrap; }
+/* inspector: a detail callout */
+.cv-inspect { position: absolute; z-index: 6; right: 14px; top: 64px; width: min(340px, calc(100vw - 28px)); padding: 20px; background: var(--bar); border: 1.5px solid var(--line); box-shadow: 8px 8px 0 rgba(5, 20, 40, .5); }
+.cv-tag { display: block; font: 400 11px "B612 Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.cv-inspect h2 { margin: 6px 0 8px; font: 700 24px/1.15 "B612", sans-serif; }
+.cv-inspect p { margin: 0 0 10px; }
+.cv-stack { font: 400 12.5px "B612 Mono", monospace; color: var(--hi) !important; }
+.cv-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px !important; }
+.cv-x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border: 1px solid var(--faint); background: none; color: var(--line); font-size: 18px; cursor: pointer; }
+/* key plan */
+.cv-mini { position: absolute; z-index: 5; right: 14px; bottom: 14px; background: var(--bar); border: 1.5px solid var(--line); cursor: pointer; overflow: hidden; }
+.cv-mini i { position: absolute; border: 1px solid var(--faint); }
+.cv-mini b { position: absolute; border: 1.5px solid var(--hi); background: rgba(255, 226, 138, .12); }
+@media (max-width: 760px) {
+    .cv-file, .cv-mini { display: none; }
+    .cv-zoom button[aria-label] { display: none; }
+    .cv-zoom span { min-width: 70px; font-size: 11px; }
+    .cv-inspect { top: auto; bottom: 120px; left: 12px; right: 12px; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .cv-mate { transition: none; } }
