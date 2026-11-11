@@ -25,7 +25,7 @@ const WorldPicker = ({ onSelect, onClose, current }) => {
                             <button type="button" onClick={() => { onClose(); onSelect(w.id); }}
                                 className="group w-full text-left p-5 min-h-[44px] hover:bg-[#151515] transition-colors">
                                 <span className="block text-[10px] tracking-[.12em] uppercase text-[#8a8780]" style={{ fontFamily: "'Geist Mono', monospace" }}>
-                                    W‑0{i + 1} {current === w.id ? "· current" : ""}
+                                    W‑0{i + 1} {w.beta ? "· beta" : ""} {current === w.id ? "· current" : ""}
                                 </span>
                                 <span className="block mt-2 text-[22px] font-semibold tracking-[-0.03em]">{w.name} <span className="text-[#ff2e1f] inline-block transition-transform group-hover:translate-x-1">→</span></span>
                                 <span className="block mt-1 text-[14px] text-[#edeae3]/70">{w.tagline}</span>

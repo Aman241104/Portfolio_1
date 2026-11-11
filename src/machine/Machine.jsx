@@ -13,11 +13,11 @@ const prefersReducedMotion = () =>
 
 // No repeats until every world has been seen this session, then start over.
 export const pickWorld = () => {
-    const seen = getSeen();
-    let pool = worlds.filter((w) => !seen.includes(w.id));
-    if (pool.length === 0) pool = worlds;
+    const seen = getSeen(), live = worlds.filter((w) => !w.beta);   // beta worlds are never served by surprise
+    let pool = live.filter((w) => !seen.includes(w.id));
+    if (pool.length === 0) pool = live;
     const world = pool[Math.floor(Math.random() * pool.length)];
-    setSeen(pool === worlds ? [world.id] : [...seen, world.id]);
+    setSeen(pool === live ? [world.id] : [...seen, world.id]);
     return world;
 };
 

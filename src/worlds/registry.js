@@ -69,6 +69,7 @@ export const worlds = [
     },
     {
         id: "arcade",
+        beta: true,   // out of the machine's pool (Aman, 2026-11-11): reachable from All worlds and ?style=arcade only
         paper: "#1b1b1b",   // the world's own background: the enter transition wipes in this colour
         name: "Arcade",
         tagline: "Break bricks, unlock projects.",

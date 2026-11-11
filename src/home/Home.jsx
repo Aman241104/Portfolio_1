@@ -439,7 +439,7 @@ const Home = ({ onSelect }) => {
                 </div>
 
                 <nav className="tabs" aria-label="Go straight to a world">
-                    {worlds.map((w) => (
+                    {worlds.filter((w) => !w.beta).map((w) => (
                         <button key={w.id} type="button" onClick={() => enter(w.id)}><i aria-hidden>↗</i>{w.name}</button>
                     ))}
                     <a href={profile.resume} target="_blank" rel="noreferrer"><i aria-hidden>↗</i>Résumé</a>
@@ -494,7 +494,7 @@ const Home = ({ onSelect }) => {
                     </div>
                     <nav className="keys" aria-label="Site index">
                         {[
-                            ["Worlds", "Four ways to see this site", worlds.map((w) => ({ label: w.name, hint: w.tagline, onClick: () => onSelect(w.id), icon: "→" }))],
+                            ["Worlds", `${worlds.length} ways to see this site`, worlds.map((w) => ({ label: w.name, hint: w.tagline, onClick: () => onSelect(w.id), icon: "→" }))],
                             ["Contact", "Résumé, email and profiles", [
                                 { label: "Résumé", hint: "One-page PDF", href: profile.resume, ext: true, icon: "↓" },
                                 { label: "Email", hint: profile.email, href: `mailto:${profile.email}`, icon: "↗" },
