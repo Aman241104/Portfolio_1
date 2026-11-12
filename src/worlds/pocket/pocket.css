@@ -1,0 +1,102 @@
+/* POCKET: an original landscape handheld in warm off-white plastic, a four-shade olive LCD, maroon A/B.
+   All on-screen text is HTML laid over the canvas, sized in container units (1 game pixel = .625cqw) so it stays crisp. */
+.pk { --s0: #13261a; --s1: #3d6142; --s2: #88a86c; --s3: #dbe7b8; --shell: #e7e1d2; --shell-2: #cfc6b2; --ink: #2b2a26; --maroon: #8e2246;
+    min-height: 100dvh; padding: 10px 12px 140px; color: var(--ink); font: 400 15px/1.45 "Pixelify Sans", ui-monospace, monospace;
+    background: radial-gradient(120% 80% at 50% 0%, #4a5a44, #1d2620 70%); }
+.pk button { font: inherit; cursor: pointer; }
+.pk :focus-visible { outline: 3px solid #ffd76a; outline-offset: 2px; }
+.pk-fast { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 0 auto 14px; max-width: 900px; }
+.pk-fast a, .pk-fast button { color: var(--s3); background: none; border: 0; padding: 8px 4px; text-decoration: underline; text-underline-offset: 3px; font-size: 15px; }
+
+/* the device */
+.pk-device { width: min(1180px, calc((100dvh - 150px) * 1.12 + 440px), 100%); box-sizing: border-box; margin: 0 auto; padding: 22px 26px 18px; border-radius: 26px 26px 26px 26px / 26px 26px 60px 60px;
+    background: linear-gradient(180deg, #f1ece0, var(--shell) 30%, var(--shell-2)); box-shadow: inset 0 2px 0 #fff, inset 0 -6px 14px rgba(80, 70, 50, .25), 0 30px 70px rgba(0, 0, 0, .55);
+    display: grid; grid-template-columns: 170px minmax(0, 1fr) 170px; grid-template-areas: "pad screen ab" "pad screen ss" "keys keys keys"; gap: 0 22px; align-items: center; }
+.pk-bezel { grid-area: screen; position: relative; padding: 16px 18px 10px; border-radius: 12px 12px 34px 12px; background: linear-gradient(#5a5d64, #44464c); box-shadow: inset 0 3px 8px rgba(0, 0, 0, .5); }
+.pk-led { position: absolute; left: 6px; top: 50%; width: 7px; height: 7px; border-radius: 50%; background: #5a1d1d; }
+.pk-led[data-on] { background: #ff4b4b; box-shadow: 0 0 8px #ff4b4b; }
+.pk-screen { position: relative; container-type: inline-size; aspect-ratio: 160 / 144; background: var(--s3); box-shadow: inset 0 0 0 2px #2a2e2a; overflow: hidden; }
+.pk-screen canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.pk-screen::after { content: ""; position: absolute; inset: 0; pointer-events: none;   /* the LCD's pixel grid and a faint glare */
+    background: repeating-linear-gradient(0deg, rgba(19, 38, 26, .07) 0 1px, transparent 1px .625cqw), repeating-linear-gradient(90deg, rgba(19, 38, 26, .05) 0 1px, transparent 1px .625cqw),
+        linear-gradient(135deg, rgba(255, 255, 255, .14), transparent 40%); }
+.pk-brand { margin: 6px 0 0; color: #d9d9dd; font: 700 13px "Silkscreen", monospace; letter-spacing: .18em; }
+.pk-brand i { font: italic 400 10px Georgia, serif; letter-spacing: 0; opacity: .7; margin-left: 8px; }
+
+/* text boxes and menus on the LCD */
+.pk-box, .pk-start, .pk-card { position: absolute; z-index: 2; color: var(--s0); background: var(--s3); border: .9cqw double var(--s0); font: 400 4.6cqw/1.45 "Silkscreen", monospace; }
+.pk-box { left: 1.5cqw; right: 1.5cqw; bottom: 1.5cqw; min-height: 26cqw; padding: 2cqw 3cqw; cursor: pointer; }
+.pk-box p { margin: 0; }
+.pk-more { font-style: normal; margin-left: 2cqw; animation: pk-bob .6s steps(2) infinite; display: inline-block; }
+@keyframes pk-bob { 50% { translate: 0 .8cqw; } }
+.pk-links { display: flex; flex-wrap: wrap; gap: 1cqw 4cqw; margin-top: 1.6cqw !important; }
+.pk-links a { color: var(--s0); font-weight: 700; text-decoration: underline; padding: 1cqw 0; }
+.pk-menu4 { display: grid; grid-template-columns: 1fr 1fr; gap: .6cqw 2cqw; cursor: default; }
+.pk-q { grid-column: 1 / -1; }
+.pk-menu4 button, .pk-moves button, .pk-start button { text-align: left; background: none; border: 0; color: var(--s0); padding: .6cqw 0 .6cqw 4cqw; position: relative; font-size: inherit; }
+.pk-menu4 button[data-sel]::before, .pk-moves button[data-sel]::before, .pk-start button[data-sel]::before { content: "▶"; position: absolute; left: 0; animation: pk-nudge .5s steps(2) infinite; }
+@keyframes pk-nudge { 50% { translate: .6cqw 0; } }
+.pk-moves { display: grid; cursor: default; font-size: 3.8cqw; }
+.pk-start { right: 1.5cqw; top: 1.5cqw; display: grid; padding: 2cqw 3cqw; min-width: 46cqw; animation: pk-in .18s steps(3) both; }
+@keyframes pk-in { from { clip-path: inset(0 0 100% 0); } }
+.pk-card { inset: 1.5cqw; padding: 2.4cqw 3cqw; overflow: auto; font-size: 4.6cqw; animation: pk-in .22s steps(4) both; }
+.pk-card p { margin: 0 0 1cqw; } .pk-card b { font-weight: 700; }
+.pk-card-h { display: flex; justify-content: space-between; border-bottom: .6cqw solid var(--s0); padding-bottom: 1cqw; font-weight: 700; }
+.pk-badges { display: flex; flex-wrap: wrap; gap: 1.6cqw; margin: 2cqw 0; }
+.pk-badges span { width: 9cqw; height: 9cqw; display: grid; place-items: center; border-radius: 50%; background: var(--s1); color: var(--s3); font-size: 3.4cqw; font-weight: 700; box-shadow: inset -.8cqw -.8cqw 0 var(--s0); }
+.pk-close { background: none; border: 0; color: var(--s0); padding: 1cqw 0; font-size: inherit; text-decoration: underline; }
+
+/* controls */
+.pk-controls { display: contents; }
+.pk-dpad { grid-area: pad; position: relative; width: 132px; height: 132px; justify-self: center; display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); }
+.pk-dpad button, .pk-hub { background: linear-gradient(#3b3d42, #26272b); border: 0; box-shadow: 0 3px 0 #111, inset 0 1px 0 rgba(255, 255, 255, .15); }
+.pk-up { grid-area: 1 / 2; border-radius: 6px 6px 0 0; } .pk-left { grid-area: 2 / 1; border-radius: 6px 0 0 6px; } .pk-hub { grid-area: 2 / 2; }
+.pk-right { grid-area: 2 / 3; border-radius: 0 6px 6px 0; } .pk-down { grid-area: 3 / 2; border-radius: 0 0 6px 6px; }
+.pk-dpad button:active { translate: 0 2px; box-shadow: 0 1px 0 #111; background: #222; }
+.pk-dpad button::after { content: ""; display: block; margin: auto; width: 0; height: 0; border: 6px solid transparent; opacity: .35; }
+.pk-up::after { border-bottom-color: #fff; translate: 0 -3px; } .pk-down::after { border-top-color: #fff; translate: 0 3px; }
+.pk-left::after { border-right-color: #fff; translate: -3px 0; } .pk-right::after { border-left-color: #fff; translate: 3px 0; }
+.pk-ab { grid-area: ab; display: flex; gap: 14px; justify-content: center; rotate: -22deg; }
+.pk-ab button { width: 58px; height: 58px; border-radius: 50%; border: 0; color: #f3dfe5; font: 700 18px "Silkscreen", monospace;
+    background: radial-gradient(circle at 35% 30%, #c2416b, var(--maroon) 60%, #5c1530); box-shadow: 0 4px 0 #3e0e20, inset 0 2px 2px rgba(255, 255, 255, .3); transition: translate var(--t-1), box-shadow var(--t-1); }
+.pk-ab button:active { translate: 0 3px; box-shadow: 0 1px 0 #3e0e20; }
+.pk-a { translate: 0 -18px; }
+.pk-ss { grid-area: ss; display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+.pk-ss button { min-height: 44px; padding: 0 12px; border-radius: 22px; border: 0; color: #5d584c; font-size: 12px; letter-spacing: .08em; background: linear-gradient(#bdb5a2, #a59d89); box-shadow: 0 2px 0 #8a826f; }
+.pk-ss button:active { translate: 0 2px; box-shadow: none; }
+.pk-keys { grid-area: keys; margin: 10px 0 0; text-align: center; color: #7a7466; font-size: 13px; }
+
+/* the Dex: a full HTML list, readable without playing */
+.pk-dex { position: fixed; z-index: 80; inset: 0; overflow: auto; padding: 18px 16px 140px; color: var(--s0); background: var(--s3); animation: pk-wipe .35s steps(6) both; }
+@keyframes pk-wipe { from { clip-path: inset(0 0 100% 0); } }
+.pk-dex header { max-width: 900px; margin: 0 auto 14px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; border-bottom: 4px double var(--s0); padding-bottom: 8px; }
+.pk-dex h2 { margin: 0; font: 700 34px "Silkscreen", monospace; } .pk-dex header p { margin: 0; flex: 1; color: var(--s1); }
+.pk-dex header button, .pk-back { min-height: 44px; padding: 0 14px; background: var(--s0); color: var(--s3); border: 0; }
+.pk-list { max-width: 900px; margin: 0 auto; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.pk-list button { width: 100%; display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: center; padding: 8px; text-align: left; color: var(--s0);
+    background: color-mix(in srgb, var(--s2) 35%, var(--s3)); border: 2px solid var(--s1); transition: background var(--t-1); }
+.pk-list button:hover, .pk-list button:focus-visible { background: var(--s2); }
+.pk-list b { display: block; font-size: 16px; } .pk-list small { display: block; color: var(--s1); font-size: 13px; }
+.pk-list i { font-style: normal; font-size: 18px; }
+.pk-sprite { width: 48px; height: 48px; image-rendering: pixelated; }
+.pk-sprite-big { width: 192px; height: 192px; background: color-mix(in srgb, var(--s2) 40%, var(--s3)); border: 3px solid var(--s0); }
+.pk-entry { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start; }
+.pk-entry .pk-back { grid-column: 1 / -1; justify-self: start; }
+.pk-entry h3 { margin: 4px 0 8px; font-size: 26px; } .pk-no { margin: 0; color: var(--s1); }
+.pk-stats { display: flex; flex-wrap: wrap; gap: 6px; } .pk-stats span { padding: 2px 8px; border: 2px solid var(--s1); font-size: 13px; }
+.pk-entry .pk-links a { color: var(--s0); font-weight: 700; padding: 8px 0; }
+
+/* arrival: the handheld slides up out of a pocket */
+@media (prefers-reduced-motion: no-preference) { .pk-device { animation: pk-arrive .7s var(--ease-spring) both; } .pk-fast { animation: pk-fade .5s var(--ease-out) .4s both; } }
+@keyframes pk-arrive { from { translate: 0 60px; rotate: 3deg; opacity: 0; } }
+@keyframes pk-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .pk-more, .pk-menu4 button::before, .pk-start, .pk-card, .pk-dex { animation: none !important; } }
+
+/* phones: portrait handheld, screen on top, controls under it */
+@media (max-width: 760px) {
+    .pk { padding: 8px 8px 150px; }
+    .pk-device { width: 100%; grid-template-columns: 1fr 1fr; grid-template-areas: "screen screen" "pad ab" "ss ss" "keys keys"; padding: 14px 12px 14px; gap: 14px 8px; border-radius: 22px 22px 48px 22px; }
+    .pk-bezel { padding: 12px 12px 8px; }
+    .pk-keys { display: none; }
+    .pk-entry { grid-template-columns: 1fr; } .pk-sprite-big { width: 144px; height: 144px; }
+}

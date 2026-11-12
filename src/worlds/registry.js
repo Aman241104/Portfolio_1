@@ -97,6 +97,16 @@ export const worlds = [
         accent: "#3fa9f5",
         load: () => import("./longhorn/index.jsx"),
     },
+    {
+        id: "pocket",
+        paper: "#1d2620",   // the world's own background: the enter transition wipes in this colour
+        beta: true,   // new (2026-11-12): out of the machine's pool until the reviewers pass it
+        name: "Pocket",
+        tagline: "A pixel town where projects live in the tall grass.",
+        symbols: ["1998", "Pocket", "Pixel"],
+        accent: "#88a86c",
+        load: () => import("./pocket/index.jsx"),
+    },
 ];
 
 // One lazy component per world, from the same loader, so preloading on lever pull warms the chunk it will render.
