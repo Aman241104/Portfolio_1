@@ -77,6 +77,16 @@ export const worlds = [
         accent: "#ff3df2",
         load: () => import("./arcade/index.jsx"),
     },
+    {
+        id: "y2001",
+        paper: "#000033",   // the world's own background: the enter transition wipes in this colour
+        beta: true,   // new (2026-11-12): out of the machine's pool until the reviewers pass it
+        name: "2001 Homepage",
+        tagline: "Under construction since 2001. Sign the guestbook.",
+        symbols: ["2001", "Homepage", "Sincere"],
+        accent: "#ffff00",
+        load: () => import("./y2001/index.jsx"),
+    },
 ];
 
 // One lazy component per world, from the same loader, so preloading on lever pull warms the chunk it will render.

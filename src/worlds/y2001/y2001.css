@@ -1,0 +1,166 @@
+/* 2001: "Under construction, forever". Original art only: the starfield tile, bevels, rainbow rules, cones, globe and
+   88x31 buttons are all drawn here. Period-true defaults on purpose (Times, link blue, visited purple). */
+.y2k {
+    --navy: #000033; --yel: #ffff00; --lime: #00ff00; --cyan: #00ffff; --red: #ff2020; --link: #8fb4ff; --visited: #d7a6ff;
+    min-height: 100dvh; color: #f2f2ff; font: 400 17px/1.5 "Times New Roman", Times, serif; padding: 0 12px 120px;
+    background-color: var(--navy);
+    /* the tile: a hand-placed starfield, repeated like it's a 4 KB GIF */
+    background-image:
+        radial-gradient(1.4px 1.4px at 12px 18px, #fff 99%, transparent), radial-gradient(1px 1px at 61px 44px, #cfe 99%, transparent),
+        radial-gradient(1.8px 1.8px at 97px 9px, #ffd 99%, transparent), radial-gradient(1px 1px at 33px 83px, #fff 99%, transparent),
+        radial-gradient(1.2px 1.2px at 82px 96px, #aef 99%, transparent), radial-gradient(1px 1px at 112px 61px, #fff 99%, transparent);
+    background-size: 128px 112px;
+    animation: y-drift 120s linear infinite;
+}
+@keyframes y-drift { to { background-position: -1280px 448px; } }
+.y2k a { color: var(--link); }
+.y2k a:visited { color: var(--visited); }
+.y2k a:hover { color: var(--yel); background: #000080; }
+.y2k a:focus-visible, .y2k button:focus-visible, .y2k input:focus-visible, .y2k textarea:focus-visible { outline: 3px dashed var(--yel); outline-offset: 2px; }
+.y2k small { color: #b9b9e6; }
+
+.y-fast { margin: 0 -12px; padding: 8px 12px; background: #c0c0c0; color: #000; font: 14px/1.4 Arial, sans-serif; text-align: center; border-bottom: 2px solid #808080; }
+.y-fast a, .y-fast a:visited { color: #0000ee; padding: 6px 2px; display: inline-block; }
+
+.y-page { max-width: 760px; margin: 18px auto 0; padding: 18px; background: rgba(0, 0, 51, .82);
+    border: 4px ridge #8a8acf; box-shadow: 0 0 0 1px #000, 0 0 40px rgba(0, 255, 255, .08); }
+.y2k h1, .y2k h2 { font-family: "Comic Neue", "Comic Sans MS", cursive; color: var(--yel); text-align: center; margin: .2em 0 .5em; }
+.y2k h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.1; text-shadow: 3px 3px 0 #ff00aa, 6px 6px 0 #000; }
+.y2k h2 { font-size: clamp(22px, 4.4vw, 30px); text-shadow: 2px 2px 0 #000; }
+.y2k h2 small { display: block; font: italic 15px "Times New Roman", serif; color: #b9b9e6; text-shadow: none; }
+.y-sub { text-align: center; margin: 0 0 12px; }
+
+/* the headline waves like a JavaScript DHTML effect from a "cool scripts" site */
+.y-word { display: inline-block; white-space: nowrap; }
+.y-word > span { display: inline-block; animation: y-wave 2.4s var(--ease-in-out) infinite; animation-delay: calc(var(--i) * 70ms); }
+@keyframes y-wave { 0%, 60%, 100% { translate: 0 0; } 30% { translate: 0 -8px; color: var(--cyan); } }
+
+.y-blink { animation: y-blink 1s steps(1) infinite; color: var(--lime); }
+@keyframes y-blink { 50% { opacity: 0; } }
+.y-new { display: inline-block; padding: 0 6px; margin-right: 6px; background: var(--red); color: #fff; font: 700 13px Arial, sans-serif;
+    transform: rotate(-8deg); vertical-align: middle; animation: y-blink 1s steps(1) infinite; }
+
+/* under construction: striped sign with two traffic cones, drawn */
+.y-construct { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 12px; padding: 6px 14px; width: max-content; max-width: 100%;
+    background: #ffcc00; color: #000; font: 700 13px/1 Arial, sans-serif; letter-spacing: .12em;
+    border: 6px solid transparent; border-image: repeating-linear-gradient(-45deg, #111 0 7px, #ffcc00 7px 14px) 6; }
+.y-cone { width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 20px solid #ff6a00;
+    animation: y-blink 1.2s steps(1) infinite; }
+.y-cone + .y-cone, .y-construct .y-cone:last-child { animation-delay: .6s; }
+
+.y-marquee { overflow: hidden; white-space: nowrap; margin: 10px -18px; padding: 6px 0; background: #000; border-block: 2px solid var(--lime); color: var(--lime); font: 700 15px "Courier New", monospace; }
+.y-marquee span { display: inline-block; padding-left: 100%; animation: y-marquee 28s linear infinite; }
+@keyframes y-marquee { to { transform: translateX(-100%); } }
+
+/* the hit counter: a real odometer */
+.y-counter { text-align: center; margin: 14px 0 4px; }
+.y-odo { display: inline-flex; gap: 2px; padding: 3px; vertical-align: middle; background: #111; border: 2px inset #888; }
+.y-odo-d { display: inline-block; width: 1.05em; height: 1.4em; overflow: hidden; background: linear-gradient(#222, #000 50%, #222); color: #ff4040; font: 700 18px/1.4em "Courier New", monospace; text-align: center; }
+.y-odo-d > span { display: flex; flex-direction: column; transform: translateY(calc(var(--d) * -1.4em)); transition: transform calc(1.2s + var(--k) * .2s) var(--ease-out); }
+.y-odo-d i { font-style: normal; height: 1.4em; }
+
+/* rainbow rule, the era's favourite divider */
+.y-hr { height: 6px; border: 0; margin: 22px 0; background: linear-gradient(90deg, #ff2020, #ff9900, #ffff00, #00ff00, #00ffff, #3366ff, #ff00ff, #ff2020);
+    background-size: 200% 100%; animation: y-rainbow 6s linear infinite; }
+@keyframes y-rainbow { to { background-position: 200% 0; } }
+
+/* tables with real bevels */
+.y-tbl { width: 100%; border-collapse: separate; border-spacing: 2px; border: 3px outset #9a9ad8; background: #00004a; }
+.y-tbl td, .y-tbl th { border: 2px inset #6a6aa8; padding: 8px; vertical-align: top; text-align: left; }
+.y-tbl thead th { background: #000080; color: var(--yel); font: 700 14px Arial, sans-serif; }
+.y-proj tbody th { font-weight: 700; }
+.y-proj tbody th small, .y-stack { display: block; font-weight: 400; font-size: 13px; margin-top: 2px; }
+.y-me { width: 120px; text-align: center !important; vertical-align: middle !important; }
+.y-status { display: inline-block; white-space: nowrap; font: 700 12px Arial, sans-serif; color: #c9c9ff; }
+.y-status[data-s="Live"] { color: var(--lime); }
+.y-status[data-s="Prototype"] { color: #ffcc66; }
+
+/* a spinning globe, drawn: two gradients and a moving longitude band */
+.y-globe { display: inline-block; width: 84px; height: 84px; border-radius: 50%; position: relative; overflow: hidden;
+    background: radial-gradient(circle at 32% 30%, #9fe7ff, #1f6fd1 45%, #062a66 75%); box-shadow: inset -10px -8px 18px rgba(0, 0, 0, .55), 0 0 18px rgba(0, 200, 255, .35); }
+.y-globe::before { content: ""; position: absolute; inset: 0; width: 200%;
+    background: repeating-linear-gradient(90deg, transparent 0 14px, rgba(80, 230, 120, .85) 14px 30px, transparent 30px 52px, rgba(80, 230, 120, .6) 52px 60px, transparent 60px 84px);
+    animation: y-spin 6s linear infinite; mask-image: radial-gradient(circle at 50% 50%, #000 62%, transparent 63%); mask-size: 84px 84px; mask-repeat: repeat-x; }
+@keyframes y-spin { to { transform: translateX(-84px); } }
+
+/* pictures that load like 2001: chunky pixels first, then the real image steps in */
+.y-pic { position: relative; display: block; width: var(--w); aspect-ratio: 4 / 3; background: #000; border: 2px inset #888; overflow: hidden; }
+.y-pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.y-pic-lo { image-rendering: pixelated; }
+.y-pic-hi { clip-path: inset(0 0 100% 0); }
+.y-pic[data-ok] .y-pic-hi { clip-path: inset(0 0 0 0); transition: clip-path .9s steps(9, end); }
+
+.y-links { columns: 2 220px; margin: 0; padding-left: 22px; }
+.y-links li { margin: 0 0 6px; break-inside: avoid; }
+.y-links li::marker { content: "★ "; color: var(--yel); }
+.y-cv div { margin-bottom: 14px; } .y-cv dt { margin-bottom: 4px; } .y-cv dd { margin: 0 0 4px 22px; }
+.y-cv dd::before { content: "» "; color: var(--yel); }
+.y-skills { font-size: 15px; }
+
+/* buttons: a raised Win9x-ish bevel that presses in */
+.y-btn, .y-ring-nav button { display: inline-block; min-height: 44px; padding: 10px 16px; background: #c0c0c0; color: #000 !important; font: 700 15px Arial, sans-serif;
+    border: 3px outset #fff; cursor: pointer; text-decoration: none; }
+.y-btn:active, .y-ring-nav button:active { border-style: inset; translate: 1px 1px; }
+.y-btn:hover, .y-ring-nav button:hover { background: #d8d8d8; }
+.y-btn:disabled { color: #777 !important; }
+
+.y-form { display: grid; gap: 10px; margin-bottom: 18px; }
+.y-form label { display: grid; gap: 4px; font-weight: 700; }
+.y-form input, .y-form textarea { font: 16px "Times New Roman", serif; padding: 8px; background: #fff; color: #000; border: 2px inset #888; }
+.y-entries { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.y-entries li { padding: 10px; border: 2px dashed #6a6aa8; }
+.y-entries q { display: block; margin-top: 4px; font-style: italic; }
+
+.y-ring { text-align: center; padding: 14px; border: 3px double var(--cyan); }
+.y-ring-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.y-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 22px 0 10px; }
+.y-88 { width: 88px; height: 31px; display: grid; place-content: center; text-align: center; border: 1px solid #000; outline: 1px solid #888;
+    background: linear-gradient(#3a3aa0, #12124a); color: #fff; font: 700 9px/1.05 Arial, sans-serif; letter-spacing: .04em; }
+.y-88 i { font-style: normal; color: var(--yel); } .y-88 b { color: var(--cyan); }
+.y-88:nth-child(2n) { background: linear-gradient(#a02a2a, #4a0f0f); } .y-88:nth-child(3n) { background: linear-gradient(#1c7a1c, #0a3a0a); }
+.y-foot { text-align: center; font-size: 15px; }
+
+/* the browser status bar: the 56k download made visible */
+.y-statusbar { position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 8px;
+    background: #c0c0c0; color: #000; font: 12px Arial, sans-serif; border-top: 2px solid #fff; }
+.y-sb-icon { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9fe7ff, #1f6fd1); }
+.y-sb-icon[data-busy] { animation: y-pulse .6s steps(2) infinite; }
+@keyframes y-pulse { 50% { filter: brightness(1.6); } }
+.y-sb-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px inset #888; padding: 1px 6px; }
+.y-sb-bar { width: 140px; height: 14px; border: 1px inset #888; background: #fff; }
+.y-sb-bar i { display: block; height: 100%; width: calc(var(--p) * 100%); background: repeating-linear-gradient(90deg, #000080 0 8px, transparent 8px 10px); transition: width .25s steps(4, end); }
+.y-sb-zone { border: 1px inset #888; padding: 1px 8px; }
+@media (min-width: 1024px) { .y-statusbar { padding-right: 380px; } }
+@media (max-width: 640px) { .y-sb-bar, .y-sb-zone { display: none; } .y2k { padding-bottom: 170px; } }
+
+/* sparkle trail */
+.y-spark { position: fixed; z-index: 60; pointer-events: none; font-style: normal; font-size: 14px; translate: -50% -50%; animation: y-spark .8s var(--ease-out) forwards; }
+@keyframes y-spark { to { opacity: 0; transform: translate(var(--dx), 26px) scale(.3) rotate(120deg); } }
+
+/* ---- the 56k arrival: each section paints in line by line once it has "downloaded" ---- */
+@media (prefers-reduced-motion: no-preference) {
+    .y-sec:not([data-in]), .y-sec:not([data-in]) + .y-hr { visibility: hidden; }
+    .y-sec[data-in] { animation: y-paint .55s steps(7, end) both; }
+    .y-hr { animation: y-rainbow 6s linear infinite, y-rule .4s steps(6, end) both; }
+    .y-88 { animation: y-pop .5s var(--ease-spring) both; animation-delay: calc(var(--i) * 80ms); }
+}
+@keyframes y-paint { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes y-rule { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes y-pop { from { scale: .2; rotate: -20deg; opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .y2k, .y-word > span, .y-blink, .y-new, .y-cone, .y-marquee span, .y-hr, .y-globe::before, .y-sb-icon { animation: none !important; }
+    .y-marquee span { padding-left: 0; white-space: normal; }
+    .y-odo-d > span { transition: none; }
+}
+
+@media (max-width: 640px) {
+    .y-page { padding: 12px; margin-top: 10px; }
+    .y-proj thead { display: none; }
+    .y-proj, .y-proj tbody, .y-proj tr, .y-proj td, .y-proj th { display: block; width: 100%; box-sizing: border-box; }
+    .y-proj tr { display: grid; grid-template-columns: 96px 1fr; gap: 0 8px; padding: 6px; border: 2px inset #6a6aa8; margin-bottom: 6px; }
+    .y-proj td, .y-proj th { border: 0; padding: 2px; }
+    .y-proj td:first-child { grid-row: span 3; }
+    .y-about tr, .y-about td { display: block; }
+    .y-me { width: auto; }
+}
