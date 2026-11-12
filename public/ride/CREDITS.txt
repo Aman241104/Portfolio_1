@@ -1,0 +1,5 @@
+RIDE world, 3D assets
+- Trees, bushes, rocks, grass: Kenney "Nature Kit" (kenney.nl), CC0 1.0.
+- Motorcycle: "Motorcycle" by Poly by Google, via poly.pizza (https://poly.pizza/m/dse64pqMKAR), CC BY 3.0
+  (https://creativecommons.org/licenses/by/3.0/).
+Everything else (road, terrain, sky, signs, milestones, billboards) is generated in code.

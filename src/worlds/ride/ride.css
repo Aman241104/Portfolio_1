@@ -1,0 +1,102 @@
+/* RIDE: golden hour on the highway. The 3D does the colour; the interface stays out of the way: solid warm-dark
+   panels with an amber rule (no frosted glass), Saira for the dashboard, a cinematic vignette and warm grade over the canvas. */
+.rd { --amber: #ffb35c; --ink: #fff7ec; --panel: rgba(28, 18, 11, .86); --muted: #e6cfb2;
+    position: fixed; inset: 0; overflow: hidden; background: #f0b07a; color: var(--ink); font: 400 15px/1.5 "Saira", system-ui, sans-serif; }
+.rd button { font: inherit; cursor: pointer; }
+.rd :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.rd-canvas { position: absolute !important; inset: 0; touch-action: none; }
+.rd-grade { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(60, 25, 5, .45)), linear-gradient(rgba(255, 170, 90, .06), rgba(120, 50, 10, .12)); }
+
+.rd-top { position: absolute; z-index: 5; left: 0; right: 0; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px;
+    background: linear-gradient(rgba(40, 20, 8, .45), transparent); }
+.rd-brand { margin: 0; font: 800 22px/1 "Saira Condensed", sans-serif; letter-spacing: .08em; text-shadow: 0 2px 10px rgba(60, 20, 0, .5); }
+.rd-brand span { font: 400 14px "Saira", sans-serif; letter-spacing: 0; opacity: .9; }
+.rd-top nav { display: flex; gap: 6px; }
+.rd-top nav a, .rd-top nav button { min-height: 40px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: 3px; border: 1px solid rgba(255, 240, 220, .45);
+    background: rgba(30, 15, 5, .35); color: var(--ink); text-decoration: none; font-weight: 600; transition: background var(--t-2) var(--ease-out), border-color var(--t-2); }
+.rd-top nav a:hover, .rd-top nav button:hover { background: rgba(30, 15, 5, .7); border-color: var(--amber); }
+
+.rd-kicker { margin: 0 0 6px; font: 600 12px "Saira", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+.rd-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 3px; border: 1px solid rgba(255, 240, 220, .5); background: transparent;
+    color: var(--ink) !important; text-decoration: none; font-weight: 600; transition: background var(--t-2) var(--ease-out), translate var(--t-1); }
+.rd-btn:hover { background: rgba(255, 179, 92, .16); } .rd-btn:active { translate: 0 1px; }
+.rd-go { background: var(--amber); border-color: var(--amber); color: #2a1406 !important; }
+.rd-go:hover { background: #ffc47d; }
+
+/* the title card before the ride: sits low-left like a film's opening title, then fades as the engine starts */
+.rd-intro { position: absolute; z-index: 4; left: clamp(20px, 6vw, 90px); bottom: clamp(90px, 14vh, 150px); max-width: 560px; padding: 0; text-shadow: 0 2px 18px rgba(70, 25, 0, .55); }
+.rd-intro h1 { margin: 0 0 12px; font: 800 clamp(40px, 6.4vw, 86px)/.92 "Saira Condensed", sans-serif; letter-spacing: -.01em; text-transform: uppercase; }
+.rd-intro p { font-size: 17px; max-width: 46ch; }
+.rd-intro-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.rd-start { font-size: 16px; padding: 0 26px; }
+@media (prefers-reduced-motion: no-preference) {
+    .rd-intro > * { animation: rd-rise .9s var(--ease-out) both; }
+    .rd-intro > :nth-child(2) { animation-delay: .12s; } .rd-intro > :nth-child(3) { animation-delay: .24s; } .rd-intro > :nth-child(4) { animation-delay: .36s; }
+}
+@keyframes rd-rise { from { opacity: 0; translate: 0 24px; } }
+
+/* dashboard */
+.rd-speedo { position: absolute; z-index: 4; left: 20px; bottom: 20px; width: 150px; text-align: center; animation: rd-rise .6s var(--ease-out) both; }
+.rd-speedo svg { width: 150px; height: 150px; filter: drop-shadow(0 6px 14px rgba(40, 15, 0, .45)); }
+.rd-dial { fill: rgba(28, 18, 11, .82); stroke: rgba(255, 220, 180, .55); stroke-width: 1.5; }
+.rd-tick { stroke: #f6dfc2; stroke-width: 1.6; }
+.rd-num { fill: #f6dfc2; font: 600 9px "Saira", sans-serif; text-anchor: middle; }
+.rd-needle { stroke: var(--amber); stroke-width: 3; stroke-linecap: round; transform-origin: 60px 60px; transition: transform .25s var(--ease-out); }
+.rd-hub { fill: var(--amber); }
+.rd-kmh { margin: -40px 0 0; font: 600 12px "Saira", sans-serif; } .rd-kmh b { font: 800 22px "Saira Condensed", sans-serif; }
+.rd-odo { margin: 22px 0 0; font: 600 12px "Saira", sans-serif; text-shadow: 0 1px 6px rgba(40, 15, 0, .8); }
+.rd-odo span { display: inline-block; padding: 0 5px; margin-right: 3px; background: #1d130c; border: 1px solid #6b4a2f; font: 800 15px "Saira Condensed", sans-serif; color: var(--amber); }
+
+/* the stop card: slides in from the right while the bike rolls past the billboard */
+.rd-card { position: absolute; z-index: 4; right: 20px; bottom: 76px; width: min(400px, calc(100vw - 40px)); padding: 18px 20px; background: var(--panel);
+    border-left: 3px solid var(--amber); box-shadow: 0 20px 40px rgba(30, 10, 0, .35); animation: rd-in .5s var(--ease-out) both; }
+@keyframes rd-in { from { opacity: 0; translate: 30px 0; } }
+.rd-card h2 { margin: 0 0 6px; font: 800 30px/1 "Saira Condensed", sans-serif; letter-spacing: .01em; }
+.rd-card p { margin: 0 0 8px; color: var(--muted); } .rd-stack { font-size: 13px; }
+.rd-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px !important; }
+.rd-end { bottom: auto; top: 50%; translate: 0 -50%; right: 50%; transform: translateX(50%); width: min(520px, calc(100vw - 40px)); }
+
+.rd-hint { position: absolute; z-index: 4; left: 50%; bottom: 20px; translate: -50% 0; margin: 0; display: flex; align-items: center; gap: 10px; white-space: nowrap;
+    font-size: 13px; text-shadow: 0 1px 6px rgba(40, 15, 0, .9); }
+.rd-hint button { min-height: 34px; padding: 0 12px; border-radius: 17px; border: 1px solid rgba(255, 240, 220, .6); background: rgba(28, 18, 11, .6); color: var(--ink); }
+.rd-progress { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; height: 3px; margin: 0; background: rgba(40, 15, 0, .25); }
+.rd-progress i { display: block; height: 100%; background: var(--amber); transition: width .2s linear; }
+.rd-credit { position: absolute; z-index: 3; right: 12px; top: 64px; margin: 0; font-size: 10px; opacity: .55; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+
+/* route map: the full list, also the low-power experience */
+.rd-map { position: absolute; z-index: 20; inset: 0; overflow: auto; padding: 24px clamp(16px, 4vw, 48px) 140px; background: rgba(24, 14, 8, .96); animation: rd-fade .3s var(--ease-out) both; }
+@keyframes rd-fade { from { opacity: 0; } }
+.rd-map header { max-width: 980px; margin: 0 auto 18px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; border-bottom: 2px solid var(--amber); padding-bottom: 12px; }
+.rd-map h2 { margin: 0; font: 800 36px/1 "Saira Condensed", sans-serif; text-transform: uppercase; } .rd-map header p { flex: 1; margin: 0; color: var(--muted); }
+.rd-map header button { min-height: 44px; padding: 0 16px; border: 0; border-radius: 3px; background: var(--amber); color: #2a1406; font-weight: 700; }
+.rd-map ol { max-width: 980px; margin: 0 auto; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; counter-reset: s; }
+.rd-map li { position: relative; }
+.rd-map li > button { width: 100%; display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 10px; text-align: left; color: var(--ink); background: rgba(255, 220, 180, .06);
+    border: 1px solid rgba(255, 220, 180, .16); border-radius: 3px; transition: background var(--t-2), border-color var(--t-2); }
+.rd-map li > button:not(:disabled):hover { background: rgba(255, 179, 92, .14); border-color: var(--amber); }
+.rd-map li[data-here] > button { border-color: var(--amber); }
+.rd-map img { width: 96px; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 2px; }
+.rd-map b { display: block; font: 700 18px/1.15 "Saira Condensed", sans-serif; }
+.rd-map small { display: block; color: var(--muted); font-size: 12px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.rd-map li > a { position: absolute; right: 10px; top: 10px; color: var(--amber); font-weight: 700; }
+.rd-map-end { grid-column: 1 / -1; padding: 16px; border: 1px dashed var(--amber); }
+.rd-map-end a { color: var(--amber); }
+.rd-flat { position: relative; min-height: 100dvh; overflow: auto; background: #1c120b; }
+.rd-flat .rd-top { position: sticky; background: #1c120b; }
+.rd-flat .rd-map { position: static; animation: none; }
+.rd-flat-note { max-width: 980px; margin: 8px auto 0; padding: 0 clamp(16px, 4vw, 48px); color: var(--muted); }
+.rd-flat-note button { margin-left: 8px; min-height: 36px; padding: 0 12px; border: 1px solid var(--amber); border-radius: 3px; background: none; color: var(--amber); }
+
+@media (max-width: 760px) {
+    .rd-brand span { display: none; }
+    .rd-top { padding: 10px 12px; } .rd-top nav a, .rd-top nav button { padding: 0 10px; }
+    .rd-speedo { left: 8px; bottom: 150px; width: 112px; } .rd-speedo svg { width: 112px; height: 112px; }
+    .rd-kmh { margin-top: -30px; }
+    .rd-card { left: 10px; right: 10px; width: auto; bottom: 150px; padding: 14px; }
+    .rd-card h2 { font-size: 24px; }
+    .rd-hint span { display: none; } .rd-hint { bottom: 112px; }
+    .rd-intro { left: 16px; right: 16px; bottom: 150px; }
+    .rd-credit { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .rd-card, .rd-speedo, .rd-map, .rd-intro > * { animation: none; } .rd-needle { transition: none; } }

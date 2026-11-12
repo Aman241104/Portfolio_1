@@ -107,6 +107,16 @@ export const worlds = [
         accent: "#88a86c",
         load: () => import("./pocket/index.jsx"),
     },
+    {
+        id: "ride",
+        paper: "#f0b07a",   // the world's own background: the enter transition wipes in this colour
+        beta: true,   // new (2026-11-12): out of the machine's pool until the reviewers pass it
+        name: "Ride",
+        tagline: "Golden hour on the highway. Every billboard is a project.",
+        symbols: ["Dusk", "Highway", "Ride"],
+        accent: "#ffb35c",
+        load: () => import("./ride/index.jsx"),
+    },
 ];
 
 // One lazy component per world, from the same loader, so preloading on lever pull warms the chunk it will render.
