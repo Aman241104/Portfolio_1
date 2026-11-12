@@ -18,7 +18,7 @@ export const cases = {
         title: "Pulse AI: WhatsApp agent SaaS",
         tagline: "Multi-tenant SaaS where every business runs its own LLM agent on its WhatsApp number.",
         facts: [["Role", "Solo: product, backend, dashboard"], ["Year", "2026"], ["Stack", "Next.js · Supabase (Postgres + RLS) · Groq · Meta WhatsApp Cloud API"], ["Links", "Live app"]],
-        links: [["Live app", "https://whatsapp-ai-agent-inky.vercel.app"]],
+        links: [["Live demo, no sign-in", "https://whatsapp-ai-agent-inky.vercel.app/demo"], ["Full app (sign-in)", "https://whatsapp-ai-agent-inky.vercel.app"]],
         sections: [
             ["The problem", ["Small businesses answer the same WhatsApp questions all day, and bookings get lost in chat threads.", "The goal: let each business plug an AI agent into its own WhatsApp Business number and manage it from one dashboard."]],
             ["What it does", ["An admin dashboard where each business workspace configures its LLM-powered agent.", "The agent handles real conversations through the WhatsApp Business Cloud API.", "A booking state machine turns chat into confirmed appointments, and a drip-sequence engine follows up automatically.", "Broadcasts and support automation from the same place."]],

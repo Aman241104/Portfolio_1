@@ -17,7 +17,7 @@ export const work = [
     },
     {
         slug: "whatsapp-ai", kind: "product", year: 2026, maintained: true, title: "Pulse AI: WhatsApp agent SaaS",
-        url: "https://whatsapp-ai-agent-inky.vercel.app",
+        url: "https://whatsapp-ai-agent-inky.vercel.app/demo",
         line: "Multi-tenant SaaS where each business runs an LLM agent on its WhatsApp number, with row-level security, bookings and drip sequences.",
         stack: "Next.js · Supabase · Groq · Meta Cloud API",
     },
