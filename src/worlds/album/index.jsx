@@ -201,6 +201,9 @@ export default function AlbumWorld() {
                     <a className="merch-item hot" href={`mailto:${profile.email}`}>
                         <span className="merch-tag">FREE</span><span className="mono">The vinyl</span><b>Book a show</b><small>{profile.email}</small><i>Email me →</i>
                     </a>
+                    <a className="merch-item" href={profile.whatsapp} target="_blank" rel="noreferrer">
+                        <span className="mono">The hotline</span><b>WhatsApp</b><small>{profile.phone}</small><i>Message me →</i>
+                    </a>
                 </div>
                 <ul className="tour-dates">
                     <li><b>Ahmedabad</b><span className="mono">on-site · available now</span></li>

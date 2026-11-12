@@ -109,6 +109,7 @@ const TerminalWorld = ({ shell }) => {
         resume: () => commands.cv(),
         contact: () => [
             <p key="e">email   <a className="tty-link" href={`mailto:${profile.email}`}>{profile.email}</a></p>,
+            <p key="w">whatsapp <a className="tty-link" href={profile.whatsapp} target="_blank" rel="noreferrer">{profile.phone}</a></p>,
             ...socials.map((s) => <p key={s.text}>{s.text.toLowerCase().padEnd(8)}{ext(s.link, <>{host(s.link.split("?")[0])}</>)}</p>),
         ],
         music: () => [...onRepeat.slice(0, 8).map((t) => <p key={t.id}>♪ {t.title} <span className="dim">· {t.artist}</span></p>), <p key="r" className="dim">rotation: {topArtists.slice(0, 10).join(", ")}</p>],

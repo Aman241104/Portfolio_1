@@ -17,7 +17,8 @@ export const setWorld = (id) => {
 // Home tracks its own links explicitly, so only clicks inside a world are classified here.
 const classify = (a) => {
     const href = a.getAttribute("href") || "";
-    if (href.startsWith("mailto:")) return ["contact_clicked", {}];
+    if (href.startsWith("mailto:")) return ["contact_clicked", { via: "email" }];
+    if (href.includes("wa.me/")) return ["contact_clicked", { via: "whatsapp" }];
     if (/resume|\.pdf$/i.test(href)) return ["resume_opened", { from: "world" }];
     if (href.startsWith("/case")) return ["case_study_viewed", { from: "world" }];
     if (/^https?:/.test(href) && a.host !== location.host) return ["live_site_visited", { host: a.host }];

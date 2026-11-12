@@ -6,6 +6,8 @@ export const profile = {
     email: "patelaman0241@gmail.com",
     resume: "/files/resume.pdf",
     github: "https://github.com/Aman241104",
+    phone: "+91 95580 09550",
+    whatsapp: `https://wa.me/919558009550?text=${encodeURIComponent("Hi Aman, I saw your portfolio and would like to talk about a role.")}`,
 };
 
 // ponytail: projects/skills/socials still live in constants/index.js (plan Phase 0 moves them here).

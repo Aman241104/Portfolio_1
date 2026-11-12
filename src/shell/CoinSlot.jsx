@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Dices, LayoutGrid, Link2, FileText } from "lucide-react";
+import { Dices, LayoutGrid, Link2, FileText, MessageCircle } from "lucide-react";
 import WorldPicker from "#shell/WorldPicker.jsx";
 import { profile } from "#content/profile.js";
 import { useLiquid } from "../liquid.js";
@@ -44,10 +44,11 @@ const CoinSlot = ({ current, onSpin, onSelect }) => {
             <nav ref={pill} aria-label="Portfolio worlds"
                 data-hidden={hidden || undefined}
                 className="coin-slot fixed z-[10000] right-3 bottom-3 max-lg:right-auto max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:bottom-[6.5rem] flex items-center gap-0.5 p-1 rounded-full lg text-white font-georama transition-[translate,opacity] duration-300 max-lg:data-[hidden]:translate-y-[calc(100%+7rem)] max-lg:data-[hidden]:opacity-0">
-                <button type="button" className={btn} onClick={onSpin} title="Back to the machine"><Dices size={14} /> Spin</button>
+                <button type="button" className={btn} onClick={onSpin} title="Back to the machine"><Dices size={14} /> <span className="max-sm:sr-only">Spin</span></button>
                 <button type="button" className={btn} onClick={() => setPicking(true)} title="All worlds"><LayoutGrid size={14} /> Worlds</button>
                 <button type="button" className={`${btn} max-sm:hidden`} onClick={copyLink} title="Copy link to this world"><Link2 size={14} /> {copied ? "Copied" : "Link"}</button>
                 <a className={btn} href={profile.resume} target="_blank" rel="noreferrer"><FileText size={14} /> Résumé</a>
+                <a className={btn} href={profile.whatsapp} target="_blank" rel="noreferrer" title={`WhatsApp ${profile.phone}`}><MessageCircle size={14} /> WhatsApp</a>
             </nav>
             {picking && <WorldPicker current={current} onSelect={onSelect} onClose={() => setPicking(false)} />}
         </>

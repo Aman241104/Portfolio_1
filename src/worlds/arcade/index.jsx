@@ -223,7 +223,7 @@ export default function ShipBreaker() {
                                         <button type="submit" disabled={initials.length !== 3}>Enter</button>
                                     </form>
                                 )}
-                                <div className="sb-row"><a href={`mailto:${profile.email}`}>Email Aman</a><a className="ghost" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a></div>
+                                <div className="sb-row"><a href={`mailto:${profile.email}`}>Email Aman</a><a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a><a className="ghost" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a></div>
                             </div>
                         )}
                         {toast && <p key={toast.id} className="sb-toast" data-k={toast.k}>{toast.k === "skill" ? toast.t : `Unlocked: ${toast.t}`}</p>}

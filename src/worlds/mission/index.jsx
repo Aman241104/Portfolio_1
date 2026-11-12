@@ -63,6 +63,7 @@ export default function Departures() {
                 <p className="dp-cta dp-cta-top">
                     <a href={`mailto:${profile.email}`}>{profile.email}</a>
                     <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
+                    <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
                     {socials.filter((x) => /linkedin|github/i.test(x.text || x.id)).map((x) => <a key={x.id} href={x.link} target="_blank" rel="noreferrer">{x.text}</a>)}
                 </p>
             </section>

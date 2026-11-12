@@ -80,42 +80,42 @@ export const work = [
         line: "Practice site for a criminal and civil lawyer, including the Bar Council disclaimer flow.",
     },
     {
-        slug: "mehta-technologies", kind: "client", year: 2026, title: "Mehta Technologies",
+        slug: "mehta-technologies", kind: "client", year: 2026, demo: true, title: "Mehta Technologies",
         url: "https://company-web-59di.vercel.app",
         line: "Agency site for a web and e-commerce studio in Ahmedabad: services, work, ERP offering and lead capture.",
     },
     {
-        slug: "eye-hospital", kind: "client", year: 2026, title: "EyeCare Hospital",
+        slug: "eye-hospital", kind: "client", year: 2026, demo: true, title: "EyeCare Hospital",
         url: "https://eye-hospital-web.vercel.app",
         line: "Eye hospital site: LASIK, cataract and paediatric care, specialists and appointment booking.",
     },
     {
-        slug: "luxekey", kind: "client", year: 2026, title: "LuxeKey Living",
+        slug: "luxekey", kind: "client", year: 2026, demo: true, title: "LuxeKey Living",
         url: "https://luxeliving-web.vercel.app",
         line: "Luxury guest houses and short stays in Ahmedabad: properties, availability and booking.",
     },
     {
-        slug: "akshar-travels", kind: "client", year: 2026, title: "Akshar Travels",
+        slug: "akshar-travels", kind: "client", year: 2026, demo: true, title: "Akshar Travels",
         url: "https://travel-july.vercel.app",
         line: "Outstation cab booking across 50+ cities: one-way, round-trip, local and airport fares.",
     },
     {
-        slug: "jade-tours", kind: "client", year: 2026, title: "Jade Tours & Travel",
+        slug: "jade-tours", kind: "client", year: 2026, demo: true, title: "Jade Tours & Travel",
         url: "https://travel-web-april.vercel.app",
         line: "Travel agency for flights, holidays, passports and visas, with a trip enquiry form.",
     },
     {
-        slug: "hvac-prep", kind: "client", year: 2026, title: "HVAC Test Prep",
+        slug: "hvac-prep", kind: "client", year: 2026, demo: true, title: "HVAC Test Prep",
         url: "https://hvac-web.vercel.app",
         line: "Exam-prep tool for HVAC students: unlimited timed practice exams, flash cards and progress tracking.",
     },
     {
-        slug: "elite-cloud-books", kind: "client", year: 2026, title: "Elite Cloud Books",
+        slug: "elite-cloud-books", kind: "client", year: 2026, demo: true, title: "Elite Cloud Books",
         url: "https://form-web-g3ka.vercel.app",
         line: "Offshore accounting, tax and fractional-CFO firm serving US businesses.",
     },
     {
-        slug: "jjfilms", kind: "client", year: 2026, title: "JJ Films",
+        slug: "jjfilms", kind: "client", year: 2026, demo: true, title: "JJ Films",
         url: "https://jjfilms.vercel.app",
         line: "Photography studio for real estate, events and wedding films.",
     },
@@ -145,3 +145,9 @@ export const work = [
         line: "Real-time stock tracking with live charts.",
     },
 ];
+
+// Client builds that live on preview URLs are shown honestly as prototypes / demo builds, everywhere their line is read.
+work.forEach((w) => { if (w.demo) w.line = `Prototype · ${w.line}`; });
+
+// One status word for a project, for worlds that show one (Live / Prototype / Built / Private).
+export const status = (w) => (w.live ? "Live" : w.demo ? "Prototype" : w.url ? "Built" : "Private");

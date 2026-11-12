@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { profile } from "#content/profile.js";
-import { work, KINDS, shot } from "../../../content/work.js";
+import { work, KINDS, shot, status } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -223,7 +223,7 @@ export default function CanvasWorld() {
                                     <dl className="bp-block">
                                         <div className="bp-title"><dt>Project</dt><dd>{it.p.title}</dd></div>
                                         <div><dt>Year</dt><dd>{it.p.year}</dd></div>
-                                        <div><dt>Status</dt><dd>{it.p.live ? "Live" : it.p.url ? "Built" : "Private"}</dd></div>
+                                        <div><dt>Status</dt><dd>{status(it.p)}</dd></div>
                                         <div><dt>Sheet</dt><dd>{String(no).padStart(2, "0")}/{work.length}</dd></div>
                                         <div><dt>Drawn</dt><dd>A. Patel</dd></div>
                                     </dl>
@@ -256,6 +256,7 @@ export default function CanvasWorld() {
                                     <p className="bp-sign">Signature <span /> Date <span /></p>
                                 </div>
                                 <a className="bp-btn" href={profile.resume} target="_blank" rel="noreferrer">Print the résumé (PDF)</a>
+                                <a className="bp-btn" href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp {profile.phone}</a>
                             </div>
                         );
                     })}

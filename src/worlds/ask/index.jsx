@@ -120,7 +120,7 @@ export default function ReferenceDesk() {
                 <main className="rd-main">
                     {!thread.length && (
                         <section className="rd-intro">
-                            <p className="rd-who">Aman Patel · Full-stack engineer · Ahmedabad · open to on-site or hybrid roles</p>
+                            <p className="rd-who">Aman Patel · Full-stack engineer · Ahmedabad · open to on-site or hybrid roles · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></p>
                             <h1>{tab === "ask" ? "Ask about Aman. The answer comes with its references." : "Paste a job. See what fits."}</h1>
                             <p>{tab === "ask"
                                 ? `Every answer is typed from his own file: ${work.length} projects, his experience, skills and case studies, footnoted so you can check it.`

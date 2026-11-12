@@ -498,6 +498,7 @@ const Home = ({ onSelect }) => {
                             ["Contact", "Résumé, email and profiles", [
                                 { label: "Résumé", hint: "One-page PDF", href: profile.resume, ext: true, icon: "↓" },
                                 { label: "Email", hint: profile.email, href: `mailto:${profile.email}`, icon: "↗" },
+                                { label: "WhatsApp", hint: profile.phone, href: profile.whatsapp, ext: true, icon: "↗" },
                                 ...socials.filter((x) => ["LinkedIn", "Github"].includes(x.text)).map((x) => ({ label: x.text === "Github" ? "GitHub" : x.text, hint: x.text === "Github" ? "Code and repos" : "Work history", href: x.link, ext: true, icon: "↗" })),
                             ]],
                             ["Social", "Elsewhere online", socials.filter((x) => !["LinkedIn", "Github"].includes(x.text)).map((x) => ({ label: x.text, hint: "Follow along", href: x.link, ext: true, icon: "↗" }))],

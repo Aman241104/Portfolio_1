@@ -78,6 +78,7 @@ export default function EditorialWorld() {
                     <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
                     <a href="/resume.html?for=fullstack">Full-stack</a><a href="/resume.html?for=frontend">Frontend</a><a href="/resume.html?for=ai">AI products</a>
                     <a href={`mailto:${profile.email}`} className="ed-ink">{profile.email}</a>
+                    <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
                 </nav>
             </header>
 
