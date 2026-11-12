@@ -87,6 +87,16 @@ export const worlds = [
         accent: "#ffff00",
         load: () => import("./y2001/index.jsx"),
     },
+    {
+        id: "longhorn",
+        paper: "#021626",   // the world's own background: the enter transition wipes in this colour
+        beta: true,   // new (2026-11-12): out of the machine's pool until the reviewers pass it
+        name: "Longhorn",
+        tagline: "A glossy 2000s desktop. Flip through the projects in 3D.",
+        symbols: ["2006", "Aero", "Glossy"],
+        accent: "#3fa9f5",
+        load: () => import("./longhorn/index.jsx"),
+    },
 ];
 
 // One lazy component per world, from the same loader, so preloading on lever pull warms the chunk it will render.
