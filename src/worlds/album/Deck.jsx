@@ -21,7 +21,10 @@ export default function Deck({ tracks, playing, onOpen, sleeve }) {
                 s.rot += s.vel;
             }
             const i = ((Math.floor((((s.rot % 360) + 360) % 360) / step)) % N + N) % N;
-            if (i !== s.idx) {
+            // while the beat just turns the record, the readout holds its track (it used to flick ~7 titles a second);
+            // it follows the record only when a hand or a key moves it
+            if (i !== s.idx && (s.drag || s.moved || !playing)) {
+                s.moved = false;
                 s.idx = i; setIdx(i);
                 if (s.drag || Math.abs(s.vel) > 2.5) { scratch(s.vel); navigator.vibrate?.(4); }
             }
@@ -50,11 +53,12 @@ export default function Deck({ tracks, playing, onOpen, sleeve }) {
         if (d > 180) d -= 360; else if (d < -180) d += 360;
         s.rot += d; s.vel = s.vel * 0.5 + d * 0.5; s.drag.a = a;
     };
-    const up = () => { st.current.drag = null; };
+    const up = () => { st.current.drag = null; st.current.moved = true; };   // let the readout catch up to where the hand left it
     const key = (e) => {                                   // keyboard: arrows step through tracks
         if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
         e.preventDefault();
         st.current.rot += (e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : -1) * step;
+        st.current.moved = true;
         setTouched(true);
     };
     const t = tracks[idx];

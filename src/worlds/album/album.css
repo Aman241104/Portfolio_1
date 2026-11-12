@@ -137,7 +137,7 @@
 .album[data-era="deluxe"] .disc-label { background: var(--dlx); }
 .deck-read { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; min-height: 48px; }
 .deck-read .mono { flex-basis: 100%; color: var(--acid); }
-.deck-title { margin: 0; font: 600 20px/1.2 "Geist", sans-serif; letter-spacing: -0.02em; flex: 1; min-width: 0; }
+.deck-title { margin: 0; font: 600 20px/1.2 "Geist", sans-serif; letter-spacing: -0.02em; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* one line always: a 2-line title used to change the height and bob the whole hero */
 .deck-title .mono { color: #8d8a84; margin-right: 6px; }
 .deck-read .btn { padding: 10px 16px; font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { .disc { animation: none; } }
