@@ -11,7 +11,7 @@ export const shot = (item, w = 900) => `https://res.cloudinary.com/dhrcarq8g/ima
 export const work = [
     {
         slug: "job-search-os", kind: "product", year: 2026, maintained: true, title: "Job Search OS", img: "portfolio/projects/job-search-os",
-        url: "https://job-search-zeta-ten.vercel.app", repo: "https://github.com/Aman241104/job-search",
+        url: "https://job-search-zeta-ten.vercel.app/demo", repo: "https://github.com/Aman241104/job-search",
         line: "AI job search platform: 19 sources scraped at once, two-stage LLM scoring, a tailored one-page CV and cover letter for every job.",
         stack: "Python · FastAPI · Next.js · Postgres · Cloud Run",
     },

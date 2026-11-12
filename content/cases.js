@@ -4,7 +4,7 @@ export const cases = {
         title: "Job Search OS",
         tagline: "An AI job-search platform I built for my own search, then made multi-user.",
         facts: [["Role", "Solo: design, backend, frontend, infra"], ["Year", "2026"], ["Stack", "Python · FastAPI · Next.js · Postgres (Supabase) · Google Cloud Run"], ["Links", "Live app · GitHub"]],
-        links: [["Live app", "https://job-search-zeta-ten.vercel.app"], ["GitHub", "https://github.com/Aman241104/job-search"]],
+        links: [["Live demo, no sign-in", "https://job-search-zeta-ten.vercel.app/demo"], ["Full app (sign-in)", "https://job-search-zeta-ten.vercel.app"], ["GitHub", "https://github.com/Aman241104/job-search"]],
         sections: [
             ["The problem", ["Job hunting as a fresher means checking many boards every day, filtering out listings that quietly want years of experience, and rewriting a CV and cover letter for each application.", "I wanted one place that finds the jobs, ranks them honestly against my real experience, and prepares the application, so my time goes into interviews instead of tabs."]],
             ["What it does", ["Scrapes 19 job sources concurrently and scores every listing on skills, the experience it really requires, and salary.", "Re-checks top listings daily so closed or stale jobs drop out.", "Writes a tailored one-page CV and cover letter per job, plus copy-ready application answers and interview prep packs.", "Shows live progress in the dashboard over Server-Sent Events while a run is working."]],
