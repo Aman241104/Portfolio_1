@@ -20,12 +20,12 @@ const WorldPicker = ({ onSelect, onClose, current }) => {
                     <button type="button" onClick={onClose} className="text-[13px] text-[#8a8780] hover:text-[#edeae3] underline underline-offset-4 py-2">Close</button>
                 </div>
                 <ul className="grid sm:grid-cols-2 gap-px bg-[#edeae3]/15 border border-[#edeae3]/15 list-none p-0 m-0">
-                    {worlds.map((w, i) => (
+                    {[...worlds].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)).map((w, i) => (
                         <li key={w.id} className="bg-[#0b0b0c]">
                             <button type="button" onClick={() => { onClose(); onSelect(w.id); }}
                                 className="group w-full text-left p-5 min-h-[44px] hover:bg-[#151515] transition-colors">
                                 <span className="block text-[10px] tracking-[.12em] uppercase text-[#8a8780]" style={{ fontFamily: "'Geist Mono', monospace" }}>
-                                    W‑0{i + 1} {w.beta ? "· beta" : ""} {current === w.id ? "· current" : ""}
+                                    {w.featured ? "Featured" : `W‑${String(i + 1).padStart(2, "0")}`} {w.beta && !w.featured ? "· beta" : ""} {current === w.id ? "· current" : ""}
                                 </span>
                                 <span className="block mt-2 text-[22px] font-semibold tracking-[-0.03em]">{w.name} <span className="text-[#ff2e1f] inline-block transition-transform group-hover:translate-x-1">→</span></span>
                                 <span className="block mt-1 text-[14px] text-[#edeae3]/70">{w.tagline}</span>

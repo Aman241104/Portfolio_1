@@ -111,6 +111,7 @@ export const worlds = [
         id: "ride",
         paper: "#f0b07a",   // the world's own background: the enter transition wipes in this colour
         beta: true,   // new (2026-11-12): out of the machine's pool until the reviewers pass it
+        featured: true,   // Aman's flagship: listed first and linked from the home hero even while in beta
         name: "Ride",
         tagline: "Golden hour on the highway. Every billboard is a project.",
         symbols: ["Dusk", "Highway", "Ride"],

@@ -439,7 +439,7 @@ const Home = ({ onSelect }) => {
                 </div>
 
                 <nav className="tabs" aria-label="Go straight to a world">
-                    {worlds.filter((w) => !w.beta).map((w) => (
+                    {[...worlds].filter((w) => !w.beta || w.featured).sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)).map((w) => (
                         <button key={w.id} type="button" onClick={() => enter(w.id)}><i aria-hidden>↗</i>{w.name}</button>
                     ))}
                     <a href={profile.resume} target="_blank" rel="noreferrer"><i aria-hidden>↗</i>Résumé</a>
