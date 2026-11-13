@@ -5,6 +5,7 @@ import { RoundedBox, Text } from "@react-three/drei";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { siReact, siTypescript, siNodedotjs, siThreedotjs } from "simple-icons";
 import { mat } from "#machine/MachineModel.jsx";
+import { sfx } from "#machine/sfx.js";
 
 // Keychains on display cables either side of PX-01: the stack I build with (enamel charms with the real logos),
 // a red ENTER keycap, and a racing helmet (bikes + helmet wraps). A designed layout, not a scatter: one depth,
@@ -202,9 +203,9 @@ const Keychain = ({ spot, index, lit, light, jackpot, kick }) => {
     const info = BY_ID[spot.item];
     return (
         <group ref={root} visible={false}
-            onPointerOver={(e) => { e.stopPropagation(); if (!hover.current) turns.current += Math.PI * 2; hover.current = true; }}
+            onPointerOver={(e) => { e.stopPropagation(); if (!hover.current) { turns.current += Math.PI * 2; sfx.coin(index); } hover.current = true; }}
             onPointerOut={() => { hover.current = false; }}
-            onPointerDown={(e) => { e.stopPropagation(); turns.current += Math.PI * 2; }}>
+            onPointerDown={(e) => { e.stopPropagation(); turns.current += Math.PI * 2; sfx.coin(index); }}>
             {spot.cable && <mesh geometry={cableGeo} material={light ? cableMatLight : cableMatDark} />}
             <Hardware />
             <group ref={swing}><Thing {...info} light={light} /></group>

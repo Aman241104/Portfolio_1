@@ -1,5 +1,14 @@
 import { certifications } from "#content/certifications.js";
 
+const trackSheen = (e) => {
+    if (e.pointerType !== "mouse") return;
+    const card = e.target.closest?.(".cert-card");
+    if (!card) return;
+    const r = card.getBoundingClientRect();
+    card.style.setProperty("--cx", `${(e.clientX - r.left).toFixed(1)}px`);
+    card.style.setProperty("--cy", `${(e.clientY - r.top).toFixed(1)}px`);
+};
+
 // Verified AI & Engineering Certifications — editorial gallery index matching Dark Studio & Light Atelier.
 export default function Certifications() {
     return (
@@ -8,7 +17,7 @@ export default function Certifications() {
                 <h2 id="certs-h">Certifications <span className="mono">({String(certifications.length).padStart(2, "0")})</span></h2>
                 <p className="mono">Verified AI, Cloud &amp; Agentic Engineering</p>
             </div>
-            <ul className="cert-grid" data-reveal>
+            <ul className="cert-grid" data-reveal onPointerMove={trackSheen}>
                 {certifications.map((c, i) => (
                     <li key={c.code} className="cert-card" style={{ "--i": i, "--cert-accent": c.accent }}>
                         <div className="cert-top">
@@ -21,7 +30,7 @@ export default function Certifications() {
                             <span className="mono cert-focus">{c.focus}</span>
                             {c.url && (
                                 <a className="mono cert-link" href={c.url} target="_blank" rel="noreferrer">
-                                    Verify ↗
+                                    Verify <span className="cert-arrow" aria-hidden>↗</span>
                                 </a>
                             )}
                         </div>

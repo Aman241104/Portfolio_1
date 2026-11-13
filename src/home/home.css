@@ -1577,3 +1577,275 @@
     100% { opacity: 0; }
 }
 
+/* ============================================================
+   10-SECTION CREATIVE MOTION & INTERACTION UPGRADES
+   All motion stays within the 4-token + 1-accent system and
+   respects Dark Studio ↔ Light Atelier + prefers-reduced-motion.
+   ============================================================ */
+
+/* 1. Hero: scroll-bound --dive differential parallax */
+.hero-ridge {
+    transform: translateY(calc(var(--dive, 0) * -28px));
+    will-change: transform;
+}
+.creative-callout {
+    transform: translateY(calc(var(--dive, 0) * -20px));
+}
+.signature {
+    transform: rotate(-4deg) translateY(calc(var(--dive, 0) * -32px));
+}
+
+/* 2. Marquee: scroll-velocity skewX shear */
+.marquee-track {
+    transform: skewX(var(--mskw, 0deg));
+    transition: transform .18s var(--ease-out);
+}
+
+/* 3. Stats: sibling dim + staggered odometer column reveal */
+.stats-row .stat {
+    transition: opacity .28s var(--ease-out), transform .55s var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 55ms);
+}
+@media (hover: hover) {
+    .stats-row:has(.stat:hover) .stat:not(:hover) {
+        opacity: .42;
+    }
+}
+
+/* 4. Work: 1px chrome progress bar, continuous --py screenshot scrub, magnetic CTA */
+.chrome {
+    position: relative;
+}
+.chrome::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--signal);
+    transform-origin: left center;
+    transform: scaleX(var(--prog, 0));
+    transition: transform .12s linear;
+}
+@media (hover: hover) {
+    .card-shot:hover .card-img img {
+        object-position: 50% var(--py, 50%);
+        transition: object-position .22s linear;
+    }
+}
+.home .block-btn.magnet {
+    transform: translate(var(--mx, 0px), var(--my, 0px));
+    transition: background .2s, transform .22s var(--ease-out);
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: .26s;
+}
+
+/* 5. Maintained: 1px proportional latency bar + translateX hover + sibling dim */
+.kept-list li {
+    position: relative;
+    transition: opacity .25s var(--ease-out);
+}
+.kept-list a {
+    position: relative;
+}
+.kept-list a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--signal);
+    opacity: .65;
+    transform-origin: left center;
+    transform: scaleX(var(--lat, 0));
+    transition: transform .65s var(--ease-out), opacity .25s;
+}
+@media (hover: hover) {
+    .kept-list:has(a:hover) li:not(:hover) {
+        opacity: .45;
+    }
+    .kept-list a:hover {
+        transform: translateX(10px);
+        padding-left: 6px;
+    }
+    .kept-list a:hover::after {
+        opacity: 1;
+    }
+}
+
+/* 6. Experience: vertical timeline spine + scroll-driven traveling signal node */
+.xp-list {
+    position: relative;
+    padding-left: 24px;
+}
+.xp-list::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 36px;
+    bottom: 36px;
+    width: 1px;
+    background: rgba(237, 234, 227, .14);
+}
+.home[data-light] .xp-list::before {
+    background: rgba(20, 20, 22, .14);
+}
+.xp-list > li {
+    position: relative;
+}
+.xp-list > li::before {
+    content: "";
+    position: absolute;
+    left: -23px;
+    top: 38px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--void);
+    border: 1.5px solid var(--signal);
+    transition: background .25s, transform .25s var(--ease-out);
+}
+.xp-list > li:hover::before {
+    background: var(--signal);
+    transform: scale(1.35);
+}
+.xp-list ul li {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .45s var(--ease-out), transform .45s var(--ease-out);
+}
+.xp-list[data-in] ul li {
+    opacity: 1;
+    transform: none;
+}
+.xp-list[data-in] ul li:nth-child(1) { transition-delay: .08s; }
+.xp-list[data-in] ul li:nth-child(2) { transition-delay: .16s; }
+.xp-list[data-in] ul li:nth-child(3) { transition-delay: .24s; }
+.xp-list[data-in] ul li:nth-child(4) { transition-delay: .32s; }
+@supports (animation-timeline: view()) {
+    .xp-list > li::before {
+        animation: xp-node linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 50%;
+    }
+    @keyframes xp-node {
+        0% { transform: scale(.5); opacity: .3; }
+        100% { transform: scale(1.1); opacity: 1; }
+    }
+}
+
+/* 7. Certifications: pointer-tracked radial gallery sheen, clip-path entrance, kinetic Verify arrow */
+.cert-card {
+    overflow: hidden;
+    clip-path: inset(0 0 100% 0 round 10px);
+    transition: transform .35s var(--ease-out), border-color .25s, box-shadow .35s, clip-path .7s var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 80ms);
+}
+.cert-grid[data-in] .cert-card {
+    clip-path: inset(0 0 0% 0 round 10px);
+}
+.cert-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(280px circle at var(--cx, 50%) var(--cy, 50%), color-mix(in srgb, var(--cert-accent, var(--signal)) 18%, transparent), transparent 70%);
+    transition: opacity .35s var(--ease-out);
+}
+@media (hover: hover) {
+    .cert-card:hover::after {
+        opacity: 1;
+    }
+}
+.cert-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.cert-arrow {
+    display: inline-block;
+    transition: transform .25s var(--ease-out);
+}
+@media (hover: hover) {
+    .cert-link:hover .cert-arrow {
+        transform: translate(3px, -3px);
+    }
+}
+
+/* 8. Skills: group switchboard focus dim + staggered chip wave */
+.skill-group li {
+    opacity: 0;
+    transform: translateY(10px) scale(.96);
+    transition: border-color .2s, background .2s, opacity .38s var(--ease-out), transform .38s var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 24ms);
+}
+.skill-group[data-in] li {
+    opacity: 1;
+    transform: none;
+}
+@media (hover: hover) {
+    .skill-group:has(li:hover) li:not(:hover) {
+        opacity: .42;
+    }
+}
+
+/* 9. Tape: hover invert-flash + bidirectional scroll nudge */
+.tape {
+    transition: background .25s, color .25s;
+}
+@media (hover: hover) {
+    .tape:hover {
+        background: var(--signal);
+        color: #0b0b0c;
+    }
+    .tape:hover i {
+        color: var(--bone);
+    }
+}
+@supports (animation-timeline: view()) {
+    .tape {
+        animation: tape-nudge linear both;
+        animation-timeline: view();
+        animation-range: entry 0% exit 100%;
+    }
+    @keyframes tape-nudge {
+        from { transform: rotate(var(--tilt, -1.6deg)) translateX(-2vw); }
+        to { transform: rotate(var(--tilt, -1.6deg)) translateX(2vw); }
+    }
+}
+
+/* 10. Contact & Index: perforated printed-ticket wipe + .keys cross-dim */
+.msg-sent {
+    padding: 16px 18px;
+    border: 1px dashed rgba(237, 234, 227, .28);
+    border-radius: 4px;
+    animation: ticket-print .55s var(--ease-out) both;
+}
+.home[data-light] .msg-sent {
+    border-color: rgba(20, 20, 22, .28);
+}
+@keyframes ticket-print {
+    from { clip-path: inset(0 0 100% 0); transform: translateY(-6px); }
+    to { clip-path: inset(0 0 0% 0); transform: none; }
+}
+.keys .key {
+    transition: opacity .22s var(--ease-out), transform .25s var(--ease-out), background .2s;
+}
+@media (hover: hover) {
+    .keys:has(.key:hover) .key:not(:hover) {
+        opacity: .42;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-ridge, .creative-callout, .signature, .marquee-track { transform: none !important; }
+    .xp-list ul li, .skill-group li { opacity: 1; transform: none; }
+    .cert-card { clip-path: none; }
+    .msg-sent { animation: none; }
+}
+

@@ -185,7 +185,7 @@ const ContactForm = ({ onSent }) => {
         try {
             const r = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
             const d = await r.json().catch(() => ({}));
-            if (r.ok) { setState({ phase: "sent", msg: d.no ? `Ticket No. ${String(d.no).padStart(4, "0")}` : "" }); onSent(); sfx.win(); track("contact_sent"); return; }
+            if (r.ok) { setState({ phase: "sent", msg: d.no ? `Ticket No. ${String(d.no).padStart(4, "0")}` : "" }); onSent(); sfx.print(); track("contact_sent"); return; }
             if (r.status === 400 || r.status === 429) { setState({ phase: "idle", msg: d.error }); return; }
             setState({ phase: "fallback", msg: d.error || "", href: mail() });
         } catch { setState({ phase: "fallback", msg: "", href: mail() }); }
@@ -256,7 +256,35 @@ const Home = ({ onSelect }) => {
     const hero = useRef(null);
     const footer = useRef(null);
     const enterBtn = useRef(null);
+    const marqueeTrack = useRef(null);
+    const lastRatchet = useRef(0);
     const heroOn = useInView(hero);
+    // Scroll-velocity WAAPI playbackRate + skewX shear on the marquee band
+    useEffect(() => {
+        const el = marqueeTrack.current;
+        if (!el || reduced()) return;
+        let lastY = window.scrollY, lastT = performance.now(), timer;
+        const onScroll = () => {
+            const y = window.scrollY, now = performance.now();
+            const dt = Math.max(8, now - lastT), dy = y - lastY;
+            lastY = y; lastT = now;
+            const v = dy / dt; // px per ms
+            const anim = el.getAnimations?.()[0];
+            if (anim) {
+                const dir = dy < -1 ? -1 : 1;
+                anim.playbackRate = dir * Math.min(4.2, 1 + Math.abs(v) * 1.4);
+            }
+            el.style.setProperty("--mskw", `${Math.max(-6, Math.min(6, v * 2.2)).toFixed(2)}deg`);
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                const a = el.getAnimations?.()[0];
+                if (a) a.playbackRate = 1;
+                el.style.setProperty("--mskw", "0deg");
+            }, 160);
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => { window.removeEventListener("scroll", onScroll); clearTimeout(timer); };
+    }, []);
     // phones: the world pill steps aside while the liquid dock is up (one floating bar, not two)
     useEffect(() => { document.body.toggleAttribute("data-dock", !heroOn); return () => document.body.removeAttribute("data-dock"); }, [heroOn]);
     // liquid glass: the light inside any .lg panel follows the cursor / finger
@@ -565,7 +593,7 @@ const Home = ({ onSelect }) => {
             </section>
 
             <div className="marquee" aria-hidden>
-                <div className="marquee-track">
+                <div ref={marqueeTrack} className="marquee-track">
                     {[0, 1].map((k) => <span key={k}>{MARQUEE.map((m) => <span key={m}>{m}<i>✺</i></span>)}</span>)}
                 </div>
             </div>
@@ -596,7 +624,11 @@ const Home = ({ onSelect }) => {
                             <ContactForm onSent={() => setPulse((n) => n + 1)} />
                         </div>
                     </div>
-                    <nav className="keys" aria-label="Site index">
+                    <nav className="keys" aria-label="Site index" onPointerOver={(e) => {
+                        if (e.pointerType !== "mouse" || !e.target.closest?.(".key")) return;
+                        const now = performance.now();
+                        if (now - lastRatchet.current > 80) { lastRatchet.current = now; sfx.ratchet(); }
+                    }}>
                         {[
                             ["Worlds", `${worlds.length} ways to see this site`, worlds.map((w) => ({ label: w.name, hint: w.tagline, onClick: () => onSelect(w.id), icon: "→" }))],
                             ["Contact", "Résumé, email and profiles", [

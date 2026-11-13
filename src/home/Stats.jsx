@@ -1,5 +1,7 @@
+import { useEffect, useRef } from "react";
 import { work } from "../../content/work.js";
 import { skillGroups } from "../../content/skills.js";
+import { sfx } from "#machine/sfx.js";
 
 // The numbers strip: every figure comes from content/ (nothing typed in by hand except the two from the CV),
 // counting up once when the strip scrolls in. Plus the tape: a moving band between sections.
@@ -31,10 +33,22 @@ export function Tape({ items, tilt = -1.6 }) {
 }
 
 export default function Stats() {
+    const row = useRef(null);
+    useEffect(() => {
+        const el = row.current;
+        if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const io = new IntersectionObserver(([e]) => {
+            if (!e.isIntersecting) return;
+            io.disconnect();
+            [0, 90, 180].forEach((ms) => setTimeout(() => sfx.tick(), ms));
+        }, { threshold: 0.35 });
+        io.observe(el);
+        return () => io.disconnect();
+    }, []);
     return (
         <section className="stats" aria-label="In numbers">
             <Tape items={["Open to work", "Full-stack engineer", "React · Node · Python", "Ahmedabad, India", "On-site or hybrid", "Available now"]} />
-            <dl className="stats-row" data-reveal>
+            <dl ref={row} className="stats-row" data-reveal>
                 {STATS.map(([n, suf, label], i) => (
                     <div key={label} className="stat" style={{ "--i": i }}>
                         <dt className="mono">{label}</dt>

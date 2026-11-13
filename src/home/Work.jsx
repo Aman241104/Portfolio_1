@@ -36,16 +36,32 @@ const Leaving = ({ item, rect }) => {
     );
 };
 
-// Hover tilt: the screenshot leans toward the pointer (mouse only; touch gets the press scale instead).
+// Hover tilt + vertical screenshot scrub: the screenshot leans toward the pointer and scrubs vertically
+// through the page with a 1px chrome progress bar.
 const tilt = (e) => {
     if (e.pointerType !== "mouse") return;
     const shot = e.target.closest?.(".card-shot");
     if (!shot) return;
     const r = shot.getBoundingClientRect();
-    shot.style.setProperty("--ry", `${((e.clientX - r.left) / r.width - 0.5) * 7}deg`);
-    shot.style.setProperty("--rx", `${((e.clientY - r.top) / r.height - 0.5) * -6}deg`);
+    const nx = (e.clientX - r.left) / r.width;
+    const ny = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+    shot.style.setProperty("--ry", `${(nx - 0.5) * 7}deg`);
+    shot.style.setProperty("--rx", `${(ny - 0.5) * -6}deg`);
+    shot.style.setProperty("--py", `${(ny * 100).toFixed(1)}%`);
+    shot.style.setProperty("--prog", ny.toFixed(3));
 };
-const untilt = (e) => e.currentTarget.querySelectorAll(".card-shot").forEach((s) => { s.style.removeProperty("--rx"); s.style.removeProperty("--ry"); });
+const untilt = (e) => e.currentTarget.querySelectorAll(".card-shot").forEach((s) => {
+    s.style.removeProperty("--rx"); s.style.removeProperty("--ry");
+    s.style.removeProperty("--py"); s.style.removeProperty("--prog");
+});
+
+const magnet = (e) => {
+    if (e.pointerType !== "mouse" || reduced()) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${((e.clientX - r.left) / r.width - 0.5) * 14}px`);
+    e.currentTarget.style.setProperty("--my", `${((e.clientY - r.top) / r.height - 0.5) * 10}px`);
+};
+const unmagnet = (e) => { e.currentTarget.style.removeProperty("--mx"); e.currentTarget.style.removeProperty("--my"); };
 
 export default function Work() {
     const [kind, setKind] = useState("all");
@@ -100,7 +116,7 @@ export default function Work() {
                     <p className="hire-line">Full-stack engineer in Ahmedabad, open to on-site or hybrid roles. Résumé, contact and {work.length} projects, all on this page.</p>
                 </div>
                 <div className="hire-actions">
-                    <a className="block-btn" href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "work" })}>Résumé (PDF) ↓</a>
+                    <a className="block-btn magnet" href={profile.resume} target="_blank" rel="noreferrer" onPointerMove={magnet} onPointerLeave={unmagnet} onClick={() => track("resume_opened", { from: "work" })}>Résumé (PDF) ↓</a>
                     <a href={`mailto:${profile.email}`}>Email</a>
                     {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
                     <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
@@ -116,7 +132,11 @@ export default function Work() {
                     {Object.entries({ all: "All", ...KINDS }).map(([k, label]) => {
                         const n = k === "all" ? work.length : work.filter((w) => w.kind === k).length;
                         return (
-                            <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => { setKind(k); setAll(false); setAt(0); list.current?.scrollTo({ left: 0 }); }}>
+                            <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => {
+                                const update = () => { setKind(k); setAll(false); setAt(0); list.current?.scrollTo({ left: 0 }); };
+                                if (document.startViewTransition && !reduced()) document.startViewTransition(update);
+                                else update();
+                            }}>
                                 {label} <span className="mono">{n}</span>
                             </button>
                         );

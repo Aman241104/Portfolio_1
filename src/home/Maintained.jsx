@@ -48,8 +48,9 @@ export default function Maintained() {
                 {list.map((w, i) => {
                     const ms = status[w.slug];
                     const state = ms === undefined ? "wait" : ms < 0 ? "down" : "up";
+                    const lat = state === "up" ? Math.max(0.08, Math.min(1, ms / 900)).toFixed(3) : 0;
                     return (
-                        <li key={w.slug} style={{ "--i": i }}>
+                        <li key={w.slug} style={{ "--i": i, "--lat": lat }}>
                             <a href={w.url} target="_blank" rel="noreferrer">
                                 <i className="dot" data-state={state} aria-hidden />
                                 <span className="kept-name">{w.title}</span>

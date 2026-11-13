@@ -314,6 +314,7 @@ const AtelierRig = ({ light }) => {
         if (orb.current) {
             orb.current.position.x = THREE.MathUtils.damp(orb.current.position.x, orbX, 6, dt);
             orb.current.position.y = -1.12 + Math.sin(clock.elapsedTime * 1.1) * 0.07;
+            orb.current.position.z = -1.2 + Math.sin(clock.elapsedTime * 0.72) * 0.14;
         }
     });
     return (

@@ -61,7 +61,7 @@ const build = (count) => {
 };
 
 const vertexShader = /* glsl */ `
-uniform float uTime, uPR, uActive, uBurst, uMorph, uAspect;
+uniform float uTime, uPR, uActive, uBurst, uMorph, uAspect, uVel;
 uniform vec3 uMouse;
 uniform vec2 uPointer, uGlyph;
 attribute float aSize, aKind, aSeed;
@@ -69,8 +69,10 @@ attribute vec3 aT0, aT1, aT2, aT3;
 vec3 shapeAt(float k) { k = mod(k, 4.0); return k < 0.5 ? aT0 : k < 1.5 ? aT1 : k < 2.5 ? aT2 : aT3; }
 varying float vAlpha;
 varying float vKind;
+varying float vHot;
 void main() {
     vKind = aKind;
+    vHot = 0.0;
     vec3 p = position;
     bool star = aKind > 0.5 && aKind < 1.5;
     if (aKind > 1.5) {
@@ -99,6 +101,7 @@ void main() {
         p.xz += normalize(d + 1e-4) * f * 1.1;
         p.y += sin(dist * 2.0 - uTime * 4.0) * smoothstep(8.0, 1.5, dist) * 0.14 * uActive;   // ripple
         vAlpha = 0.72 + f * 0.28;
+        vHot = f * clamp(uVel * 1.8, 0.0, 1.0);
         // "copy email": a ring of light leaves the glyph and rolls out across the dunes
         float bt = uTime - uBurst, dm = length(p.xz - uGlyph), front = bt * 6.0;
         float wave = step(0.0, bt) * exp(-bt * 0.7) * smoothstep(2.5, 0.0, abs(dm - front));
@@ -113,12 +116,15 @@ void main() {
 const fragmentShader = /* glsl */ `
 varying float vAlpha;
 varying float vKind;
+varying float vHot;
 uniform vec3 uColor;
 uniform vec3 uGlyphColor;
+uniform vec3 uSignalColor;
 void main() {
     float r = length(gl_PointCoord - 0.5);
     if (r > 0.5) discard;
-    vec3 col = vKind > 1.5 ? uGlyphColor : uColor;
+    vec3 base = vKind > 1.5 ? uGlyphColor : uColor;
+    vec3 col = mix(base, uSignalColor, vHot * 0.85);
     gl_FragColor = vec4(col, vAlpha * smoothstep(0.5, 0.15, r));
 }`;
 
@@ -136,9 +142,10 @@ const Dust = ({ count, pulse, light, eventSource }) => {
     const uniforms = useMemo(() => ({
         uTime: { value: 0 }, uPR: { value: Math.min(window.devicePixelRatio, 2) },
         uMouse: { value: new THREE.Vector3(0, 0, -100) }, uActive: { value: 0 }, uBurst: { value: -100 },
-        uMorph: { value: 0 }, uAspect: { value: 1 }, uPointer: { value: new THREE.Vector2(9, 9) }, uGlyph: { value: new THREE.Vector2(...GLYPH_AT) },
+        uMorph: { value: 0 }, uAspect: { value: 1 }, uVel: { value: 0 }, uPointer: { value: new THREE.Vector2(9, 9) }, uGlyph: { value: new THREE.Vector2(...GLYPH_AT) },
         uColor: { value: DARK_INK.clone() },
         uGlyphColor: { value: DARK_INK.clone() },
+        uSignalColor: { value: LIGHT_GLYPH.clone() },
     }), []);
     const bgCol = useMemo(() => DARK_BG.clone(), []);
     const last = useRef({ x: 9, y: 9, moved: 0 });
@@ -168,7 +175,13 @@ const Dust = ({ count, pulse, light, eventSource }) => {
         uniforms.uPointer.value.lerp(pointer, 1 - Math.exp(-14 * dt));
         if (pulse !== seen.current) { seen.current = pulse; uniforms.uBurst.value = clock.elapsedTime; }
         const l = last.current;
-        if (pointer.x !== l.x || pointer.y !== l.y) { l.x = pointer.x; l.y = pointer.y; l.moved = clock.elapsedTime; }
+        if (pointer.x !== l.x || pointer.y !== l.y) {
+            const speed = Math.hypot(pointer.x - l.x, pointer.y - l.y) / Math.max(dt, 0.008);
+            uniforms.uVel.value = THREE.MathUtils.damp(uniforms.uVel.value, Math.min(speed * 0.35, 1.0), 8, dt);
+            l.x = pointer.x; l.y = pointer.y; l.moved = clock.elapsedTime;
+        } else {
+            uniforms.uVel.value = THREE.MathUtils.damp(uniforms.uVel.value, 0, 4, dt);
+        }
         raycaster.setFromCamera(pointer, camera);
         if (raycaster.ray.intersectPlane(plane, hit)) uniforms.uMouse.value.lerp(hit, 1 - Math.exp(-8 * dt));
         // the field calms down a couple of seconds after the cursor stops
