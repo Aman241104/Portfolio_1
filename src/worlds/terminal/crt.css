@@ -1,11 +1,12 @@
-/* tty1 · AHMEDABAD: an amber-phosphor CRT in a dark room. All CSS: scanlines, vignette, bloom, a breath of flicker. */
+/* tty1 · AHMEDABAD: a split-pane phosphor CRT workstation with tmux chrome, live inspector, and scanline bloom. */
 .tty { --fg: #ffb000; --dim: rgba(255, 176, 0, .58); --bg: #120c02; --room: #050403;
-    min-height: 100dvh; background: radial-gradient(120% 90% at 50% 40%, #1b1206, var(--room) 70%); padding: clamp(10px, 3vw, 36px); padding-bottom: 150px;
-    color: var(--fg); font: 400 15px/1.55 "IBM Plex Mono", "Roboto Mono", ui-monospace, monospace; position: relative; }
+    min-height: 100dvh; background: radial-gradient(120% 90% at 50% 40%, #1b1206, var(--room) 70%); padding: clamp(10px, 2.5vw, 24px); padding-bottom: 18px;
+    color: var(--fg); font: 400 14.5px/1.55 "IBM Plex Mono", "Roboto Mono", ui-monospace, monospace; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
 .tty-green { --fg: #7dff9b; --dim: rgba(125, 255, 155, .58); --bg: #04110a; }
 .tty-plain { --fg: #e9e6df; --dim: #a8a49c; --bg: #111; }
-.tty-glass { position: relative; max-width: 1100px; margin: 0 auto; min-height: calc(100dvh - 120px); background: radial-gradient(130% 120% at 50% 45%, color-mix(in srgb, var(--bg) 70%, #2a1a03), var(--bg) 60%);
-    border-radius: 22px / 18px; padding: clamp(18px, 3vw, 40px); box-shadow: 0 0 0 10px #0d0b08, 0 0 0 11px #2a241b, inset 0 0 90px rgba(0, 0, 0, .85), 0 30px 80px rgba(0, 0, 0, .7);
+.tty-glass { position: relative; width: 100%; max-width: 1240px; margin: 0 auto; height: calc(100dvh - 96px); min-height: 520px; display: flex; flex-direction: column;
+    background: radial-gradient(130% 120% at 50% 45%, color-mix(in srgb, var(--bg) 70%, #2a1a03), var(--bg) 60%);
+    border-radius: 22px / 18px; padding: clamp(16px, 2.2vw, 28px); box-shadow: 0 0 0 10px #0d0b08, 0 0 0 11px #2a241b, inset 0 0 90px rgba(0, 0, 0, .85), 0 30px 80px rgba(0, 0, 0, .7);
     text-shadow: 0 0 2px currentColor, 0 0 9px color-mix(in srgb, var(--fg) 45%, transparent); overflow: hidden; animation: tty-flicker 6s infinite; }
 .tty-plain .tty-glass { text-shadow: none; animation: none; box-shadow: 0 0 0 1px #333; border-radius: 6px; }
 .tty-scan { position: fixed; inset: 0; pointer-events: none; z-index: 5; background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px), radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, .55)); mix-blend-mode: multiply; }
@@ -13,16 +14,33 @@
 @keyframes tty-flicker { 0%, 100% { opacity: 1; } 48% { opacity: .985; } 50% { opacity: .96; } 52% { opacity: .99; } }
 .tty p { margin: 0; }
 .tty .dim { color: var(--dim); }
-.tty-big { font: 400 clamp(64px, 12vw, 150px)/1 "Rozha One", serif; letter-spacing: .02em; margin-bottom: 6px !important; }
-.tty-head { padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px dashed var(--dim); font-family: "VT323", monospace; font-size: 22px; line-height: 1.25; }
-.tty-head .dim { font: 400 14px/1.6 "IBM Plex Mono", monospace; margin-top: 6px !important; }
+
+.tty-tmux { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding: 6px 10px; margin-bottom: 16px; border: 1px solid var(--dim); background: color-mix(in srgb, var(--fg) 8%, transparent); font-size: 12px; letter-spacing: .04em; }
+.tty-tmux-r { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.tty-split { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 24px; flex: 1; min-height: 0; }
+.tty-main { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--dim) transparent; }
+.tty-inspector { min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--dim) transparent; }
+.tty-card { border: 1px dashed var(--dim); padding: 14px; background: color-mix(in srgb, var(--bg) 75%, #000); }
+.tty-card-hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-bottom: 6px; margin-bottom: 10px; border-bottom: 1px dashed var(--dim); font-size: 12px; letter-spacing: .08em; }
+.tty-card-body { margin: 8px 0 !important; font-size: 13.5px; }
+.tty-card-actions { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: 8px; font-size: 13px; }
+.tty-kv { margin: 0; display: grid; gap: 7px; font-size: 13px; }
+.tty-kv > div { display: grid; grid-template-columns: 72px 1fr; gap: 8px; }
+.tty-kv dt { color: var(--dim); }
+.tty-kv dd { margin: 0; }
+
+.tty-big { font: 400 clamp(56px, 9vw, 120px)/1 "Rozha One", serif; letter-spacing: .02em; margin-bottom: 6px !important; }
+.tty-head { padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px dashed var(--dim); font-family: "VT323", monospace; font-size: 21px; line-height: 1.25; }
+.tty-head .dim { font: 400 13.5px/1.6 "IBM Plex Mono", monospace; margin-top: 6px !important; }
 .tty-boot { font: 400 24px/1.35 "VT323", monospace; padding-top: 6vh; cursor: pointer; }
 .tty-boot .dim { margin-top: 26px !important; font-size: 18px; }
 .tty-log article { margin-bottom: 14px; }
 .tty-echo { color: var(--fg); }
-.tty-ps { color: var(--dim); margin-right: 8px; }
+.tty-ps { color: var(--dim); margin-right: 8px; flex: none; }
 .tty-out { padding-left: 2px; white-space: pre-wrap; word-break: break-word; }
 .tty-row { white-space: pre-wrap; }
+.tty-tag { color: var(--dim); font-size: 12.5px; }
 .tty-h { font-family: "VT323", monospace; font-size: 20px; letter-spacing: .03em; }
 .tty-block { margin-bottom: 10px; }
 .tty-block ul { margin: 4px 0 0; padding-left: 18px; }
@@ -31,21 +49,35 @@
 .tty-cmd:hover, .tty-link:hover, .tty-cmd:focus-visible, .tty-link:focus-visible { background: var(--fg); color: var(--bg); text-shadow: none; outline: none; }
 .ok { color: var(--fg); }
 .tty-shot { margin: 6px 0 10px; width: min(440px, 100%); border: 1px solid var(--dim); position: relative; overflow: hidden; }
+.tty-shot-side { width: 100%; margin: 0 0 10px; }
 .tty-shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; filter: grayscale(1) contrast(1.25) brightness(.9); image-rendering: pixelated; }
-.tty-shot::after { content: ""; position: absolute; inset: 0; background: var(--fg); mix-blend-mode: multiply; opacity: .85; }
+.tty-shot::after { content: ""; position: absolute; inset: 0; background: var(--fg); mix-blend-mode: multiply; opacity: .82; pointer-events: none; }
 .tty-plain .tty-shot::after { display: none; }
 .tty-bar { display: inline-block; width: 90px; height: .7em; border: 1px solid var(--fg); vertical-align: middle; background: linear-gradient(var(--fg), var(--fg)) 0 0 / 0% 100% no-repeat; animation: tty-fill 1.2s steps(10) forwards; }
 @keyframes tty-fill { to { background-size: 100% 100%; } }
+
 .tty-input { display: flex; gap: 0; align-items: center; }
-.tty-input input { flex: 1; background: transparent; border: 0; outline: none; color: var(--fg); font: inherit; caret-color: var(--fg); text-shadow: inherit; min-width: 0; }
-.tty-dock { position: sticky; bottom: 14px; z-index: 6; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 1100px; margin: 14px auto 0; }
-.tty-dock button { font: 500 13px "IBM Plex Mono", monospace; color: var(--fg); background: rgba(0, 0, 0, .7); border: 1px solid var(--dim); border-radius: 4px; padding: 9px 12px; min-height: 40px; backdrop-filter: blur(6px); cursor: pointer; }
+.tty-input-wrap { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; }
+.tty-input input { position: relative; z-index: 1; width: 100%; background: transparent; border: 0; outline: none; color: var(--fg); font: inherit; caret-color: var(--fg); text-shadow: inherit; min-width: 0; }
+.tty-ghost { position: absolute; left: 0; top: 0; color: var(--dim); opacity: .45; pointer-events: none; white-space: pre; overflow: hidden; max-width: 100%; }
+
+.tty-dock { position: relative; z-index: 6; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-start; width: 100%; max-width: 1240px; margin: 12px auto 0; padding-right: 170px; }
+.tty-dock button { font: 500 12.5px "IBM Plex Mono", monospace; color: var(--fg); background: rgba(0, 0, 0, .78); border: 1px solid var(--dim); border-radius: 4px; padding: 8px 11px; min-height: 36px; backdrop-filter: blur(6px); cursor: pointer; }
+.tty-dock button:hover, .tty-dock button:focus-visible { border-color: var(--fg); outline: none; }
 .tty-dock button:active { background: var(--fg); color: var(--bg); }
 .tty[data-shake] .tty-glass { animation: tty-shake .4s; }
 @keyframes tty-shake { 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+
+@media (max-width: 960px) {
+    .tty { padding-bottom: 120px; }
+    .tty-glass { height: auto; min-height: calc(100dvh - 110px); }
+    .tty-split { grid-template-columns: 1fr; }
+    .tty-main, .tty-inspector { overflow-y: visible; }
+    .tty-dock { position: sticky; bottom: 12px; padding-right: 0; }
+}
 @media (max-width: 640px) {
-    .tty { font-size: 13.5px; padding: 8px 8px 160px; }
-    .tty-glass { border-radius: 14px; padding: 16px 14px; box-shadow: 0 0 0 6px #0d0b08, inset 0 0 60px rgba(0, 0, 0, .85); }
+    .tty { font-size: 13.5px; padding: 8px 8px 150px; }
+    .tty-glass { border-radius: 14px; padding: 14px 12px; box-shadow: 0 0 0 6px #0d0b08, inset 0 0 60px rgba(0, 0, 0, .85); }
     .tty-head { font-size: 18px; }
     .tty-dock { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 0 4px; scrollbar-width: none; }
     .tty-dock button { flex: none; }
@@ -53,7 +85,6 @@
 @media (prefers-reduced-motion: reduce) { .tty-glass, .tty-bar { animation: none !important; } .tty-bar { background-size: 100% 100%; } }
 @media (prefers-contrast: more) { .tty-glass { text-shadow: none; } .tty-scan { display: none; } }
 
-/* idle: the prompt hints, then the screensaver */
 .tty-input input::placeholder { color: var(--dim); opacity: .6; }
 .tty-saver { position: fixed; inset: 0; z-index: 8; background: rgba(0, 0, 0, .92); cursor: none; animation: saver-in .8s ease both; }
 @keyframes saver-in { from { opacity: 0; } }
@@ -64,51 +95,12 @@
 @keyframes corner { 50% { color: #fff; filter: brightness(1.8); } }
 .tty-dock button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
 
-/* Type-on: the newest output prints line by line, each line sweeping on in character steps like a teletype.
-   Fast (45 ms a line) and any key completes it. Older entries never animate again. */
 @media (prefers-reduced-motion: no-preference) {
-    .tty-log > article:last-child .tty-out > * { animation: tty-type clamp(120ms, calc(var(--n, 30) * 8ms), 700ms) steps(24, end) both; }
+    .tty-log > article:last-child .tty-out > * {
+        animation: tty-type clamp(110ms, calc(var(--n, 30) * 7ms), 650ms) steps(24, end) both;
+        animation-delay: calc(var(--i, 0) * 35ms);
+    }
     .tty-log[data-skip] > article:last-child .tty-out > * { animation: none; }
     .tty-log > article:last-child .tty-echo { animation: tty-type 160ms steps(16, end) both; }
-    .tty-log > article:last-child .tty-out > :nth-child(1) { animation-delay: 0ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(2) { animation-delay: 45ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(3) { animation-delay: 90ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(4) { animation-delay: 135ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(5) { animation-delay: 180ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(6) { animation-delay: 225ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(7) { animation-delay: 270ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(8) { animation-delay: 315ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(9) { animation-delay: 360ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(10) { animation-delay: 405ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(11) { animation-delay: 450ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(12) { animation-delay: 495ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(13) { animation-delay: 540ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(14) { animation-delay: 585ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(15) { animation-delay: 630ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(16) { animation-delay: 675ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(17) { animation-delay: 720ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(18) { animation-delay: 765ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(19) { animation-delay: 810ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(20) { animation-delay: 855ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(21) { animation-delay: 900ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(22) { animation-delay: 945ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(23) { animation-delay: 990ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(24) { animation-delay: 1035ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(25) { animation-delay: 1080ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(26) { animation-delay: 1125ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(27) { animation-delay: 1170ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(28) { animation-delay: 1215ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(29) { animation-delay: 1260ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(30) { animation-delay: 1305ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(31) { animation-delay: 1350ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(32) { animation-delay: 1395ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(33) { animation-delay: 1440ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(34) { animation-delay: 1485ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(35) { animation-delay: 1530ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(36) { animation-delay: 1575ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(37) { animation-delay: 1620ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(38) { animation-delay: 1665ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(39) { animation-delay: 1710ms; }
-    .tty-log > article:last-child .tty-out > :nth-child(40) { animation-delay: 1755ms; }
 }
 @keyframes tty-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
