@@ -2324,12 +2324,12 @@
 
 /* 7. Mobile Hero & Below-the-Fold Polish (<= 760px) */
 @media (max-width: 760px) {
-    .home { --word-size: 15.8vw; --word-bottom: 206px; }
+    .home { --word-bottom: 196px; }
     .home .bar .center, .studio-pill { display: none !important; }
     .home .bar .right { top: 18px; right: var(--gutter); gap: 10px; }
     .home .ident { top: 64px; font-size: 10px; line-height: 1.5; }
-    .home .hero-word { left: 0; right: 0; bottom: 202px !important; z-index: 13; text-align: center; letter-spacing: -0.045em; }
-    .home .signature { right: 5vw; bottom: 268px !important; font-size: 9vw; }
+    .home .hero-word { --word-size: clamp(50px, 16.2vw, 84px); left: 0; right: 0; bottom: 196px !important; transform: none; z-index: 13 !important; text-align: center; letter-spacing: -0.045em; }
+    .home .signature { right: 5vw; bottom: 248px !important; font-size: 8.6vw; }
     .home .below {
         z-index: 12;
         padding: 24px var(--gutter) calc(74px + env(safe-area-inset-bottom));
