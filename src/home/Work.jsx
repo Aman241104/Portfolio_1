@@ -84,7 +84,10 @@ export default function Work() {
         const img = e.currentTarget.querySelector("img");
         setLeaving({ item, rect: img.getBoundingClientRect() });
         sfx.detent();
-        setTimeout(() => window.location.assign(item.url), 1050);
+        setTimeout(() => {
+            window.open(item.url, "_blank", "noopener,noreferrer");
+            setLeaving(null);
+        }, 420);
     };
 
     const hire = useRef(null);

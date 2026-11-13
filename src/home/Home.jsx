@@ -7,6 +7,7 @@ import Work from "./Work.jsx";
 import { work } from "../../content/work.js";
 import Experience from "./Experience.jsx";
 import Maintained from "./Maintained.jsx";
+import Certifications from "./Certifications.jsx";
 import Skills from "./Skills.jsx";
 import Stats, { Tape } from "./Stats.jsx";
 import LiquidDock from "./LiquidDock.jsx";
@@ -71,8 +72,7 @@ const SIG = sig.strokes.map((st) => "M" + st.map(([x, y]) => `${((x + 1) * 100).
 const BOOT_LINES = [[0, "PX-01 reality selector"], [0, "Firmware 2026.11 · Aman Patel"], [35, "Reels ............ OK"], [65, "3 realities ...... OK"], [100, "Key light ........ OK"]];
 const Boot = ({ target, onDone }) => {
     const [n, setN] = useState(0);
-    const [skip, setSkip] = useState(false);              // never trap anyone: after 2.5 s a click ends the boot
-    useEffect(() => { const t = setTimeout(() => setSkip(true), 2500); return () => clearTimeout(t); }, []);
+    const [skip] = useState(true);              // instant click-to-skip so recruiters are never gated
     const finish = useRef(onDone);
     finish.current = onDone;
     // the count carries on from where it is when the next milestone arrives (it used to restart from 0 each time)
@@ -535,13 +535,17 @@ const Home = ({ onSelect }) => {
                     <nav className="lf-nav" aria-label="Portfolio sections">
                         <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>Projects</button>
                         <span aria-hidden>·</span>
-                        <button type="button" onClick={() => document.querySelector(".stats")?.scrollIntoView({ behavior: "smooth" })}>About</button>
+                        <button type="button" onClick={() => document.querySelector(".xp")?.scrollIntoView({ behavior: "smooth" })}>Experience</button>
+                        <span aria-hidden>·</span>
+                        <button type="button" onClick={() => document.querySelector(".certs-sec")?.scrollIntoView({ behavior: "smooth" })}>Certs</button>
                         <span aria-hidden>·</span>
                         <button type="button" onClick={() => document.querySelector(".skills-sec")?.scrollIntoView({ behavior: "smooth" })}>Skills</button>
                         <span aria-hidden>·</span>
-                        <button type="button" onClick={() => document.querySelector(".xp")?.scrollIntoView({ behavior: "smooth" })}>Experience</button>
-                        <span aria-hidden>·</span>
                         <button type="button" onClick={() => document.querySelector(".land")?.scrollIntoView({ behavior: "smooth" })}>Contact</button>
+                        <span aria-hidden>·</span>
+                        <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "hero_bar" })}>Résumé ↗</a>
+                        <span aria-hidden>·</span>
+                        <a href={profile.github} target="_blank" rel="noreferrer">GitHub ↗</a>
                         <span aria-hidden>·</span>
                         <button type="button" onClick={() => setPicking(true)}>All Worlds</button>
                     </nav>
@@ -571,6 +575,7 @@ const Home = ({ onSelect }) => {
                 <Work />
                 <Maintained />
                 <Experience />
+                <Certifications />
                 <Skills />
                 <Tape items={["Say hello", "Résumé one tap away", "Replies from a real person", "Ahmedabad · IST", "Open to full-stack roles"]} tilt={1.4} />
 

@@ -1,0 +1,40 @@
+// Verified certifications & credentials — single source of truth for Home & portfolio worlds.
+export const certifications = [
+    {
+        code: "CERT-01",
+        issuer: "Anthropic · Claude Academy",
+        short: "ANTHROPIC",
+        title: "Claude Code in Action",
+        date: "2026",
+        focus: "Agentic Coding · Tool Use · Production Workflows",
+        accent: "#d97757",
+    },
+    {
+        code: "CERT-02",
+        issuer: "Amazon Web Services (AWS)",
+        short: "AWS",
+        title: "Introduction to Generative AI — Art of the Possible",
+        date: "2026",
+        focus: "Foundation Models · Cloud AI Architecture",
+        accent: "#ff9900",
+    },
+    {
+        code: "CERT-03",
+        issuer: "Google",
+        short: "GOOGLE",
+        title: "Introduction to Generative AI",
+        date: "2026",
+        focus: "LLMs · Multimodal Systems · Responsible AI",
+        accent: "#4285f4",
+    },
+    {
+        code: "CERT-04",
+        issuer: "Microsoft Learn",
+        short: "MICROSOFT",
+        title: "Introduction to Generative AI and Agents",
+        date: "2026",
+        focus: "Autonomous Agents · Orchestration · Applied AI",
+        url: "https://lnkd.in/d53cF3MK",
+        accent: "#00a4ef",
+    },
+];

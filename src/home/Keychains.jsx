@@ -118,8 +118,8 @@ const Thing = ({ kind, ...p }) =>
 // The 4 exhibition charms (UI-01 REACT, LANG-02 TYPESCRIPT, RUNTIME-03 NODE.JS, ENGINE-04 THREE.JS)
 // stay at the exact same 3D coordinates, scale, and sway phase during Dark ↔ Light transitions.
 const DESKTOP = [
-    { sx: -0.76, sy: 0.66, item: "react" }, { sx: -0.47, sy: 0.57, item: "typescript" },
-    { sx: 0.48, sy: 0.57, item: "node" }, { sx: 0.76, sy: 0.66, item: "three" },
+    { sx: -0.82, sy: 0.66, item: "react", outer: true }, { sx: -0.52, sy: 0.56, item: "typescript", outer: false },
+    { sx: 0.52, sy: 0.56, item: "node", outer: false }, { sx: 0.82, sy: 0.66, item: "three", outer: true },
 ];
 // phones: a small even row on cables above the machine, clear of the lever on the right
 const PHONE = [
@@ -136,11 +136,20 @@ const place = (aspect, framing) => {
     const phone = aspect < 0.8;
     const ray = new THREE.Raycaster();
     const list = phone ? PHONE : DESKTOP;
-    return list.map(({ sx, sy, item }, i) => {
-        // inner columns: keep a gap from the machine on screens where it takes more width
-        if (!phone && Math.abs(sx) < 0.7) sx = Math.sign(sx) * Math.max(Math.abs(sx), (sx < 0 ? -box.min.x : box.max.x) + 0.12);
+    // Guarantee clean separation between the machine, inner keychains, and outer keychains on all laptop/desktop widths
+    const innerLeft = Math.max(0.47, -box.min.x + 0.10);
+    const innerRight = Math.max(0.47, box.max.x + 0.10);
+    const outerLeft = Math.min(0.89, Math.max(0.76, innerLeft + 0.23));
+    const outerRight = Math.min(0.89, Math.max(0.76, innerRight + 0.23));
+    const deskScale = THREE.MathUtils.clamp(aspect * 0.52, 0.66, 0.84);
+    return list.map(({ sx, sy, item, outer }, i) => {
+        if (!phone) {
+            const side = Math.sign(sx);
+            const xMag = side < 0 ? (outer ? outerLeft : innerLeft) : (outer ? outerRight : innerRight);
+            sx = side * xMag;
+        }
         const at = (y) => { ray.setFromCamera({ x: sx, y }, cam); return ray.ray.at(((phone ? -3 : -3.2) - cam.position.z) / ray.ray.direction.z, new THREE.Vector3()); };
-        let pos = at(sy), scale = phone ? 1 : 0.84;
+        let pos = at(sy), scale = phone ? 1 : deskScale;
         if (phone) {
             const bottomY = (p, k) => new THREE.Vector3(p.x, p.y - 1.7 * k, p.z).project(cam).y;
             const clear = box.max.y + 0.04;

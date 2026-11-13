@@ -1095,13 +1095,16 @@
     padding-left: 28px;
     border-left: 1px solid rgba(237, 234, 227, .22);
 }
-.home .lf-nav button {
+.home .lf-nav button,
+.home .lf-nav a {
     font: 400 13px/1 "Geist", sans-serif;
     color: var(--bone);
+    text-decoration: none;
     padding: 4px 2px;
     transition: color .2s;
 }
-.home .lf-nav button:hover {
+.home .lf-nav button:hover,
+.home .lf-nav a:hover {
     color: var(--signal);
 }
 .home .lf-nav span {
@@ -1216,7 +1219,8 @@
     color: #2b2a28;
 }
 .home[data-light] .lf-nav { border-left-color: rgba(20, 20, 22, .25); }
-.home[data-light] .lf-nav button { color: #2b2a28; }
+.home[data-light] .lf-nav button,
+.home[data-light] .lf-nav a { color: #2b2a28; }
 .home[data-light] .lf-nav span { color: rgba(20, 20, 22, .35); }
 .home[data-light] .lf-scroll { color: #2b2a28; }
 .home[data-light] .lf-scroll i { color: #484642; }
@@ -1429,8 +1433,120 @@
 
 @media (max-width: 760px) {
     .home[data-light] .creative-callout,
-    .home[data-light] .light-foot-bar { display: none !important; }
+    .home[data-light] .light-foot-bar,
+    .home .creative-callout,
+    .home .light-foot-bar { display: none !important; }
 }
+
+/* ============================================================
+   CERTIFICATIONS ARCHIVE (Dark Studio ↔ Light Gallery Atelier)
+   ============================================================ */
+.cert-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+@media (max-width: 760px) {
+    .cert-grid { grid-template-columns: 1fr; }
+}
+.cert-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 24px 26px;
+    border-radius: 10px;
+    border: 1px solid rgba(237, 234, 227, .12);
+    background: rgba(255, 255, 255, .025);
+    transition: transform .35s var(--ease-out), border-color .25s, box-shadow .35s;
+}
+.cert-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 20px;
+    bottom: 20px;
+    width: 2.5px;
+    border-radius: 2px;
+    background: var(--cert-accent, var(--signal));
+    opacity: .85;
+}
+@media (hover: hover) {
+    .cert-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(237, 234, 227, .28);
+        box-shadow: 0 20px 44px rgba(0, 0, 0, .42);
+    }
+}
+.cert-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+.cert-code {
+    color: var(--signal) !important;
+    font-size: 10.5px !important;
+}
+.cert-issuer {
+    font-size: 10.5px !important;
+}
+.cert-title {
+    margin: 2px 0 0;
+    font: 600 clamp(18px, 1.55vw, 22px)/1.25 "Geist", sans-serif;
+    letter-spacing: -0.02em;
+    color: var(--bone);
+}
+.cert-org {
+    margin: 0;
+    font: 400 13.5px/1.4 "Geist", sans-serif;
+    color: rgba(237, 234, 227, .68);
+}
+.cert-foot {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid rgba(237, 234, 227, .09);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.cert-focus {
+    font-size: 10px !important;
+    letter-spacing: 0.08em !important;
+}
+.cert-link {
+    color: var(--bone) !important;
+    text-decoration: underline;
+    text-decoration-color: var(--signal);
+    text-underline-offset: 4px;
+    font-size: 10.5px !important;
+}
+.cert-link:hover { color: var(--signal) !important; }
+
+/* Light Mode Gallery Overrides for Certifications */
+.home[data-light] .cert-card {
+    background: rgba(255, 255, 255, .64);
+    border-color: rgba(20, 20, 22, .11);
+    box-shadow: 0 10px 28px rgba(20, 20, 22, .04), inset 0 1px 0 #ffffff;
+}
+@media (hover: hover) {
+    .home[data-light] .cert-card:hover {
+        background: #ffffff;
+        border-color: rgba(230, 33, 23, .45);
+        box-shadow: 0 20px 48px rgba(20, 20, 22, .09);
+    }
+}
+.home[data-light] .cert-title {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+}
+.home[data-light] .cert-org { color: rgba(20, 20, 22, .72); }
+.home[data-light] .cert-foot { border-top-color: rgba(20, 20, 22, .10); }
 
 /* ============================================================
    ORGANIC SUMI / VERMILION INK-BLEED OVERLAY (Dark ↔ Light)
@@ -1444,20 +1560,20 @@
     height: 100vh;
     z-index: 9999;
     pointer-events: none;
-    animation: ink-overlay-fade 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: ink-overlay-fade 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .ink-bleed-red {
-    animation: ink-circle-grow 0.82s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: ink-circle-grow 0.68s cubic-bezier(0.12, 1, 0.25, 1) forwards;
 }
 .ink-bleed-body {
-    animation: ink-circle-grow 0.88s 0.04s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: ink-circle-grow 0.74s 0.04s cubic-bezier(0.12, 1, 0.25, 1) forwards;
 }
 @keyframes ink-circle-grow {
     0% { r: 0px; }
     100% { r: var(--max-r, 1800px); }
 }
 @keyframes ink-overlay-fade {
-    0%, 58% { opacity: 1; }
+    0%, 55% { opacity: 1; }
     100% { opacity: 0; }
 }
 

@@ -287,6 +287,9 @@ const AtelierRig = ({ light }) => {
     const hemi = useRef();
     const frontFill = useRef();
     const orb = useRef();
+    const { size } = useThree();
+    const aspect = size.width / Math.max(1, size.height);
+    const orbX = aspect < 0.8 ? -2.2 : -THREE.MathUtils.clamp(aspect * 2.85, 2.95, 5.15);
     const orbMat = useMemo(() => new THREE.MeshPhysicalMaterial({
         color: "#ff2214",
         metalness: 0.88,
@@ -309,6 +312,7 @@ const AtelierRig = ({ light }) => {
         orbMat.roughness = THREE.MathUtils.damp(orbMat.roughness, light ? 0.14 : 0.14, 6, dt);
         orbMat.metalness = THREE.MathUtils.damp(orbMat.metalness, light ? 0.45 : 0.88, 6, dt);
         if (orb.current) {
+            orb.current.position.x = THREE.MathUtils.damp(orb.current.position.x, orbX, 6, dt);
             orb.current.position.y = -1.12 + Math.sin(clock.elapsedTime * 1.1) * 0.07;
         }
     });
@@ -317,7 +321,7 @@ const AtelierRig = ({ light }) => {
             <directionalLight ref={frontFill} position={[2, 2, 9]} intensity={0.35} color="#ffffff" />
             <hemisphereLight ref={hemi} args={["#ffffff", light ? "#e4e2dd" : "#000000", 0.12]} />
             {/* Cohesive floating metallic sphere on the left: Crimson-Red Anodized Metal in Dark Mode, Bright Silver-Chrome in Light Mode */}
-            <mesh ref={orb} position={[-5.15, -1.12, -1.2]} material={orbMat}>
+            <mesh ref={orb} position={[orbX, -1.12, -1.2]} material={orbMat}>
                 <sphereGeometry args={[0.25, 48, 32]} />
             </mesh>
         </>
