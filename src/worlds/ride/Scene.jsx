@@ -3,7 +3,6 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF, Text } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { SkeletonUtils } from "three-stdlib";
 import { shot } from "../../../content/work.js";
 import { STOPS, END, LENGTH, ROAD_W, LANE_X, MODELS, CERT_ORBS, APEX_GATES, frame, at, scenery } from "./route.js";
 
@@ -780,50 +779,15 @@ function Landmarks({ preset }) {
     );
 }
 
-// ---- the bike and real skeletal humanoid rider (Xbot.glb posed in MotoGP tuck + glossy racing helmet) ----
+// ---- the autonomous sportbike (motorcycle.glb) + Akira/JDM LED tail-light trail ----
 function Rider({ state, preset }) {
     const { scene } = useGLTF("/ride/motorcycle.glb");
-    const { scene: riderSrc } = useGLTF("/ride/rider.glb");
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
     const bike = useMemo(() => {
         const s = scene.clone(true);
-        s.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.material = o.material.clone(); o.material.roughness = 0.42; o.material.metalness = 0.25; } });
+        s.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.material = o.material.clone(); o.material.roughness = 0.36; o.material.metalness = 0.32; } });
         return s;
     }, [scene]);
-    const rider = useMemo(() => {
-        const r = SkeletonUtils.clone(riderSrc);
-        const suitCol = preset === "sakura" ? "#d91b26" : preset === "fjord" ? "#1e293b" : "#1c1f26";
-        r.traverse((o) => {
-            if (o.isMesh) {
-                o.castShadow = true;
-                o.material = o.material.clone();
-                if (o.material.name?.includes("Surface") || o.material.color) {
-                    o.material.roughness = 0.38;
-                    o.material.metalness = 0.45;
-                    if (!o.name?.includes("Joints")) o.material.color.set(suitCol);
-                }
-            }
-            if (o.isBone) {
-                const n = o.name;
-                if (n === "mixamorigSpine") o.rotation.set(0.38, 0, 0);
-                else if (n === "mixamorigSpine1") o.rotation.set(0.28, 0, 0);
-                else if (n === "mixamorigSpine2") o.rotation.set(0.18, 0, 0);
-                else if (n === "mixamorigNeck") o.rotation.set(-0.36, 0, 0);
-                else if (n === "mixamorigHead") o.rotation.set(-0.22, 0, 0);
-                else if (n === "mixamorigLeftShoulder") o.rotation.set(0, 0.25, -0.15);
-                else if (n === "mixamorigLeftArm") o.rotation.set(0.2, 1.28, -1.18);
-                else if (n === "mixamorigLeftForeArm") o.rotation.set(0, 0.42, -0.22);
-                else if (n === "mixamorigRightShoulder") o.rotation.set(0, -0.25, 0.15);
-                else if (n === "mixamorigRightArm") o.rotation.set(0.2, -1.28, 1.18);
-                else if (n === "mixamorigRightForeArm") o.rotation.set(0, -0.42, 0.22);
-                else if (n === "mixamorigLeftUpLeg") o.rotation.set(-1.05, 0.12, -0.22);
-                else if (n === "mixamorigLeftLeg") o.rotation.set(1.38, 0, 0);
-                else if (n === "mixamorigRightUpLeg") o.rotation.set(-1.05, -0.12, 0.22);
-                else if (n === "mixamorigRightLeg") o.rotation.set(1.38, 0, 0);
-            }
-        });
-        return r;
-    }, [riderSrc, preset]);
     const root = useRef(), body = useRef(), light = useRef(), tailTrail = useRef();
     const f = useMemo(() => ({}), []), ahead = useMemo(() => ({}), []);
     const look = useMemo(() => new THREE.Vector3(), []);
@@ -878,12 +842,6 @@ function Rider({ state, preset }) {
                     </mesh>
                     {/* Headlight cone */}
                     <pointLight position={[0, 0.85, -1.2]} intensity={preset === "sakura" ? 4.5 : 1.2} distance={18} color="#fff6d6" />
-                    {/* Real skeletal humanoid rider in MotoGP tuck + glossy racing helmet */}
-                    <primitive object={rider} position={[0, 0.4, 0.24]} rotation={[0, Math.PI, 0]} scale={0.92} />
-                    <group position={[0, 1.56, -0.26]} rotation={[0.25, Math.PI, 0]}>
-                        <mesh castShadow><sphereGeometry args={[0.155, 24, 18]} /><meshPhysicalMaterial color={preset === "sakura" ? "#ff2e1f" : "#f2ede4"} roughness={0.12} metalness={0.28} clearcoat={1} clearcoatRoughness={0.05} /></mesh>
-                        <mesh position={[0, -0.02, 0.01]} rotation={[0.1, -Math.PI * 0.42, 0]}><cylinderGeometry args={[0.16, 0.16, 0.075, 20, 1, true, 0, Math.PI * 0.84]} /><meshPhysicalMaterial color="#111216" roughness={0.05} metalness={0.92} clearcoat={1} side={THREE.DoubleSide} /></mesh>
-                    </group>
                 </group>
             </group>
         </>
