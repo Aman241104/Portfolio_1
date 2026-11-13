@@ -47,6 +47,7 @@ export default function PocketWorld({ shell }) {
     const [caught, setCaught] = useState(loadCaught);
     const [sound, setSound] = useState(false);
     const [typed, setTyped] = useState(0);
+    const [prompt, setPrompt] = useState("");
     const modeRef = useRef(mode); modeRef.current = mode;
 
     const save = (set) => { try { localStorage.setItem("px01-pocket-dex", JSON.stringify([...set])); } catch { /* ignore */ } };
@@ -102,10 +103,21 @@ export default function PocketWorld({ shell }) {
             const pxw = s.x * A.T + ox, pyw = s.y * A.T + oy;
             const camX = Math.max(0, Math.min(COLS * A.T - W, pxw - (W - A.T) / 2)), camY = Math.max(0, Math.min(ROWS * A.T - H, pyw - (H - A.T) / 2 + 8));
             draw(b, now, s, camX, camY, pxw, pyw);
-            // the LCD: each frame is laid over the last at partial opacity, so moving things leave a faint smear
-            ctx.globalAlpha = reduced ? 1 : 0.62;
-            ctx.drawImage(buf, 0, 0);
             ctx.globalAlpha = 1;
+            ctx.drawImage(buf, 0, 0);
+            if (modeRef.current === "walk") {
+                const [dx, dy] = DIRS[s.dir], fx = s.x + dx, fy = s.y + dy, ahead = at(fx, fy);
+                const nextPrompt = ahead === "S" && TALK[`${fx},${fy}`]
+                    ? "[A] READ SIGN"
+                    : s.dir === "up" && (ahead === "#" || BUILDINGS[ahead]) && TALK[`${s.x},${s.y}`]
+                        ? "[A] INSPECT"
+                        : at(s.x, s.y) === ":"
+                            ? "TALL GRASS · PROJECTS"
+                            : "";
+                setPrompt((prev) => (prev === nextPrompt ? prev : nextPrompt));
+            } else {
+                setPrompt((prev) => (prev === "" ? prev : ""));
+            }
             raf = requestAnimationFrame(loop);
         };
         const draw = (gx, now, s, camX, camY, pxw, pyw) => {
@@ -154,28 +166,30 @@ export default function PocketWorld({ shell }) {
         };
         const drawBattle = (gx, now) => {
             const bt = battleRef.current;
-            gx.fillStyle = A.SHADES[3]; gx.fillRect(0, 0, W, H);
-            gx.fillStyle = A.SHADES[2]; gx.beginPath(); gx.ellipse(124, 62, 30, 7, 0, 0, 7); gx.fill(); gx.beginPath(); gx.ellipse(40, 104, 34, 8, 0, 0, 7); gx.fill();
+            gx.fillStyle = "#d8f0ff"; gx.fillRect(0, 0, W, 80);
+            gx.fillStyle = "#b2e2a4"; gx.fillRect(0, 80, W, H - 80);
+            gx.fillStyle = "#7bc96f"; gx.beginPath(); gx.ellipse(124, 62, 32, 8, 0, 0, 7); gx.fill();
+            gx.fillStyle = "#5aa84e"; gx.beginPath(); gx.ellipse(40, 104, 36, 9, 0, 0, 7); gx.fill();
             if (!bt) return;
             const age = now - (bt.t0 || now);
             const slide = reduced ? 0 : Math.max(0, 1 - age / 500);
             if (!bt.gone) {
                 const bob = bt.phase === "throw" ? 0 : Math.round(Math.sin(now / 300));
-                A.creature(gx, 100 + slide * 80, 10 + bob, bt.mon.slug, 2);
+                A.creature(gx, 100 + slide * 80, 10 + bob, bt.mon.slug, 2, false, bt.mon.w.kind);
             }
             gx.save(); gx.translate(Math.round(18 - slide * 80), 64); gx.scale(2, 2); A.player(gx, 0, 0, "up", 0); gx.restore();   // the player, from behind, at 2×
             // the kulhad (a clay chai cup) does the catching here
             if (bt.phase === "throw" || bt.gone) {
                 const k = Math.min(1, age / 500), cx = 30 + (124 - 30) * k, cy = 80 - Math.sin(k * Math.PI) * 50 + (k >= 1 ? 2 : 0);
                 const wob = bt.gone && !bt.done ? Math.sin(now / 80) * 2 : 0;
-                gx.fillStyle = A.SHADES[0]; gx.fillRect(cx - 5 + wob, cy - 6, 10, 2); gx.fillStyle = A.SHADES[1]; gx.fillRect(cx - 4 + wob, cy - 4, 8, 7); gx.fillStyle = A.SHADES[2]; gx.fillRect(cx - 3 + wob, cy - 3, 2, 5);
+                gx.fillStyle = "#7c441e"; gx.fillRect(cx - 5 + wob, cy - 6, 10, 2); gx.fillStyle = "#c86d3b"; gx.fillRect(cx - 4 + wob, cy - 4, 8, 7); gx.fillStyle = "#f4c094"; gx.fillRect(cx - 3 + wob, cy - 3, 2, 5);
             }
             // a stack bar instead of HP: how much of the stack you've seen it use
-            gx.fillStyle = A.SHADES[0]; gx.font = "700 8px 'Silkscreen', monospace"; gx.textAlign = "left";
+            gx.fillStyle = "#161822"; gx.font = "700 8px 'Silkscreen', monospace"; gx.textAlign = "left";
             gx.fillText(bt.mon.name.slice(0, 16), 6, 12);
-            gx.fillStyle = A.SHADES[1]; gx.fillRect(6, 16, 60, 4); gx.fillStyle = A.SHADES[0];
+            gx.fillStyle = "#cbd5e1"; gx.fillRect(6, 16, 60, 4); gx.fillStyle = "#2b8a3e";
             gx.fillRect(6, 16, 60 * Math.min(1, (bt.used?.length || 0) / Math.max(1, bt.mon.moves.length)), 4);
-            gx.font = "400 7px 'Silkscreen', monospace"; gx.fillText(`TYPE/${bt.mon.type}`, 6, 28);
+            gx.fillStyle = "#3b4260"; gx.font = "400 7px 'Silkscreen', monospace"; gx.fillText(`TYPE/${bt.mon.type}`, 6, 28);
         };
         raf = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(raf);
@@ -300,9 +314,10 @@ export default function PocketWorld({ shell }) {
     return (
         <div className="pk">
             <p className="pk-fast">
-                <button type="button" onClick={() => { setDexOpen(null); setMode("dex"); }}>Skip the game: all {MONS.length} projects</button>
+                <button type="button" onClick={() => { setDexOpen(null); setMode("dex"); }}>All {MONS.length} projects</button>
                 <a href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>
                 <a href={`mailto:${profile.email}`}>Email</a>
+                <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
                 <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
             </p>
 
@@ -350,15 +365,18 @@ export default function PocketWorld({ shell }) {
                                 <p className="pk-links">
                                     <a href={profile.resume} target="_blank" rel="noreferrer">RÉSUMÉ ▸</a>
                                     <a href={`mailto:${profile.email}`}>EMAIL ▸</a>
+                                    <a href={profile.github} target="_blank" rel="noreferrer">GITHUB ▸</a>
                                     <a href={profile.whatsapp} target="_blank" rel="noreferrer">WHATSAPP ▸</a>
                                     {linkedin && <a href={linkedin.link} target="_blank" rel="noreferrer">LINKEDIN ▸</a>}
                                 </p>
                                 <button type="button" className="pk-close" onClick={() => setMode("walk")}>B · BACK</button>
                             </div>
                         )}
+                        {mode === "walk" && prompt && <div className="pk-prompt" aria-live="polite">{prompt}</div>}
                     </div>
-                    <p className="pk-brand" aria-hidden>POCKET <i>colour? never heard of it</i></p>
+                    <p className="pk-brand" aria-hidden>POCKET <i>COLOR</i></p>
                 </div>
+                <span className="pk-speaker" aria-hidden="true" />
 
                 <div className="pk-controls">
                     <div className="pk-dpad" aria-label="Direction pad">
@@ -418,7 +436,7 @@ function DexSprite({ mon, big, caught }) {
     const ref = useRef(null);
     useEffect(() => {
         const c = ref.current, x = c.getContext("2d");
-        x.clearRect(0, 0, 24, 24); A.creature(x, 0, 0, mon.slug, 1, !caught);
+        x.clearRect(0, 0, 24, 24); A.creature(x, 0, 0, mon.slug, 1, !caught, mon.w.kind);
     }, [mon, caught]);
     return <canvas ref={ref} className={big ? "pk-sprite pk-sprite-big" : "pk-sprite"} width={24} height={24} aria-hidden />;
 }
