@@ -13,7 +13,10 @@
 .rd-tabs { display: flex; gap: 2px; }
 .rd-tabs button { border: 0; padding: 10px 16px 9px; background: rgba(0, 0, 0, .18); color: #dfe3d6; font: 600 14px "Hanken Grotesk", sans-serif; cursor: pointer; border-radius: 6px 6px 0 0; }
 .rd-tabs button[aria-selected="true"] { background: var(--card); color: var(--type); }
-.rd-tag { justify-self: end; position: relative; padding: 8px 14px 8px 22px; background: var(--manila); color: var(--type); font: 600 14px "Hanken Grotesk", sans-serif; text-decoration: none;
+.rd-top-r { justify-self: end; display: flex; align-items: center; gap: 12px; }
+.rd-clear { border: 1px solid rgba(244, 237, 224, .35); background: none; color: var(--paper); padding: 7px 12px; border-radius: 4px; font: 600 13px "Hanken Grotesk", sans-serif; cursor: pointer; }
+.rd-clear:hover { background: rgba(244, 237, 224, .12); }
+.rd-tag { position: relative; padding: 8px 14px 8px 22px; background: var(--manila); color: var(--type); font: 600 14px "Hanken Grotesk", sans-serif; text-decoration: none;
     clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%); transform: rotate(2deg); transition: transform .25s; }
 .rd-tag::before { content: ""; position: absolute; left: 9px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: var(--felt); }
 .rd-tag:hover { transform: rotate(0deg) translateY(-2px); }
@@ -22,7 +25,7 @@
 /* the card catalogue: a stack of filed cards with tabs */
 .rd-drawer { position: sticky; top: 24px; align-self: start; display: grid; gap: 0; padding-top: 34px; }
 .rd-drawer-label { margin: 0 0 12px; font: 700 13px "Hanken Grotesk", sans-serif; color: #c6cbbd; }
-.rd-file { position: relative; display: grid; gap: 2px; text-align: left; margin-top: -10px; padding: 18px 16px 16px; border: 0; border-radius: 4px; background: var(--card); color: var(--type);
+.rd-file { position: relative; display: grid; gap: 2px; text-align: left; margin-top: -4px; padding: 18px 16px 24px; border: 0; border-radius: 4px; background: var(--card); color: var(--type);
     box-shadow: 0 -1px 0 rgba(0, 0, 0, .06), 0 6px 14px rgba(0, 0, 0, .18); cursor: pointer; transition: transform .25s var(--ease-spring); animation: rd-file-in .5s var(--d) both; }
 .rd-file:first-of-type { margin-top: 0; }
 .rd-file:nth-of-type(even) { background: #f6efdd; }
@@ -56,6 +59,13 @@
     box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 14px 30px rgba(0, 0, 0, .28); animation: rd-drop .55s var(--ease-spring) both; }
 @keyframes rd-drop { from { opacity: 0; transform: translateY(-40px) rotate(calc(var(--t) * -4)); } }
 .rd-card-head { display: flex; justify-content: space-between; height: 34px; align-items: center; margin-bottom: 18px; font: 700 12px "Courier Prime", monospace; letter-spacing: .08em; text-transform: uppercase; color: #7a6f5e; }
+.rd-card-actions { display: flex; align-items: center; gap: 10px; }
+.rd-skip-hint { font-size: 11px; color: var(--red); text-transform: lowercase; }
+.rd-copy-btn { border: 1px solid rgba(42, 38, 32, .25); background: none; color: var(--type); padding: 2px 8px; border-radius: 3px; font: 700 11px "Hanken Grotesk", sans-serif; cursor: pointer; }
+.rd-copy-btn:hover { background: var(--type); color: var(--card); }
+.rd-notes li.is-lit { background: rgba(216, 56, 44, .12); border-radius: 3px; padding: 1px 4px; margin: -1px -4px; }
+.rd-folder-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; grid-column: 1 / -1; }
+.rd-sample-btn { border: 1px solid rgba(42, 38, 32, .35) !important; background: rgba(255, 255, 255, .45) !important; color: var(--type) !important; padding: 5px 10px !important; font: 700 12px "Hanken Grotesk", sans-serif !important; }
 .rd-body, .rd-body p { margin: 0; font: 400 17px/26px "Courier Prime", "Courier New", monospace; }
 .rd-body p + p { margin-top: 0; }
 .rd-li { padding-left: 1.4em; text-indent: -1.4em; }

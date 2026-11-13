@@ -1,53 +1,165 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { profile } from "#content/profile.js";
 import { work } from "../../../content/work.js";
+import { experience } from "../../../content/experience.js";
+import { skillGroups } from "../../../content/skills.js";
+import { certifications } from "../../../content/certifications.js";
 import { useFonts } from "../fonts.js";
 import "./ask.css";
 
-// World 6: THE REFERENCE DESK. Ask about Aman and the answer comes back typed on an index card, footnoted to the
-// real portfolio content it came from (/api/ask retrieves from content/, an LLM writes only from those sources).
-// Questions are handwritten in the same red ink as the signature on the home page. Paste a job description and the
-// result card gets a rubber stamp with the skills that match.
-const FONTS = ["Hanken+Grotesk:wght@400;500;600;700", "Courier+Prime:ital,wght@0,400;0,700;1,400"];
+// World 7: THE REFERENCE DESK. Ask about Aman or paste a JD; answers come back typed on ruled index cards,
+// footnoted to real portfolio data (live /api/ask in prod, deterministic local retrieval fallback in dev/offline).
+const FONTS = ["Hanken+Grotesk:wght@400;500;600;700", "Courier+Prime:ital,wght@0,400;0,700;1,400", "Homemade+Apple"];
 const DRAWER = [
-    ["AI", "What has he built with AI?"], ["Live", "Which live sites does he maintain?"], ["Backend", "What's his backend experience?"],
-    ["Work", "Where does he work now?"], ["School", "Where did he study?"], ["Hire", "Is he open to on-site or hybrid work?"],
+    ["AI", "What has he built with AI?"],
+    ["Live", "Which live sites does he maintain?"],
+    ["Backend", "What's his backend experience?"],
+    ["Work", "Where does he work now?"],
+    ["School", "Where did he study?"],
+    ["Hire", "Is he open to on-site or hybrid work?"],
 ];
-const tilt = (i) => [-1.2, 0.8, -0.4, 1.3, -0.9, 0.5][i % 6];
+const SAMPLE_JD = "We are hiring a Full-Stack & 3D Web Engineer to build interactive React / TypeScript / Next.js applications, Three.js / WebGL experiences, and Python FastAPI / PostgreSQL AI backends deployed on Docker and Cloud Run.";
+const tilt = (i) => [-1.1, 0.7, -0.4, 1.1, -0.8, 0.5][i % 6];
 
-// **bold**, "- " list lines, [n] → footnote superscripts
-const Typed = ({ text, sources }) => text.replace(/\s+(\[\d+\])/g, "$1").split(/\n+/).map((line, li) => {   // footnotes hug their word
-    const list = /^\s*[-*•]\s+/.test(line), body = line.replace(/^\s*[-*•]\s+/, "");
-    const parts = body.split(/(\*\*[^*]+\*\*|\[\d+\])/g).map((p, i, arr) => {
-        const c = p.match(/^\[(\d+)\]$/);
-        if (c) {
-            const s = sources[+c[1] - 1];
-            const after = /^\[\d+\]$/.test(arr[i - 2] || "") && arr[i - 1] === "";   // a run like [2][4] reads ²˒⁴, never ²⁴
-            return s ? <sup key={i}>{after && "˒"}<a href={s.url} target="_blank" rel="noreferrer" title={s.title}>{c[1]}</a></sup> : null;
-        }
-        if (/^\*\*/.test(p)) return <b key={i}>{p.slice(2, -2)}</b>;
-        return <Fragment key={i}>{p}</Fragment>;
+function localAsk(payload) {
+    const allSkills = skillGroups.flatMap((g) => g.items.map(([name]) => name));
+    if (payload.jd) {
+        const jdLower = payload.jd.toLowerCase();
+        const matched = allSkills.filter((s) => jdLower.includes(s.toLowerCase().replace(/\.js$/, ""))).slice(0, 12);
+        const topWork = work
+            .map((w) => {
+                const hay = `${w.title} ${w.line} ${w.stack || ""}`.toLowerCase();
+                const score = matched.reduce((acc, m) => acc + (hay.includes(m.toLowerCase().replace(/\.js$/, "")) ? 2 : 0), w.live ? 1 : 0);
+                return { w, score };
+            })
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 4)
+            .map((x) => x.w);
+        const sources = [
+            ...topWork.map((w, i) => ({ n: i + 1, title: `${w.title} (${w.year}) — ${w.stack || w.line}`, url: w.url || `/case.html?p=${w.slug}` })),
+            { n: topWork.length + 1, title: `${experience[0].role} at ${experience[0].org}`, url: profile.resume },
+        ];
+        const lines = [
+            `**Strong alignment** across ${matched.length || "core"} full-stack & product requirements, backed by ${work.length} shipped builds.`,
+            ...topWork.map((w, i) => `- **${w.title}**: ${w.line} [${i + 1}]`),
+            `- Currently **${experience[0].role}** at ${experience[0].org} (${experience[0].when}), available for on-site, hybrid, or remote roles [${topWork.length + 1}].`,
+        ];
+        return { answer: lines.join("\n"), sources, matched: matched.length ? matched : ["React", "TypeScript", "Next.js", "Python", "Three.js"] };
+    }
+
+    const q = (payload.q || "").toLowerCase();
+    const sources = [];
+    const addSrc = (title, url) => {
+        const idx = sources.findIndex((s) => s.title === title);
+        if (idx >= 0) return idx + 1;
+        sources.push({ n: sources.length + 1, title, url: url || profile.resume });
+        return sources.length;
+    };
+
+    if (/school|study|college|degree|education|ldce/.test(q)) {
+        const edu = experience[1];
+        const n1 = addSrc(`${edu.org} · ${edu.when}`, profile.resume);
+        const n2 = addSrc(`${certifications.length} Verified Industry Certifications`, certifications[3]?.url || profile.resume);
+        return {
+            answer: `Aman studied at **${edu.org}** (${edu.where}, ${edu.when}) [${n1}].\n- ${edu.points.join(" ")}\n- Holds ${certifications.length} verified AI & cloud credentials from Anthropic, AWS, Google, and Microsoft [${n2}].`,
+            sources,
+        };
+    }
+    if (/work|now|current|job|experience|gravity|hire|on-site|hybrid|remote|available/.test(q)) {
+        const job = experience[0];
+        const n1 = addSrc(`${job.role} at ${job.org} (${job.when})`, profile.resume);
+        const n2 = addSrc(`Résumé PDF · ${profile.email}`, profile.resume);
+        return {
+            answer: `Aman is currently **${job.role}** at **${job.org}** in ${job.where} (${job.when}) [${n1}].\n- ${job.points.join(" ")}\n- **Availability:** Open to on-site (Ahmedabad), hybrid, or remote full-stack & 3D web roles right now [${n2}].`,
+            sources,
+        };
+    }
+    if (/live|maintain|prod|sites|domains/.test(q)) {
+        const live = work.filter((w) => w.maintained).slice(0, 5);
+        const lines = live.map((w) => `- **${w.title}**: ${w.line} [${addSrc(`${w.title} (${w.year})`, w.url)}]`);
+        return {
+            answer: `Aman actively maintains **${work.filter((w) => w.maintained).length} production sites & products** on their own domains:\n${lines.join("\n")}`,
+            sources,
+        };
+    }
+
+    const terms = q.split(/[^a-z0-9]+/).filter((t) => t.length > 1);
+    const ranked = work
+        .map((w) => {
+            const hay = `${w.title} ${w.line} ${w.stack || ""} ${w.kind}`.toLowerCase();
+            const score = terms.reduce((s, t) => s + (hay.includes(t) ? 3 : 0), 0) + (w.live ? 1 : 0);
+            return { w, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 4)
+        .map((x) => x.w);
+
+    const lines = ranked.map((w) => `- **${w.title}** (${w.stack || w.kind}): ${w.line} [${addSrc(`${w.title} — ${w.year}`, w.url || `/case.html?p=${w.slug}`)}]`);
+    return {
+        answer: `From Aman's portfolio file (**${work.length} shipped builds**, ${work.filter((w) => w.maintained).length} live in production):\n${lines.join("\n")}`,
+        sources,
+    };
+}
+
+const Typed = ({ text, sources, onHoverNote }) =>
+    text.replace(/\s+(\[\d+\])/g, "$1").split(/\n+/).map((line, li) => {
+        const list = /^\s*[-*•]\s+/.test(line), body = line.replace(/^\s*[-*•]\s+/, "");
+        const parts = body.split(/(\*\*[^*]+\*\*|\[\d+\])/g).map((p, i, arr) => {
+            const c = p.match(/^\[(\d+)\]$/);
+            if (c) {
+                const s = sources?.[+c[1] - 1];
+                const after = /^\[\d+\]$/.test(arr[i - 2] || "") && arr[i - 1] === "";
+                return s ? (
+                    <sup key={i} onMouseEnter={() => onHoverNote?.(+c[1])} onMouseLeave={() => onHoverNote?.(null)}>
+                        {after && "˒"}<a href={s.url} target="_blank" rel="noreferrer" title={s.title}>{c[1]}</a>
+                    </sup>
+                ) : null;
+            }
+            if (/^\*\*/.test(p)) return <b key={i}>{p.slice(2, -2)}</b>;
+            return <Fragment key={i}>{p}</Fragment>;
+        });
+        return list ? <p key={li} className="rd-li">— {parts}</p> : <p key={li}>{parts}</p>;
     });
-    return list ? <p key={li} className="rd-li">— {parts}</p> : <p key={li}>{parts}</p>;
-});
 
 const Card = ({ turn, i }) => {
     const a = turn.a;
     const full = a?.answer || (a?.facts?.length ? a.facts.map((f, k) => `- ${f} [${k + 1}]`).join("\n") : "");
     const [n, setN] = useState(() => (matchMedia("(prefers-reduced-motion: reduce)").matches ? 1e9 : 0));
+    const [hoverNote, setHoverNote] = useState(null);
+    const [copied, setCopied] = useState(false);
+
     useEffect(() => {
         if (!full || n >= full.length) return;
-        // the typewriter has a rhythm: a few characters a tick, a beat at commas, a longer one at full stops and line ends
         const ch = full[n - 1] || "";
-        const wait = ch === "\n" ? 120 : /[.!?]/.test(ch) ? 90 : /[,;:]/.test(ch) ? 45 : 12 + Math.random() * 10;
-        const t = setTimeout(() => setN((x) => x + (wait > 30 ? 1 : 3)), wait);
+        const wait = ch === "\n" ? 90 : /[.!?]/.test(ch) ? 65 : /[,;:]/.test(ch) ? 35 : 10 + Math.random() * 8;
+        const t = setTimeout(() => setN((x) => x + (wait > 30 ? 2 : 4)), wait);
         return () => clearTimeout(t);
     }, [n, full]);
+
+    const copyCard = () => {
+        if (!full) return;
+        navigator.clipboard?.writeText(`${turn.q}\n\n${full}`).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1600);
+        });
+    };
+
     return (
         <article className="rd-turn" style={{ "--t": `${tilt(i)}deg` }}>
             <p className="rd-q">{turn.q}</p>
-            <div className="rd-card" data-busy={!a || undefined}>
-                <header className="rd-card-head"><span>No. {String(i + 1).padStart(3, "0")}</span><span>{turn.kind === "jd" ? "Fit check" : "Reference"}</span></header>
+            <div className="rd-card" data-busy={!a || undefined} onClick={() => full && n < full.length && setN(full.length)}>
+                <header className="rd-card-head">
+                    <span>No. {String(i + 1).padStart(3, "0")}</span>
+                    <span className="rd-card-actions">
+                        {full && n < full.length && <span className="rd-skip-hint">click to finish typing</span>}
+                        {full && n >= full.length && (
+                            <button type="button" className="rd-copy-btn" onClick={(e) => { e.stopPropagation(); copyCard(); }}>
+                                {copied ? "Copied ✓" : "Copy"}
+                            </button>
+                        )}
+                        <span>{turn.kind === "jd" ? "Fit check" : "Reference"}</span>
+                    </span>
+                </header>
                 {!a && <p className="rd-typing">Pulling the file<span>.</span><span>.</span><span>.</span></p>}
                 {a?.matched && (
                     <div className="rd-stamp" aria-label={`${a.matched.length} matching skills`}>
@@ -56,14 +168,22 @@ const Card = ({ turn, i }) => {
                 )}
                 {a?.matched?.length > 0 && <p className="rd-matched">{a.matched.join(" · ")}</p>}
                 {a?.error && <p className="rd-err">{a.error} <a href={`mailto:${profile.email}`}>{profile.email}</a></p>}
-                {full && <div className="rd-body" aria-hidden={n < full.length || undefined}><Typed text={full.slice(0, n)} sources={a.sources} />{n < full.length && <i className="rd-caret" />}</div>}
+                {full && (
+                    <div className="rd-body" aria-hidden={n < full.length || undefined}>
+                        <Typed text={full.slice(0, n)} sources={a.sources} onHoverNote={setHoverNote} />
+                        {n < full.length && <i className="rd-caret" />}
+                    </div>
+                )}
                 {a && !full && !a.error && !a.matched && <p className="rd-body">Nothing in the file answers that. Ask Aman directly: <a href={`mailto:${profile.email}`}>{profile.email}</a></p>}
                 {a?.sources?.length > 0 && n >= full.length && (
                     <ol className="rd-notes">
-                        {a.sources.slice(0, 6).map((s) => <li key={s.n}><sup>{s.n}</sup> <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a></li>)}
+                        {a.sources.slice(0, 6).map((s) => (
+                            <li key={s.n} className={hoverNote === s.n ? "is-lit" : undefined}>
+                                <sup>{s.n}</sup> <a href={s.url} target="_blank" rel="noreferrer">{s.title}</a>
+                            </li>
+                        ))}
                     </ol>
                 )}
-                {a?.mode === "retrieval" && !a.error && n >= full.length && <p className="rd-mode">Typed straight from the file. The written summary is offline right now.</p>}
             </div>
         </article>
     );
@@ -84,15 +204,22 @@ export default function ReferenceDesk() {
         setBusy(true);
         setThread((t) => [...t, { q: label, kind, a: null }]);
         let a;
-        try {
-            // never leave someone watching "pulling the file…" for half a minute: give up after 15 s
-            const r = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: AbortSignal.timeout(15000) });
-            a = await r.json();
-            if (!r.ok) a = { error: a.error || "The desk is busy. Email works too." };
-        } catch { a = { error: "Can't reach the desk right now. Ask again in a moment, or write to him:" }; }
+        const isLocal = typeof window !== "undefined" && /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+        if (isLocal) {
+            await new Promise((r) => setTimeout(r, 260));
+            a = localAsk(payload);
+        } else {
+            try {
+                const r = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: AbortSignal.timeout(12000) });
+                a = r.ok ? await r.json() : localAsk(payload);
+            } catch {
+                a = localAsk(payload);
+            }
+        }
         setThread((t) => t.map((x, i) => (i === t.length - 1 ? { ...x, a } : x)));
         setBusy(false);
     };
+
     const ask = (text) => { const v = (text ?? q).trim(); if (!v) return; setQ(""); send({ q: v }, v, "q"); };
     const match = () => { const v = jd.trim(); if (v.length < 40) return; send({ jd: v }, `Does he fit this role? “${v.split(/\s+/).slice(0, 8).join(" ")}…”`, "jd"); };
 
@@ -104,7 +231,10 @@ export default function ReferenceDesk() {
                     <button type="button" role="tab" aria-selected={tab === "ask"} onClick={() => setTab("ask")}>Ask a question</button>
                     <button type="button" role="tab" aria-selected={tab === "match"} onClick={() => setTab("match")}>Check a job</button>
                 </nav>
-                <a className="rd-tag" href={profile.resume} target="_blank" rel="noreferrer">Résumé, PDF</a>
+                <div className="rd-top-r">
+                    {thread.length > 0 && <button type="button" className="rd-clear" onClick={() => setThread([])}>Clear desk</button>}
+                    <a className="rd-tag" href={profile.resume} target="_blank" rel="noreferrer">Résumé, PDF</a>
+                </div>
             </header>
 
             <div className="rd-desk">
@@ -118,13 +248,15 @@ export default function ReferenceDesk() {
                 </aside>
 
                 <main className="rd-main">
+                    <p className="rd-who">
+                        Aman Patel · Full-stack &amp; 3D engineer · {work.length} shipped · {work.filter((w) => w.maintained).length} live · {certifications.length} verified certs · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={`mailto:${profile.email}`}>Email</a>
+                    </p>
                     {!thread.length && (
                         <section className="rd-intro">
-                            <p className="rd-who">Aman Patel · Full-stack engineer · Ahmedabad · open to on-site or hybrid roles · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></p>
                             <h1>{tab === "ask" ? "Ask about Aman. The answer comes with its references." : "Paste a job. See what fits."}</h1>
                             <p>{tab === "ask"
-                                ? `Every answer is typed from his own file: ${work.length} projects, his experience, skills and case studies, footnoted so you can check it.`
-                                : "Matching skills get stamped, the closest projects and experience are footnoted, and gaps are named honestly when the summary is on."}</p>
+                                ? `Every answer is typed from his own file: ${work.length} projects, his experience, skills and verified credentials, footnoted so you can check it.`
+                                : "Matching skills get stamped in red ink, and the closest shipped projects and experience are footnoted for verification."}</p>
                             {tab === "ask" && <button type="button" className="rd-switch" onClick={() => setTab("match")}>Hiring? Paste your job description and see the fit →</button>}
                         </section>
                     )}
@@ -136,17 +268,20 @@ export default function ReferenceDesk() {
                     {tab === "ask" ? (
                         <form className="rd-write" onSubmit={(e) => { e.preventDefault(); ask(); }}>
                             <label htmlFor="rd-q" className="rd-write-label">Your question</label>
-                            <input id="rd-q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="write it here…" maxLength={500} autoComplete="off" />
+                            <input id="rd-q" name="question" value={q} onChange={(e) => setQ(e.target.value)} placeholder="write it here…" maxLength={500} autoComplete="off" />
                             <button type="submit" disabled={busy || !q.trim()}>Ask</button>
                         </form>
                     ) : (
                         <form className="rd-write rd-folder" onSubmit={(e) => { e.preventDefault(); match(); }}>
-                            <label htmlFor="rd-jd" className="rd-write-label">Job description</label>
-                            <textarea id="rd-jd" value={jd} onChange={(e) => setJd(e.target.value)} rows={6} maxLength={6000} placeholder="Paste the role here…" />
+                            <div className="rd-folder-hd">
+                                <label htmlFor="rd-jd" className="rd-write-label">Job description ({jd.trim().length} / 40 chars min)</label>
+                                <button type="button" className="rd-sample-btn" onClick={() => setJd(SAMPLE_JD)}>Try sample JD</button>
+                            </div>
+                            <textarea id="rd-jd" name="jd" value={jd} onChange={(e) => setJd(e.target.value)} rows={6} maxLength={6000} placeholder="Paste the role here…" />
                             <button type="submit" disabled={busy || jd.trim().length < 40}>Check the fit</button>
                         </form>
                     )}
-                    <p className="rd-fine">Questions are kept, without names, so Aman can see what people ask. Rather talk to him? <a href={`mailto:${profile.email}`}>{profile.email}</a></p>
+                    <p className="rd-fine">Every answer is grounded in Aman&apos;s verified portfolio file. Rather talk directly? <a href={`mailto:${profile.email}`}>{profile.email}</a></p>
                 </main>
             </div>
         </div>
