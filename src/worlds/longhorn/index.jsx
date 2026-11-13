@@ -189,7 +189,7 @@ function Welcome({ open, flip }) {
             <p>Full-stack engineer at {experience[0].org}, based in Ahmedabad. {work.length} projects live on this desktop: products, Android apps and client sites, most of them running right now.</p>
             <div className="lh-tiles">
                 <button type="button" onClick={() => open("explorer")}><Icon kind="folder" /><b>Browse projects</b><small>All {work.length}, by kind</small></button>
-                <button type="button" onClick={flip}><Icon kind="stack" /><b>Flip through them</b><small>The 3D stack · or press F</small></button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); flip(); }}><Icon kind="stack" /><b>Flip through them</b><small>The 3D stack · or press F</small></button>
                 <button type="button" onClick={() => open("resume")}><Icon kind="doc" /><b>Résumé</b><small>Read or download</small></button>
                 <button type="button" onClick={() => open("contact")}><Icon kind="card" /><b>Contact</b><small>Email, WhatsApp, LinkedIn</small></button>
             </div>
@@ -249,7 +249,23 @@ export default function LonghornWorld({ shell }) {
     const [clock, setClock] = useState(() => new Date());
 
     useEffect(() => { const i = setInterval(() => setClock(new Date()), 15000); return () => clearInterval(i); }, []);
-    useEffect(() => { fetch("/api/status").then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => setSites(d.sites || {})).catch(() => setSites(null)); }, []);
+    useEffect(() => {
+        const probeLocal = async () => {
+            const list = work.filter((w) => w.maintained && w.url);
+            const entries = await Promise.all(list.map(async (w) => {
+                const t0 = performance.now();
+                try {
+                    await fetch(w.url, { mode: "no-cors", cache: "no-store" });
+                    return [w.slug, { ok: true, ms: Math.max(18, Math.round(performance.now() - t0)) }];
+                } catch {
+                    return [w.slug, { ok: false, ms: 0 }];
+                }
+            }));
+            setSites(Object.fromEntries(entries));
+        };
+        if (/^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname)) { probeLocal(); return; }
+        fetch("/api/status").then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => setSites(d.sites || {})).catch(probeLocal);
+    }, []);
 
     const open = useCallback((kind, payload) => {
         setStart(false);
