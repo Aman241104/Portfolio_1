@@ -608,7 +608,7 @@ function Billboard({ stop, near, preset }) {
     useEffect(() => () => tex?.dispose(), [tex]);
     const isSakura = preset === "sakura";
     return (
-        <group position={[p.x, 0, p.z]} rotation={[0, p.heading + Math.PI + 0.55, 0]}>
+        <group position={[p.x, 0, p.z]} rotation={[0, p.heading + Math.PI + 0.36, 0]}>
             {[-2.9, 2.9].map((x) => <mesh key={x} position={[x, 2.6, -0.1]} castShadow><boxGeometry args={[0.22, 5.2, 0.22]} /><meshStandardMaterial color={isSakura ? "#d91b26" : "#3b3530"} /></mesh>)}
             <mesh position={[0, 5.4, -0.08]} castShadow><boxGeometry args={[6.6, 4.3, 0.18]} /><meshStandardMaterial color={isSakura ? "#1a0e26" : "#2c2723"} roughness={0.8} /></mesh>
             <mesh position={[0, 5.4, 0.02]}>
@@ -631,8 +631,8 @@ function Sign({ stop, preset }) {
             <mesh position={[0, 1.6, 0]}><cylinderGeometry args={[0.07, 0.07, 3.2, 6]} /><meshStandardMaterial color="#8f9aa0" /></mesh>
             <mesh position={[0, 3.35, 0]} castShadow><boxGeometry args={[3.4, 1.5, 0.08]} /><meshStandardMaterial color={boardCol} roughness={0.6} /></mesh>
             <mesh position={[0, 3.35, 0.045]}><planeGeometry args={[3.2, 1.3]} /><meshBasicMaterial color={boardCol} /></mesh>
-            <Text font={FONT} position={[0, 3.62, 0.06]} fontSize={0.3} maxWidth={3.1} color={textCol} anchorX="center" anchorY="middle">{stop.title}</Text>
-            <Text font={FONT} position={[0, 3.08, 0.06]} fontSize={0.2} color={textCol} anchorX="center" anchorY="middle">{`${stop.kind}  ·  45 m  ↑`}</Text>
+            <Text font={FONT} position={[0, 3.64, 0.06]} fontSize={0.25} maxWidth={3.0} color={textCol} anchorX="center" anchorY="middle">{stop.title}</Text>
+            <Text font={FONT} position={[0, 3.04, 0.06]} fontSize={0.18} color={textCol} anchorX="center" anchorY="middle">{`${stop.kind}  ·  45 m  ↑`}</Text>
         </group>
     );
 }
@@ -643,7 +643,7 @@ function Milestones() {
     return stones.map((s) => (
         <group key={s.d} position={[s.p.x, 0, s.p.z]} rotation={[0, s.p.heading + Math.PI + 0.4, 0]}>
             <mesh position={[0, 0.35, 0]}><boxGeometry args={[0.46, 0.7, 0.18]} /><meshStandardMaterial color="#f1ece2" /></mesh>
-            <mesh position={[0, 0.78, 0]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.23, 0.23, 0.18, 12, 1, false, 0, Math.PI]} /><meshStandardMaterial color="#f2b81c" /></mesh>
+            <mesh position={[0, 0.7, 0]} rotation={[Math.PI / 2, 0, Math.PI / 2]}><cylinderGeometry args={[0.23, 0.23, 0.18, 12, 1, false, 0, Math.PI]} /><meshStandardMaterial color="#f2b81c" /></mesh>
             <Text font={FONT} position={[0, 0.52, 0.1]} fontSize={0.1} color="#222" anchorX="center">AMD</Text>
             <Text font={FONT} position={[0, 0.34, 0.1]} fontSize={0.14} color="#222" anchorX="center">{(s.d / 1000).toFixed(1)}</Text>
         </group>
@@ -750,6 +750,8 @@ export default function Scene({ state, near, preset = "golden" }) {
         <>
             <fog attach="fog" args={[p.fog, 65, 540]} />
             <hemisphereLight args={[p.hemiSky, p.hemiGround, 1.1]} />
+            {/* Rear-right fill light so the left FjordCliffs show rock relief instead of a crushed-black wall */}
+            <directionalLight position={[45, 22, 60]} intensity={preset === "sakura" ? 0.85 : 1.1} color={preset === "sakura" ? "#ffb7c5" : "#ffd6a8"} />
             <Sky preset={preset} />
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-380, 0, -LENGTH / 2]} receiveShadow>
                 <planeGeometry args={[800, LENGTH + 1200]} /><meshStandardMaterial color={groundCol} roughness={1} />

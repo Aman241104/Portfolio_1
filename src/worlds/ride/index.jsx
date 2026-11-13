@@ -66,9 +66,9 @@ function RouteMap({ onGo, onClose, here }) {
                 <li key={s.i} data-here={Math.abs(here - s.d) < 37 || undefined}>
                     <button type="button" onClick={() => onGo?.(s)} disabled={!onGo}>
                         <img src={shot(s.w, 240)} alt="" loading="lazy" />
-                        <span><small>km {(s.d / 1000).toFixed(2)} · {s.kind}</small><b>{s.title}</b><small>{s.w.line}</small></span>
+                        <span><small>km {(s.d / 1000).toFixed(2)} · {s.kind}</small><b>{s.title}</b><small>{s.w.line}</small>{s.w.stack && <small className="rd-map-stack">{s.w.stack}</small>}</span>
                     </button>
-                    {!onGo && s.w.url && <a href={s.w.url} target="_blank" rel="noreferrer">Visit ↗</a>}
+                    {s.w.url && <a href={s.w.url} target="_blank" rel="noreferrer">Visit ↗</a>}
                 </li>
             ))}
                 <li className="rd-map-end"><b>Next exit: your team.</b> <a href={`mailto:${profile.email}`}>{profile.email}</a> · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={profile.resume} target="_blank" rel="noreferrer">Résumé</a></li>
@@ -76,6 +76,8 @@ function RouteMap({ onGo, onClose, here }) {
         </section>
     );
 }
+
+const BIOMES = [["golden", "Golden Hour"], ["fjord", "Fjord"], ["sakura", "Kyoto Touge"]];
 
 export default function RideWorld() {
     useFonts(FONTS);
@@ -86,6 +88,7 @@ export default function RideWorld() {
     const [started, setStarted] = useState(false);
     const [map, setMap] = useState(false);
     const [cruise, setCruise] = useState(true);
+    const [preset, setPreset] = useState("golden");
     const [near, setNear] = useState(0);
     const visitedRef = useRef(new Set());
     const show3d = !flat || force3d;
@@ -132,6 +135,7 @@ export default function RideWorld() {
             else if (["ArrowDown", "s", "S"].includes(e.key)) { e.preventDefault(); s.hold = -1; }
             else if (e.key === " ") { e.preventDefault(); begin(); s.cruise = !s.cruise; setCruise(s.cruise); }
             else if (e.key === "m" || e.key === "M") setMap((m) => !m);
+            else if (e.key === "b" || e.key === "B") setPreset((p) => BIOMES[(BIOMES.findIndex(([id]) => id === p) + 1) % BIOMES.length][0]);
         };
         const ku = (e) => { if (["ArrowUp", "w", "W", "ArrowDown", "s", "S"].includes(e.key)) s.hold = 0; };
         addEventListener("wheel", wheel, { passive: false }); addEventListener("touchstart", ts, { passive: true }); addEventListener("touchmove", tm, { passive: true });
@@ -155,15 +159,26 @@ export default function RideWorld() {
         );
     }
 
+    const stepStop = (dir) => {
+        const curIdx = STOPS.findIndex((s) => s.d > state.current.d - 18);
+        const idx = curIdx === -1 ? STOPS.length - 1 : Math.max(0, Math.min(STOPS.length - 1, curIdx + dir));
+        go(STOPS[idx]);
+    };
+
     return (
-        <div className="rd" data-started={started || undefined}>
+        <div className="rd" data-started={started || undefined} data-preset={preset}>
             <Canvas className="rd-canvas" shadows dpr={[1, 1.6]} camera={{ fov: 52, near: 0.5, far: 1200, position: [-8, 3, 10] }} gl={{ antialias: true, powerPreference: "high-performance" }}>
-                <Suspense fallback={null}><Scene state={state} near={near} /></Suspense>
+                <Suspense fallback={null}><Scene state={state} near={near} preset={preset} /></Suspense>
             </Canvas>
             <div className="rd-grade" aria-hidden />
 
             <header className="rd-top">
                 <p className="rd-brand">RIDE <span>· Aman Patel, full-stack engineer · Ahmedabad</span></p>
+                <div className="rd-biomes" role="group" aria-label="Biome">
+                    {BIOMES.map(([id, label]) => (
+                        <button key={id} type="button" aria-pressed={preset === id} onClick={() => setPreset(id)}>{label}</button>
+                    ))}
+                </div>
                 <nav>
                     <button type="button" onClick={() => setMap(true)}>Map</button>
                     <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "world" })}>Résumé</a>
@@ -200,8 +215,10 @@ export default function RideWorld() {
             )}
             {started && (
                 <p className="rd-hint">
+                    <button type="button" onClick={() => stepStop(-1)} aria-label="Previous stop">← Prev</button>
                     <button type="button" onClick={() => { state.current.cruise = !state.current.cruise; setCruise(state.current.cruise); }}>{cruise ? "Cruise on" : "Cruise off"}</button>
-                    <span>Scroll or ↑ to ride faster · Space to pause · M for the map</span>
+                    <button type="button" onClick={() => stepStop(1)} aria-label="Next stop">Next →</button>
+                    <span>Scroll / ↑ faster · Space pause · B biome · M map</span>
                 </p>
             )}
             <p className="rd-progress" aria-hidden><i style={{ width: `${Math.min(100, (hud.d / END) * 100)}%` }} /></p>

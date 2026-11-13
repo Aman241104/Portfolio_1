@@ -44,8 +44,8 @@
 .rd-num { fill: #f6dfc2; font: 600 9px "Saira", sans-serif; text-anchor: middle; }
 .rd-needle { stroke: var(--amber); stroke-width: 3; stroke-linecap: round; transform-origin: 60px 60px; transition: transform .25s var(--ease-out); }
 .rd-hub { fill: var(--amber); }
-.rd-kmh { margin: -40px 0 0; font: 600 12px "Saira", sans-serif; } .rd-kmh b { font: 800 22px "Saira Condensed", sans-serif; }
-.rd-odo { margin: 22px 0 0; font: 600 12px "Saira", sans-serif; text-shadow: 0 1px 6px rgba(40, 15, 0, .8); }
+.rd-kmh { position: relative; z-index: 2; margin: -40px 0 0; font: 600 12px "Saira", sans-serif; text-shadow: 0 1px 4px rgba(0, 0, 0, .8); } .rd-kmh b { font: 800 22px "Saira Condensed", sans-serif; }
+.rd-odo { position: relative; z-index: 2; margin: 22px 0 0; font: 600 12px "Saira", sans-serif; text-shadow: 0 1px 6px rgba(40, 15, 0, .8); }
 .rd-odo span { display: inline-block; padding: 0 5px; margin-right: 3px; background: #1d130c; border: 1px solid #6b4a2f; font: 800 15px "Saira Condensed", sans-serif; color: var(--amber); }
 
 /* the stop card: slides in from the right while the bike rolls past the billboard */
@@ -99,4 +99,12 @@
     .rd-intro { left: 16px; right: 16px; bottom: 150px; }
     .rd-credit { display: none; }
 }
+
+.rd[data-preset="sakura"] { --amber: #ff7aa2; }
+.rd[data-preset="fjord"] { --amber: #7dd3fc; }
+.rd-biomes { display: flex; gap: 4px; padding: 3px; border-radius: 999px; border: 1px solid rgba(255, 240, 220, .3); background: rgba(20, 10, 5, .48); }
+.rd-biomes button { padding: 5px 11px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); font: 600 11.5px/1 "Saira", sans-serif; letter-spacing: .04em; opacity: .75; transition: background .2s, color .2s, opacity .2s; }
+.rd-biomes button[aria-pressed="true"] { background: var(--amber); color: #1b0d05; opacity: 1; }
+.rd-map-stack { color: var(--amber) !important; margin-top: 4px; font-size: 11px !important; }
+@media (max-width: 760px) { .rd-biomes { display: none; } }
 @media (prefers-reduced-motion: reduce) { .rd-card, .rd-speedo, .rd-map, .rd-intro > * { animation: none; } .rd-needle { transition: none; } }

@@ -46,6 +46,7 @@ export function scenery() {
             if (side < 0 && off < 22 && STOPS.some((s) => Math.abs(s.d - dd) < 14 || Math.abs(s.d - 45 - dd) < 6)) continue;
             const m = PICK[Math.floor(r() * PICK.length)], [lo, hi] = MODELS[m].s;
             at(dd, side * off, p);
+            if (p.x > 17.5) continue;                       // never spawn land props in the coastal ocean (x >= 20)
             out[m].push({ x: p.x, z: p.z, rot: r() * Math.PI * 2, s: lo + r() * (hi - lo) });
         }
     }
