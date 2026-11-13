@@ -19,10 +19,63 @@
     animation: world-wipe 280ms var(--ease-out) both; }
 .world-wipe.hold { position: relative; min-height: 100dvh; z-index: auto; animation: none; }
 .world-wipe p { font: 500 13px "Georama", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: rgba(128, 128, 128, .9); opacity: 0; animation: world-wait .3s .6s both; }
-.world-cover { position: fixed; inset: 0; z-index: 9999; pointer-events: none; animation: world-cover 300ms var(--ease-in-out) both; }
-@keyframes world-cover { from { opacity: 0; } }
 @keyframes world-wipe { to { opacity: 0; visibility: hidden; } }
 @keyframes world-wait { to { opacity: 1; } }
+
+/* Awwwards-grade PX-01 Reality Shutter transition (Home <-> World & World <-> World) */
+.world-stage { animation: world-stage-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes world-stage-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.world-portal {
+    position: fixed; inset: 0; z-index: 10050; pointer-events: none;
+    background: var(--portal-bg, #050506); color: var(--portal-fg, #edeae3);
+    display: grid; place-items: center; overflow: hidden;
+    will-change: clip-path, opacity;
+}
+.world-portal--in {
+    animation: portal-in 380ms cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+.world-portal--out {
+    animation: portal-out 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.world-portal-edge {
+    position: absolute; inset: 0;
+    border-top: 2px solid #ff2e1f;
+    box-shadow: inset 0 0 80px rgba(255, 46, 31, 0.08);
+}
+.world-portal-hud {
+    display: grid; justify-items: center; gap: 6px; text-align: center; padding: 20px;
+    animation: portal-hud 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.world-portal-kicker {
+    font: 500 11px/1 "Geist Mono", monospace; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #ff2e1f;
+}
+.world-portal-name {
+    font: 600 clamp(26px, 5vw, 52px)/1.05 "Geist", system-ui, sans-serif; letter-spacing: -0.03em;
+}
+.world-portal-sym {
+    font: 400 11px/1.2 "Geist Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;
+    opacity: 0.65;
+}
+@keyframes portal-in {
+    0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
+    100% { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); }
+}
+@keyframes portal-out {
+    0% { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); opacity: 1; }
+    100% { clip-path: polygon(0 0%, 100% 0%, 100% 0%, 0 0%); opacity: 0.96; }
+}
+@keyframes portal-hud {
+    0% { opacity: 0; transform: translateY(14px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .world-stage, .world-portal--in, .world-portal--out, .world-portal-hud { animation: none !important; }
+}
 
 /* A world's fonts are still loading (src/worlds/fonts.js, max 600 ms): hold every entrance on its first frame. */
 html[data-fonts-wait] *, html[data-fonts-wait] *::before, html[data-fonts-wait] *::after { animation-play-state: paused !important; }

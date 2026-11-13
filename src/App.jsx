@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { setWorld } from "./analytics.js";
 import { findWorld } from "#worlds/registry.js";
 import { setLast } from "#shell/storage.js";
@@ -20,53 +20,106 @@ const syncUrl = (id) => {
     history.replaceState(null, "", url);
 };
 
+// Simple luminance check so telemetry text on the portal shutter always has high contrast.
+const isLightHex = (hex = "#0a0a0a") => {
+    const h = hex.replace("#", "");
+    if (h.length !== 6) return false;
+    const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+    return (r * 299 + g * 587 + b * 114) / 1000 > 145;
+};
+
 const App = () => {
     const [worldId, setWorldId] = useState(initialWorld);
-    const [wipe, setWipe] = useState(false);   // only when arriving from another screen, never on a direct link
+    const [portal, setPortal] = useState(null);   // { phase: "in" | "out", color, name, symbols }
+    const timers = useRef([]);
     const world = findWorld(worldId);
+
     useEffect(() => {
         setWorld(world?.id);
         document.documentElement.style.setProperty("--paper0", world?.paper ?? "#0a0a0a");
     }, [world]);
 
-    const [cover, setCover] = useState(null);  // world → world: the next world's colour covers this one first
+    useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+    const transitionTo = (target, apply) => {
+        timers.current.forEach(clearTimeout);
+        timers.current = [];
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            apply();
+            window.scrollTo(0, 0);
+            setPortal(null);
+            return;
+        }
+        setPortal({ phase: "in", ...target });
+        const t1 = setTimeout(() => {
+            apply();
+            window.scrollTo(0, 0);
+            setPortal((p) => (p ? { ...p, phase: "out" } : null));
+        }, 380);
+        const t2 = setTimeout(() => setPortal(null), 820);
+        timers.current = [t1, t2];
+    };
+
     const go = (id) => {
         const next = findWorld(id);
-        if (!next) return;
-        const swap = () => {
-            setLast(next.id);
-            setWipe(true);
-            syncUrl(next.id);
-            setWorldId(next.id);
-            setCover(null);
-        };
-        if (!world || matchMedia("(prefers-reduced-motion: reduce)").matches) return swap();
-        setCover(next.paper);
-        setTimeout(swap, 300);
+        if (!next || next.id === worldId) return;
+        transitionTo(
+            { color: next.paper || "#0a0a0a", name: next.name, symbols: next.symbols?.join(" · ") || "PX-01" },
+            () => {
+                setLast(next.id);
+                syncUrl(next.id);
+                setWorldId(next.id);
+            }
+        );
     };
 
     const toMachine = () => {
-        const back = () => { syncUrl(null); setWorldId(null); setCover(null); };
-        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return back();
-        setCover("#050506");
-        setTimeout(back, 300);
+        if (!worldId) return;
+        transitionTo(
+            { color: "#050506", name: "Studio Machine", symbols: "PX-01 · REALITY SELECTOR" },
+            () => {
+                syncUrl(null);
+                setWorldId(null);
+            }
+        );
     };
 
-    if (!world) return hasWebGL ? <Home onSelect={go} /> : <Suspense fallback={null}><Machine onSelect={go} /></Suspense>;
+    const portalOverlay = portal && (
+        <div
+            className={`world-portal world-portal--${portal.phase}`}
+            style={{ "--portal-bg": portal.color, "--portal-fg": isLightHex(portal.color) ? "#111113" : "#edeae3" }}
+            aria-hidden="true"
+        >
+            <div className="world-portal-edge" />
+            <div className="world-portal-hud">
+                <span className="world-portal-kicker">PX‑01 // REALITY SHIFT</span>
+                <strong className="world-portal-name">{portal.name}</strong>
+                <span className="world-portal-sym">{portal.symbols}</span>
+            </div>
+        </div>
+    );
+
+    if (!world) {
+        return (
+            <>
+                {hasWebGL ? <Home onSelect={go} /> : <Suspense fallback={null}><Machine onSelect={go} /></Suspense>}
+                {portalOverlay}
+            </>
+        );
+    }
 
     const { Component } = world;
     return (
         <>
             <WorldBoundary key={world.id}>
-                {/* One continuous move from the machine: the curtain faded to this world's paper, the loading screen holds
-                    that colour, and once the world is mounted it dissolves into the world's own arrival. */}
                 <Suspense fallback={<div className="world-wipe hold" style={{ background: world.paper }}><p>Loading {world.name}…</p></div>}>
-                    <Component shell={{ go, spin: toMachine }} />
-                    {wipe && <div className="world-wipe" style={{ background: world.paper }} aria-hidden />}
+                    <div className="world-stage">
+                        <Component shell={{ go, spin: toMachine }} />
+                    </div>
                 </Suspense>
             </WorldBoundary>
             <CoinSlot current={world.id} onSpin={toMachine} onSelect={go} />
-            {cover && <div className="world-cover" style={{ background: cover }} aria-hidden />}
+            {portalOverlay}
         </>
     );
 };
