@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { profile } from "#content/profile.js";
-import { shot } from "../../../content/work.js";
+import { profile, socials } from "#content/profile.js";
+import { shot, KINDS } from "../../../content/work.js";
 import { cases } from "../../../content/cases.js";
 import { useFonts } from "../fonts.js";
 import { track } from "../../analytics.js";
@@ -23,6 +23,7 @@ const lowPower = () => {
 };
 const CRUISE = 13, MAX = 42;                                       // m/s: ~47 km/h cruise, ~150 km/h flat out
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
 function Speedo({ kmh, visited }) {
     const a = -120 + Math.min(1, kmh / 160) * 240;
@@ -59,10 +60,29 @@ function StopCard({ stop }) {
 }
 
 function RouteMap({ onGo, onClose, here }) {
+    const [kind, setKind] = useState("all");
+    const [q, setQ] = useState("");
+    const query = q.trim().toLowerCase();
+    const list = STOPS.filter((s) =>
+        (kind === "all" || s.w.kind === kind) &&
+        (!query || s.title.toLowerCase().includes(query) || (s.w.stack || "").toLowerCase().includes(query) || s.w.line.toLowerCase().includes(query))
+    );
     return (
         <section className="rd-map" role="dialog" aria-label="Route map: every stop">
-            <header><h2>Route map</h2><p>NH-PX01 · Ahmedabad → your team · {(LENGTH / 1000).toFixed(1)} km · {STOPS.length} stops</p>{onClose && <button type="button" onClick={onClose}>Back to the ride</button>}</header>
-            <ol>{STOPS.map((s) => (
+            <header>
+                <h2>Route map</h2>
+                <p>NH-PX01 · Ahmedabad → your team · {(LENGTH / 1000).toFixed(1)} km · {STOPS.length} stops</p>
+                {onClose && <button type="button" onClick={onClose}>Back to the ride</button>}
+            </header>
+            <div className="rd-map-tools">
+                <div className="rd-map-filters" role="tablist" aria-label="Filter stops">
+                    {Object.entries({ all: "All", ...KINDS }).map(([k, label]) => (
+                        <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>{label}</button>
+                    ))}
+                </div>
+                <input id="rd-map-search" name="q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search project or stack (e.g. FastAPI, Three.js)…" aria-label="Search stops" />
+            </div>
+            <ol>{list.map((s) => (
                 <li key={s.i} data-here={Math.abs(here - s.d) < 37 || undefined}>
                     <button type="button" onClick={() => onGo?.(s)} disabled={!onGo}>
                         <img src={shot(s.w, 240)} alt="" loading="lazy" />
@@ -71,8 +91,9 @@ function RouteMap({ onGo, onClose, here }) {
                     {s.w.url && <a href={s.w.url} target="_blank" rel="noreferrer">Visit ↗</a>}
                 </li>
             ))}
-                <li className="rd-map-end"><b>Next exit: your team.</b> <a href={`mailto:${profile.email}`}>{profile.email}</a> · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={profile.resume} target="_blank" rel="noreferrer">Résumé</a></li>
+                <li className="rd-map-end"><b>Next exit: your team.</b> <a href={`mailto:${profile.email}`}>{profile.email}</a> · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a> · {linkedin && <><a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a> · </>}<a href={profile.resume} target="_blank" rel="noreferrer">Résumé</a></li>
             </ol>
+            <p className="rd-map-credit">Trees &amp; rocks: Kenney (CC0) · Motorcycle: Poly by Google, CC BY 3.0</p>
         </section>
     );
 }
@@ -180,8 +201,10 @@ export default function RideWorld() {
                     ))}
                 </div>
                 <nav>
-                    <button type="button" onClick={() => setMap(true)}>Map</button>
+                    <button type="button" onClick={() => setMap(true)}>Map ({STOPS.length})</button>
                     <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "world" })}>Résumé</a>
+                    <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
+                    {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
                     <a href={`mailto:${profile.email}`}>Email</a>
                 </nav>
             </header>
@@ -199,7 +222,17 @@ export default function RideWorld() {
             )}
 
             {started && <Speedo kmh={hud.v * 3.6} visited={visited} />}
-            {started && !atEnd && <StopCard stop={stop} />}
+            {started && !atEnd && stop && <StopCard stop={stop} />}
+            {started && !atEnd && !stop && (() => {
+                const next = STOPS.find((s) => s.d >= hud.d + 20);
+                if (!next) return null;
+                return (
+                    <button type="button" className="rd-next-pill" onClick={() => go(next)}>
+                        <span>Next in {Math.max(1, Math.round(next.d - hud.d))} m</span>
+                        <b>{next.title} →</b>
+                    </button>
+                );
+            })()}
             {atEnd && (
                 <aside className="rd-card rd-end">
                     <p className="rd-kicker">Next exit</p>
@@ -223,7 +256,6 @@ export default function RideWorld() {
             )}
             <p className="rd-progress" aria-hidden><i style={{ width: `${Math.min(100, (hud.d / END) * 100)}%` }} /></p>
             {map && <RouteMap here={hud.d} onGo={go} onClose={() => setMap(false)} />}
-            <p className="rd-credit">Trees &amp; rocks: Kenney (CC0) · Motorcycle: Poly by Google, CC BY 3.0</p>
         </div>
     );
 }

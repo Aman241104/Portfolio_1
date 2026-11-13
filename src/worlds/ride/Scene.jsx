@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, Text } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { shot } from "../../../content/work.js";
 import { STOPS, END, LENGTH, ROAD_W, LANE_X, MODELS, frame, at, scenery } from "./route.js";
@@ -275,20 +276,22 @@ function FjordCliffs({ preset }) {
     }, []);
 
     useEffect(() => {
-        if (preset === "sakura") cliffMat.color.set("#4a3559");
-        else if (preset === "fjord") cliffMat.color.set("#7d93a6");
+        if (preset === "sakura") cliffMat.color.set("#72548a");
+        else if (preset === "fjord") cliffMat.color.set("#8da5ba");
         else cliffMat.color.set("#d8a47f");
     }, [preset, cliffMat]);
 
     const cliffs = useMemo(() => {
         const arr = [];
         for (let d = 20; d < LENGTH + 120; d += 55) {
-            const posL = at(d, -ROAD_W / 2 - 28 - ((d * 17) % 18));
-            const posR = at(d + 25, ROAD_W / 2 + 65 + ((d * 23) % 45));
+            const sxL = 22 + ((d * 13) % 16);
+            // Keep inner cliff edge >= 26m left of centreline so cliffs never clip the highway
+            const posL = at(d, -ROAD_W / 2 - 48 - sxL * 0.85 - ((d * 17) % 14));
+            const posR = at(d + 25, ROAD_W / 2 + 78 + ((d * 23) % 45));
             arr.push({
                 x: posL.x,
                 z: posL.z,
-                sx: 22 + ((d * 13) % 16),
+                sx: sxL,
                 sy: 26 + ((d * 29) % 34),
                 sz: 24 + ((d * 19) % 18),
                 rot: (d * 0.17) % Math.PI,
@@ -457,8 +460,8 @@ function SakuraHighwayAtmosphere({ active, state }) {
             {toriiStops.map((g, idx) => (
                 <group key={idx} position={[g.x, 0, g.z]} rotation={[0, g.heading + Math.PI, 0]}>
                     <primitive object={toriiScene.clone(true)} position={[0, 0, 0]} scale={[14.5, 13.5, 14.5]} />
-                    <primitive object={sakuraScene.clone(true)} position={[-9.2, 0, -2.5]} rotation={[0, 0.5, 0]} scale={7.2} />
-                    <primitive object={sakuraScene.clone(true)} position={[9.2, 0, 2.5]} rotation={[0, -0.5, 0]} scale={7.2} />
+                    <primitive object={sakuraScene.clone(true)} position={[-14.5, 0, -3.5]} rotation={[0, 0.5, 0]} scale={5.4} />
+                    <primitive object={sakuraScene.clone(true)} position={[14.5, 0, 3.5]} rotation={[0, -0.5, 0]} scale={5.4} />
                     {[-4.4, 4.4].map((lx) => (
                         <group key={`l-${lx}`} position={[lx, 6.1, 0]}>
                             <primitive object={lanternScene.clone(true)} scale={1.15} />
@@ -471,17 +474,21 @@ function SakuraHighwayAtmosphere({ active, state }) {
     );
 }
 
-// ---- the road: shoulders, asphalt, edge lines as ribbons; centre dashes instanced ----
+// ---- the road: shoulders, wet-asphalt PBR ribbon, Armco steel guardrails, cat's-eye studs & touge lamps ----
 function ribbon(w, y, from = -80, to = LENGTH + 200, step = 3) {
-    const pos = [], idx = [], f = {};
+    const pos = [], uvs = [], idx = [], f = {};
     let i = 0;
     for (let d = from; d <= to; d += step, i++) {
         frame(d, f);
         pos.push(f.x - f.rx * w / 2, y, f.z - f.rz * w / 2, f.x + f.rx * w / 2, y, f.z + f.rz * w / 2);
+        uvs.push(0, d * 0.14, 1, d * 0.14);
         if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
     }
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+    g.setIndex(idx);
+    g.computeVertexNormals();
     return g;
 }
 function offsetRibbon(off, w, y) {
@@ -497,16 +504,55 @@ function offsetRibbon(off, w, y) {
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
     return g;
 }
+function wallRibbon(off, y0, y1, from = -80, to = LENGTH + 200, step = 4) {
+    const pos = [], idx = [], f = {};
+    let i = 0;
+    for (let d = from; d <= to; d += step, i++) {
+        frame(d, f);
+        const cx = f.x + f.rx * off, cz = f.z + f.rz * off;
+        pos.push(cx, y0, cz, cx, y1, cz);
+        if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+    return g;
+}
+function asphaltTex() {
+    const c = document.createElement("canvas");
+    c.width = c.height = 256;
+    const g = c.getContext("2d");
+    const img = g.createImageData(256, 256);
+    for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+        const i = (y * 256 + x) * 4;
+        const u = x / 256;
+        // Subtle tire-track polish in the two lanes + fine aggregate grain
+        const track = Math.exp(-Math.pow((u - 0.28) * 7, 2)) + Math.exp(-Math.pow((u - 0.72) * 7, 2));
+        const grain = (Math.random() - 0.5) * 38;
+        const v = Math.max(0, Math.min(255, 135 - track * 22 + grain));
+        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+        img.data[i + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+}
 function Road({ preset }) {
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
-    const [shoulder, asphalt, lineL, lineR] = useMemo(() => [
-        ribbon(ROAD_W + 4.5, 0.01),
+    const isNight = preset === "sakura";
+    const roadTex = useMemo(() => asphaltTex(), []);
+    const [shoulder, asphalt, lineL, lineR, railL, railR] = useMemo(() => [
+        ribbon(ROAD_W + 4.8, 0.01),
         ribbon(ROAD_W, 0.03),
         offsetRibbon(-ROAD_W / 2 + 0.35, 0.16, 0.04),
         offsetRibbon(ROAD_W / 2 - 0.35, 0.16, 0.04),
+        wallRibbon(-ROAD_W / 2 - 0.55, 0.42, 0.74),
+        wallRibbon(ROAD_W / 2 + 0.55, 0.42, 0.74),
     ], []);
-    const dashes = useRef();
+    const dashes = useRef(), studs = useRef(), posts = useRef(), lamps = useRef();
     const n = Math.floor((LENGTH + 280) / 9);
+    const nPosts = Math.floor((LENGTH + 280) / 8) * 2;
+    const nLamps = Math.floor((LENGTH + 200) / 56);
     useEffect(() => {
         const m = new THREE.Matrix4(), q = new THREE.Quaternion(), f = {};
         for (let i = 0; i < n; i++) {
@@ -514,66 +560,134 @@ function Road({ preset }) {
             q.setFromEuler(new THREE.Euler(0, f.heading, 0));
             m.compose(new THREE.Vector3(f.x, 0.045, f.z), q, new THREE.Vector3(0.16, 0.01, 3.2));
             dashes.current.setMatrixAt(i, m);
+            m.compose(new THREE.Vector3(f.x, 0.055, f.z), q, new THREE.Vector3(0.12, 0.04, 0.12));
+            studs.current.setMatrixAt(i, m);
         }
         dashes.current.instanceMatrix.needsUpdate = true;
-    }, [n]);
+        studs.current.instanceMatrix.needsUpdate = true;
+        let pi = 0;
+        for (let d = -80; d <= LENGTH + 200 && pi + 1 < nPosts; d += 8) {
+            frame(d, f);
+            q.setFromEuler(new THREE.Euler(0, f.heading, 0));
+            for (const side of [-1, 1]) {
+                const off = side * (ROAD_W / 2 + 0.62);
+                m.compose(new THREE.Vector3(f.x + f.rx * off, 0.38, f.z + f.rz * off), q, new THREE.Vector3(0.08, 0.76, 0.08));
+                posts.current.setMatrixAt(pi++, m);
+            }
+        }
+        posts.current.instanceMatrix.needsUpdate = true;
+        for (let i = 0; i < nLamps; i++) {
+            frame(-40 + i * 56, f);
+            q.setFromEuler(new THREE.Euler(0, f.heading, 0));
+            const off = ROAD_W / 2 + 1.25;
+            m.compose(new THREE.Vector3(f.x + f.rx * off, 0, f.z + f.rz * off), q, new THREE.Vector3(1, 1, 1));
+            lamps.current.setMatrixAt(i, m);
+        }
+        lamps.current.instanceMatrix.needsUpdate = true;
+    }, [n, nPosts, nLamps]);
     return (
         <group>
             <mesh geometry={shoulder} receiveShadow><meshStandardMaterial color={p.shoulder} roughness={0.95} /></mesh>
-            <mesh geometry={asphalt} receiveShadow><meshStandardMaterial color={p.asphalt} roughness={0.76} metalness={0.08} /></mesh>
+            <mesh geometry={asphalt} receiveShadow>
+                <meshStandardMaterial color={p.asphalt} map={roadTex} roughnessMap={roadTex} roughness={isNight ? 0.38 : 0.62} metalness={isNight ? 0.25 : 0.12} />
+            </mesh>
             <mesh geometry={lineL}><meshBasicMaterial color={p.lineColor} /></mesh>
             <mesh geometry={lineR}><meshBasicMaterial color={p.lineColor} /></mesh>
+            <mesh geometry={railL} castShadow receiveShadow><meshStandardMaterial color="#b4bcc2" metalness={0.72} roughness={0.34} side={THREE.DoubleSide} /></mesh>
+            <mesh geometry={railR} castShadow receiveShadow><meshStandardMaterial color="#b4bcc2" metalness={0.72} roughness={0.34} side={THREE.DoubleSide} /></mesh>
             <instancedMesh ref={dashes} args={[null, null, n]} frustumCulled={false}><boxGeometry /><meshBasicMaterial color={p.lineColor} /></instancedMesh>
+            <instancedMesh ref={studs} args={[null, null, n]} frustumCulled={false}>
+                <boxGeometry />
+                <meshStandardMaterial color="#ff9d2e" emissive="#ff7b00" emissiveIntensity={isNight ? 1.8 : 0.85} />
+            </instancedMesh>
+            <instancedMesh ref={posts} args={[null, null, nPosts]} frustumCulled={false}><boxGeometry /><meshStandardMaterial color="#6e767d" metalness={0.6} roughness={0.45} /></instancedMesh>
+            <instancedMesh ref={lamps} args={[null, null, nLamps]} frustumCulled={false}>
+                <cylinderGeometry args={[0.07, 0.1, 6.2, 8]} />
+                <meshStandardMaterial color="#4a4e54" metalness={0.7} roughness={0.35} />
+            </instancedMesh>
         </group>
     );
 }
 
-// ---- scenery: every Kenney model drawn as instanced meshes, recoloured dynamically per preset ----
-function Model({ name, items, preset }) {
-    const { scene } = useGLTF(`/ride/${name}.glb`);
-    const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
-    const parts = useMemo(() => {
-        scene.updateMatrixWorld(true);
+// ---- realistic PBR scenery: PolyHaven fern_02 + 1K PBR rock boulders + BlenderKit sakura (zero toy blocks) ----
+function Scenery({ preset }) {
+    const s = useMemo(() => scenery(), []);
+    const { scene: fernGltf } = useGLTF("/models/fern_02/fern_02.gltf");
+    const { scene: sakuraGltf } = useGLTF("/models/bk/bk-sakura-blooming.glb");
+
+    const fernParts = useMemo(() => {
+        fernGltf.updateMatrixWorld(true);
         const out = [];
-        scene.traverse((o) => {
+        fernGltf.traverse((o) => {
             if (!o.isMesh) return;
             const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld);
-            const name2 = o.material.name || "";
-            const key = Object.keys(p.recolour).find((k) => name2.toLowerCase().includes(k.toLowerCase().replace(/s$/, "")));
-            const col = p.recolour[key] || o.material.color;
-            const isSakuraLeaf = preset === "sakura" && (key === "leafsGreen" || key === "leafsDark");
-            out.push({
-                g,
-                m: new THREE.MeshStandardMaterial({
-                    color: col,
-                    emissive: isSakuraLeaf ? "#ff5c8a" : "#000000",
-                    emissiveIntensity: isSakuraLeaf ? 0.25 : 0,
-                    roughness: 0.9,
-                    flatShading: true,
-                }),
-            });
+            out.push({ g, m: o.material });
         });
         return out;
-    }, [scene, preset, p]);
-    const refs = useRef([]);
+    }, [fernGltf]);
+
+    const boulderMat = useMemo(() => {
+        const loader = new THREE.TextureLoader();
+        const diff = loader.load("/textures/coast_land_rocks_01_diff_1k.jpg");
+        const nor = loader.load("/textures/coast_land_rocks_01_nor_gl_1k.jpg");
+        const rough = loader.load("/textures/coast_land_rocks_01_rough_1k.jpg");
+        diff.colorSpace = THREE.SRGBColorSpace;
+        return new THREE.MeshStandardMaterial({ map: diff, normalMap: nor, roughnessMap: rough, roughness: 0.68, metalness: 0.08 });
+    }, []);
+    const boulderGeo = useMemo(() => {
+        const g = new THREE.IcosahedronGeometry(1, 2);
+        const pos = g.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+            const n = Math.sin(x * 4.2 + z * 3.1) * 0.18 + Math.cos(y * 3.7 - x * 2.5) * 0.14;
+            pos.setXYZ(i, x * (1 + n), y * (0.72 + n * 0.5), z * (1 + n));
+        }
+        g.computeVertexNormals();
+        return g;
+    }, []);
+
+    const ferns = useMemo(() => [...(s.plant_bush || []), ...(s.plant_bushLarge || []), ...(s.grass_large || [])].slice(0, 260), [s]);
+    const rocks = useMemo(() => [...(s.rock_largeA || []), ...(s.rock_largeC || []), ...(s.rock_tallB || [])].slice(0, 90), [s]);
+    const trees = useMemo(() => [...(s.tree_oak || []), ...(s.tree_default || []), ...(s.tree_palm || [])].filter((_, i) => i % 3 === 0).slice(0, 48), [s]);
+
+    const fernRefs = useRef([]);
+    const rockRef = useRef();
+
     useEffect(() => {
         const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
-        refs.current.forEach((im) => {
+        fernRefs.current.forEach((im) => {
             if (!im) return;
-            items.forEach((it, i) => {
+            ferns.forEach((it, i) => {
                 e.set(0, it.rot, 0); q.setFromEuler(e);
-                m.compose(new THREE.Vector3(it.x, 0, it.z), q, new THREE.Vector3(it.s, it.s * (0.9 + (i % 5) * 0.05), it.s));
+                const sc = 2.6 + (i % 4) * 0.55;
+                m.compose(new THREE.Vector3(it.x, 0, it.z), q, new THREE.Vector3(sc, sc, sc));
                 im.setMatrixAt(i, m);
             });
             im.instanceMatrix.needsUpdate = true;
             im.computeBoundingSphere();
         });
-    }, [items, parts]);
-    return parts.map((pt, k) => <instancedMesh key={k} ref={(el) => { refs.current[k] = el; }} args={[pt.g, pt.m, items.length]} castShadow receiveShadow frustumCulled={false} />);
-}
-function Scenery({ preset }) {
-    const s = useMemo(() => scenery(), []);
-    return Object.keys(MODELS).map((k) => <Model key={k} name={k} items={s[k]} preset={preset} />);
+        if (rockRef.current) {
+            rocks.forEach((it, i) => {
+                e.set(0, it.rot, 0); q.setFromEuler(e);
+                m.compose(new THREE.Vector3(it.x, it.s * 0.12, it.z), q, new THREE.Vector3(it.s * 0.45, it.s * 0.34, it.s * 0.45));
+                rockRef.current.setMatrixAt(i, m);
+            });
+            rockRef.current.instanceMatrix.needsUpdate = true;
+            rockRef.current.computeBoundingSphere();
+        }
+    }, [ferns, rocks, fernParts]);
+
+    return (
+        <group>
+            {fernParts.map((pt, k) => (
+                <instancedMesh key={`fn-${k}`} ref={(el) => { fernRefs.current[k] = el; }} args={[pt.g, pt.m, ferns.length]} castShadow receiveShadow frustumCulled={false} />
+            ))}
+            <instancedMesh ref={rockRef} args={[boulderGeo, boulderMat, rocks.length]} castShadow receiveShadow frustumCulled={false} />
+            {trees.map((t, i) => (
+                <primitive key={`bk-t-${i}`} object={sakuraGltf.clone(true)} position={[t.x, 0, t.z]} rotation={[0, t.rot, 0]} scale={t.s * 0.85} />
+            ))}
+        </group>
+    );
 }
 
 // ---- far hills ----
@@ -610,13 +724,16 @@ function Billboard({ stop, near, preset }) {
     return (
         <group position={[p.x, 0, p.z]} rotation={[0, p.heading + Math.PI + 0.36, 0]}>
             {[-2.9, 2.9].map((x) => <mesh key={x} position={[x, 2.6, -0.1]} castShadow><boxGeometry args={[0.22, 5.2, 0.22]} /><meshStandardMaterial color={isSakura ? "#d91b26" : "#3b3530"} /></mesh>)}
-            <mesh position={[0, 5.4, -0.08]} castShadow><boxGeometry args={[6.6, 4.3, 0.18]} /><meshStandardMaterial color={isSakura ? "#1a0e26" : "#2c2723"} roughness={0.8} /></mesh>
+            <mesh position={[0, 5.4, -0.08]} castShadow><boxGeometry args={[6.6, 4.3, 0.18]} /><meshStandardMaterial color={isSakura ? "#1a0e26" : "#2c2723"} roughness={0.65} metalness={0.35} /></mesh>
+            {/* Steel truss cross-brace & overhead billboard lamp */}
+            <mesh position={[0, 5.4, -0.22]}><boxGeometry args={[5.8, 0.16, 0.12]} /><meshStandardMaterial color="#58524c" metalness={0.6} roughness={0.4} /></mesh>
+            <mesh position={[0, 7.72, 0.28]}><boxGeometry args={[4.4, 0.08, 0.24]} /><meshStandardMaterial color={isSakura ? "#ff7aa2" : "#fff1d0"} emissive={isSakura ? "#ff4d79" : "#ffcf87"} emissiveIntensity={1.2} /></mesh>
             <mesh position={[0, 5.4, 0.02]}>
                 <planeGeometry args={[6.2, 3.875]} />
-                {tex ? <meshBasicMaterial map={tex} toneMapped={false} /> : <meshStandardMaterial color="#d9c6a6" />}
+                {tex ? <meshBasicMaterial map={tex} color="#e2ddd4" toneMapped={false} /> : <meshStandardMaterial color="#d9c6a6" />}
             </mesh>
             <mesh position={[0, 2.85, 0.05]}><boxGeometry args={[6.6, 0.9, 0.12]} /><meshStandardMaterial color={isSakura ? "#241130" : "#f3ead8"} /></mesh>
-            <Text font={FONT} position={[0, 2.86, 0.13]} fontSize={0.42} maxWidth={6.2} color={isSakura ? "#ffb7c5" : "#231f1b"} anchorX="center" anchorY="middle">{stop.title}</Text>
+            <Text font={FONT} position={[0, 2.86, 0.13]} fontSize={0.34} maxWidth={6.1} color={isSakura ? "#ffb7c5" : "#231f1b"} anchorX="center" anchorY="middle">{stop.title}</Text>
         </group>
     );
 }
@@ -650,18 +767,25 @@ function Milestones() {
     ));
 }
 
-// ---- the city gateway at the start, and the exit sign at the end ----
+// ---- sleek architectural coastal highway gantry at the start, and the exit sign at the end ----
 function Landmarks({ preset }) {
     const g = useMemo(() => frame(28), []), e = useMemo(() => at(END, -ROAD_W / 2 - 3), []);
     const isSakura = preset === "sakura";
+    const steel = isSakura ? "#d91b26" : "#c58b5b";
     return (
         <>
             <group position={[g.x, 0, g.z]} rotation={[0, g.heading + Math.PI, 0]}>
-                {[-5.4, 5.4].map((x) => <mesh key={x} position={[x, 3.6, 0]} castShadow><boxGeometry args={[1.3, 7.2, 1.3]} /><meshStandardMaterial color={isSakura ? "#d91b26" : "#c58b5b"} flatShading /></mesh>)}
-                <mesh position={[0, 7.6, 0]} castShadow><boxGeometry args={[12.4, 1.4, 1.4]} /><meshStandardMaterial color={isSakura ? "#221229" : "#b27a4d"} flatShading /></mesh>
-                {[-5.4, 5.4].map((x) => <mesh key={`d${x}`} position={[x, 8.9, 0]}><sphereGeometry args={[0.9, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color={isSakura ? "#ff7597" : "#d7a06e"} flatShading /></mesh>)}
-                <Text font={FONT} position={[0, 7.6, -0.72]} rotation={[0, Math.PI, 0]} fontSize={0.62} color={isSakura ? "#ffb7c5" : "#3b2414"} anchorX="center" anchorY="middle">{isSakura ? "NEO-KYOTO · SAKURA TOUGE" : "AHMEDABAD · RIDE"}</Text>
-                <Text font={FONT} position={[0, 7.6, 0.72]} fontSize={0.62} color={isSakura ? "#ffb7c5" : "#3b2414"} anchorX="center" anchorY="middle">{isSakura ? "NEO-KYOTO · SAKURA TOUGE" : "AHMEDABAD · RIDE"}</Text>
+                {[-5.6, 5.6].map((x) => (
+                    <group key={x} position={[x, 0, 0]}>
+                        <mesh position={[0, 3.8, -0.35]} rotation={[0.1, 0, 0]} castShadow><cylinderGeometry args={[0.24, 0.34, 7.8, 10]} /><meshStandardMaterial color={steel} metalness={0.55} roughness={0.38} /></mesh>
+                        <mesh position={[0, 3.8, 0.35]} rotation={[-0.1, 0, 0]} castShadow><cylinderGeometry args={[0.24, 0.34, 7.8, 10]} /><meshStandardMaterial color={steel} metalness={0.55} roughness={0.38} /></mesh>
+                        <mesh position={[0, 0.25, 0]}><boxGeometry args={[1.1, 0.5, 1.3]} /><meshStandardMaterial color="#3c3733" roughness={0.9} /></mesh>
+                    </group>
+                ))}
+                <mesh position={[0, 7.45, 0]} castShadow><boxGeometry args={[12.8, 1.15, 0.55]} /><meshStandardMaterial color={isSakura ? "#1e0d2b" : "#1d1a18"} metalness={0.5} roughness={0.35} /></mesh>
+                <mesh position={[0, 8.08, 0]}><boxGeometry args={[12.9, 0.1, 0.62]} /><meshStandardMaterial color={isSakura ? "#ff7aa2" : "#ffb35c"} emissive={isSakura ? "#ff4d79" : "#ff9b3d"} emissiveIntensity={1.15} /></mesh>
+                <Text font={FONT} position={[0, 7.45, -0.3]} rotation={[0, Math.PI, 0]} fontSize={0.56} letterSpacing={0.08} color={isSakura ? "#ffd0de" : "#fff4e2"} anchorX="center" anchorY="middle">{isSakura ? "NEO-KYOTO · SAKURA TOUGE" : "AHMEDABAD · NH-PX01"}</Text>
+                <Text font={FONT} position={[0, 7.45, 0.3]} fontSize={0.56} letterSpacing={0.08} color={isSakura ? "#ffd0de" : "#fff4e2"} anchorX="center" anchorY="middle">{isSakura ? "NEO-KYOTO · SAKURA TOUGE" : "AHMEDABAD · NH-PX01"}</Text>
             </group>
             <group position={[e.x, 0, e.z]} rotation={[0, e.heading + Math.PI + 0.3, 0]}>
                 {[-2.6, 2.6].map((x) => <mesh key={x} position={[x, 2.3, 0]}><cylinderGeometry args={[0.1, 0.1, 4.6, 6]} /><meshStandardMaterial color="#8f9aa0" /></mesh>)}
@@ -706,6 +830,12 @@ function Rider({ state, preset }) {
         const k = 1 - Math.exp(-dt * (s.snap ? 30 : 4));
         // eslint-disable-next-line react-hooks/immutability
         camera.position.x += (cx - camera.position.x) * k; camera.position.z += (cz - camera.position.z) * k; camera.position.y += (up - camera.position.y) * k;
+        const targetFov = 52 + THREE.MathUtils.clamp(s.v / 42, 0, 1) * 9;
+        if (Math.abs(camera.fov - targetFov) > 0.05) {
+            // eslint-disable-next-line react-hooks/immutability
+            camera.fov = THREE.MathUtils.damp(camera.fov, targetFov, 4, dt);
+            camera.updateProjectionMatrix();
+        }
         look.set(x + f.tx * 9, 1.1, z + f.tz * 9);
         camera.lookAt(look);
         s.snap = false;
@@ -729,13 +859,17 @@ function Rider({ state, preset }) {
                     </mesh>
                     {/* Headlight cone */}
                     <pointLight position={[0, 0.85, -1.2]} intensity={preset === "sakura" ? 4.5 : 1.2} distance={18} color="#fff6d6" />
-                    {/* the rider */}
-                    <group position={[0, 0.98, 0.05]} rotation={[0, Math.PI, 0]}>
-                        <mesh position={[0, 0.34, 0.08]} rotation={[0.35, 0, 0]} castShadow><boxGeometry args={[0.42, 0.62, 0.3]} /><meshStandardMaterial color={preset === "sakura" ? "#d91b26" : "#2f4a5a"} flatShading /></mesh>
-                        <mesh position={[0, 0.78, 0.2]} castShadow><icosahedronGeometry args={[0.17, 1]} /><meshStandardMaterial color="#e9e2d6" flatShading roughness={0.4} /></mesh>
-                        <mesh position={[0, 0.76, 0.33]}><boxGeometry args={[0.2, 0.08, 0.04]} /><meshStandardMaterial color="#1c1c1c" /></mesh>
-                        {[-0.24, 0.24].map((sx) => <mesh key={sx} position={[sx, 0.3, 0.32]} rotation={[1.0, 0, sx > 0 ? -0.25 : 0.25]} castShadow><boxGeometry args={[0.11, 0.5, 0.11]} /><meshStandardMaterial color={preset === "sakura" ? "#d91b26" : "#2f4a5a"} flatShading /></mesh>)}
-                        {[-0.16, 0.16].map((sx) => <mesh key={`l${sx}`} position={[sx, -0.12, 0.12]} rotation={[-0.9, 0, 0]} castShadow><boxGeometry args={[0.14, 0.52, 0.14]} /><meshStandardMaterial color="#1e1b24" flatShading /></mesh>)}
+                    {/* Sculpted aerodynamic rider & racing helmet */}
+                    <group position={[0, 0.96, 0.06]} rotation={[0, Math.PI, 0]}>
+                        {/* Torso + aero racing hump */}
+                        <mesh position={[0, 0.34, 0.08]} rotation={[0.42, 0, 0]} castShadow><capsuleGeometry args={[0.18, 0.34, 8, 16]} /><meshStandardMaterial color={preset === "sakura" ? "#d91b26" : "#223442"} roughness={0.42} metalness={0.18} /></mesh>
+                        <mesh position={[0, 0.44, -0.04]} rotation={[0.55, 0, 0]} scale={[0.85, 1.15, 0.7]} castShadow><sphereGeometry args={[0.16, 16, 12]} /><meshStandardMaterial color={preset === "sakura" ? "#ff4d6d" : "#e8e3da"} roughness={0.35} /></mesh>
+                        {/* Glossy full-face helmet + smoked wrap visor */}
+                        <mesh position={[0, 0.76, 0.24]} castShadow><sphereGeometry args={[0.175, 24, 18]} /><meshPhysicalMaterial color="#f2ede4" roughness={0.12} metalness={0.25} clearcoat={1} clearcoatRoughness={0.05} /></mesh>
+                        <mesh position={[0, 0.74, 0.25]} rotation={[0.12, -Math.PI * 0.42, 0]}><cylinderGeometry args={[0.18, 0.18, 0.08, 20, 1, true, 0, Math.PI * 0.84]} /><meshPhysicalMaterial color="#111216" roughness={0.06} metalness={0.9} clearcoat={1} side={THREE.DoubleSide} /></mesh>
+                        {/* Sculpted arms & legs */}
+                        {[-0.21, 0.21].map((sx) => <mesh key={sx} position={[sx, 0.32, 0.28]} rotation={[1.05, 0, sx > 0 ? -0.22 : 0.22]} castShadow><capsuleGeometry args={[0.06, 0.36, 6, 12]} /><meshStandardMaterial color={preset === "sakura" ? "#d91b26" : "#223442"} roughness={0.45} /></mesh>)}
+                        {[-0.16, 0.16].map((sx) => <mesh key={`l${sx}`} position={[sx, -0.1, 0.12]} rotation={[-0.85, 0, 0]} castShadow><capsuleGeometry args={[0.075, 0.36, 6, 12]} /><meshStandardMaterial color="#19181d" roughness={0.65} /></mesh>)}
                     </group>
                 </group>
             </group>
@@ -743,18 +877,51 @@ function Rider({ state, preset }) {
     );
 }
 
+function groundPbrMaps() {
+    const loader = new THREE.TextureLoader();
+    const diff = loader.load("/textures/aerial_grass_rock_diff_1k.jpg");
+    const nor = loader.load("/textures/aerial_grass_rock_nor_1k.jpg");
+    const rough = loader.load("/textures/aerial_grass_rock_rough_1k.jpg");
+    [diff, nor, rough].forEach((t) => {
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.repeat.set(95, 280);
+    });
+    diff.colorSpace = THREE.SRGBColorSpace;
+    return { diff, nor, rough };
+}
+
 export default function Scene({ state, near, preset = "golden" }) {
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
-    const groundCol = preset === "sakura" ? "#140b1f" : preset === "fjord" ? "#3b493f" : "#b29a58";
+    const groundCol = preset === "sakura" ? "#4e3966" : preset === "fjord" ? "#6d8572" : "#d9be94";
+    const groundMaps = useMemo(() => groundPbrMaps(), []);
+    const seawallGeo = useMemo(() => {
+        const pos = [], idx = [], f = {};
+        let i = 0;
+        for (let d = -80; d <= LENGTH + 200; d += 5, i++) {
+            frame(d, f);
+            const x = Math.min(18.5, f.x + f.rx * (ROAD_W / 2 + 2.4));
+            pos.push(x, 0, f.z, x, 0.68, f.z);
+            if (i > 0) { const a = i * 2 - 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+        g.setIndex(idx);
+        g.computeVertexNormals();
+        return g;
+    }, []);
     return (
         <>
             <fog attach="fog" args={[p.fog, 65, 540]} />
-            <hemisphereLight args={[p.hemiSky, p.hemiGround, 1.1]} />
+            <hemisphereLight args={[p.hemiSky, p.hemiGround, 1.25]} />
             {/* Rear-right fill light so the left FjordCliffs show rock relief instead of a crushed-black wall */}
-            <directionalLight position={[45, 22, 60]} intensity={preset === "sakura" ? 0.85 : 1.1} color={preset === "sakura" ? "#ffb7c5" : "#ffd6a8"} />
+            <directionalLight position={[45, 22, 60]} intensity={preset === "sakura" ? 0.95 : 1.15} color={preset === "sakura" ? "#ffb7c5" : "#ffd6a8"} />
             <Sky preset={preset} />
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-380, 0, -LENGTH / 2]} receiveShadow>
-                <planeGeometry args={[800, LENGTH + 1200]} /><meshStandardMaterial color={groundCol} roughness={1} />
+                <planeGeometry args={[800, LENGTH + 1200]} /><meshStandardMaterial color={groundCol} map={groundMaps.diff} normalMap={groundMaps.nor} roughnessMap={groundMaps.rough} roughness={0.94} />
+            </mesh>
+            {/* Coastal highway seawall along the ocean shoulder */}
+            <mesh geometry={seawallGeo} receiveShadow castShadow>
+                <meshStandardMaterial color={preset === "sakura" ? "#2e233a" : "#c8bfb2"} roughness={0.82} side={THREE.DoubleSide} />
             </mesh>
             <CoastalOcean preset={preset} />
             <FjordCliffs preset={preset} />
@@ -767,6 +934,9 @@ export default function Scene({ state, near, preset = "golden" }) {
             {STOPS.map((s) => <Sign key={`s${s.i}`} stop={s} preset={preset} />)}
             {STOPS.map((s) => <Billboard key={s.i} stop={s} near={Math.abs(near - s.d) < 320} preset={preset} />)}
             <Rider state={state} preset={preset} />
+            <EffectComposer multisampling={0}>
+                <Bloom mipmapBlur luminanceThreshold={0.82} intensity={preset === "sakura" ? 0.65 : 0.34} />
+            </EffectComposer>
         </>
     );
 }
