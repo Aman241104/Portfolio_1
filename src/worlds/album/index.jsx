@@ -5,14 +5,14 @@ import { work, KINDS, shot } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
+import { certifications } from "../../../content/certifications.js";
 import { onRepeat, watching } from "#content/taste.js";
 import { profile } from "#content/profile.js";
 import Deck from "./Deck.jsx";
 import "./album.css";
 
-// World 4: the portfolio as an album drop. Projects = tracklist, stack = features, case studies = liner notes,
-// concepts = deluxe edition, experience = credits, résumé = merch. Original type, generated cover + beat; the only real
-// music is the B-sides player, an official (visible, no-cookie) YouTube embed loaded only when someone taps a song.
+// World 5: the portfolio as an album drop. Projects = tracklist, stack = features, case studies = liner notes,
+// concepts = deluxe edition, experience + certs = gatefold credits, résumé = merch.
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 const Wave = ({ seed }) => {
@@ -49,7 +49,6 @@ const Countdown = ({ onDone }) => {
 
 export default function AlbumWorld() {
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // the countdown plays once per session (visitors coming back skip straight to the record)
     const [intro, setIntro] = useState(() => { try { return !reduced && !sessionStorage.getItem("px01-album-intro"); } catch { return !reduced; } });
     const endIntro = () => { setIntro(false); try { sessionStorage.setItem("px01-album-intro", "1"); } catch { /* private mode */ } };
     const cover = useRef(null);
@@ -57,6 +56,9 @@ export default function AlbumWorld() {
     const [playing, setPlaying] = useState(false);
     const [open, setOpen] = useState(null);
     const [yt, setYt] = useState(null);
+    const [era, setEra] = useState("a");
+    const [scrolled, setScrolled] = useState(false);
+
     const toggle = () => { if (playing) { stop(); setPlaying(false); } else { setYt(null); play(); setPlaying(true); } };
     const openTrack = (w) => {
         setOpen(w.slug);
@@ -64,36 +66,75 @@ export default function AlbumWorld() {
     };
     const listen = (id) => { stop(); setPlaying(false); setYt(id); };
     useEffect(() => () => stop(), []);
-    // era colour follows the side you're reading (lime → pink → blue)
+
     useEffect(() => {
-        const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && root.current?.setAttribute("data-era", e.target.dataset.era)), { rootMargin: "-45% 0px -45% 0px" });
+        const io = new IntersectionObserver((es) => {
+            es.forEach((e) => {
+                if (e.isIntersecting) {
+                    const nextEra = e.target.dataset.era;
+                    root.current?.setAttribute("data-era", nextEra);
+                    setEra(nextEra);
+                }
+            });
+        }, { rootMargin: "-40% 0px -45% 0px" });
         root.current?.querySelectorAll(".side").forEach((el) => io.observe(el));
         return () => io.disconnect();
     }, []);
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 380);
+        window.addEventListener("scroll", onScroll, { passive: true });
+        onScroll();
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
     useEffect(() => {
         const draw = () => cover.current && drawCover(cover.current, work.map((w) => w.slug));
-        document.fonts?.ready.then(draw); draw();
+        document.fonts?.ready.then(draw);
+        draw();
     }, []);
-    // track numbers run across the sides: A, then B, then Deluxe
+
     const numbered = SIDES.flatMap((side) => work.filter((w) => side.kinds.includes(w.kind)));
     const trackNo = (w) => numbered.indexOf(w) + 1;
     const job = experience[0], edu = experience[1];
+    const eraMeta = SIDES.find((s) => s.id === era) || SIDES[0];
 
     return (
-        <div ref={root} className="album" data-intro={intro || undefined} data-playing={playing || undefined} style={{ "--beat": `${BEAT_MS}ms` }}>
+        <div ref={root} className="album" data-era={era} data-intro={intro || undefined} data-playing={playing || undefined} style={{ "--beat": `${BEAT_MS}ms` }}>
             {intro && <Countdown onDone={endIntro} />}
+
+            <nav className={`album-bar${scrolled ? " is-vis" : ""}`} aria-label="Album transport bar">
+                <div className="album-bar-in">
+                    <div className="album-bar-l">
+                        <span className="mini-disc" aria-hidden />
+                        <span className="mono album-era-pill">{eraMeta.label}</span>
+                        <b>SHIP IT <span className="dim">· {eraMeta.note}</span></b>
+                    </div>
+                    <div className="album-bar-r">
+                        <a href="#side-a" className="mono">Side A</a>
+                        <a href="#side-b" className="mono">Side B</a>
+                        <a href="#side-deluxe" className="mono">Deluxe</a>
+                        <a href="#credits" className="mono">Credits</a>
+                        <button type="button" className="btn btn-sm" onClick={toggle} aria-pressed={playing}>{playing ? "❚❚ Pause" : "▶ Play"}</button>
+                        <a href={profile.resume} target="_blank" rel="noreferrer" className="btn btn-sm ghost">Résumé ↗</a>
+                    </div>
+                </div>
+            </nav>
+
             <header className="cover">
                 <Deck tracks={numbered} playing={playing} onOpen={openTrack}
                     sleeve={<canvas ref={cover} className="cover-art" width="900" height="900" role="img" aria-label="Generated cover art: one ring per project" />} />
                 <div className="cover-copy">
-                <p className="mono">Aman Patel · Self-released · Ahmedabad, {new Date().getFullYear()}</p>
-                <h1>SHIP<br />IT<span>(Deluxe)</span></h1>
-                <p className="cover-sub">{work.length} tracks · {work.filter((w) => w.live).length} out now on their own domains · {skillGroups.reduce((a, g) => a + g.items.length, 0)} instruments</p>
-                <div className="cover-cta">
-                    <button type="button" className="btn" onClick={toggle} aria-pressed={playing}>{playing ? "❚❚ Pause the record" : "▶ Play the record"}</button>
-                    <a href="#tracklist" className="btn ghost">Tracklist ↓</a>
-                    <a href={profile.resume} target="_blank" rel="noreferrer" className="btn ghost">Press kit (résumé)</a>
-                </div>
+                    <p className="mono">CAT. NO. PX-05 · AMAN PATEL · AHMEDABAD, {new Date().getFullYear()} · 118 BPM</p>
+                    <p className="cover-role">Full-Stack &amp; 3D Web Engineer · {work.length} Shipped Builds · {work.filter((w) => w.maintained).length} Live in Prod</p>
+                    <h1>SHIP<br />IT<span>(Deluxe)</span></h1>
+                    <p className="cover-sub">{work.length} tracks · {work.filter((w) => w.live).length} out now on their own domains · {skillGroups.reduce((a, g) => a + g.items.length, 0)} instruments · {certifications.length} verified certs</p>
+                    <div className="cover-cta">
+                        <button type="button" className="btn" onClick={toggle} aria-pressed={playing}>{playing ? "❚❚ Pause the record" : "▶ Play the record"}</button>
+                        <a href="#side-a" className="btn ghost">Side A · Products</a>
+                        <a href="#side-b" className="btn ghost">Side B · Singles</a>
+                        <a href={profile.resume} target="_blank" rel="noreferrer" className="btn ghost">Press kit (Résumé ↗)</a>
+                    </div>
                 </div>
             </header>
 
@@ -101,7 +142,7 @@ export default function AlbumWorld() {
                 {SIDES.map((side) => {
                     const tracks = work.filter((w) => side.kinds.includes(w.kind));
                     return (
-                        <section key={side.id} className={`side side-${side.id}`} data-era={side.id}>
+                        <section key={side.id} id={`side-${side.id}`} className={`side side-${side.id}`} data-era={side.id}>
                             <div className="side-head"><h2>{side.label}</h2><p className="mono">{side.note} · {tracks.length} tracks</p></div>
                             <ol>
                                 {tracks.map((w) => {
@@ -118,10 +159,10 @@ export default function AlbumWorld() {
                                                 </a>
                                                 <p>{w.line}</p>
                                                 <p className="mono meta">
-                                                    {KINDS[w.kind]} · {w.year}
-                                                    {w.live && <em className="single">● Single · out now at {host(w.url)}</em>}
+                                                    <span>{KINDS[w.kind]} · {w.year}</span>
+                                                    {w.live && <em className="single">● Single · {host(w.url)}</em>}
                                                     {notes && <a className="liner" href={`/case.html?p=${w.slug}`}>Liner notes →</a>}
-                                                    {w.note && <em> · {w.note}</em>}
+                                                    {w.note && <em>· {w.note}</em>}
                                                 </p>
                                             </div>
                                             <Wave seed={w.slug} />
@@ -134,7 +175,7 @@ export default function AlbumWorld() {
                                                         <p>{w.line}</p>
                                                         {w.stack && <p className="mono">feat. {w.stack}</p>}
                                                         <p className="track-links">
-                                                            {w.url && <a className="btn" href={w.url} target="_blank" rel="noreferrer">{w.url.includes("github.com") ? "Code ↗" : `Listen live: ${host(w.url)} ↗`}</a>}
+                                                            {w.url && <a className="btn" href={w.url} target="_blank" rel="noreferrer">{w.url.includes("github.com") ? "View Code ↗" : "Visit Live Site ↗"}</a>}
                                                             {notes && <a className="btn ghost" href={`/case.html?p=${w.slug}`}>Liner notes →</a>}
                                                         </p>
                                                     </div>
@@ -149,14 +190,37 @@ export default function AlbumWorld() {
                 })}
             </main>
 
-            <section className="credits">
-                <h2>Credits</h2>
-                <dl>
-                    <div><dt className="mono">Written, produced & engineered by</dt><dd>Aman Patel</dd></div>
-                    <div><dt className="mono">Recorded at</dt><dd>{job.org} · {job.when} · {job.role}</dd></div>
-                    <div><dt className="mono">Studied at</dt><dd>{edu.org} · {edu.when} · {edu.where}</dd></div>
-                    {skillGroups.slice(0, 6).map((g) => <div key={g.group}><dt className="mono">{g.group}</dt><dd>{g.items.map(([x]) => x).join(", ")}</dd></div>)}
-                </dl>
+            <section id="credits" className="credits">
+                <div className="side-head"><h2>Gatefold Credits</h2><p className="mono">Experience, credentials &amp; studio instruments</p></div>
+                <div className="credits-grid">
+                    <div className="credits-col">
+                        <p className="mono credits-k">Personnel &amp; Sessions</p>
+                        <dl>
+                            <div><dt className="mono">Written, produced &amp; engineered by</dt><dd><b>Aman Patel</b> — Full-Stack &amp; 3D Web Engineer</dd></div>
+                            <div><dt className="mono">Recorded at</dt><dd><b>{job.org}</b> · {job.when} · {job.role}</dd></div>
+                            <div><dt className="mono">Studied at</dt><dd><b>{edu.org}</b> · {edu.when} · {edu.where}</dd></div>
+                        </dl>
+                    </div>
+                    <div className="credits-col">
+                        <p className="mono credits-k">Verified Credentials ({certifications.length})</p>
+                        <ul className="cert-sleeve">
+                            {certifications.map((c) => (
+                                <li key={c.code}>
+                                    <div><b>{c.title}</b><span className="mono">{c.issuer} · {c.date}</span></div>
+                                    {c.url && <a className="liner mono" href={c.url} target="_blank" rel="noreferrer">Verify ↗</a>}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+                <div className="credits-stack">
+                    {skillGroups.slice(0, 6).map((g) => (
+                        <div key={g.group} className="stack-box">
+                            <span className="mono">{g.group}</span>
+                            <p>{g.items.map(([x]) => x).join(" · ")}</p>
+                        </div>
+                    ))}
+                </div>
             </section>
 
             <section className="bsides" aria-labelledby="bs-h">

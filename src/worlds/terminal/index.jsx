@@ -195,8 +195,8 @@ const TerminalWorld = ({ shell }) => {
         certs: () => [
             <p key="h" className="dim">verified industry credentials ({certifications.length}):</p>,
             ...certifications.map((c, i) => (
-                <div key={c.id} className="tty-row">
-                    <span className="ok">[{String(i + 1).padStart(2, "0")}]</span> {c.title} <span className="dim">· {c.issuer} ({c.year})</span>{" "}
+                <div key={c.code} className="tty-row">
+                    <span className="ok">[{String(i + 1).padStart(2, "0")}]</span> {c.title} <span className="dim">· {c.issuer} ({c.date})</span>{" "}
                     {c.url && ext(c.url, <>[verify ↗]</>)}
                 </div>
             )),

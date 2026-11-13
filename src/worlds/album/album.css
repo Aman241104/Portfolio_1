@@ -1,7 +1,32 @@
 /* Album Rollout: black, one acid colour per era (A lime, B hot pink, Deluxe electric blue). Original type only. */
-.album { --ink: #070707; --paper: #f2f0ea; --acid: #c8ff2e; --b: #ff3d9a; --dlx: #3d7bff; min-height: 100dvh; background: var(--ink); color: var(--paper); font: 400 16px/1.5 "Geist", system-ui, sans-serif; padding-bottom: 120px; }
+.album { --ink: #070707; --paper: #f2f0ea; --acid: #c8ff2e; --b: #ff3d9a; --dlx: #3d7bff; --era-c: var(--acid); min-height: 100dvh;
+    background: radial-gradient(85% 45% at 75% 0%, color-mix(in srgb, var(--era-c) 9%, transparent), transparent 60%), var(--ink);
+    color: var(--paper); font: 400 16px/1.5 "Geist", system-ui, sans-serif; padding-bottom: 120px; transition: background .5s; }
+.album[data-era="b"] { --era-c: var(--b); }
+.album[data-era="deluxe"] { --era-c: var(--dlx); }
 .album .mono { font: 400 11px/1.4 "Space Mono", "Geist Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: #8d8a84; margin: 0; }
 .album a { color: inherit; text-decoration: none; }
+
+/* Sticky Now-Playing & Era Transport Bar */
+.album-bar { position: fixed; top: 14px; left: 50%; transform: translate(-50%, -18px); width: min(1160px, calc(100vw - 24px)); z-index: 20;
+    opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .3s var(--ease-out); }
+.album-bar.is-vis { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+.album-bar-in { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 9px 14px; border-radius: 999px;
+    background: rgba(12, 12, 14, .88); backdrop-filter: blur(16px); border: 1px solid rgba(242, 240, 234, .14); box-shadow: 0 18px 40px rgba(0, 0, 0, .55); }
+.album-bar-l { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.album-bar-l b { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.album-bar-l .dim { color: #8d8a84; font-weight: 400; }
+.mini-disc { width: 22px; height: 22px; border-radius: 50%; flex: none; background: radial-gradient(circle, var(--era-c) 0 28%, #161616 32% 100%);
+    border: 1px solid rgba(255, 255, 255, .25); }
+.album[data-playing] .mini-disc { animation: spin-slow 2.2s linear infinite; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.album-era-pill { padding: 3px 8px; border-radius: 999px; background: color-mix(in srgb, var(--era-c) 18%, transparent); color: var(--era-c) !important; border: 1px solid color-mix(in srgb, var(--era-c) 45%, transparent); }
+.album-bar-r { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; }
+.album-bar-r a.mono { color: rgba(242, 240, 234, .7); transition: color .2s; }
+.album-bar-r a.mono:hover { color: var(--era-c); }
+.album .btn.btn-sm { padding: 7px 13px; font-size: 12.5px; background: var(--era-c); color: var(--ink); }
+.album .btn.btn-sm.ghost { background: none; color: var(--paper); border: 1px solid rgba(242, 240, 234, .28); }
+.cover-role { margin: 10px 0 0; font: 600 15px/1.4 "Geist", sans-serif; color: var(--paper); letter-spacing: -.01em; }
 .drop { position: fixed; inset: 0; z-index: 30; display: grid; place-content: center; gap: 18px; text-align: center; background: var(--acid); color: var(--ink); cursor: pointer; border: 0; width: 100%; font: inherit; }
 .drop:focus { outline: none; }
 .drop span { display: block; }
@@ -43,8 +68,18 @@
 @keyframes pump { to { transform: scaleY(.45); } }
 .credits, .samples, .tour { padding-top: 70px; }
 .album h2 { margin: 0 0 18px; font: 400 clamp(32px, 4.5vw, 54px)/1 "Russo One", sans-serif; }
-.credits dl { margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 40px; }
-.credits dd { margin: 4px 0 0; }
+.credits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px; }
+.credits-col { border: 1px solid rgba(242, 240, 234, .12); border-radius: 8px; padding: 20px 22px; background: rgba(242, 240, 234, .02); }
+.credits-k { color: var(--era-c) !important; margin-bottom: 14px !important; }
+.credits dl { margin: 0; display: grid; gap: 14px; }
+.credits dd { margin: 4px 0 0; font-size: 15px; color: rgba(242, 240, 234, .85); }
+.cert-sleeve { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.cert-sleeve li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(242, 240, 234, .08); }
+.cert-sleeve li:last-child { border-bottom: 0; padding-bottom: 0; }
+.cert-sleeve b { display: block; font-size: 14.5px; font-weight: 600; }
+.credits-stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+.stack-box { border: 1px solid rgba(242, 240, 234, .1); border-radius: 6px; padding: 14px 16px; }
+.stack-box p { margin: 6px 0 0; font-size: 14px; color: rgba(242, 240, 234, .82); }
 .samples p { max-width: 70ch; color: rgba(242, 240, 234, .75); }
 .tour ul { list-style: none; margin: 0 0 24px; padding: 0; }
 .tour li { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(242, 240, 234, .12); font-size: 20px; }
@@ -105,7 +140,7 @@
 /* touch: 44px hit areas without changing the look */
 .track-toggle { position: relative; }
 .track-toggle::before { content: ""; position: absolute; inset: -8px; }
-.liner { display: inline-block; padding: 10px 0; }
+.liner { display: inline-block; padding: 0; }
 
 /* ============================================================ the deck: sleeve + record you can scratch */
 .deck { display: grid; gap: 22px; }
@@ -162,7 +197,7 @@
 
 /* ============================================================ merch table (the hire card) */
 .merch { --c: var(--acid); }
-.merch-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 26px 0 30px; }
+.merch-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin: 26px 0 30px; }
 .album .merch-item {
     position: relative; display: flex; flex-direction: column; gap: 6px; padding: 26px 22px 22px; border-radius: 6px; background: var(--paper); color: var(--ink);
     transform: rotate(var(--r, -1deg)); transition: transform .35s var(--ease-spring), box-shadow .35s; box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
@@ -178,14 +213,21 @@
 .merch-item.hot { background: var(--acid); }
 .album[data-era="b"] .merch-item.hot { background: var(--b); }
 .album[data-era="deluxe"] .merch-item.hot { background: var(--dlx); color: var(--paper); }
+.album[data-era="deluxe"] .merch-item.hot .mono, .album[data-era="deluxe"] .merch-item.hot small { color: rgba(242, 240, 234, .86); }
 .merch-tag { position: absolute; top: -12px; right: 18px; padding: 6px 10px; background: var(--ink); color: var(--acid); font: 700 11px "Space Mono", monospace; letter-spacing: .14em; border-radius: 3px; transform: rotate(4deg); }
 .tour-dates { list-style: none; margin: 0; padding: 0; }
 .tour-dates li { display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(242, 240, 234, .12); font-size: 20px; }
+@media (max-width: 1020px) {
+    .merch-row { grid-template-columns: repeat(2, 1fr); }
+    .credits-grid { grid-template-columns: 1fr; }
+    .credits-stack { grid-template-columns: repeat(2, 1fr); }
+    .album-bar-r a.mono { display: none; }
+}
 @media (max-width: 760px) {
     .deck-stage { width: 100%; }
     .bs-grid { grid-template-columns: 1fr; }
     .bs-list { max-height: none; }
-    .merch-row { grid-template-columns: 1fr; gap: 22px; }
+    .merch-row, .credits-stack { grid-template-columns: 1fr; gap: 22px; }
     .tour-dates li { font-size: 17px; }
 }
 .album { overflow-x: clip; }

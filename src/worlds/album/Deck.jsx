@@ -5,7 +5,7 @@ import { scratch } from "./beat.js";
 // 360/N degrees is the next track, with a scratch tick (and a tap of haptics on phones). It keeps spinning with
 // whatever speed the hand left it, and turns on its own while the beat plays. Release shows "Now playing" + Open.
 export default function Deck({ tracks, playing, onOpen, sleeve }) {
-    const disc = useRef(null), st = useRef({ rot: -8, vel: 0, drag: null, idx: 0 });
+    const disc = useRef(null), st = useRef({ rot: 0, vel: 0, drag: null, idx: 0 });
     const [idx, setIdx] = useState(0);
     const [touched, setTouched] = useState(false);
     const N = tracks.length, step = 360 / N;
@@ -28,7 +28,10 @@ export default function Deck({ tracks, playing, onOpen, sleeve }) {
                 s.idx = i; setIdx(i);
                 if (s.drag || Math.abs(s.vel) > 2.5) { scratch(s.vel); navigator.vibrate?.(4); }
             }
-            if (disc.current) disc.current.style.transform = `rotate(${s.rot}deg)`;
+            if (disc.current) {
+                const scrollSpin = reduced ? 0 : window.scrollY * 0.06;
+                disc.current.style.transform = `rotate(${s.rot + scrollSpin}deg)`;
+            }
             raf = requestAnimationFrame(loop);
         };
         raf = requestAnimationFrame(loop);
