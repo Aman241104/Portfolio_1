@@ -37,14 +37,16 @@ const build = () => {
         list.forEach((p, i) => items.push({ type: "frame", p, x: 24 + (i % cols) * (FW + GAP), y: y + 60 + Math.floor(i / cols) * (FH + GAP) }));
         y += rows * (FH + GAP) + 150;
     });
-    const right = 5 * FW + 4 * GAP + 160;
-    sections.push({ id: "skills", label: "Bill of materials", x: right, y: 520, w: 980, h: 700 });
+    // Pack Approval & Revision history right beside Zones A & B so the arrival viewport is dense and balanced
+    const mid = 2 * FW + GAP + 120;
+    sections.push({ id: "contact", label: "Approval", x: mid, y: 520, w: 940, h: 380 });
+    items.push({ type: "contact", x: mid + 30, y: 590 });
+    sections.push({ id: "career", label: "Revision history", x: mid, y: 940, w: 940, h: 340 });
+    items.push({ type: "rev", x: mid + 30, y: 1010 });
+    const right = 5 * FW + 4 * GAP + 140;
+    sections.push({ id: "skills", label: "Bill of materials", x: right, y: 520, w: 980, h: 720 });
     items.push({ type: "bom", x: right + 30, y: 590 });
-    sections.push({ id: "career", label: "Revision history", x: right, y: 1300, w: 980, h: 360 });
-    items.push({ type: "rev", x: right + 30, y: 1370 });
-    sections.push({ id: "contact", label: "Approval", x: right, y: 1740, w: 980, h: 420 });
-    items.push({ type: "contact", x: right + 30, y: 1810 });
-    const W = right + 980 + 200, H = Math.max(y, 2300);
+    const W = right + 980 + 180, H = Math.max(y, 1500);
     return { items, sections, W, H };
 };
 
@@ -56,6 +58,7 @@ export default function CanvasWorld() {
     const [vstate, setV] = useState({ x: 0, y: 0, k: 0.4 }); // for the minimap + zoom readout
     const [vpSize, setVpSize] = useState({ w: 0, h: 0 });
     const [focus, setFocus] = useState(null);
+    const [coords, setCoords] = useState({ x: 0, y: 0 });
     // phones open on a plain scrolling print of the same drawing (readable, no pan/zoom work); the full sheet is one tap away
     const [list, setList] = useState(() => typeof window !== "undefined" && matchMedia("(max-width: 760px)").matches);
     const [mate, setMate] = useState({ x: 300, y: 300, label: "A.P." });
@@ -71,10 +74,10 @@ export default function CanvasWorld() {
         }
         setV(v);
     }, [reduced]);
-    const fitTo = useCallback((x, y, w, h, pad = 60) => {
+    const fitTo = useCallback((x, y, w, h, pad = 60, offsetX = 0) => {
         const r = vp.current.getBoundingClientRect();
-        const k = Math.min((r.width - pad * 2) / w, (r.height - pad * 2) / h, 1.6);
-        apply({ k, x: r.width / 2 - (x + w / 2) * k, y: r.height / 2 - (y + h / 2) * k }, true);
+        const k = Math.min((r.width - pad * 2) / w, (r.height - pad * 2) / h, 1.5);
+        apply({ k, x: r.width / 2 + offsetX - (x + w / 2) * k, y: r.height / 2 - (y + h / 2) * k }, true);
     }, [apply]);
     // phones open on the title block (readable), wide screens on the first zones
     useEffect(() => {
@@ -176,7 +179,27 @@ export default function CanvasWorld() {
         return () => clearInterval(t);
     }, [items, reduced]);
 
-    const open = (it) => { setFocus(it.p); if (!list) fitTo(it.x, it.y, FW, FH, 40); };
+    const open = useCallback((it) => {
+        setFocus(it.p);
+        if (!list) fitTo(it.x, it.y, FW, FH, 60, -170);
+    }, [fitTo, list]);
+
+    useEffect(() => {
+        const frames = items.filter((i) => i.type === "frame");
+        const onKey = (e) => {
+            if (e.target.closest("input, textarea")) return;
+            if (e.key === "Escape") setFocus(null);
+            else if (e.key === "0" || e.key.toLowerCase() === "f") { setFocus(null); fitTo(0, 0, W, H, 30); }
+            else if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                const idx = focus ? frames.findIndex((f) => f.p === focus) : -1;
+                const next = e.key === "ArrowRight" ? (idx + 1) % frames.length : (idx - 1 + frames.length) % frames.length;
+                open(frames[next]);
+            }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [focus, items, open, fitTo, W, H]);
+
     const MM = 180 / W;
 
     return (
@@ -188,14 +211,24 @@ export default function CanvasWorld() {
                     {sections.map((s) => <button key={s.id} type="button" onClick={() => { setFocus(null); fitTo(s.x, s.y, s.w, s.h); }}>{s.label}</button>)}
                 </nav>
                 <div className="cv-zoom">
+                    <span className="cv-coords" aria-hidden>X:{String(coords.x).padStart(4, "0")} Y:{String(coords.y).padStart(4, "0")}</span>
                     <button type="button" aria-label="Zoom out" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 0.8, true); }}>−</button>
                     <span>Scale {vstate.k >= 1 ? `${vstate.k.toFixed(1)}:1` : `1:${(1 / vstate.k).toFixed(1)}`}</span>
                     <button type="button" aria-label="Zoom in" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 1.25, true); }}>+</button>
                     <button type="button" className="cv-fit" onClick={() => { setFocus(null); fitTo(0, 0, W, H, 30); }}>Whole sheet</button>
+                    <a className="cv-fit cv-res" href={profile.resume} target="_blank" rel="noreferrer">Résumé ↗</a>
                 </div>
             </header>
 
-            <div ref={vp} className="cv-vp" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
+            <div ref={vp} className="cv-vp" onPointerDown={down} onPointerMove={(e) => {
+                if (vp.current && !list) {
+                    const r = vp.current.getBoundingClientRect();
+                    const bx = Math.round((e.clientX - r.left - view.current.x) / view.current.k);
+                    const by = Math.round((e.clientY - r.top - view.current.y) / view.current.k);
+                    setCoords({ x: Math.max(0, bx), y: Math.max(0, by) });
+                }
+                move(e);
+            }} onPointerUp={up} onPointerCancel={up}>
                 <div ref={board} className="cv-board" style={{ width: W, height: H }}>
                     <section className="bp-cover">
                         <p className="bp-dwg">Dwg. no. AP-2026-001 · General arrangement</p>
@@ -275,8 +308,9 @@ export default function CanvasWorld() {
                     {focus.stack && <p className="cv-stack">{focus.stack}</p>}
                     <p className="cv-links">
                         {cases[focus.slug] && <a className="cv-btn" href={`/case.html?p=${focus.slug}`}>Case study →</a>}
-                        {focus.url && <a className="cv-btn ghost" href={focus.url} target="_blank" rel="noreferrer">{focus.url.includes("github.com") ? "Code ↗" : `${host(focus.url)} ↗`}</a>}
+                        {focus.url && <a className="cv-btn ghost" href={focus.url} target="_blank" rel="noreferrer">{focus.url.includes("github.com") ? "View Code ↗" : "Visit Live Site ↗"}</a>}
                     </p>
+                    <p className="cv-nav-hint">Keys: ← / → step sheets · Esc close · 0 fit all</p>
                 </aside>
             )}
 

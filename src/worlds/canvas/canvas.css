@@ -10,9 +10,12 @@
 .cv-jump { display: flex; gap: 2px; flex: 1; overflow-x: auto; scrollbar-width: none; }
 .cv-jump button, .cv-zoom button { border: 0; background: none; color: var(--line); padding: 8px 10px; font: 400 12px "B612 Mono", monospace; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
 .cv-jump button:hover, .cv-zoom button:hover { color: var(--hi); }
-.cv-zoom { display: flex; align-items: center; gap: 2px; }
-.cv-zoom span { min-width: 92px; text-align: center; font: 700 12px "B612 Mono", monospace; color: var(--hi); }
-.cv-fit { border: 1px solid var(--line) !important; }
+.cv-zoom { display: flex; align-items: center; gap: 6px; }
+.cv-coords { font: 400 11px "B612 Mono", monospace; color: var(--faint) !important; min-width: 118px !important; }
+.cv-zoom span { min-width: 82px; text-align: center; font: 700 12px "B612 Mono", monospace; color: var(--hi); }
+.cv-fit { border: 1px solid var(--line) !important; padding: 6px 10px; font: 400 12px "B612 Mono", monospace; text-decoration: none; text-transform: uppercase; }
+.cv-res { border-color: var(--hi) !important; color: var(--hi) !important; }
+.cv-res:hover { background: var(--hi); color: var(--bar) !important; }
 .cv-vp { position: absolute; inset: 50px 0 0; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; background-color: var(--paper);
     background-image: linear-gradient(var(--grid-2) 1px, transparent 1px), linear-gradient(90deg, var(--grid-2) 1px, transparent 1px),
         linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px),
@@ -29,7 +32,7 @@
 .bp-hand { margin: 0; font: 400 26px/1.3 "Architects Daughter", cursive; color: var(--hi); }
 .bp-hire { transform: rotate(-3deg); max-width: 320px; }
 .bp-zone { border: 1.5px dashed var(--faint); pointer-events: none; }
-.bp-zone span { position: absolute; left: -1.5px; top: -34px; padding: 4px 10px; border: 1.5px solid var(--faint); border-bottom: 0; font: 700 14px "B612 Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.bp-zone span { position: absolute; left: 10px; top: 10px; padding: 4px 10px; border: 1.5px solid var(--faint); background: rgba(10, 40, 75, .75); font: 700 13px "B612 Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
 
 /* a project, drawn as a sheet */
 .bp-sheet { border: 1.5px solid var(--line); background: rgba(10, 40, 75, .35); cursor: pointer; display: flex; flex-direction: column; transition: background .25s, box-shadow .25s; }
@@ -89,9 +92,10 @@
 .cv-inspect p { margin: 0 0 10px; }
 .cv-stack { font: 400 12.5px "B612 Mono", monospace; color: var(--hi) !important; }
 .cv-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px !important; }
+.cv-nav-hint { margin: 12px 0 0 !important; font: 400 11px "B612 Mono", monospace; color: var(--faint); }
 .cv-x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border: 1px solid var(--faint); background: none; color: var(--line); font-size: 18px; cursor: pointer; }
 /* key plan */
-.cv-mini { position: absolute; z-index: 5; right: 14px; bottom: 14px; background: var(--bar); border: 1.5px solid var(--line); cursor: pointer; overflow: hidden; }
+.cv-mini { position: absolute; z-index: 5; left: 14px; bottom: 14px; background: var(--bar); border: 1.5px solid var(--line); cursor: pointer; overflow: hidden; box-shadow: 0 10px 26px rgba(0, 0, 0, .45); }
 .cv-mini i { position: absolute; border: 1px solid var(--faint); }
 .cv-mini b { position: absolute; border: 1.5px solid var(--hi); background: rgba(255, 226, 138, .12); }
 @media (max-width: 760px) {
