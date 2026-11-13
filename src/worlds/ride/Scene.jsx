@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF, Text } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
+import { SkeletonUtils } from "three-stdlib";
 import { shot } from "../../../content/work.js";
 import { STOPS, END, LENGTH, ROAD_W, LANE_X, MODELS, CERT_ORBS, APEX_GATES, frame, at, scenery } from "./route.js";
 
@@ -517,30 +518,22 @@ function wallRibbon(off, y0, y1, from = -80, to = LENGTH + 200, step = 4) {
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
     return g;
 }
-function asphaltTex() {
-    const c = document.createElement("canvas");
-    c.width = c.height = 256;
-    const g = c.getContext("2d");
-    const img = g.createImageData(256, 256);
-    for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
-        const i = (y * 256 + x) * 4;
-        const u = x / 256;
-        // Subtle tire-track polish in the two lanes + fine aggregate grain
-        const track = Math.exp(-Math.pow((u - 0.28) * 7, 2)) + Math.exp(-Math.pow((u - 0.72) * 7, 2));
-        const grain = (Math.random() - 0.5) * 38;
-        const v = Math.max(0, Math.min(255, 135 - track * 22 + grain));
-        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-        img.data[i + 3] = 255;
-    }
-    g.putImageData(img, 0, 0);
-    const t = new THREE.CanvasTexture(c);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    return t;
+function asphaltPbrMaps() {
+    const loader = new THREE.TextureLoader();
+    const diff = loader.load("/textures/asphalt_02_Diffuse_1k.jpg");
+    const nor = loader.load("/textures/asphalt_02_nor_gl_1k.jpg");
+    const rough = loader.load("/textures/asphalt_02_Rough_1k.jpg");
+    [diff, nor, rough].forEach((t) => {
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.repeat.set(1.5, 1.5);
+    });
+    diff.colorSpace = THREE.SRGBColorSpace;
+    return { diff, nor, rough };
 }
 function Road({ preset }) {
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
     const isNight = preset === "sakura";
-    const roadTex = useMemo(() => asphaltTex(), []);
+    const roadMaps = useMemo(() => asphaltPbrMaps(), []);
     const [shoulder, asphalt, lineL, lineR, railL, railR] = useMemo(() => [
         ribbon(ROAD_W + 4.8, 0.01),
         ribbon(ROAD_W, 0.03),
@@ -589,7 +582,7 @@ function Road({ preset }) {
         <group>
             <mesh geometry={shoulder} receiveShadow><meshStandardMaterial color={p.shoulder} roughness={0.95} /></mesh>
             <mesh geometry={asphalt} receiveShadow>
-                <meshStandardMaterial color={p.asphalt} map={roadTex} roughnessMap={roadTex} roughness={isNight ? 0.38 : 0.62} metalness={isNight ? 0.25 : 0.12} />
+                <meshStandardMaterial color={isNight ? "#444854" : "#8e8a84"} map={roadMaps.diff} normalMap={roadMaps.nor} roughnessMap={roadMaps.rough} roughness={isNight ? 0.35 : 0.72} metalness={isNight ? 0.28 : 0.08} />
             </mesh>
             <mesh geometry={lineL}><meshBasicMaterial color={p.lineColor} /></mesh>
             <mesh geometry={lineR}><meshBasicMaterial color={p.lineColor} /></mesh>
@@ -609,80 +602,70 @@ function Road({ preset }) {
     );
 }
 
-// ---- realistic PBR scenery: PolyHaven fern_02 + 1K PBR rock boulders + BlenderKit sakura (zero toy blocks) ----
-function Scenery({ preset }) {
+function extractParts(gltfScene) {
+    gltfScene.updateMatrixWorld(true);
+    const out = [];
+    gltfScene.traverse((o) => {
+        if (!o.isMesh) return;
+        const g = o.geometry.clone();
+        g.applyMatrix4(o.matrixWorld);
+        out.push({ g, m: o.material });
+    });
+    return out;
+}
+
+// ---- realistic PBR scenery: PolyHaven fern_02 + shrub_01 + boulder_01 + BlenderKit sakura (zero toy blocks) ----
+function Scenery() {
     const s = useMemo(() => scenery(), []);
     const { scene: fernGltf } = useGLTF("/models/fern_02/fern_02.gltf");
+    const { scene: shrubGltf } = useGLTF("/models/shrub_01/shrub_01.gltf");
+    const { scene: boulderGltf } = useGLTF("/models/boulder_01/boulder_01.gltf");
     const { scene: sakuraGltf } = useGLTF("/models/bk/bk-sakura-blooming.glb");
 
-    const fernParts = useMemo(() => {
-        fernGltf.updateMatrixWorld(true);
-        const out = [];
-        fernGltf.traverse((o) => {
-            if (!o.isMesh) return;
-            const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld);
-            out.push({ g, m: o.material });
-        });
-        return out;
-    }, [fernGltf]);
+    const fernParts = useMemo(() => extractParts(fernGltf), [fernGltf]);
+    const shrubParts = useMemo(() => extractParts(shrubGltf), [shrubGltf]);
+    const boulderParts = useMemo(() => extractParts(boulderGltf), [boulderGltf]);
 
-    const boulderMat = useMemo(() => {
-        const loader = new THREE.TextureLoader();
-        const diff = loader.load("/textures/coast_land_rocks_01_diff_1k.jpg");
-        const nor = loader.load("/textures/coast_land_rocks_01_nor_gl_1k.jpg");
-        const rough = loader.load("/textures/coast_land_rocks_01_rough_1k.jpg");
-        diff.colorSpace = THREE.SRGBColorSpace;
-        return new THREE.MeshStandardMaterial({ map: diff, normalMap: nor, roughnessMap: rough, roughness: 0.68, metalness: 0.08 });
-    }, []);
-    const boulderGeo = useMemo(() => {
-        const g = new THREE.IcosahedronGeometry(1, 2);
-        const pos = g.attributes.position;
-        for (let i = 0; i < pos.count; i++) {
-            const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-            const n = Math.sin(x * 4.2 + z * 3.1) * 0.18 + Math.cos(y * 3.7 - x * 2.5) * 0.14;
-            pos.setXYZ(i, x * (1 + n), y * (0.72 + n * 0.5), z * (1 + n));
-        }
-        g.computeVertexNormals();
-        return g;
-    }, []);
-
-    const ferns = useMemo(() => [...(s.plant_bush || []), ...(s.plant_bushLarge || []), ...(s.grass_large || [])].slice(0, 260), [s]);
+    const ferns = useMemo(() => [...(s.grass_large || []), ...(s.plant_bush || [])].slice(0, 220), [s]);
+    const shrubs = useMemo(() => [...(s.plant_bushLarge || []), ...(s.plant_bush || [])].filter((_, i) => i % 2 === 0).slice(0, 140), [s]);
     const rocks = useMemo(() => [...(s.rock_largeA || []), ...(s.rock_largeC || []), ...(s.rock_tallB || [])].slice(0, 90), [s]);
     const trees = useMemo(() => [...(s.tree_oak || []), ...(s.tree_default || []), ...(s.tree_palm || [])].filter((_, i) => i % 3 === 0).slice(0, 48), [s]);
 
     const fernRefs = useRef([]);
-    const rockRef = useRef();
+    const shrubRefs = useRef([]);
+    const boulderRefs = useRef([]);
 
     useEffect(() => {
         const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
-        fernRefs.current.forEach((im) => {
-            if (!im) return;
-            ferns.forEach((it, i) => {
-                e.set(0, it.rot, 0); q.setFromEuler(e);
-                const sc = 2.6 + (i % 4) * 0.55;
-                m.compose(new THREE.Vector3(it.x, 0, it.z), q, new THREE.Vector3(sc, sc, sc));
-                im.setMatrixAt(i, m);
+        const fill = (refs, list, scaleFn, yFn) => {
+            refs.current.forEach((im) => {
+                if (!im) return;
+                list.forEach((it, i) => {
+                    e.set(0, it.rot, 0); q.setFromEuler(e);
+                    const sc = scaleFn(it, i);
+                    m.compose(new THREE.Vector3(it.x, yFn(it, sc), it.z), q, new THREE.Vector3(sc, sc, sc));
+                    im.setMatrixAt(i, m);
+                });
+                im.instanceMatrix.needsUpdate = true;
+                im.computeBoundingSphere();
             });
-            im.instanceMatrix.needsUpdate = true;
-            im.computeBoundingSphere();
-        });
-        if (rockRef.current) {
-            rocks.forEach((it, i) => {
-                e.set(0, it.rot, 0); q.setFromEuler(e);
-                m.compose(new THREE.Vector3(it.x, it.s * 0.12, it.z), q, new THREE.Vector3(it.s * 0.45, it.s * 0.34, it.s * 0.45));
-                rockRef.current.setMatrixAt(i, m);
-            });
-            rockRef.current.instanceMatrix.needsUpdate = true;
-            rockRef.current.computeBoundingSphere();
-        }
-    }, [ferns, rocks, fernParts]);
+        };
+        fill(fernRefs, ferns, (_, i) => 2.5 + (i % 4) * 0.55, () => 0);
+        fill(shrubRefs, shrubs, (_, i) => 1.8 + (i % 3) * 0.55, () => 0);
+        fill(boulderRefs, rocks, (it) => 0.48 + (it.s || 4) * 0.14, () => -0.15);
+    }, [ferns, shrubs, rocks, fernParts, shrubParts, boulderParts]);
 
     return (
         <group>
             {fernParts.map((pt, k) => (
                 <instancedMesh key={`fn-${k}`} ref={(el) => { fernRefs.current[k] = el; }} args={[pt.g, pt.m, ferns.length]} castShadow receiveShadow frustumCulled={false} />
             ))}
-            <instancedMesh ref={rockRef} args={[boulderGeo, boulderMat, rocks.length]} castShadow receiveShadow frustumCulled={false} />
+            {shrubParts.map((pt, k) => (
+                <instancedMesh key={`sh-${k}`} ref={(el) => { shrubRefs.current[k] = el; }} args={[pt.g, pt.m, shrubs.length]} castShadow receiveShadow frustumCulled={false} />
+            ))}
+            {boulderParts.map((pt, k) => (
+                <instancedMesh key={`bd-${k}`} ref={(el) => { boulderRefs.current[k] = el; }} args={[pt.g, pt.m, rocks.length]} castShadow receiveShadow frustumCulled={false} />
+            ))}
             {trees.map((t, i) => (
                 <primitive key={`bk-t-${i}`} object={sakuraGltf.clone(true)} position={[t.x, 0, t.z]} rotation={[0, t.rot, 0]} scale={t.s * 0.85} />
             ))}
@@ -797,15 +780,50 @@ function Landmarks({ preset }) {
     );
 }
 
-// ---- the bike and rider; leans into the bends; glowing JDM tail-light streak in Sakura/Night mode ----
+// ---- the bike and real skeletal humanoid rider (Xbot.glb posed in MotoGP tuck + glossy racing helmet) ----
 function Rider({ state, preset }) {
     const { scene } = useGLTF("/ride/motorcycle.glb");
+    const { scene: riderSrc } = useGLTF("/ride/rider.glb");
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
     const bike = useMemo(() => {
         const s = scene.clone(true);
         s.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.material = o.material.clone(); o.material.roughness = 0.42; o.material.metalness = 0.25; } });
         return s;
     }, [scene]);
+    const rider = useMemo(() => {
+        const r = SkeletonUtils.clone(riderSrc);
+        const suitCol = preset === "sakura" ? "#d91b26" : preset === "fjord" ? "#1e293b" : "#1c1f26";
+        r.traverse((o) => {
+            if (o.isMesh) {
+                o.castShadow = true;
+                o.material = o.material.clone();
+                if (o.material.name?.includes("Surface") || o.material.color) {
+                    o.material.roughness = 0.38;
+                    o.material.metalness = 0.45;
+                    if (!o.name?.includes("Joints")) o.material.color.set(suitCol);
+                }
+            }
+            if (o.isBone) {
+                const n = o.name;
+                if (n === "mixamorigSpine") o.rotation.set(0.38, 0, 0);
+                else if (n === "mixamorigSpine1") o.rotation.set(0.28, 0, 0);
+                else if (n === "mixamorigSpine2") o.rotation.set(0.18, 0, 0);
+                else if (n === "mixamorigNeck") o.rotation.set(-0.36, 0, 0);
+                else if (n === "mixamorigHead") o.rotation.set(-0.22, 0, 0);
+                else if (n === "mixamorigLeftShoulder") o.rotation.set(0, 0.25, -0.15);
+                else if (n === "mixamorigLeftArm") o.rotation.set(0.2, 1.28, -1.18);
+                else if (n === "mixamorigLeftForeArm") o.rotation.set(0, 0.42, -0.22);
+                else if (n === "mixamorigRightShoulder") o.rotation.set(0, -0.25, 0.15);
+                else if (n === "mixamorigRightArm") o.rotation.set(0.2, -1.28, 1.18);
+                else if (n === "mixamorigRightForeArm") o.rotation.set(0, -0.42, 0.22);
+                else if (n === "mixamorigLeftUpLeg") o.rotation.set(-1.05, 0.12, -0.22);
+                else if (n === "mixamorigLeftLeg") o.rotation.set(1.38, 0, 0);
+                else if (n === "mixamorigRightUpLeg") o.rotation.set(-1.05, -0.12, 0.22);
+                else if (n === "mixamorigRightLeg") o.rotation.set(1.38, 0, 0);
+            }
+        });
+        return r;
+    }, [riderSrc, preset]);
     const root = useRef(), body = useRef(), light = useRef(), tailTrail = useRef();
     const f = useMemo(() => ({}), []), ahead = useMemo(() => ({}), []);
     const look = useMemo(() => new THREE.Vector3(), []);
@@ -818,6 +836,7 @@ function Rider({ state, preset }) {
         let dh = ahead.heading - f.heading; if (dh > Math.PI) dh -= Math.PI * 2; if (dh < -Math.PI) dh += Math.PI * 2;
         const lean = THREE.MathUtils.clamp(-dh * s.v * 0.9 - (s.steer || 0) * 0.28, -0.46, 0.46);
         body.current.rotation.z = THREE.MathUtils.damp(body.current.rotation.z, lean, 6, dt);
+        s.leanDeg = Math.round((body.current.rotation.z * 180) / Math.PI);
         body.current.position.y = Math.sin(d * 1.7) * 0.012 * Math.min(1, s.v / 6);
         // Stretch glowing Akira/JDM tail-light trail with speed
         if (tailTrail.current) {
@@ -859,17 +878,11 @@ function Rider({ state, preset }) {
                     </mesh>
                     {/* Headlight cone */}
                     <pointLight position={[0, 0.85, -1.2]} intensity={preset === "sakura" ? 4.5 : 1.2} distance={18} color="#fff6d6" />
-                    {/* Sculpted aerodynamic rider & racing helmet */}
-                    <group position={[0, 0.96, 0.06]} rotation={[0, Math.PI, 0]}>
-                        {/* Torso + aero racing hump */}
-                        <mesh position={[0, 0.34, 0.08]} rotation={[0.42, 0, 0]} castShadow><capsuleGeometry args={[0.18, 0.34, 8, 16]} /><meshStandardMaterial color={preset === "sakura" ? "#d91b26" : "#223442"} roughness={0.42} metalness={0.18} /></mesh>
-                        <mesh position={[0, 0.44, -0.04]} rotation={[0.55, 0, 0]} scale={[0.85, 1.15, 0.7]} castShadow><sphereGeometry args={[0.16, 16, 12]} /><meshStandardMaterial color={preset === "sakura" ? "#ff4d6d" : "#e8e3da"} roughness={0.35} /></mesh>
-                        {/* Glossy full-face helmet + smoked wrap visor */}
-                        <mesh position={[0, 0.76, 0.24]} castShadow><sphereGeometry args={[0.175, 24, 18]} /><meshPhysicalMaterial color="#f2ede4" roughness={0.12} metalness={0.25} clearcoat={1} clearcoatRoughness={0.05} /></mesh>
-                        <mesh position={[0, 0.74, 0.25]} rotation={[0.12, -Math.PI * 0.42, 0]}><cylinderGeometry args={[0.18, 0.18, 0.08, 20, 1, true, 0, Math.PI * 0.84]} /><meshPhysicalMaterial color="#111216" roughness={0.06} metalness={0.9} clearcoat={1} side={THREE.DoubleSide} /></mesh>
-                        {/* Sculpted arms & legs */}
-                        {[-0.21, 0.21].map((sx) => <mesh key={sx} position={[sx, 0.32, 0.28]} rotation={[1.05, 0, sx > 0 ? -0.22 : 0.22]} castShadow><capsuleGeometry args={[0.06, 0.36, 6, 12]} /><meshStandardMaterial color={preset === "sakura" ? "#d91b26" : "#223442"} roughness={0.45} /></mesh>)}
-                        {[-0.16, 0.16].map((sx) => <mesh key={`l${sx}`} position={[sx, -0.1, 0.12]} rotation={[-0.85, 0, 0]} castShadow><capsuleGeometry args={[0.075, 0.36, 6, 12]} /><meshStandardMaterial color="#19181d" roughness={0.65} /></mesh>)}
+                    {/* Real skeletal humanoid rider in MotoGP tuck + glossy racing helmet */}
+                    <primitive object={rider} position={[0, 0.4, 0.24]} rotation={[0, Math.PI, 0]} scale={0.92} />
+                    <group position={[0, 1.56, -0.26]} rotation={[0.25, Math.PI, 0]}>
+                        <mesh castShadow><sphereGeometry args={[0.155, 24, 18]} /><meshPhysicalMaterial color={preset === "sakura" ? "#ff2e1f" : "#f2ede4"} roughness={0.12} metalness={0.28} clearcoat={1} clearcoatRoughness={0.05} /></mesh>
+                        <mesh position={[0, -0.02, 0.01]} rotation={[0.1, -Math.PI * 0.42, 0]}><cylinderGeometry args={[0.16, 0.16, 0.075, 20, 1, true, 0, Math.PI * 0.84]} /><meshPhysicalMaterial color="#111216" roughness={0.05} metalness={0.92} clearcoat={1} side={THREE.DoubleSide} /></mesh>
                     </group>
                 </group>
             </group>

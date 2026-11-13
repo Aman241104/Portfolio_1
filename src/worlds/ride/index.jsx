@@ -25,10 +25,18 @@ const CRUISE = 13, MAX = 42;                                       // m/s: ~47 k
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
-function Speedo({ kmh, visited }) {
+function Speedo({ kmh, visited, d, leanDeg = 0, tps = 0 }) {
     const a = -120 + Math.min(1, kmh / 160) * 240;
+    const gear = kmh < 2 ? "N" : kmh < 28 ? 1 : kmh < 54 ? 2 : kmh < 82 ? 3 : kmh < 112 ? 4 : kmh < 138 ? 5 : 6;
+    const bands = [0, 2, 28, 54, 82, 112, 138, 165];
+    const gIdx = gear === "N" ? 0 : gear;
+    const lo = bands[gIdx], hi = bands[gIdx + 1] || 165;
+    const ratio = gear === "N" ? 0.08 : Math.min(1, Math.max(0.18, (kmh - lo) / Math.max(1, hi - lo)));
+    const rpm = Math.round(1400 + ratio * 12100);
+    const segs = Math.round(ratio * 12);
+    const leanLabel = leanDeg === 0 ? "0°" : `${Math.abs(leanDeg)}° ${leanDeg < 0 ? "L" : "R"}`;
     return (
-        <div className="rd-speedo" aria-label={`${Math.round(kmh)} km per hour, ${visited} of ${STOPS.length} projects visited`}>
+        <div className="rd-speedo" aria-label={`${Math.round(kmh)} km per hour, gear ${gear}, ${rpm} RPM, ${visited} of ${STOPS.length} projects visited`}>
             <svg viewBox="0 0 120 120" aria-hidden>
                 <circle cx="60" cy="60" r="56" className="rd-dial" />
                 {Array.from({ length: 17 }, (_, i) => { const t = (-120 + i * 15) * Math.PI / 180, r1 = i % 2 ? 46 : 42; return <line key={i} x1={60 + Math.sin(t) * r1} y1={60 - Math.cos(t) * r1} x2={60 + Math.sin(t) * 52} y2={60 - Math.cos(t) * 52} className="rd-tick" />; })}
@@ -37,7 +45,18 @@ function Speedo({ kmh, visited }) {
                 <circle cx="60" cy="60" r="5" className="rd-hub" />
             </svg>
             <p className="rd-kmh"><b>{Math.round(kmh)}</b> km/h</p>
-            <p className="rd-odo"><span>{String(visited).padStart(2, "0")}</span>/{STOPS.length} projects</p>
+            <div className="rd-rpm" aria-hidden>
+                {Array.from({ length: 12 }, (_, i) => (
+                    <i key={i} data-on={i < segs || undefined} data-red={i >= 9 || undefined} />
+                ))}
+            </div>
+            <div className="rd-tele">
+                <span>GEAR <b>{gear}</b></span>
+                <span>RPM <b>{(rpm / 1000).toFixed(1)}k</b></span>
+                <span>LEAN <b>{leanLabel}</b></span>
+                <span>THR <b>{tps}%</b></span>
+            </div>
+            <p className="rd-odo"><span>{String(visited).padStart(2, "0")}</span>/{STOPS.length} · {(d / 1000).toFixed(2)} km</p>
         </div>
     );
 }
@@ -174,7 +193,8 @@ export default function RideWorld() {
         raf = requestAnimationFrame(tick);
         const hudT = setInterval(() => {
             const s = state.current;
-            setHud({ d: s.d, v: s.v });
+            const tps = s.hold > 0 ? 100 : s.hold < 0 ? 0 : Math.min(100, Math.round((s.v / MAX) * 85));
+            setHud({ d: s.d, v: s.v, leanDeg: s.leanDeg || 0, tps });
             setQuest((q) => ({ ...q, score: questRef.current.score, combo: questRef.current.combo, topKmh: questRef.current.topKmh }));
             setNear((n) => (Math.abs(n - s.d) > 40 ? s.d : n));
         }, 120);
@@ -288,7 +308,7 @@ export default function RideWorld() {
                 </div>
             )}
             {started && quest.toast && <p className="rd-toast" role="status">{quest.toast}</p>}
-            {started && <Speedo kmh={hud.v * 3.6} visited={visited} />}
+            {started && <Speedo kmh={hud.v * 3.6} visited={visited} d={hud.d} leanDeg={hud.leanDeg} tps={hud.tps} />}
             {started && !atEnd && stop && <StopCard stop={stop} />}
             {started && !atEnd && !stop && (() => {
                 const next = STOPS.find((s) => s.d >= hud.d + 20);
@@ -321,6 +341,9 @@ export default function RideWorld() {
             )}
             {started && (
                 <p className="rd-hint">
+                    <button type="button" onPointerDown={() => { state.current.steerHold = -1; }} onPointerUp={() => { state.current.steerHold = 0; }} onPointerLeave={() => { state.current.steerHold = 0; }} aria-label="Steer left">◀</button>
+                    <button type="button" onPointerDown={() => { state.current.hold = 1; }} onPointerUp={() => { state.current.hold = 0; }} onPointerLeave={() => { state.current.hold = 0; }} aria-label="Throttle boost">Boost</button>
+                    <button type="button" onPointerDown={() => { state.current.steerHold = 1; }} onPointerUp={() => { state.current.steerHold = 0; }} onPointerLeave={() => { state.current.steerHold = 0; }} aria-label="Steer right">▶</button>
                     <button type="button" onClick={() => stepStop(-1)} aria-label="Previous stop">← Prev</button>
                     <button type="button" onClick={() => { state.current.cruise = !state.current.cruise; setCruise(state.current.cruise); }}>{cruise ? "Cruise on" : "Cruise off"}</button>
                     <button type="button" onClick={() => stepStop(1)} aria-label="Next stop">Next →</button>

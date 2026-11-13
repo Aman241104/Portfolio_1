@@ -1,0 +1,40 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - paragraph [ref=e5]: PX‑01 — Clear Hardware Series
+        - generic [ref=e6]: "001"
+        - generic [ref=e9]:
+          - button "Enter with sound" [disabled] [ref=e10]
+          - button "Enter quietly" [disabled] [ref=e11]
+        - link "Skip to the work →" [ref=e12] [cursor=pointer]:
+          - /url: /editorial
+      - paragraph [ref=e13]: Best with headphones · a 7-second intro
+    - paragraph [ref=e14]: PX‑01 — Clear Hardware Series
+    - paragraph [ref=e15]: Edition 01 · 2026
+    - list [ref=e16]:
+      - listitem [ref=e17]: 01 Arrival
+      - listitem [ref=e18]: 02 Select
+      - listitem [ref=e19]: 03 Enter
+    - banner:
+      - generic "Aman Patel":
+        - generic [aria-hidden]: AMAN
+        - generic [aria-hidden]: EN
+      - paragraph [ref=e20]:
+        - button "Sound off" [ref=e21] [cursor=pointer]
+        - text: · 14:20:28 IST
+    - contentinfo:
+      - heading "PX‑01" [level=2]
+      - generic:
+        - generic:
+          - paragraph: Reality Selector
+          - paragraph: "A clear-case machine that decides which of my worlds you land in. Three reels: era, medium, mood."
+        - generic:
+          - paragraph: Loaded
+          - paragraph: Desktop OS, Editorial, Terminal. Album Rollout is in production.
+      - generic:
+        - generic: Drag the lever · Space
+        - button "Pull the lever" [ref=e22] [cursor=pointer]:
+          - text: Pull the lever
+          - generic [aria-hidden] [ref=e23]: →
+  - alert [ref=e24]

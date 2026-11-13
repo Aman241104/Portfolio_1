@@ -6,16 +6,22 @@ import useWindowStore from "#store/window.js";
 // PX-OS shelf: original line icons, labelled, a 2px lift on hover. (Was Apple PNGs + Gaussian magnification.)
 
 const Dock = () => {
-    const { openWindow, closeWindow, windows } = useWindowStore();
-    const toggleApp = (id) => (windows[id]?.isOpen ? closeWindow(id) : openWindow(id));
+    const { openWindow, minimizeWindow, windows } = useWindowStore();
+    const toggleApp = (id) => {
+        const w = windows[id];
+        if (!w?.isOpen || w?.isMinimized) openWindow(id);
+        else minimizeWindow(id);
+    };
 
     return (
         <section id="dock">
             <div className="dock-container">
                 {dockApps.filter((a) => a.canOpen && ICONS[a.id]).map(({ id, name }, i) => {
                     const Icon = ICONS[id];
+                    const w = windows[id];
                     return (
-                        <button key={id} type="button" className="dock-icon" style={{ "--i": i }} aria-label={name} aria-pressed={!!windows[id]?.isOpen}
+                        <button key={id} type="button" className="dock-icon" style={{ "--i": i }} aria-label={name}
+                            aria-pressed={!!(w?.isOpen && !w?.isMinimized)} data-minimized={w?.isMinimized || undefined}
                             data-tooltip-id="dock-tooltip" data-tooltip-content={name} onClick={() => toggleApp(id)}>
                             <Icon strokeWidth={1.5} aria-hidden />
                             <span>{name}</span>

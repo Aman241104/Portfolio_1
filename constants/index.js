@@ -1,6 +1,8 @@
 import { work, KINDS, shot } from "../content/work.js";
 import { skillGroups } from "../content/skills.js";
 import { cases } from "../content/cases.js";
+import { certifications } from "../content/certifications.js";
+import { experience } from "../content/experience.js";
 const navLinks = [
     {
         id: 1,
@@ -291,20 +293,32 @@ const ABOUT_LOCATION = {
             kind: "file",
             fileType: "txt",
             position: "top-60 left-5",
-            subtitle: "Meet the Developer Behind the Code",
+            subtitle: "Aman Patel — Full-Stack & 3D Web Engineer",
             image: "/images/aman-1.jpeg",
             description: [
-                "👋 Hi, I’m Aman Patel",
-
-                "💻 Currently working on full-stack and frontend projects using JavaScript, React, and modern web tools",
-                "🤝 Open to collaborating on web development, React apps, and practical software projects",
-                "🛠️ Looking for help with system design, backend integration, and scalable architectures'",
-                "📚 Currently learning advanced React patterns, backend development, and data handling",
-                "💬 Ask me about JavaScript, CSS, React, Python, or project setup",
-                "⚡ Fun fact: I enjoy turning half-finished ideas into working projects (and occasionally over-engineering them)",
+                "Full-stack & 3D Web Engineer in Ahmedabad, India — shipping 26+ live websites, SaaS tools, and mobile apps.",
+                ...experience.map((e) => `${e.role} @ ${e.org} (${e.when} · ${e.where}) — ${e.points[0]}`),
+                `CREDENTIALS · ${certifications.length} Verified AI Certifications (Anthropic, AWS, Google, Microsoft).`,
             ],
         },
     ],
+};
+
+const CREDENTIALS_LOCATION = {
+    id: 5,
+    type: "certs",
+    name: "Certs (4)",
+    icon: "/icons/file.svg",
+    kind: "folder",
+    children: certifications.map((c, idx) => ({
+        id: idx + 1,
+        name: `${c.issuer} — ${c.title}`,
+        icon: "/images/safari.png",
+        kind: "file",
+        fileType: "url",
+        href: c.url,
+        meta: `${c.date} · Verified`,
+    })),
 };
 
 const RESUME_LOCATION = {
@@ -337,6 +351,7 @@ const TRASH_LOCATION = {
 
 export const locations = {
     work: WORK_LOCATION,
+    certs: CREDENTIALS_LOCATION,
     about: ABOUT_LOCATION,
     resume: RESUME_LOCATION,
     trash: TRASH_LOCATION,
@@ -345,16 +360,16 @@ export const locations = {
 const INITIAL_Z_INDEX = 10;   // windows live in 10–900; the dock sits at 950 so it is never covered
 
 const WINDOW_CONFIG = {
-    finder: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    contact: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    resume: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    safari: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    photos: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    terminal: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    txtfile: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    imgfile: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    game: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
-    music: { isOpen: false, zIndex: INITIAL_Z_INDEX, data: null },
+    finder: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    contact: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    resume: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    safari: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    photos: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    terminal: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    txtfile: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    imgfile: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    game: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
+    music: { isOpen: false, isMinimized: false, zIndex: INITIAL_Z_INDEX, data: null },
 };
 
 export { INITIAL_Z_INDEX, WINDOW_CONFIG };

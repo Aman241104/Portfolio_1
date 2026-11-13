@@ -1,0 +1,47 @@
+1:"$Sreact.fragment"
+2:"/_next/static/chunks/0umf92h1sb77c.js"
+3:I[39756,["$2"],"default"]
+4:I[37457,["$2"],"default"]
+b:I[68027,["$2"],"default",1]
+:HL["/_next/static/chunks/18mkau1g48pmz.css","style"]
+:HL["/_next/static/media/002fdac0c3edc89f-s.p.3qqwhn2965m_x.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/00fe6731614b479c-s.p.3gnlxne4ydafw.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/0fd167c930fa207d-s.p.05cs70r70yxdy.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/605ce01b664af129-s.p.0wgildi0cnwt9.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/af77a86cf1e51fa0-s.p.22iyan98j1_2e.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/d902bc2bfdd0a4cb-s.p.1g73gv09-xcb6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/e63b65bb308a9351-s.p.3j3877k49yy0l.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/chunks/350vii5zycd0k.css","style"]
+:HL["https://fonts.googleapis.com/css2?family=Rozha+One&text=%E0%A4%85%E0%A4%AE%E0%A4%A8&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@800&text=%E0%AA%85%E0%AA%AE%E0%AA%A8&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Baloo+Paaji+2:wght@800&text=%E0%A8%85%E0%A8%AE%E0%A8%A8&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@800&text=%E0%A6%86%E0%A6%AE%E0%A6%A8&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@800&text=%E0%AE%85%E0%AE%AE%E0%AE%A9%E0%AF%8D&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Baloo+Tammudu+2:wght@800&text=%E0%B0%85%E0%B0%AE%E0%B0%A8%E0%B1%8D&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Dela+Gothic+One&text=%E3%82%A2%E3%83%9E%E3%83%B3&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Black+Han+Sans&text=%EC%95%84%EB%A7%8C&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Lalezar&text=%D8%A3%D9%85%D8%A7%D9%86&display=swap","style"]
+:HL["https://fonts.googleapis.com/css2?family=Russo+One&text=%D0%90%D0%9C%D0%90%D0%9D&display=swap","style"]
+5:[["children",{"s":"__PAGE__","h":512,"d":{"r":"$L6","p":false,"v":null}}]]
+0:{"P":null,"c":["",""],"q":"","i":false,"t":{"t":{"s":"","h":528,"d":{"r":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/18mkau1g48pmz.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/0umf92h1sb77c.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"QEgkia_variable _8ShoDG_variable AuOkkq_variable F0U0CW_variable -J3uYW_variable","children":[["$","head",null,{"children":[["$","link",null,{"rel":"preconnect","href":"https://fonts.googleapis.com"}],["$","link",null,{"rel":"preconnect","href":"https://fonts.gstatic.com","crossOrigin":""}],[["$","link","Rozha+One&text=%E0%A4%85%E0%A4%AE%E0%A4%A8",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Rozha+One&text=%E0%A4%85%E0%A4%AE%E0%A4%A8&display=swap"}],["$","link","Baloo+Bhai+2:wght@800&text=%E0%AA%85%E0%AA%AE%E0%AA%A8",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@800&text=%E0%AA%85%E0%AA%AE%E0%AA%A8&display=swap"}],["$","link","Baloo+Paaji+2:wght@800&text=%E0%A8%85%E0%A8%AE%E0%A8%A8",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Baloo+Paaji+2:wght@800&text=%E0%A8%85%E0%A8%AE%E0%A8%A8&display=swap"}],["$","link","Baloo+Da+2:wght@800&text=%E0%A6%86%E0%A6%AE%E0%A6%A8",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@800&text=%E0%A6%86%E0%A6%AE%E0%A6%A8&display=swap"}],["$","link","Baloo+Thambi+2:wght@800&text=%E0%AE%85%E0%AE%AE%E0%AE%A9%E0%AF%8D",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@800&text=%E0%AE%85%E0%AE%AE%E0%AE%A9%E0%AF%8D&display=swap"}],["$","link","Baloo+Tammudu+2:wght@800&text=%E0%B0%85%E0%B0%AE%E0%B0%A8%E0%B1%8D",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Baloo+Tammudu+2:wght@800&text=%E0%B0%85%E0%B0%AE%E0%B0%A8%E0%B1%8D&display=swap"}],["$","link","Dela+Gothic+One&text=%E3%82%A2%E3%83%9E%E3%83%B3",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Dela+Gothic+One&text=%E3%82%A2%E3%83%9E%E3%83%B3&display=swap"}],["$","link","Black+Han+Sans&text=%EC%95%84%EB%A7%8C",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Black+Han+Sans&text=%EC%95%84%EB%A7%8C&display=swap"}],["$","link","Lalezar&text=%D8%A3%D9%85%D8%A7%D9%86",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Lalezar&text=%D8%A3%D9%85%D8%A7%D9%86&display=swap"}],["$","link","Russo+One&text=%D0%90%D0%9C%D0%90%D0%9D",{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Russo+One&text=%D0%90%D0%9C%D0%90%D0%9D&display=swap"}]]]}],["$","body",null,{"children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}]]}]]}],"p":false,"v":null},"c":"$Q5"},"h":{"r":["$","$1","h",{"children":["$L7","$L8","$L9","$La"]}],"p":false,"v":null}},"m":"$undefined","G":["$b",["$Lc"]],"S":true,"r":"$undefined","s":"$undefined","a":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"o1NCQZsBUqte2k5GrF6Cl"}
+d:"$Sreact.suspense"
+e:"/_next/static/chunks/13ma0qmasv-mk.js"
+f:"/_next/static/chunks/3uo42cv273ucg.js"
+10:"/_next/static/chunks/25ydtenu7tn2m.js"
+11:"/_next/static/chunks/2l1gyvnu2dmz8.js"
+12:I[14403,["$2","$e","$f","$10","$11"],"default"]
+13:I[97367,["$2"],"OutletBoundary"]
+15:"ViewportBoundary"
+16:I[97367,["$2"],"$15"]
+18:"MetadataBoundary"
+19:I[97367,["$2"],"$18"]
+6:["$","$1","c",{"children":[["$","$d",null,{"children":["$","$L12",null,{}]}],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/350vii5zycd0k.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/_next/static/chunks/13ma0qmasv-mk.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/_next/static/chunks/3uo42cv273ucg.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/_next/static/chunks/25ydtenu7tn2m.js","async":true,"nonce":"$undefined"}],["$","script","script-3",{"src":"/_next/static/chunks/2l1gyvnu2dmz8.js","async":true,"nonce":"$undefined"}]],["$","$L13",null,{"children":["$","$d",null,{"name":"Next.MetadataOutlet","children":"$@14"}]}]]}]
+7:null
+8:["$","$L16",null,{"children":"$L17"}]
+9:["$","$L19",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$d",null,{"name":"Next.Metadata","children":"$L1a"}]}],null]}]
+a:["$","meta",null,{"name":"next-size-adjust","content":""}]
+c:["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/18mkau1g48pmz.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]
+17:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","2",{"name":"theme-color","content":"#0b0b0c"}]]
+1b:I[27201,["$2"],"IconMark"]
+14:null
+1a:[["$","title","0",{"children":"Aman Patel — PORTFOLIO.exe"}],["$","meta","1",{"name":"description","content":"Creative full-stack developer. A clear-case machine on a floating island decides which of my portfolio worlds you land in."}],["$","meta","2",{"property":"og:title","content":"Aman Patel — PORTFOLIO.exe"}],["$","meta","3",{"property":"og:description","content":"A machine for alternate realities."}],["$","meta","4",{"property":"og:image","content":"https://portfolio-1byaman.vercel.app/poster-intro.jpg"}],["$","meta","5",{"property":"og:type","content":"website"}],["$","meta","6",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","7",{"name":"twitter:title","content":"Aman Patel — PORTFOLIO.exe"}],["$","meta","8",{"name":"twitter:description","content":"A machine for alternate realities."}],["$","meta","9",{"name":"twitter:image","content":"https://portfolio-1byaman.vercel.app/poster-intro.jpg"}],["$","link","10",{"rel":"icon","href":"/macbook.png"}],["$","$L1b","11",{}]]

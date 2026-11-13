@@ -13,8 +13,17 @@ const useWindowStore = create(
                 if (!win) return;
 
                 win.isOpen = true;
+                win.isMinimized = false;
                 win.zIndex = state.nextZIndex++;
                 if (data !== null) win.data = data;
+            }),
+
+        minimizeWindow: (windowKey) =>
+            set((state) => {
+                const win = state.windows[windowKey];
+                if (!win || !win.isOpen) return;
+
+                win.isMinimized = true;
             }),
 
         closeWindow: (windowKey) =>
@@ -23,6 +32,7 @@ const useWindowStore = create(
                 if (!win) return;
 
                 win.isOpen = false;
+                win.isMinimized = false;
                 win.data = null;
             }),
 

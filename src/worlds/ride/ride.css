@@ -124,5 +124,11 @@
 .rd-end-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0 12px; padding: 10px; border: 1px solid rgba(255, 220, 180, .22); border-radius: 3px; background: rgba(0, 0, 0, .25); }
 .rd-end-stats span { font: 600 11px/1.2 "Saira", sans-serif; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .rd-end-stats b { display: block; color: var(--amber); font: 800 18px/1.1 "Saira Condensed", sans-serif; }
+.rd-rpm { display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; margin: 6px auto 4px; width: 112px; }
+.rd-rpm i { height: 5px; border-radius: 1px; background: rgba(255, 255, 255, .14); display: block; }
+.rd-rpm i[data-on="true"] { background: var(--amber); }
+.rd-rpm i[data-on="true"][data-red="true"] { background: #ff2e1f; box-shadow: 0 0 6px #ff2e1f; }
+.rd-tele { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px 8px; margin: 4px auto 3px; width: 122px; font: 600 9.5px/1.25 "Saira", sans-serif; letter-spacing: .06em; color: var(--muted); text-align: left; }
+.rd-tele b { color: var(--ink); float: right; }
 @media (max-width: 760px) { .rd-biomes { display: none; } .rd-next-pill { bottom: 150px; right: 10px; } .rd-quest { top: 56px; left: 10px; gap: 10px; padding: 6px 10px; } }
 @media (prefers-reduced-motion: reduce) { .rd-card, .rd-speedo, .rd-map, .rd-intro > * { animation: none; } .rd-needle { transition: none; } }

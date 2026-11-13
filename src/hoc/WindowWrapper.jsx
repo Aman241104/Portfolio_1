@@ -12,7 +12,7 @@ import {Draggable} from "gsap/Draggable";
 const WindowWrapper = (Component, windowKey) => {
     const Wrapped = (props) => {
         const { windows, focusWindow, closeWindow } = useWindowStore();
-        const { isOpen, zIndex } = windows[windowKey];
+        const { isOpen, isMinimized, zIndex } = windows[windowKey];
         const ref = useRef(null);
 
         // Mounted lags isOpen on close so the window can animate away before it unmounts.
@@ -29,13 +29,18 @@ const WindowWrapper = (Component, windowKey) => {
                 gsap.to(el, { scale: 0.12, opacity: 0, transformOrigin: origin.current, duration: 0.26, ease: "power3.in", onComplete: () => setMounted(false) });
                 return;
             }
+            if (isMinimized) {
+                if (reduced()) { el.style.display = "none"; return; }
+                gsap.to(el, { scale: 0.2, y: 180, opacity: 0, duration: 0.22, ease: "power2.in", onComplete: () => { if (useWindowStore.getState().windows[windowKey]?.isMinimized) el.style.display = "none"; } });
+                return;
+            }
             el.style.display = "block";
-            if (reduced()) { gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2 }); return; }
+            if (reduced()) { gsap.fromTo(el, { opacity: 0 }, { opacity: 1, y: 0, scale: 1, duration: 0.2 }); return; }
             const r = el.getBoundingClientRect();
             origin.current = press ? `${press.x - r.left}px ${press.y - r.top}px` : "50% 100%";
-            gsap.fromTo(el, { scale: 0.12, transformOrigin: origin.current }, { scale: 1, duration: 0.55, ease: "expo.out" });
+            gsap.fromTo(el, { scale: 0.12, y: 0, transformOrigin: origin.current }, { scale: 1, y: 0, duration: 0.45, ease: "expo.out" });
             gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" });   // solid early, never a ghost
-        }, [isOpen, mounted])
+        }, [isOpen, isMinimized, mounted])
 
         useGSAP(() => {
             const el = ref.current;
@@ -74,6 +79,7 @@ const WindowWrapper = (Component, windowKey) => {
                 role="dialog"
                 aria-label={windowKey}
                 tabIndex={-1}
+                onDoubleClick={(e) => { if (e.target.closest?.("#window-header") && !e.target.closest?.("button, input")) ref.current?.classList.toggle("is-max"); }}
             >
                 <Component {...props} />
             </section>
