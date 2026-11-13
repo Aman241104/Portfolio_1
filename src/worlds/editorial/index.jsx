@@ -1,13 +1,16 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { profile, socials } from "#content/profile.js";
 import { onRepeat, watching } from "#content/taste.js";
 import { work, KINDS, shot } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
+import { certifications } from "../../../content/certifications.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
 import "./editorial.css";
+
+const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
 // World 2: THE INDEX. A one-ink broadsheet (paper, ink, International Klein Blue). Front page first, then a Swiss
 // project index with a cursor-following duotone preview. The recruiter view: everything one scroll away.
@@ -27,10 +30,32 @@ export default function EditorialWorld() {
     const root = useRef(null);
     const preview = useRef(null);
     const [kind, setKind] = useState("all");
+    const [q, setQ] = useState("");
     const [peek, setPeek] = useState(null);
-    const rows = work.filter((w) => kind === "all" || w.kind === kind);
+    const [folio, setFolio] = useState({ show: false, pct: 0 });
+    const rows = useMemo(() => {
+        const query = q.trim().toLowerCase();
+        return work.filter((w) =>
+            (kind === "all" || w.kind === kind) &&
+            (!query || `${w.title} ${w.line} ${w.stack || ""} ${w.kind}`.toLowerCase().includes(query))
+        );
+    }, [kind, q]);
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const fine = typeof window !== "undefined" && matchMedia("(pointer: fine)").matches;
+
+    useEffect(() => {
+        const onScroll = () => {
+            const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+            setFolio({ show: window.scrollY > 360, pct: Math.min(100, (window.scrollY / max) * 100) });
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    useEffect(() => {
+        if (reduced) return;
+        gsap.fromTo(".ed-table li:not(.ed-th)", { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, stagger: 0.015, ease: "power2.out", clearProps: "transform" });
+    }, [kind, q, reduced]);
 
     useGSAP(() => {
         if (reduced) return;
@@ -70,6 +95,18 @@ export default function EditorialWorld() {
 
     return (
         <div ref={root} className="ed">
+            <nav className="ed-folio" data-show={folio.show || undefined} aria-label="Section index">
+                <span className="ed-folio-brand">THE INDEX · 2026</span>
+                <div>
+                    <a href="#ed-front">Front Page</a>
+                    <a href="#ed-index">Index ({work.length})</a>
+                    <a href="#ed-xp">Experience</a>
+                    <a href="#ed-certs">Credentials ({certifications.length})</a>
+                    <a href="#ed-tools">Toolkit</a>
+                    <a href="#ed-contact">Contact</a>
+                </div>
+                <i className="ed-folio-bar" style={{ width: `${folio.pct}%` }} aria-hidden />
+            </nav>
             <header className="ed-mast">
                 <p className="ed-meta"><span>Ahmedabad</span><span>{today}</span><span>Vol. 2026 · {work.length} projects · {work.filter((w) => w.maintained).length} in production</span></p>
                 <h1 aria-label={TITLE}>{[...TITLE].map((c, i) => <span key={i} className="ed-ch" aria-hidden>{c === " " ? "\u00a0" : c}</span>)}</h1>
@@ -77,12 +114,14 @@ export default function EditorialWorld() {
                 <nav className="ed-ear">
                     <a href={profile.resume} target="_blank" rel="noreferrer">Résumé (PDF)</a>
                     <a href="/resume.html?for=fullstack">Full-stack</a><a href="/resume.html?for=frontend">Frontend</a><a href="/resume.html?for=ai">AI products</a>
+                    <a href={profile.github} target="_blank" rel="noreferrer">GitHub ↗</a>
+                    {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</a>}
                     <a href={`mailto:${profile.email}`} className="ed-ink">{profile.email}</a>
                     <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
                 </nav>
             </header>
 
-            <section className="ed-front" aria-label="Front page">
+            <section id="ed-front" className="ed-front" aria-label="Front page">
                 <a className="ed-lead" href={href(LEAD)}>
                     <Duo w={LEAD} size={1400} />
                     <p className="ed-kicker">Lead story · Product · {LEAD.year}</p>
@@ -106,12 +145,15 @@ export default function EditorialWorld() {
             <section className="ed-sec" aria-labelledby="ed-index">
                 <div className="ed-sec-head">
                     <h2 id="ed-index">Index of work</h2>
-                    <div className="ed-tabs" role="tablist" aria-label="Filter by kind">
-                        {Object.entries({ all: "All", ...KINDS }).map(([k, l]) => (
-                            <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>
-                                {l} <span>{k === "all" ? work.length : work.filter((w) => w.kind === k).length}</span>
-                            </button>
-                        ))}
+                    <div className="ed-index-controls">
+                        <input id="ed-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter by name or stack…" aria-label="Filter projects" />
+                        <div className="ed-tabs" role="tablist" aria-label="Filter by kind">
+                            {Object.entries({ all: "All", ...KINDS }).map(([k, l]) => (
+                                <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>
+                                    {l} <span>{k === "all" ? work.length : work.filter((w) => w.kind === k).length}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
                 <ol className="ed-table" onPointerLeave={() => setPeek(null)}>
@@ -120,7 +162,7 @@ export default function EditorialWorld() {
                         <li key={w.slug}>
                             <a href={href(w) || "#"} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer" onPointerEnter={() => setPeek(w)} onFocus={() => setPeek(w)}>
                                 <span className="ed-no">{String(work.indexOf(w) + 1).padStart(2, "0")}</span>
-                                <span className="ed-title">{w.title}<small>{w.line}</small></span>
+                                <span className="ed-title">{w.title}<small>{w.line}</small>{w.stack && <em className="ed-stack">{w.stack}</em>}</span>
                                 <span>{KINDS[w.kind].replace(/s$/, "")}</span>
                                 <span>{w.year}</span>
                                 <span>{cases[w.slug] ? <b className="ed-ink">Case study</b> : w.live ? <b className="ed-ink">● {host(w.url)}</b> : w.url ? "Online" : "Private"}</span>
@@ -143,6 +185,7 @@ export default function EditorialWorld() {
                         <article key={x.role} className="ed-xp">
                             <p className="ed-kicker">{x.when} · {x.where}</p>
                             <h3>{x.role}, <em>{x.org}</em></h3>
+                            {x.stack && <p className="ed-xp-stack">{x.stack}</p>}
                             <ul>{x.points.map((p) => <li key={p}>{p}</li>)}</ul>
                         </article>
                     ))}
@@ -154,6 +197,24 @@ export default function EditorialWorld() {
                             <li key={w.slug}><a href={w.url} target="_blank" rel="noreferrer"><span>{w.title}</span><span className="ed-mono">{host(w.url)}</span></a></li>
                         ))}
                     </ul>
+                </div>
+            </section>
+
+            <section className="ed-sec" aria-labelledby="ed-certs">
+                <div className="ed-sec-head">
+                    <h2 id="ed-certs">Verified credentials</h2>
+                    <p className="ed-kicker">Anthropic · AWS · Google · Microsoft Learn</p>
+                </div>
+                <div className="ed-certs">
+                    {certifications.map((c) => (
+                        <article key={c.code} className="ed-cert">
+                            <p className="ed-cert-meta"><span>{c.code}</span><span>{c.date}</span></p>
+                            <p className="ed-cert-issuer">{c.issuer}</p>
+                            <h3>{c.title}</h3>
+                            <p className="ed-cert-focus">{c.focus}</p>
+                            {c.url && <a href={c.url} target="_blank" rel="noreferrer" className="ed-more">Verify badge ↗</a>}
+                        </article>
+                    ))}
                 </div>
             </section>
 

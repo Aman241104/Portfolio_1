@@ -100,3 +100,37 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 .ed-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; }
 .ed-w > span { display: inline-block; }
 .ed :is(h1, h2, h3, p, .ed-title, .ed-more) { font-variant-numeric: normal; }   /* tnum also widens , : . in Schibsted: keep it for the numeric columns only */
+
+/* 90+ Gate Broadsheet Upgrades */
+.ed-folio { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px clamp(16px, 4vw, 56px); background: rgba(247, 244, 236, .95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--ink); transform: translateY(-100%); transition: transform .28s ease; }
+.ed-folio[data-show="true"] { transform: translateY(0); }
+.ed-folio-brand { font: 700 11.5px/1 "Geist Mono", monospace; letter-spacing: .1em; color: var(--ikb); }
+.ed-folio > div { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.ed-folio a { font: 500 11.5px/1 "Geist Mono", monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--ink); text-decoration: none; }
+.ed-folio a:hover { color: var(--ikb); }
+.ed-folio-bar { position: absolute; left: 0; bottom: -1px; height: 2px; background: var(--ikb); pointer-events: none; }
+
+.ed-duo { border: 1px solid rgba(15, 16, 18, .22); }
+.ed-duo img { filter: grayscale(1) contrast(1.26) brightness(.92) !important; }
+.ed-standfirst::first-letter { float: left; font: 700 3.2em/0.86 "Schibsted Grotesk", sans-serif; color: var(--ikb); padding: 4px 10px 0 0; }
+
+.ed-index-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+#ed-search { min-width: 210px; padding: 7px 10px; border: 1px solid var(--ink); background: transparent; color: var(--ink); font: 500 12px "Geist Mono", monospace; outline: none; }
+#ed-search:focus { border-color: var(--ikb); }
+.ed-stack { display: block; font: 500 11px/1.3 "Geist Mono", monospace; color: var(--ikb); margin-top: 4px; font-style: normal; letter-spacing: .03em; }
+.ed-table li > a:hover .ed-stack { color: #9db4ff; }
+.ed-xp-stack { margin: 8px 0 0; font: 500 11.5px/1.4 "Geist Mono", monospace; color: var(--ikb); letter-spacing: .03em; }
+
+.ed-certs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; border-top: 2px solid var(--ink); padding-top: 20px; }
+.ed-cert { padding-right: 18px; border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 6px; }
+.ed-cert:last-child { border-right: 0; padding-right: 0; }
+.ed-cert-meta { display: flex; justify-content: space-between; margin: 0; font: 600 11px "Geist Mono", monospace; color: var(--ikb); letter-spacing: .08em; }
+.ed-cert-issuer { margin: 0; font: 600 12px "Geist Mono", monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--mute); }
+.ed-cert h3 { margin: 0; font: 700 18px/1.2 "Schibsted Grotesk", sans-serif; }
+.ed-cert-focus { margin: 0; font-size: 14px; line-height: 1.45; color: var(--mute); }
+.ed-cert .ed-more { margin-top: auto; padding-top: 6px; }
+.ed-tools > div { padding-right: 18px; border-right: 1px solid var(--rule); }
+.ed-tools > div:last-child { border-right: 0; }
+
+@media (max-width: 960px) { .ed-certs { grid-template-columns: repeat(2, 1fr); } .ed-cert { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--rule); padding-bottom: 16px; } }
+@media (max-width: 600px) { .ed-certs { grid-template-columns: 1fr; } .ed-folio > div { display: none; } }
