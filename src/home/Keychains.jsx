@@ -38,6 +38,15 @@ const plate = (size, r, depth) => {
 const rimGeo = plate(0.96, 0.26, 0.09);
 const faceGeo = plate(0.84, 0.21, 0.1);
 const enamel = new THREE.MeshPhysicalMaterial({ color: "#0d0d0f", roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.05 });
+const lightRim = new THREE.MeshPhysicalMaterial({
+    color: "#e6e4de", roughness: 0.22, metalness: 0.35, clearcoat: 1, clearcoatRoughness: 0.06,
+    emissive: "#d8d5ce", emissiveIntensity: 0.32,
+});
+const clearFace = new THREE.MeshPhysicalMaterial({
+    color: "#f7f5f0", roughness: 0.12, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.04,
+    emissive: "#ece9e2", emissiveIntensity: 0.38,
+});
+const darkInkLogo = new THREE.MeshPhysicalMaterial({ color: "#1c1c1f", roughness: 0.28, metalness: 0.2, clearcoat: 0.8 });
 const logoCache = new Map();
 const logoGeo = (icon) => {
     if (logoCache.has(icon.slug)) return logoCache.get(icon.slug);
@@ -49,7 +58,7 @@ const logoGeo = (icon) => {
     return g;
 };
 const LOGO_SCALE = 0.025;                                  // 24-unit icon → 0.6
-const Charm = ({ icon, label }) => {
+const Charm = ({ icon, label, light }) => {
     const brand = useMemo(() => {
         const dark = parseInt(icon.hex, 16) < 0x333333;     // black logos (Next.js, three.js) become bone enamel
         return new THREE.MeshPhysicalMaterial({ color: dark ? "#edeae3" : `#${icon.hex}`, roughness: 0.28, metalness: 0.15, clearcoat: 1, clearcoatRoughness: 0.08 });
@@ -57,13 +66,13 @@ const Charm = ({ icon, label }) => {
     const geo = logoGeo(icon);
     return (
         <group position-y={-0.6}>
-            <mesh geometry={rimGeo} material={mat.chrome} />
-            <mesh geometry={faceGeo} material={enamel} position-z={0.012} />
-            {/* the logo, front face; y flipped from SVG space (three handles the mirrored winding) */}
-            <mesh geometry={geo} material={brand} position-z={0.065} scale={[LOGO_SCALE, -LOGO_SCALE, LOGO_SCALE]} />
-            <Text font={MONO} fontSize={0.085} letterSpacing={0.12} color="#8a8780" anchorX="center" anchorY="middle"
+            <mesh geometry={rimGeo} material={light ? lightRim : mat.chrome} />
+            <mesh geometry={faceGeo} material={light ? clearFace : enamel} position-z={0.012} />
+            {/* the logo, front face; in Light Mode it renders as crisp carbon/gunmetal inside frosted gallery glass */}
+            <mesh geometry={geo} material={light ? darkInkLogo : brand} position-z={0.065} scale={[LOGO_SCALE, -LOGO_SCALE, LOGO_SCALE]} />
+            <Text font={MONO} fontSize={0.085} letterSpacing={0.12} color={light ? "#5a5854" : "#8a8780"} anchorX="center" anchorY="middle"
                 position={[0, 0, -0.07]} rotation-y={Math.PI}>{label}</Text>
-            <mesh position-y={0.5} rotation-y={Math.PI / 2} material={mat.chrome}><torusGeometry args={[0.07, 0.016, 10, 24]} /></mesh>
+            <mesh position-y={0.5} rotation-y={Math.PI / 2} material={light ? lightRim : mat.chrome}><torusGeometry args={[0.07, 0.016, 10, 24]} /></mesh>
         </group>
     );
 };
@@ -105,13 +114,12 @@ const Thing = ({ kind, ...p }) =>
 
 /* ---------------------------------------------------------------- placement */
 
-// Designed, not scattered: desktop hangs three per side in a mirrored arc, phones a row of four in the band
-// between machine and word. Every charm sits at the same depth, so they read as one set at one size.
-// Slots are in screen space (NDC) for the ring; positions are solved for the current screen shape with the
-// same framing as the camera, and pushed clear of the machine if a narrow screen makes it wider.
+// Unified 1:1 Match-Cut layout across both Dark Studio and Light Atelier:
+// The 4 exhibition charms (UI-01 REACT, LANG-02 TYPESCRIPT, RUNTIME-03 NODE.JS, ENGINE-04 THREE.JS)
+// stay at the exact same 3D coordinates, scale, and sway phase during Dark ↔ Light transitions.
 const DESKTOP = [
-    { sx: -0.88, sy: 0.52, item: "react" }, { sx: -0.71, sy: 0.7, item: "enter" }, { sx: -0.54, sy: 0.52, item: "typescript" },
-    { sx: 0.54, sy: 0.52, item: "node" }, { sx: 0.71, sy: 0.7, item: "helmet" }, { sx: 0.88, sy: 0.52, item: "three" },
+    { sx: -0.76, sy: 0.66, item: "react" }, { sx: -0.47, sy: 0.57, item: "typescript" },
+    { sx: 0.48, sy: 0.57, item: "node" }, { sx: 0.76, sy: 0.66, item: "three" },
 ];
 // phones: a small even row on cables above the machine, clear of the lever on the right
 const PHONE = [
@@ -127,14 +135,13 @@ const place = (aspect, framing) => {
     }
     const phone = aspect < 0.8;
     const ray = new THREE.Raycaster();
-    return (phone ? PHONE : DESKTOP).map(({ sx, sy, item }, i) => {
+    const list = phone ? PHONE : DESKTOP;
+    return list.map(({ sx, sy, item }, i) => {
         // inner columns: keep a gap from the machine on screens where it takes more width
         if (!phone && Math.abs(sx) < 0.7) sx = Math.sign(sx) * Math.max(Math.abs(sx), (sx < 0 ? -box.min.x : box.max.x) + 0.12);
         const at = (y) => { ray.setFromCamera({ x: sx, y }, cam); return ray.ray.at(((phone ? -3 : -3.2) - cam.position.z) / ray.ray.direction.z, new THREE.Vector3()); };
-        let pos = at(sy), scale = phone ? 1 : 0.82;
+        let pos = at(sy), scale = phone ? 1 : 0.84;
         if (phone) {
-            // phones: the machine's height on screen depends on the aspect, so hang each piece (object + label,
-            // ~1.7 units under its ring) clear of the machine's real top; shrink if even the top of the screen is too low
             const bottomY = (p, k) => new THREE.Vector3(p.x, p.y - 1.7 * k, p.z).project(cam).y;
             const clear = box.max.y + 0.04;
             for (let y = sy; y <= 0.82 && bottomY(pos, scale) < clear; y += 0.02) pos = at(y);
@@ -146,23 +153,23 @@ const place = (aspect, framing) => {
 
 // The component archive: every object carries a catalogue number, like pieces in an exhibition.
 const BY_ID = {
-    react: { kind: "charm", icon: siReact, label: "REACT", code: "UI-01", note: "Interfaces" },
-    typescript: { kind: "charm", icon: siTypescript, label: "TYPESCRIPT", code: "LANG-02", note: "Every line" },
-    node: { kind: "charm", icon: siNodedotjs, label: "NODE.JS", code: "RUNTIME-03", note: "APIs + agents" },
-    three: { kind: "charm", icon: siThreedotjs, label: "THREE.JS", code: "ENGINE-04", note: "This machine" },
-    enter: { kind: "key", label: "ENTER", material: m.redAnodised, ink: "#edeae3", wide: 1.7, code: "KEY-05", note: "Ship it" },
-    helmet: { kind: "helmet", code: "GEAR-06", note: "Bikes, wraps" },
+    react: { kind: "charm", icon: siReact, label: "REACT", code: "UI-01", note: "REACT" },
+    typescript: { kind: "charm", icon: siTypescript, label: "TYPESCRIPT", code: "LANG-02", note: "TYPESCRIPT" },
+    node: { kind: "charm", icon: siNodedotjs, label: "NODE.JS", code: "RUNTIME-03", note: "NODE.JS" },
+    three: { kind: "charm", icon: siThreedotjs, label: "THREE.JS", code: "ENGINE-04", note: "THREE.JS" },
+    enter: { kind: "key", label: "ENTER", material: m.redAnodised, ink: "#edeae3", wide: 1.7, code: "KEY-05", note: "ENTER" },
+    helmet: { kind: "helmet", code: "GEAR-06", note: "HELMET" },
 };
 
 // hairline display cable from the ring up out of frame
 const cableGeo = new THREE.CylinderGeometry(0.006, 0.006, 14, 6).translate(0, 7 + 0.42, 0);
-const cableMat = new THREE.MeshBasicMaterial({ color: "#4a4844" });
+const cableMatDark = new THREE.MeshBasicMaterial({ color: "#4a4844" });
+const cableMatLight = new THREE.MeshBasicMaterial({ color: "#9c9891" });
 
-const Keychain = ({ spot, index, lit, jackpot, kick }) => {
+const Keychain = ({ spot, index, lit, light, jackpot, kick }) => {
     const root = useRef(), swing = useRef(), hover = useRef(false);
     const turns = useRef(0), turned = useRef(0);
     const t0 = useRef(null), burst = useRef(9), was = useRef(false);
-    const s = spot.seed;
     const still = reduced ? 0 : 1;
     useFrame(({ clock }, dt) => {
         const t = clock.elapsedTime;
@@ -183,28 +190,29 @@ const Keychain = ({ spot, index, lit, jackpot, kick }) => {
         swing.current.rotation.x = kick.current * 1.4 * (1 + (index % 3) * 0.25);
         swing.current.rotation.y = turned.current + Math.sin(t * 0.6 + index * 0.7) * 0.28 * still;
     });
+    const info = BY_ID[spot.item];
     return (
         <group ref={root} visible={false}
             onPointerOver={(e) => { e.stopPropagation(); if (!hover.current) turns.current += Math.PI * 2; hover.current = true; }}
             onPointerOut={() => { hover.current = false; }}
             onPointerDown={(e) => { e.stopPropagation(); turns.current += Math.PI * 2; }}>
-            {spot.cable && <mesh geometry={cableGeo} material={cableMat} />}
+            {spot.cable && <mesh geometry={cableGeo} material={light ? cableMatLight : cableMatDark} />}
             <Hardware />
-            <group ref={swing}><Thing {...BY_ID[spot.item]} /></group>
+            <group ref={swing}><Thing {...info} light={light} /></group>
             {/* catalogue label on the display, not on the object: stays level while the piece sways; off during a win */}
             <group visible={!jackpot}>
-            <Text font={MONO} fontSize={spot.phone ? 0.13 : 0.1} letterSpacing={0.12} color="#8a8780" anchorX="center" anchorY="top" position-y={-1.28}>
-                {BY_ID[spot.item].code}
+            <Text font={MONO} fontSize={spot.phone ? 0.13 : 0.095} letterSpacing={0.12} color={light ? "#52504c" : "#8a8780"} anchorX="center" anchorY="top" position-y={-1.28}>
+                {info.code}
             </Text>
-            <Text font={MONO} fontSize={spot.phone ? 0.13 : 0.1} letterSpacing={0.08} color="#edeae3" anchorX="center" anchorY="top" position-y={-1.45}>
-                {BY_ID[spot.item].note.toUpperCase()}
+            <Text font={MONO} fontSize={spot.phone ? 0.13 : 0.095} letterSpacing={0.08} color={light ? "#141416" : "#edeae3"} anchorX="center" anchorY="top" position-y={-1.44}>
+                {info.note}
             </Text>
             </group>
         </group>
     );
 };
 
-export default function Keychains({ lit, jackpot, framing }) {
+export default function Keychains({ lit, light = false, jackpot, framing }) {
     const aspect = useThree((st) => st.size.width / st.size.height);
     // re-place only when the screen shape changes meaningfully (rotate, resize), not every pixel
     const bucket = Math.round(aspect * 10) / 10;
@@ -220,5 +228,5 @@ export default function Keychains({ lit, jackpot, framing }) {
         vel.current *= Math.exp(-3.2 * dt);                               // damping
         kick.current = THREE.MathUtils.clamp(kick.current + vel.current * dt * 10, -0.6, 0.6);
     });
-    return spots.map((spot, i) => <Keychain key={`${bucket}-${i}`} spot={spot} index={i} lit={lit} jackpot={jackpot} kick={kick} />);
+    return spots.map((spot, i) => <Keychain key={`${bucket}-${light ? "L" : "D"}-${i}`} spot={spot} index={i} lit={lit} light={light} jackpot={jackpot} kick={kick} />);
 }

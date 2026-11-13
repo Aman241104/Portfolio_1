@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap');
+
 /* Main screen: Dark Studio (docs/DESIGN_DIRECTION.md §10). 4 tokens, one accent. */
 .home {
     --void: #050506;
@@ -768,3 +770,694 @@
     }
 }
 @media (max-width: 760px) { .xp-list::before { left: -10px; } }
+
+/* ============================================================
+   UNIFIED 1:1 CINEMA MATCH-CUT ARCHITECTURE (Dark Studio ↔ Light Atelier)
+   - Every element (Top Bar, 4 Keychains, Floating Sphere, "Portfolio" Wordmark,
+     "Creative Developer" Callout, Outline Pill CTA, Sculpted Ridge, Bottom Bar)
+     shares the EXACT SAME pixel coordinates, size, and geometry in both modes.
+   - Toggling Dark ↔ Light via the Ink-Bleed wave changes ONLY color, lighting,
+     surface material, and typography treatment — zero layout shift.
+   ============================================================ */
+.home {
+    --ridge-0: #111114;
+    --ridge-1: #0a0a0c;
+    --ridge-2: #050506;
+    --ridge-sh0: rgba(0, 0, 0, 0.55);
+    --ridge-sh1: rgba(0, 0, 0, 0.22);
+    --arch-0: #221c19;
+    --arch-1: #110e0d;
+    --ridge-line: rgba(237, 234, 227, 0.06);
+    --ridge-cross: rgba(237, 234, 227, 0.22);
+    --rock-1: #17161a;
+    --rock-2: #0d0c0f;
+}
+
+.home .dark-floor-fog {
+    position: absolute;
+    left: -10vw;
+    right: -10vw;
+    bottom: -4vh;
+    height: 36vh;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(58% 68% at 50% 82%, rgba(255, 46, 31, .085) 0%, rgba(18, 18, 22, .55) 48%, transparent 100%),
+        linear-gradient(180deg, transparent 0%, rgba(5, 5, 6, .75) 65%, #050506 100%);
+    filter: blur(18px);
+}
+
+.home .theme-link {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 0; transition: color .2s;
+}
+.home .theme-link:hover { color: var(--bone); }
+.home .theme-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--signal);
+    box-shadow: 0 0 8px rgba(255, 46, 31, .55);
+    transition: background .25s, box-shadow .25s, transform .25s;
+}
+
+/* 1. Shared Hero Ridge & Studio Canvas Z-Stacking */
+.home .hero-ridge {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+.home .studio {
+    z-index: 2 !important;
+}
+
+/* 2. Shared Top Bar Geometry: Stacked AMAN® + Center Pill + Clock + Circular Waveform Button */
+.home .bar {
+    padding: 26px var(--gutter);
+    align-items: center;
+}
+.home .bar-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+.home .mv-text {
+    font: 800 22px/1 "Geist", sans-serif !important;
+    letter-spacing: 0.03em;
+    color: var(--bone);
+}
+.home .mv-text::after {
+    content: "®" !important;
+    position: static !important;
+    font: 500 11px/1 "Geist", sans-serif;
+    vertical-align: super;
+    margin-left: 2px;
+    color: var(--bone);
+    clip-path: none !important;
+    transform: none !important;
+}
+.home .brand-sub {
+    display: block !important;
+    margin: 0;
+    font: 500 10px/1.45 "Geist Mono", monospace;
+    letter-spacing: 0.14em;
+    color: var(--smoke);
+}
+.home .brand-sub i {
+    font-style: normal;
+    color: var(--signal);
+    font-size: 8px;
+    margin-right: 5px;
+}
+
+/* Shared Center Pill: ✦ PX-01 -- REALITY SELECTOR */
+.home .bar .center {
+    padding: 9px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(237, 234, 227, .14);
+    background: rgba(18, 18, 22, .56);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--bone);
+    font: 500 10.5px/1 "Geist Mono", monospace;
+    letter-spacing: 0.14em;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+}
+.home .bar .center .star {
+    display: inline-block !important;
+    font-size: 12px;
+    color: var(--signal);
+}
+
+/* Shared Top-Right: ThemeToggle + Clock + Circular Audio Waveform Button */
+.home .bar .right {
+    padding-top: 0;
+    gap: 16px;
+}
+.home .bar .clock {
+    color: var(--bone);
+    font: 500 11px/1 "Geist Mono", monospace;
+    letter-spacing: 0.1em;
+}
+.home .sound {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(237, 234, 227, .16);
+    background: rgba(18, 18, 22, .62);
+    display: inline-grid;
+    place-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+}
+.home .sound .eq {
+    display: inline-flex;
+    align-items: center;
+    gap: 2.5px;
+    height: 12px;
+}
+.home .sound .eq i {
+    width: 1.8px;
+    height: 7px;
+    background: var(--bone);
+    border-radius: 2px;
+}
+.home .sound .eq i:nth-child(2) { height: 12px; }
+.home .sound .eq .eq-dot {
+    display: inline-block !important;
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background: var(--signal);
+    margin-left: 1px;
+}
+
+/* 3. Shared Monumental "Portfolio" Wordmark & Red Signature Geometry */
+.home .hero-word {
+    --word-size: clamp(104px, 21.4vw, 410px);
+    --word-bottom: clamp(54px, 6.8vh, 80px);
+    font: 800 var(--word-size)/0.78 "Geist", sans-serif;
+    letter-spacing: -0.055em;
+    z-index: 1 !important;
+    pointer-events: none;
+}
+.home .hero-word span {
+    background: linear-gradient(180deg, #f3f0e8 0%, #d8d4cb 52%, rgba(138, 135, 128, 0.38) 85%, rgba(5, 5, 6, 0.04) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+}
+.home .signature {
+    right: 3.2vw;
+    bottom: calc(var(--word-bottom) + var(--word-size) * 0.06);
+    font: 400 clamp(36px, 5.6vw, 102px)/1.2 "Homemade Apple", cursive;
+    color: var(--signal);
+    transform: rotate(-7deg);
+    text-shadow: 0 6px 28px rgba(255, 46, 31, .28);
+}
+.home .sig-underline {
+    display: block !important;
+    width: 92%;
+    height: 22px;
+    margin: -10px 0 0 6%;
+    color: var(--signal);
+    overflow: visible;
+}
+
+/* 4. Shared Mid-Left Callout: "Creative Developer" + [ EXPERIMENTAL PORTFOLIO ] */
+.home .creative-callout {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    position: absolute;
+    left: 6.2vw;
+    top: 53.5%;
+    z-index: 4;
+}
+.home .creative-script {
+    margin: 0;
+    position: relative;
+    font: 400 clamp(20px, 1.85vw, 30px)/1.2 "Homemade Apple", cursive;
+    color: var(--bone);
+    transform: rotate(-4.5deg);
+    white-space: nowrap;
+}
+.home .creative-line {
+    display: block;
+    width: 82%;
+    height: 1.5px;
+    background: var(--bone);
+    margin: 4px auto 0;
+    transform: rotate(-1.5deg);
+}
+.home .creative-tag {
+    margin: 0;
+    font: 500 10.5px/1 "Geist Mono", monospace;
+    letter-spacing: 0.2em;
+    color: var(--smoke);
+}
+
+/* 5. Shared Mid-Right CTA: Outline Pill Button + "JUST SHOW ME THE WORK" */
+.home .cta:not(.reveal) {
+    right: 6.2vw;
+    top: 47%;
+    width: auto;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+}
+.home .pull {
+    font: 600 11.5px/1 "Geist Mono", monospace !important;
+    letter-spacing: 0.12em;
+    color: var(--bone) !important;
+    background: rgba(18, 18, 22, .68) !important;
+    border: 1px solid rgba(237, 234, 227, .22) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 15px 26px !important;
+    min-height: 46px;
+    border-radius: 999px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .28);
+    transition: background .2s, border-color .2s, transform .2s, box-shadow .2s;
+}
+.home .pull:hover {
+    background: rgba(32, 32, 38, .88) !important;
+    border-color: var(--signal) !important;
+    transform: translateY(-1px);
+}
+.home .cta-alt {
+    justify-content: center;
+}
+.home .cta-alt > * {
+    font: 500 10.5px/1 "Geist Mono", monospace !important;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--smoke) !important;
+    text-decoration: underline;
+    text-decoration-color: rgba(237, 234, 227, .24);
+    text-underline-offset: 6px;
+    padding: 4px 0;
+}
+.home .cta-alt > *:hover {
+    color: var(--bone) !important;
+    text-decoration-color: var(--signal);
+}
+
+/* 6. Shared Bottom Editorial Bar (01 / 07 | One developer... | Projects · About · Skills · Experience · Contact | Scroll ︾) */
+.home .light-foot-bar {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-end;
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: 20px;
+    z-index: 4;
+    pointer-events: auto;
+}
+.home .lf-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.home .lf-idx {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font: 500 11px/1 "Geist Mono", monospace;
+    color: var(--smoke);
+}
+.home .lf-idx i {
+    display: inline-block;
+    width: 96px;
+    height: 1px;
+    background: rgba(237, 234, 227, .22);
+}
+.home .lf-tag {
+    margin: 0;
+    padding-top: 6px;
+    border-top: 1px solid rgba(237, 234, 227, .14);
+    font: 400 13px/1.3 "Geist", sans-serif;
+    color: var(--bone);
+}
+.home .lf-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 28px;
+    border-left: 1px solid rgba(237, 234, 227, .22);
+}
+.home .lf-nav button {
+    font: 400 13px/1 "Geist", sans-serif;
+    color: var(--bone);
+    padding: 4px 2px;
+    transition: color .2s;
+}
+.home .lf-nav button:hover {
+    color: var(--signal);
+}
+.home .lf-nav span {
+    color: rgba(237, 234, 227, .32);
+    font-size: 12px;
+}
+.home .lf-scroll {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 400 13px/1 "Geist", sans-serif;
+    color: var(--bone);
+    padding: 4px 0;
+    transition: color .2s, transform .2s;
+}
+.home .lf-scroll i {
+    font-style: normal;
+    font-size: 12px;
+    color: var(--smoke);
+}
+.home .lf-scroll:hover {
+    color: var(--signal);
+    transform: translateY(2px);
+}
+
+/* ============================================================
+   LIGHT MODE COLOR & SURFACE OVERRIDES (.home[data-light])
+   Zero geometry changes — 100% pure color/material/font Match-Cut
+   ============================================================ */
+.home[data-light] {
+    --void: #ebe8e2;
+    --bone: #141416;
+    --smoke: #64615b;
+    --signal: #e62117;
+    --ridge-0: #faf9f6;
+    --ridge-1: #edeae4;
+    --ridge-2: #e2dfd8;
+    --ridge-sh0: rgba(18, 18, 20, 0.08);
+    --ridge-sh1: rgba(18, 18, 20, 0.03);
+    --arch-0: #ffffff;
+    --arch-1: #f5f3ef;
+    --ridge-line: rgba(18, 18, 20, 0.07);
+    --ridge-cross: rgba(18, 18, 20, 0.22);
+    --rock-1: #d6d2ca;
+    --rock-2: #beb9b0;
+    background: var(--void);
+    color: var(--bone);
+}
+.home[data-light]::after { opacity: .032; mix-blend-mode: multiply; }
+
+.home[data-light] .hero {
+    background:
+        radial-gradient(44% 38% at 50% 6%, #ffffff 0%, rgba(255, 255, 255, .65) 55%, transparent 100%),
+        linear-gradient(180deg, #e7e4de 0%, #efede8 48%, #f4f2ee 74%, #e5e2dc 100%);
+}
+.home[data-light] .hero::before {
+    background: radial-gradient(130% 100% at 50% 42%, transparent 58%, rgba(20, 20, 22, .06));
+}
+.home[data-light] .brand-sub { color: #3a3835; }
+.home[data-light] .bar .center {
+    border-color: rgba(20, 20, 22, .11);
+    background: rgba(255, 255, 255, .52);
+    color: #1e1e20;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .025);
+}
+.home[data-light] .bar .center .star { color: #141416; }
+.home[data-light] .bar .clock { color: #222224; }
+.home[data-light] .sound {
+    border-color: rgba(20, 20, 22, .13);
+    background: rgba(255, 255, 255, .62);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
+}
+.home[data-light] .sound .eq i { background: #141416; }
+.home[data-light] .hero-word {
+    font-family: "Playfair Display", Georgia, serif;
+    letter-spacing: -0.042em;
+}
+.home[data-light] .hero-word span {
+    background: linear-gradient(180deg, #121214 0%, #1c1c1f 54%, rgba(28, 28, 31, 0.36) 85%, rgba(235, 232, 226, 0.04) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+.home[data-light] .signature {
+    text-shadow: 0 6px 24px rgba(230, 33, 23, .16);
+}
+.home[data-light] .creative-script { color: #161618; }
+.home[data-light] .creative-line { background: #161618; }
+.home[data-light] .creative-tag { color: #3e3c38; }
+.home[data-light] .pull {
+    color: #141416 !important;
+    background: rgba(255, 255, 255, .66) !important;
+    border-color: rgba(20, 20, 22, .18) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .04);
+}
+.home[data-light] .pull:hover {
+    background: #ffffff !important;
+    border-color: rgba(20, 20, 22, .38) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .07);
+}
+.home[data-light] .cta-alt > * {
+    color: #55534e !important;
+    text-decoration-color: rgba(20, 20, 22, .22);
+}
+.home[data-light] .cta-alt > *:hover {
+    color: #141416 !important;
+    text-decoration-color: var(--signal);
+}
+.home[data-light] .lf-idx { color: #3a3835; }
+.home[data-light] .lf-idx i { background: rgba(20, 20, 22, .24); }
+.home[data-light] .lf-tag {
+    border-top-color: rgba(20, 20, 22, .12);
+    color: #2b2a28;
+}
+.home[data-light] .lf-nav { border-left-color: rgba(20, 20, 22, .25); }
+.home[data-light] .lf-nav button { color: #2b2a28; }
+.home[data-light] .lf-nav span { color: rgba(20, 20, 22, .35); }
+.home[data-light] .lf-scroll { color: #2b2a28; }
+.home[data-light] .lf-scroll i { color: #484642; }
+
+
+/* ============================================================
+   7. BELOW-THE-FOLD SECTIONS IN LIGHT MODE (Unified Editorial Gallery Philosophy)
+   Every section below the hero uses Playfair Display serif headers,
+   sculpted alabaster cards, crisp hairline grids, and vermilion accents.
+   ============================================================ */
+.home[data-light] .marquee {
+    border-top: 1px solid rgba(20, 20, 22, .10);
+    background: linear-gradient(180deg, #e5e2dc 0%, #ebe8e2 100%);
+}
+.home[data-light] .marquee-track span span {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 800;
+    -webkit-text-stroke-color: rgba(20, 20, 22, .35);
+}
+.home[data-light] .tape {
+    background: #141416;
+    color: #f4f2ee;
+    border-block-color: #141416;
+}
+
+/* Section Headers ("Work", "Live & maintained", "Experience", "Skills") in Monumental Didone Serif */
+.home[data-light] .work-head {
+    border-bottom: 1px solid rgba(20, 20, 22, .14);
+    padding-bottom: 22px;
+}
+.home[data-light] .work-head h2 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    color: #141416;
+}
+.home[data-light] .so-word {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+.home[data-light] .so-l {
+    background: linear-gradient(180deg, #141416 15%, #7c7972 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* Stats Strip: Architectural Gallery Index */
+.home[data-light] .stats-row {
+    border-top: 1px solid rgba(20, 20, 22, .14);
+    border-bottom: 1px solid rgba(20, 20, 22, .14);
+    padding-bottom: 18px;
+}
+.home[data-light] .stat {
+    border-color: rgba(20, 20, 22, .10);
+}
+.home[data-light] .stat dd {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #141416;
+}
+
+/* Recruiter Banner: Frosted Optical Glass Card */
+.home[data-light] .hire.lg {
+    background: rgba(255, 255, 255, .64);
+    border: 1px solid rgba(20, 20, 22, .11);
+    box-shadow: 0 18px 48px rgba(20, 20, 22, .04), inset 0 1px 0 #ffffff;
+}
+.home[data-light] .hire-actions a:not(.block-btn),
+.home[data-light] .hire-cv a,
+.home[data-light] .contact-alt a {
+    text-decoration-color: rgba(20, 20, 22, .26);
+}
+.home[data-light] .block-btn {
+    background: #141416;
+    color: #f4f2ee;
+    border-radius: 999px;
+    padding: 15px 26px;
+}
+.home[data-light] .block-btn:hover { background: #2a2a2e; }
+.home[data-light] .block-btn.copy .mono { color: #f4f2ee; }
+
+/* Filter Pills: Match the Top-Bar Center Pill */
+.home[data-light] .filters button {
+    background: rgba(255, 255, 255, .56);
+    border: 1px solid rgba(20, 20, 22, .12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .02);
+    color: #484642;
+    font-family: "Geist Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.home[data-light] .filters button[aria-selected="true"] {
+    background: #141416;
+    color: #f4f2ee;
+    border-color: #141416;
+}
+
+/* Project Cards: Crisp Gallery Frames */
+.home[data-light] .card-shot {
+    background: #ffffff;
+    border: 1px solid rgba(20, 20, 22, .12);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(20, 20, 22, .05);
+}
+.home[data-light] .chrome {
+    background: #f5f3ef;
+    border-bottom: 1px solid rgba(20, 20, 22, .08);
+}
+.home[data-light] .chrome i { background: #d0cdc6; }
+.home[data-light] .chrome i:first-child { background: var(--signal); }
+.home[data-light] .card-meta h3 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(20px, 1.75vw, 25px);
+    letter-spacing: -0.02em;
+}
+.home[data-light] .card-line,
+.home[data-light] .kept-intro,
+.home[data-light] .xp-list ul { color: rgba(20, 20, 22, .74); }
+.home[data-light] .card-code {
+    background: rgba(255, 255, 255, .9);
+    border-color: rgba(20, 20, 22, .16);
+    border-radius: 999px;
+    padding: 6px 12px;
+}
+@media (hover: hover) {
+    .home[data-light] .card > a:hover .card-shot {
+        border-color: rgba(230, 33, 23, .55);
+        box-shadow: 0 24px 56px rgba(20, 20, 22, .12);
+    }
+}
+.home[data-light] .more {
+    border-color: rgba(20, 20, 22, .22);
+    background: rgba(255, 255, 255, .6);
+    font-family: "Geist Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Live & Maintained + Experience + Skills */
+.home[data-light] .kept-list,
+.home[data-light] .kept-list a,
+.home[data-light] .xp-list > li { border-color: rgba(20, 20, 22, .11); }
+@media (hover: hover) {
+    .home[data-light] .kept-list a:hover { background: rgba(255, 255, 255, .55); }
+}
+.home[data-light] .xp-list h3 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+.home[data-light] .skill-group li {
+    background: rgba(255, 255, 255, .58);
+    border-color: rgba(20, 20, 22, .12);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .02);
+}
+.home[data-light] .skill-group li b { background: rgba(20, 20, 22, .08); }
+@media (hover: hover) {
+    .home[data-light] .skill-group li:hover { background: #ffffff; }
+}
+
+/* Footer Dunes & Site Index */
+.home[data-light] .foot-head h2 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: rgba(20, 20, 22, .42);
+}
+.home[data-light] .foot-head b {
+    font-weight: 800;
+    color: #141416;
+}
+.home[data-light] .msg :is(input, textarea) {
+    background: rgba(255, 255, 255, .62);
+    border-bottom-color: rgba(20, 20, 22, .22);
+    color: var(--bone);
+    padding: 12px 10px;
+    border-radius: 6px 6px 0 0;
+}
+.home[data-light] .msg :is(input, textarea)::placeholder { color: rgba(20, 20, 22, .42); }
+.home[data-light] .key.lg {
+    background: rgba(255, 255, 255, .62);
+    box-shadow: inset 0 0 0 1px rgba(20, 20, 22, .10), 0 4px 16px rgba(0, 0, 0, .025);
+}
+@media (hover: hover) {
+    .home[data-light] .key:hover {
+        background: #141416;
+        color: #f4f2ee;
+    }
+    .home[data-light] .key:hover .k-hint { color: rgba(244, 242, 238, .68); }
+}
+.home[data-light] .legal { border-color: rgba(20, 20, 22, .14); }
+.home[data-light] .nudge.lg,
+.home[data-light] .ld-tabs.lg,
+.home[data-light] .ld-act.lg {
+    background: rgba(244, 242, 238, .85);
+    box-shadow: inset 0 0 0 1px rgba(20, 20, 22, .12), 0 14px 36px rgba(20, 20, 22, .12);
+}
+.home[data-light] .ld-tab span,
+.home[data-light] .ld-tab svg { filter: none; }
+.home[data-light] .nudge input:not(.hp) {
+    background: rgba(20, 20, 22, .05);
+    box-shadow: inset 0 0 0 1px rgba(20, 20, 22, .12);
+}
+.home[data-light] .nudge input::placeholder { color: rgba(20, 20, 22, .42); }
+
+@media (max-width: 760px) {
+    .home[data-light] .creative-callout,
+    .home[data-light] .light-foot-bar { display: none !important; }
+}
+
+/* ============================================================
+   ORGANIC SUMI / VERMILION INK-BLEED OVERLAY (Dark ↔ Light)
+   Guaranteed 60fps fullscreen SVG with #px01-ink-filter fractal
+   turbulence displacement + vermilion (#ff2e1f) leading bleed edge.
+   ============================================================ */
+.ink-bleed-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    pointer-events: none;
+    animation: ink-overlay-fade 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.ink-bleed-red {
+    animation: ink-circle-grow 0.82s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.ink-bleed-body {
+    animation: ink-circle-grow 0.88s 0.04s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes ink-circle-grow {
+    0% { r: 0px; }
+    100% { r: var(--max-r, 1800px); }
+}
+@keyframes ink-overlay-fade {
+    0%, 58% { opacity: 1; }
+    100% { opacity: 0; }
+}
+

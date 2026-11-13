@@ -68,7 +68,9 @@ attribute float aSize, aKind, aSeed;
 attribute vec3 aT0, aT1, aT2, aT3;
 vec3 shapeAt(float k) { k = mod(k, 4.0); return k < 0.5 ? aT0 : k < 1.5 ? aT1 : k < 2.5 ? aT2 : aT3; }
 varying float vAlpha;
+varying float vKind;
 void main() {
+    vKind = aKind;
     vec3 p = position;
     bool star = aKind > 0.5 && aKind < 1.5;
     if (aKind > 1.5) {
@@ -110,22 +112,35 @@ void main() {
 }`;
 const fragmentShader = /* glsl */ `
 varying float vAlpha;
+varying float vKind;
+uniform vec3 uColor;
+uniform vec3 uGlyphColor;
 void main() {
     float r = length(gl_PointCoord - 0.5);
     if (r > 0.5) discard;
-    gl_FragColor = vec4(0.93, 0.92, 0.89, vAlpha * smoothstep(0.5, 0.15, r));
+    vec3 col = vKind > 1.5 ? uGlyphColor : uColor;
+    gl_FragColor = vec4(col, vAlpha * smoothstep(0.5, 0.15, r));
 }`;
 
 const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.4);
 const hit = new THREE.Vector3();
 
-const Dust = ({ count, pulse, eventSource }) => {
+const DARK_INK = new THREE.Color(0.93, 0.92, 0.89);
+const LIGHT_INK = new THREE.Color(0.08, 0.08, 0.09);     // deep carbon iron-filings on warm paper
+const LIGHT_GLYPH = new THREE.Color(1.0, 0.18, 0.12);    // vermilion #ff2e1f code glyphs in Daylight Atelier
+const DARK_BG = new THREE.Color("#050506");
+const LIGHT_BG = new THREE.Color("#f2ede4");
+
+const Dust = ({ count, pulse, light, eventSource }) => {
     const geo = useMemo(() => build(count), [count]);
     const uniforms = useMemo(() => ({
         uTime: { value: 0 }, uPR: { value: Math.min(window.devicePixelRatio, 2) },
         uMouse: { value: new THREE.Vector3(0, 0, -100) }, uActive: { value: 0 }, uBurst: { value: -100 },
         uMorph: { value: 0 }, uAspect: { value: 1 }, uPointer: { value: new THREE.Vector2(9, 9) }, uGlyph: { value: new THREE.Vector2(...GLYPH_AT) },
+        uColor: { value: DARK_INK.clone() },
+        uGlyphColor: { value: DARK_INK.clone() },
     }), []);
+    const bgCol = useMemo(() => DARK_BG.clone(), []);
     const last = useRef({ x: 9, y: 9, moved: 0 });
     const seen = useRef(pulse);
     // touch: a tap or drag on the footer counts as the pointer (R3F only tracks mouse-style moves)
@@ -141,7 +156,12 @@ const Dust = ({ count, pulse, eventSource }) => {
         el.addEventListener("pointerdown", touch, { passive: true }); el.addEventListener("pointermove", touch, { passive: true });
         return () => { el.removeEventListener("pointerdown", touch); el.removeEventListener("pointermove", touch); };
     }, [eventSource, get]);
-    useFrame(({ clock, pointer, raycaster, camera, size }, dt) => {
+    useFrame(({ clock, pointer, raycaster, camera, size, gl }, dt) => {
+        const k = 1 - Math.exp(-8 * dt);
+        bgCol.lerp(light ? LIGHT_BG : DARK_BG, k);
+        gl.setClearColor(bgCol);
+        uniforms.uColor.value.lerp(light ? LIGHT_INK : DARK_INK, k);
+        uniforms.uGlyphColor.value.lerp(light ? LIGHT_GLYPH : DARK_INK, k);
         uniforms.uTime.value = clock.elapsedTime;
         uniforms.uMorph.value = reduced ? 0 : clock.elapsedTime / 4.2;     // a glyph every ~4s
         uniforms.uAspect.value = size.width / size.height;
@@ -158,19 +178,19 @@ const Dust = ({ count, pulse, eventSource }) => {
     return (
         <points geometry={geo} frustumCulled={false}>
             <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader}
-                transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+                transparent depthWrite={false} blending={light ? THREE.NormalBlending : THREE.AdditiveBlending} />
         </points>
     );
 };
 
 // `eventSource`: the footer element, so the dots react even when the cursor is over the footer's text.
-export default function DotField({ active, eventSource, pulse = 0 }) {
+export default function DotField({ active, eventSource, pulse = 0, light = false }) {
     const count = typeof window !== "undefined" && window.innerWidth < 700 ? 40000 : 95000;
     return (
         <Canvas className="dots" frameloop={active ? "always" : "never"} dpr={[1, 1.5]} eventSource={eventSource} eventPrefix="client"
             camera={{ position: [0, 3.4, 12], fov: 45, far: 200 }} gl={{ antialias: false }}
-            onCreated={({ camera, gl }) => { camera.lookAt(0, 0.2, -10); gl.setClearColor("#050506"); }}>
-            <Dust count={count} pulse={pulse} eventSource={eventSource} />
+            onCreated={({ camera, gl }) => { camera.lookAt(0, 0.2, -10); gl.setClearColor(light ? "#f2ede4" : "#050506"); }}>
+            <Dust count={count} pulse={pulse} light={light} eventSource={eventSource} />
         </Canvas>
     );
 }

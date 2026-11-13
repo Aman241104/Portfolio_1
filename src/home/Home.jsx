@@ -225,8 +225,22 @@ const SoundToggle = () => {
         return () => window.removeEventListener("keydown", k);
     }, []);
     return (
-        <button type="button" className="mono sound" aria-pressed={on} onClick={() => setSound(!on)} title="Sound (S)">
-            <span className="eq" aria-hidden><i /><i /><i /></span>Sound {on ? "on" : "off"}
+        <button type="button" className="mono sound" aria-pressed={on} onClick={() => setSound(!on)} title="Sound (S)" aria-label={`Sound ${on ? "on" : "off"}`}>
+            <span className="eq" aria-hidden><i /><i /><i /><b className="eq-dot" /></span>
+        </button>
+    );
+};
+
+// Minimal Geist Mono theme link ("Light" / "Dark") right next to Sound off — triggers the organic Ink-Bleed reveal.
+const ThemeToggle = ({ light, onToggle }) => {
+    useEffect(() => {
+        const k = (e) => { if ((e.key === "t" || e.key === "T") && !e.metaKey && !e.ctrlKey && !e.target.closest?.("input, textarea")) onToggle(null); };
+        window.addEventListener("keydown", k);
+        return () => window.removeEventListener("keydown", k);
+    }, [onToggle]);
+    return (
+        <button type="button" className="mono theme-link" aria-pressed={light} onClick={(e) => onToggle(e)} title="Studio light (T)">
+            <span className="theme-dot" aria-hidden />{light ? "Dark" : "Light"}
         </button>
     );
 };
@@ -287,6 +301,34 @@ const Home = ({ onSelect }) => {
     };
     const [picking, setPicking] = useState(false);
     const [progress, setProgress] = useState(8);
+    // Light Mode Gallery Atelier ("light") vs Dark Studio (default)
+    const [light, setLight] = useState(() => { try { return localStorage.getItem("px01-theme") === "light"; } catch { return false; } });
+    const [inkWave, setInkWave] = useState(null);      // { x, y, r, toLight } for the guaranteed SVG fractal ink-bleed transition
+    useEffect(() => {
+        try { localStorage.setItem("px01-theme", light ? "light" : "dark"); } catch { /* ignore */ }
+        document.documentElement.dataset.theme = light ? "light" : "dark";
+    }, [light]);
+
+    const toggleLight = (e) => {
+        const x = e?.clientX ?? window.innerWidth - 150;
+        const y = e?.clientY ?? 36;
+        const maxR = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)) * 1.25;
+        sfx.tick();
+        if (reduced()) {
+            setLight((l) => !l);
+            return;
+        }
+        const toLight = !light;
+        setInkWave({ x, y, maxR, toLight });
+        // Flip the underlying DOM + 3D studio right as the fractal ink wave covers the center of the screen
+        setTimeout(() => {
+            setLight(toLight);
+        }, 420);
+        setTimeout(() => {
+            setInkWave(null);
+        }, 1150);
+    };
+
     // the boot plays once per session; coming back from a world goes straight to the machine dropping in
     const [lit, setLit] = useState(() => { try { return reduced() || !!sessionStorage.getItem("px01-booted"); } catch { return reduced(); } });
     const locked = useRef(0);
@@ -360,9 +402,58 @@ const Home = ({ onSelect }) => {
 
     return (
         <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-phase={phase}
-            data-entering={phase === "transitioning" || undefined}>
+            data-light={light || undefined} data-entering={phase === "transitioning" || undefined}>
+            {/* Guaranteed 60fps SVG Fractal Ink-Bleed Transition Overlay (Works across WebGL + DOM in all browsers) */}
+            {inkWave && (
+                <svg className="ink-bleed-overlay" viewBox={`0 0 ${window.innerWidth} ${window.innerHeight}`} preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                        <filter id="px01-ink-filter" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.014 0.018" numOctaves="4" seed="11" result="noise" />
+                            <feDisplacementMap in="SourceGraphic" in2="noise" scale="135" xChannelSelector="R" yChannelSelector="G" />
+                        </filter>
+                    </defs>
+                    <g filter="url(#px01-ink-filter)">
+                        {/* Vermilion red ink leading edge */}
+                        <circle className="ink-bleed-red" cx={inkWave.x} cy={inkWave.y} r="0" style={{ "--max-r": `${inkWave.maxR}px` }} fill="#ff2e1f" />
+                        {/* Theme paper/void ink body */}
+                        <circle className="ink-bleed-body" cx={inkWave.x} cy={inkWave.y} r="0" style={{ "--max-r": `${inkWave.maxR}px` }} fill={inkWave.toLight ? "#ebe8e2" : "#050506"} />
+                    </g>
+                </svg>
+            )}
             <section ref={hero} className="hero" aria-label="PX-01, the reality selector">
-                <h1 className="ident mono"><span>Aman Patel</span> — full-stack engineer, Ahmedabad <i aria-hidden>●</i> open to work</h1>
+                {/* 0. Background layer: Unified sculpted architectural ridge (Dark Obsidian in Dark Mode ↔ Alabaster Limestone in Light Mode) */}
+                <svg className="hero-ridge" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden>
+                    <defs>
+                        <linearGradient id="ridge-top" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="var(--ridge-0)" />
+                            <stop offset="45%" stopColor="var(--ridge-1)" />
+                            <stop offset="100%" stopColor="var(--ridge-2)" />
+                        </linearGradient>
+                        <linearGradient id="ridge-shadow" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stopColor="var(--ridge-sh0)" />
+                            <stop offset="50%" stopColor="var(--ridge-sh1)" />
+                            <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+                        </linearGradient>
+                        <radialGradient id="top-arch-glow" cx="50%" cy="0%" r="50%">
+                            <stop offset="0%" stopColor="var(--arch-0)" stopOpacity="0.92" />
+                            <stop offset="70%" stopColor="var(--arch-1)" stopOpacity="0.48" />
+                            <stop offset="100%" stopColor="var(--void)" stopOpacity="0" />
+                        </radialGradient>
+                    </defs>
+                    <circle cx="960" cy="-60" r="380" fill="url(#top-arch-glow)" />
+                    <circle cx="-60" cy="590" r="310" fill="none" stroke="var(--ridge-line)" strokeWidth="1" />
+                    <circle cx="1990" cy="540" r="290" fill="none" stroke="var(--ridge-line)" strokeWidth="1" />
+                    <path d="M 1860 440 L 1884 440 M 1872 428 L 1872 452" stroke="var(--ridge-cross)" strokeWidth="1" />
+                    <path d="M 0 520 Q 190 560 360 660 Q 520 560 720 550 L 1220 550 Q 1450 560 1620 650 Q 1780 610 1920 640 L 1920 1080 L 0 1080 Z" fill="url(#ridge-top)" />
+                    <path d="M 360 660 Q 520 560 720 550 L 960 690 L 360 880 Z" fill="url(#ridge-shadow)" />
+                    <path d="M 0 895 L 58 904 L 132 942 L 228 968 L 340 1022 L 485 1080 L 0 1080 Z" fill="var(--rock-1)" opacity="0.65" />
+                    <path d="M 0 925 L 88 946 L 195 990 L 320 1045 L 410 1080 L 0 1080 Z" fill="var(--rock-2)" opacity="0.45" />
+                </svg>
+
+                {/* Subtle atmospheric floor fog & studio depth in Dark Mode */}
+                {!light && <div className="dark-floor-fog" aria-hidden />}
+
+                {/* 1. Monumental "Portfolio" wordmark: identical position & scale in both modes (z-index: 1, behind the 3D machine) */}
                 <p className="hero-word" aria-hidden>{"Portfolio".split("").map((c, i) => <span key={i} style={{ "--i": i }}>{c}</span>)}</p>
 
                 {fontsOk && (
@@ -370,33 +461,37 @@ const Home = ({ onSelect }) => {
                         <Studio active={heroOn} count={lit ? plays : 0} debug={debug} onDebug={() => { setDebug((d) => !d); track("debug_toggled"); }}
                             ticket={phase === "revealed" && result ? { no: plays, name: result.name, symbols: result.symbols } : null}
                             onTicket={() => { if (!result) return; track("ticket_clicked", { world: result.id }); enter(result.id); }} spinning={phase === "spinning"} pulled={pulled} booted={booted}
-                            target={target} entering={phase === "transitioning"} jackpot={phase === "revealed" || phase === "transitioning"} lit={lit}
+                            target={target} entering={phase === "transitioning"} jackpot={phase === "revealed" || phase === "transitioning"} lit={lit} light={light}
                             onPull={pull} onArm={onArm} onReelStop={onReelStop} onAnchors={onAnchors}
                             onCreated={() => bump(65)} onFrame={() => bump(100)} onBooted={() => setBooted(true)} />
                     </Suspense>
                 )}
 
                 <header className="bar">
-                    <MultiverseName scramble={phase === "spinning"} />
-                    <p className="mono center">PX‑01 — Reality selector</p>
-                    <div className="mono right"><SoundToggle /><span className="clock"><Clock /></span></div>
+                    <div className="bar-brand">
+                        <span className="mv-text">AMAN</span>
+                        <p className="brand-sub mono">FULL-STACK ENGINEER<br /><i aria-hidden>●</i> AHMEDABAD, INDIA</p>
+                    </div>
+                    <p className="mono center"><span className="star" aria-hidden>✦</span>PX‑01 -- REALITY SELECTOR</p>
+                    <div className="mono right">
+                        <ThemeToggle light={light} onToggle={toggleLight} />
+                        <span className="clock"><Clock /></span>
+                        <SoundToggle />
+                    </div>
                 </header>
 
-                {/* handwriting pinned to the machine: what to grab, and (after a win) what was chosen */}
+                {/* Unified editorial annotations & red signature — identical coordinates across Dark ↔ Light */}
                 <div className="ink" aria-hidden>
-                    <span className="tag mono">[2026]</span>
-                    <svg className="sig-mark doodle" viewBox="0 -4 200 130">
-                        {SIG.map((d, i) => <path key={i} d={d} pathLength="1" style={{ "--i": i * 0.6 }} />)}
-                        {sig.dots.map(([x, y], i) => <circle key={i} cx={(x + 1) * 100} cy={(0.55 - y) * 100} r="3" />)}
-                    </svg>
-                    <p className="note n-role">full-stack dev</p>
-                    <p className="note n-craft">+ 3D &amp; AI</p>
-                    <p className="note n-city">Ahmedabad, IN</p>
-                    <p className="signature">Aman Patel</p>
-                    <div className="pin pin-knob">
-                        <p className="note">pull me</p>
-                        <Doodle d={ARROW} className="d-arrow" />
+                    <div className="creative-callout">
+                        <p className="creative-script">Creative Developer<span className="creative-line" /></p>
+                        <p className="creative-tag mono">[ EXPERIMENTAL PORTFOLIO ]</p>
                     </div>
+                    <p className="signature">
+                        Aman Patel
+                        <svg className="sig-underline" viewBox="0 0 320 28" aria-hidden>
+                            <path d="M 18 22 Q 165 11 308 4" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+                        </svg>
+                    </p>
                     <div className="pin pin-win"><Doodle d={RING} className="d-ring" view="0 0 206 64" /></div>
                 </div>
 
@@ -418,19 +513,13 @@ const Home = ({ onSelect }) => {
                         </section>
                     ) : (
                         <div className="cta">
-                            <p className="mono cta-label">PX‑01 / Reality selector</p>
-                            <p className="mono cta-kicker">Optional · a style picker</p>
-                            <ol className="how" aria-label="How the machine works">
-                                <li><b>1</b>Pull the lever</li>
-                                <li><b>2</b>Reels pick a design style</li>
-                                <li><b>3</b>Your ticket opens that version</li>
-                            </ol>
-                            <p className="how-m">Optional: pull the lever, the reels pick a design style, your ticket opens it.</p>
-                            <p className="mono status" aria-live="polite">{status}</p>
-                            {shared && <p className="mono pulls">{plays.toLocaleString("en-IN")} pulls so far</p>}
-                            <button type="button" className="pull" onClick={pull} disabled={busy}>Pull the lever <i aria-hidden>→</i></button>
+                            <button type="button" className="pull" onClick={pull} disabled={busy}>
+                                PULL THE LEVER <i aria-hidden>→</i>
+                            </button>
                             <div className="cta-alt">
-                                <button type="button" onClick={() => enter(RECRUITER_WORLD)}><span className="desk-only">Skip the machine · </span>View my work</button>
+                                <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>
+                                    JUST SHOW ME THE WORK
+                                </button>
                                 <button type="button" className="phone-only" onClick={() => setPicking(true)}>All worlds</button>
                                 <a className="phone-only" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>
                             </div>
@@ -438,18 +527,28 @@ const Home = ({ onSelect }) => {
                     )}
                 </div>
 
-                <nav className="tabs" aria-label="Go straight to a world">
-                    {[...worlds].filter((w) => !w.beta || w.featured).sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0)).map((w) => (
-                        <button key={w.id} type="button" onClick={() => enter(w.id)}><i aria-hidden>↗</i>{w.name}</button>
-                    ))}
-                    <a href={profile.resume} target="_blank" rel="noreferrer"><i aria-hidden>↗</i>Résumé</a>
-                </nav>
-                {/* the false floor fix: say plainly that the portfolio continues below the machine */}
-                <button type="button" className="peek" onClick={() => document.querySelector(".stats")?.scrollIntoView({ behavior: "smooth" })}>
-                    <span className="mono">Or just scroll · it's all below</span>
-                    <span className="peek-list">{work.length} projects · Experience · Skills · Résumé · Contact</span>
-                    <i aria-hidden>↓</i>
-                </button>
+                <div className="light-foot-bar">
+                    <div className="lf-left">
+                        <p className="mono lf-idx"><span>01 / 07</span><i /></p>
+                        <p className="lf-tag">One developer. Multiple creative dimensions.</p>
+                    </div>
+                    <nav className="lf-nav" aria-label="Portfolio sections">
+                        <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>Projects</button>
+                        <span aria-hidden>·</span>
+                        <button type="button" onClick={() => document.querySelector(".stats")?.scrollIntoView({ behavior: "smooth" })}>About</button>
+                        <span aria-hidden>·</span>
+                        <button type="button" onClick={() => document.querySelector(".skills-sec")?.scrollIntoView({ behavior: "smooth" })}>Skills</button>
+                        <span aria-hidden>·</span>
+                        <button type="button" onClick={() => document.querySelector(".xp")?.scrollIntoView({ behavior: "smooth" })}>Experience</button>
+                        <span aria-hidden>·</span>
+                        <button type="button" onClick={() => document.querySelector(".land")?.scrollIntoView({ behavior: "smooth" })}>Contact</button>
+                        <span aria-hidden>·</span>
+                        <button type="button" onClick={() => setPicking(true)}>All Worlds</button>
+                    </nav>
+                    <button type="button" className="lf-scroll" onClick={() => document.querySelector(".stats")?.scrollIntoView({ behavior: "smooth" })}>
+                        Scroll <i aria-hidden>︾</i>
+                    </button>
+                </div>
                 <div className="curtain" aria-hidden />
                 {debug && (
                     <div className="debug-hud mono" role="status">
@@ -477,7 +576,7 @@ const Home = ({ onSelect }) => {
 
                 <div ref={land} className="land" onClick={ripple}>
                     <div className="foot-dots" aria-hidden>
-                        <Suspense fallback={null}><DotField active={footerOn} eventSource={footer} pulse={pulse} /></Suspense>
+                        <Suspense fallback={null}><DotField active={footerOn} eventSource={footer} pulse={pulse} light={light} /></Suspense>
                     </div>
                     <div className="foot-head">
                         <div>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer, Float, PresentationControls, SpotLight, Sparkles, Preload } from "@react-three/drei";
-import { Machine, GlassSurface } from "#machine/MachineModel.jsx";
+import { Machine, GlassSurface, mat } from "#machine/MachineModel.jsx";
 import Keychains from "./Keychains.jsx";
 
 // Hero: PX-01 floating in a black void under one volumetric key light (docs/DESIGN_DIRECTION.md §10–11).
@@ -27,14 +27,21 @@ const useSince = (on) => {
     };
 };
 
-const KeyLight = ({ lit, onBooted }) => {
+const KeyLight = ({ lit, light, onBooted }) => {
     const ref = useRef();
     const since = useSince(lit);
     const done = useRef(false);
-    useFrame(({ clock }) => {
+    const col = useMemo(() => new THREE.Color("#fff3e6"), []);
+    const targetCol = useMemo(() => new THREE.Color(), []);
+    useFrame(({ clock }, dt) => {
         const t = since(clock);
         const k = reduced ? 1 : t === null ? 0 : clamp01((t - 0.1) / 0.9);
-        ref.current.intensity = KEY * outCubic(k);
+        const baseKey = light ? 440 : KEY;
+        ref.current.intensity = THREE.MathUtils.damp(ref.current.intensity, baseKey * outCubic(k), 6, dt);
+        targetCol.set(light ? "#fffaf0" : "#fff3e6");
+        col.lerp(targetCol, 1 - Math.exp(-6 * dt));
+        ref.current.color.copy(col);
+        ref.current.opacity = THREE.MathUtils.damp(ref.current.opacity, light ? 0.14 : 0.32, 6, dt);
         if (k === 1 && !done.current) { done.current = true; onBooted(); }
     });
     return (
@@ -66,10 +73,15 @@ const poolTexture = (stops) => {
 };
 // The key light falls through a jali: the Sidi Saiyyed tree-of-life window (Ahmedabad), drawn procedurally into the
 // light pool on the floor. Canvas top = far side of the floor, so the arch points away from the viewer.
-const jaliTexture = () => {
+const jaliTexture = (daylight = false) => {
     const W = 1024, H = 600, c = document.createElement("canvas"); c.width = W; c.height = H;
     const g = c.getContext("2d"), pool = g.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W / 2);
-    [[0, "rgba(255,236,214,.13)"], [0.45, "rgba(255,236,214,.04)"], [1, "rgba(255,236,214,0)"]].forEach(([a, col]) => pool.addColorStop(a, col));
+    if (daylight) {
+        // Daylight Atelier: crisp morning sun pool with warm architectural limestone shadow framing the jali arch
+        [[0, "rgba(255,252,244,.65)"], [0.42, "rgba(218,208,192,.28)"], [1, "rgba(242,237,228,0)"]].forEach(([a, col]) => pool.addColorStop(a, col));
+    } else {
+        [[0, "rgba(255,236,214,.13)"], [0.45, "rgba(255,236,214,.04)"], [1, "rgba(255,236,214,0)"]].forEach(([a, col]) => pool.addColorStop(a, col));
+    }
     g.fillStyle = pool; g.fillRect(0, 0, W, H);
     // arch window, ~1/3 of the pool, centred
     const cx = W / 2, base = H * 0.86, aw = 250, top = H * 0.12;
@@ -78,7 +90,13 @@ const jaliTexture = () => {
     arch.quadraticCurveTo(cx - aw / 2, top, cx, top); arch.quadraticCurveTo(cx + aw / 2, top, cx + aw / 2, top + aw * 0.5);
     arch.lineTo(cx + aw / 2, base); arch.closePath();
     g.save(); g.clip(arch);
-    g.filter = "blur(2.5px)"; g.strokeStyle = "rgba(255,236,214,.22)"; g.lineCap = "round";
+    if (daylight) {
+        g.fillStyle = "rgba(255,253,247,.55)";
+        g.fill(arch);
+    }
+    g.filter = "blur(2.5px)";
+    g.strokeStyle = daylight ? "rgba(38,34,28,.22)" : "rgba(255,236,214,.22)";
+    g.lineCap = "round";
     // the tree: a trunk that splits into curling branches, each ending in a spiral leaf
     const branch = (x, y, ang, len, w, depth) => {
         const ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len, curl = ang + (depth % 2 ? 0.5 : -0.5);
@@ -97,26 +115,39 @@ const jaliTexture = () => {
     g.lineWidth = 3;
     for (let x = cx - aw / 2; x < cx + aw / 2; x += 22) for (let y = base - 110; y < base; y += 22) { g.beginPath(); g.arc(x + 11, y + 11, 8, 0, Math.PI * 2); g.stroke(); }
     g.restore();
-    g.filter = "none"; g.strokeStyle = "rgba(255,236,214,.12)"; g.lineWidth = 4; g.stroke(arch);
+    g.filter = "none";
+    g.strokeStyle = daylight ? "rgba(38,34,28,.16)" : "rgba(255,236,214,.12)";
+    g.lineWidth = 4; g.stroke(arch);
     return new THREE.CanvasTexture(c);
 };
 const FLOOR_Y = -3.4;
-const Ground = ({ floatRef, dropRef }) => {
+const Ground = ({ floatRef, dropRef, light }) => {
     const shadow = useRef();
+    const darkPool = useRef();
+    const lightPool = useRef();
     const tex = useMemo(() => ({
-        pool: jaliTexture(),
-        shadow: poolTexture([[0, "rgba(0,0,0,.9)"], [0.5, "rgba(0,0,0,.45)"], [1, "rgba(0,0,0,0)"]]),
+        poolDark: jaliTexture(false),
+        poolLight: jaliTexture(true),
+        shadowDark: poolTexture([[0, "rgba(0,0,0,.9)"], [0.5, "rgba(0,0,0,.45)"], [1, "rgba(0,0,0,0)"]]),
+        shadowLight: poolTexture([[0, "rgba(24,22,18,.38)"], [0.5, "rgba(24,22,18,.15)"], [1, "rgba(24,22,18,0)"]]),
     }), []);
-    useFrame(() => {
+    useFrame((_, dt) => {
         const y = (floatRef.current?.position.y ?? 0) + (dropRef.current?.position.y ?? 0);
         const s = 1 + y * 0.6;
         shadow.current.scale.set(s, s, 1);
-        shadow.current.material.opacity = THREE.MathUtils.clamp(0.45 - y * 0.6, 0, 0.6);
+        const baseOp = light ? 0.34 : 0.45;
+        shadow.current.material.opacity = THREE.MathUtils.clamp(baseOp - y * 0.45, 0, 0.6);
+        shadow.current.material.map = light ? tex.shadowLight : tex.shadowDark;
+        if (darkPool.current && lightPool.current) {
+            darkPool.current.material.opacity = THREE.MathUtils.damp(darkPool.current.material.opacity, light ? 0 : 1, 6, dt);
+            lightPool.current.material.opacity = THREE.MathUtils.damp(lightPool.current.material.opacity, light ? 0.32 : 0, 6, dt);
+        }
     });
     return (
         <group position={[0, FLOOR_Y, 0]} rotation-x={-Math.PI / 2}>
-            <mesh><planeGeometry args={[12, 7]} /><meshBasicMaterial map={tex.pool} transparent depthWrite={false} toneMapped={false} /></mesh>
-            <mesh ref={shadow} position-z={0.01}><planeGeometry args={[5.4, 2.6]} /><meshBasicMaterial map={tex.shadow} transparent depthWrite={false} /></mesh>
+            <mesh ref={darkPool}><planeGeometry args={[12, 7]} /><meshBasicMaterial map={tex.poolDark} transparent depthWrite={false} toneMapped={false} /></mesh>
+            <mesh ref={lightPool} position-z={0.002}><planeGeometry args={[12, 7]} /><meshBasicMaterial map={tex.poolLight} transparent opacity={0} depthWrite={false} toneMapped={false} /></mesh>
+            <mesh ref={shadow} position-z={0.01}><planeGeometry args={[5.4, 2.6]} /><meshBasicMaterial map={tex.shadowDark} transparent depthWrite={false} /></mesh>
         </group>
     );
 };
@@ -242,7 +273,58 @@ const FirstFrame = ({ onFrame }) => {
     return null;
 };
 
-export default function Studio({ count, ticket, onTicket, onDebug, debug, spinning, pulled, booted, target, entering, jackpot, lit, onPull, onArm, onReelStop, onAnchors, onBooted, onFrame, onCreated, active }) {
+// Smoothly shifts PX-01's studio fill & floating sphere between Dark Studio (crimson-red anodized orb) and Light Mode Atelier (polished silver-chrome orb)
+const DARK_BLACK = new THREE.Color("#0d0d0f");
+const LIGHT_BLACK = new THREE.Color("#141416");
+const DARK_SHELL = new THREE.Color("#cfe9e6");
+const LIGHT_SHELL = new THREE.Color("#e8ecef");
+const ORB_DARK_COL = new THREE.Color("#ff2214");
+const ORB_LIGHT_COL = new THREE.Color("#f4f2ee");
+const ORB_DARK_EMISSIVE = new THREE.Color("#7a0b04");
+const ORB_LIGHT_EMISSIVE = new THREE.Color("#dad6ce");
+
+const AtelierRig = ({ light }) => {
+    const hemi = useRef();
+    const frontFill = useRef();
+    const orb = useRef();
+    const orbMat = useMemo(() => new THREE.MeshPhysicalMaterial({
+        color: "#ff2214",
+        metalness: 0.88,
+        roughness: 0.14,
+        clearcoat: 1,
+        clearcoatRoughness: 0.04,
+        emissive: "#7a0b04",
+        emissiveIntensity: 0.45,
+    }), []);
+    useFrame(({ clock }, dt) => {
+        const k = 1 - Math.exp(-6 * dt);
+        mat.black.color.lerp(light ? LIGHT_BLACK : DARK_BLACK, k);
+        mat.black.roughness = THREE.MathUtils.damp(mat.black.roughness, light ? 0.28 : 0.55, 6, dt);
+        mat.black.metalness = THREE.MathUtils.damp(mat.black.metalness, light ? 0.35 : 0.2, 6, dt);
+        mat.shell.attenuationColor.lerp(light ? LIGHT_SHELL : DARK_SHELL, k);
+        if (hemi.current) hemi.current.intensity = THREE.MathUtils.damp(hemi.current.intensity, light ? 0.95 : 0.12, 6, dt);
+        if (frontFill.current) frontFill.current.intensity = THREE.MathUtils.damp(frontFill.current.intensity, light ? 1.25 : 0.35, 6, dt);
+        orbMat.color.lerp(light ? ORB_LIGHT_COL : ORB_DARK_COL, k);
+        orbMat.emissive.lerp(light ? ORB_LIGHT_EMISSIVE : ORB_DARK_EMISSIVE, k);
+        orbMat.roughness = THREE.MathUtils.damp(orbMat.roughness, light ? 0.14 : 0.14, 6, dt);
+        orbMat.metalness = THREE.MathUtils.damp(orbMat.metalness, light ? 0.45 : 0.88, 6, dt);
+        if (orb.current) {
+            orb.current.position.y = -1.12 + Math.sin(clock.elapsedTime * 1.1) * 0.07;
+        }
+    });
+    return (
+        <>
+            <directionalLight ref={frontFill} position={[2, 2, 9]} intensity={0.35} color="#ffffff" />
+            <hemisphereLight ref={hemi} args={["#ffffff", light ? "#e4e2dd" : "#000000", 0.12]} />
+            {/* Cohesive floating metallic sphere on the left: Crimson-Red Anodized Metal in Dark Mode, Bright Silver-Chrome in Light Mode */}
+            <mesh ref={orb} position={[-5.15, -1.12, -1.2]} material={orbMat}>
+                <sphereGeometry args={[0.25, 48, 32]} />
+            </mesh>
+        </>
+    );
+};
+
+export default function Studio({ count, ticket, onTicket, onDebug, debug, spinning, pulled, booted, target, entering, jackpot, lit, light = false, onPull, onArm, onReelStop, onAnchors, onBooted, onFrame, onCreated, active }) {
     const floatRef = useRef();
     const dropRef = useRef();
     useEffect(() => { onCreated?.(); }, [onCreated]);
@@ -255,17 +337,16 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             onCreated={({ gl }) => { gl.setClearColor(0x000000, 0); gl.localClippingEnabled = true; }}>   {/* the ticket feeds out of its slot */}
             <GlassSurface />
             <Rig entering={entering} />
-            <KeyLight lit={lit} onBooted={onBooted} />
+            <KeyLight lit={lit} light={light} onBooted={onBooted} />
+            <AtelierRig light={light} />
             <WinFlash jackpot={jackpot} />
 
             {/* rims: cool from behind-left, warm from behind-right, so every edge of the case is drawn in light */}
-            <directionalLight position={[-6, 3, -5]} intensity={2.6} color="#cfe0ff" />
-            <directionalLight position={[6, 1.5, -4]} intensity={1.8} color="#ffd6b0" />
-            <directionalLight position={[2, 2, 9]} intensity={0.35} />
+            <directionalLight position={[-6, 3, -5]} intensity={light ? 3.2 : 2.6} color={light ? "#ffffff" : "#cfe0ff"} />
+            <directionalLight position={[6, 1.5, -4]} intensity={light ? 2.4 : 1.8} color="#ffd6b0" />
             {/* separation: a cool top rim and a faint red kicker from below-behind (ties the machine to the red ink) */}
             <directionalLight position={[0, 7, -5]} intensity={1.6} color="#dfe8ff" />
             <directionalLight position={[0, -3, -6]} intensity={1.3} color="#ff3a22" />
-            <hemisphereLight args={["#ffffff", "#000000", 0.12]} />
 
             {/* reflections come only from these strips: chrome reads as bright bars on black, the product-shot look */}
             <Environment resolution={coarse ? 128 : 256} frames={coarse || reduced ? 1 : Infinity}>
@@ -278,7 +359,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             </Environment>
 
             {/* dust hanging in the beam */}
-            {!reduced && <Sparkles count={coarse ? 40 : 80} scale={[3.6, 7, 3]} position={[0.2, 1.2, 0.6]} size={2.2} speed={0.25} opacity={0.55} color="#fff1df" noise={0.6} />}
+            {!reduced && <Sparkles count={coarse ? 40 : 80} scale={[3.6, 7, 3]} position={[0.2, 1.2, 0.6]} size={2.2} speed={0.25} opacity={light ? 0.22 : 0.55} color={light ? "#ff2e1f" : "#fff1df"} noise={0.6} />}
 
             <Entrance lit={lit} innerRef={dropRef}>
                     <Float ref={floatRef} enabled={!reduced} speed={1.3} rotationIntensity={0.18} floatIntensity={0.55} floatingRange={[-0.18, 0.18]}>
@@ -290,8 +371,8 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
                         </PresentationControls>
                     </Float>
             </Entrance>
-            <Keychains lit={lit} jackpot={jackpot} framing={framing} />
-            <Ground floatRef={floatRef} dropRef={dropRef} />
+            <Keychains lit={lit} light={light} jackpot={jackpot} framing={framing} />
+            <Ground floatRef={floatRef} dropRef={dropRef} light={light} />
             <FirstFrame onFrame={onFrame} />
             <Debug on={!!debug} />
             <Preload all />
