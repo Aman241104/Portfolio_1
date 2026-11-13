@@ -269,6 +269,47 @@ const Counter = ({ position, count = 427 }) => {
     );
 };
 
+// Internal miniature OLED status screen visible through the clear shell.
+const OledReadout = ({ position, spinning }) => {
+    const tex = useMemo(() => {
+        const c = document.createElement("canvas"); c.width = 256; c.height = 96;
+        const t = new THREE.CanvasTexture(c);
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.userData = { c, g: c.getContext("2d"), last: -1 };
+        return t;
+    }, []);
+    useFrame(({ clock }) => {
+        const { c, g } = tex.userData;
+        const t = clock.elapsedTime;
+        if (Math.floor(t * 14) === tex.userData.last) return;
+        tex.userData.last = Math.floor(t * 14);
+        g.fillStyle = "#060807"; g.fillRect(0, 0, 256, 96);
+        g.strokeStyle = "rgba(255,46,31,0.35)"; g.strokeRect(3, 3, 250, 90);
+        g.fillStyle = spinning ? "#ff2e1f" : "#edeae3";
+        g.font = "700 18px 'Geist Mono', monospace";
+        g.fillText(spinning ? "SYS // SPINNING" : "SYS // ARMED_01", 14, 26);
+        g.strokeStyle = spinning ? "#ff2e1f" : "#3ddc84";
+        g.lineWidth = 2.2;
+        g.beginPath();
+        for (let x = 14; x <= 242; x += 4) {
+            const amp = spinning ? 18 : 7;
+            const y = 62 + Math.sin(x * 0.08 + t * (spinning ? 18 : 4)) * amp * Math.sin((x - 14) / 228 * Math.PI);
+            if (x === 14) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.stroke();
+        tex.needsUpdate = true;
+    });
+    return (
+        <group position={position}>
+            <RoundedBox args={[0.56, 0.24, 0.03]} radius={0.015} material={mat.black} />
+            <mesh position={[0, 0, 0.017]}>
+                <planeGeometry args={[0.5, 0.19]} />
+                <meshBasicMaterial map={tex} toneMapped={false} />
+            </mesh>
+        </group>
+    );
+};
+
 const Mechanism = ({ spinning, count }) => (
     <group>
         {/* gear train, lower left, facing the viewer */}
@@ -331,6 +372,41 @@ const Mechanism = ({ spinning, count }) => (
                 <mesh material={mat.chrome}><cylinderGeometry args={[0.035, 0.035, 0.015, 20]} /></mesh>
                 <mesh position={[0, 0.009, 0]} material={mat.black}><boxGeometry args={[0.05, 0.003, 0.008]} /></mesh>
             </group>
+        ))}
+
+        {/* internal OLED diagnostic readout + copper toroid inductor + optical reel sensors */}
+        <OledReadout position={[0.58, -0.58, -0.44]} spinning={spinning} />
+        <group position={[-0.78, -0.86, -0.46]} rotation={[Math.PI / 2, 0, 0.3]}>
+            <mesh material={new THREE.MeshStandardMaterial({ color: "#b86b35", metalness: 0.9, roughness: 0.22 })}>
+                <torusGeometry args={[0.09, 0.035, 12, 24]} />
+            </mesh>
+            <mesh material={mat.black}><cylinderGeometry args={[0.055, 0.055, 0.06, 16]} /></mesh>
+        </group>
+        {/* gold PCB edge connector fingers */}
+        {Array.from({ length: 10 }, (_, i) => (
+            <mesh key={`pin-${i}`} position={[-0.9 + i * 0.055, -1.02, -0.5]} material={mat.gold}>
+                <boxGeometry args={[0.025, 0.08, 0.015]} />
+            </mesh>
+        ))}
+        {/* precision chrome optical divider combs between the 3 drums */}
+        {[-0.475, 0.475].map((x) => (
+            <group key={`comb-${x}`} position={[x, 0.42, 0.58]}>
+                <RoundedBox args={[0.03, 0.72, 0.14]} radius={0.01} material={mat.brushed} />
+                <mesh position={[0, 0, 0.075]}><sphereGeometry args={[0.018, 12, 12]} /><meshBasicMaterial color={SIGNAL} toneMapped={false} /></mesh>
+            </group>
+        ))}
+        {/* top knurled brass calibration dial + acoustic grille */}
+        <mesh position={[-1.12, 1.28, -0.48]} material={mat.gold}>
+            <cylinderGeometry args={[0.14, 0.15, 0.06, 28]} />
+        </mesh>
+        <mesh position={[-1.12, 1.32, -0.48]} material={mat.black}>
+            <boxGeometry args={[0.02, 0.02, 0.14]} />
+        </mesh>
+        {/* vibration-damping rubber rings under feet */}
+        {[[-1.4, 0.6], [1.4, 0.6], [-1.4, -0.6], [1.4, -0.6]].map(([x, z], i) => (
+            <mesh key={`pad-${i}`} position={[x, -1.355, z]} material={mat.rubber}>
+                <cylinderGeometry args={[0.125, 0.125, 0.018, 24]} />
+            </mesh>
         ))}
     </group>
 );
