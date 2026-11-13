@@ -4,7 +4,7 @@ import { useGLTF, Text } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { shot } from "../../../content/work.js";
-import { STOPS, END, LENGTH, ROAD_W, LANE_X, MODELS, frame, at, scenery } from "./route.js";
+import { STOPS, END, LENGTH, ROAD_W, LANE_X, MODELS, CERT_ORBS, APEX_GATES, frame, at, scenery } from "./route.js";
 
 const FONT = "/fonts/Geist-800.ttf";
 
@@ -810,13 +810,13 @@ function Rider({ state, preset }) {
     const f = useMemo(() => ({}), []), ahead = useMemo(() => ({}), []);
     const look = useMemo(() => new THREE.Vector3(), []);
     useFrame(({ camera }, dt) => {
-        const s = state.current, d = s.d;
+        const s = state.current, d = s.d, lane = s.lane ?? LANE_X;
         frame(d, f); frame(d + 6, ahead);
-        const x = f.x + f.rx * LANE_X, z = f.z + f.rz * LANE_X;
+        const x = f.x + f.rx * lane, z = f.z + f.rz * lane;
         root.current.position.set(x, 0, z);
-        root.current.rotation.y = f.heading + Math.PI;
+        root.current.rotation.y = f.heading + Math.PI - (s.steer || 0) * 0.08;
         let dh = ahead.heading - f.heading; if (dh > Math.PI) dh -= Math.PI * 2; if (dh < -Math.PI) dh += Math.PI * 2;
-        const lean = THREE.MathUtils.clamp(-dh * s.v * 0.9, -0.38, 0.38);
+        const lean = THREE.MathUtils.clamp(-dh * s.v * 0.9 - (s.steer || 0) * 0.28, -0.46, 0.46);
         body.current.rotation.z = THREE.MathUtils.damp(body.current.rotation.z, lean, 6, dt);
         body.current.position.y = Math.sin(d * 1.7) * 0.012 * Math.min(1, s.v / 6);
         // Stretch glowing Akira/JDM tail-light trail with speed
@@ -890,7 +890,65 @@ function groundPbrMaps() {
     return { diff, nor, rough };
 }
 
-export default function Scene({ state, near, preset = "golden" }) {
+// ---- Initial D Touge Objectives: 4 AI Certification Orbs + 8 Apex Clipping Gates ----
+function Objectives({ collected = [], clearedGates = [] }) {
+    const orbs = useMemo(() => CERT_ORBS.map((o) => ({ ...o, p: at(o.d, o.lane) })), []);
+    const gates = useMemo(() => APEX_GATES.map((g) => ({ ...g, p: at(g.d, g.lane) })), []);
+    const spinRef = useRef([]);
+    useFrame((state, dt) => {
+        const t = state.clock.elapsedTime;
+        spinRef.current.forEach((m, i) => {
+            if (!m) return;
+            m.rotation.y += dt * 2.1;
+            m.position.y = 1.25 + Math.sin(t * 2.8 + i) * 0.14;
+        });
+    });
+    return (
+        <group>
+            {orbs.map((o, idx) => {
+                if (collected.includes(o.id)) return null;
+                return (
+                    <group key={o.id} position={[o.p.x, 0, o.p.z]} rotation={[0, o.p.heading + Math.PI, 0]}>
+                        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+                            <ringGeometry args={[0.72, 0.96, 24]} />
+                            <meshBasicMaterial color={o.color} transparent opacity={0.85} side={THREE.DoubleSide} />
+                        </mesh>
+                        <mesh ref={(el) => { spinRef.current[idx] = el; }} position={[0, 1.25, 0]}>
+                            <octahedronGeometry args={[0.48, 0]} />
+                            <meshStandardMaterial color={o.color} emissive={o.color} emissiveIntensity={1.6} roughness={0.2} metalness={0.6} />
+                        </mesh>
+                        <Text font={FONT} position={[0, 2.15, 0]} fontSize={0.28} color="#ffffff" anchorX="center" anchorY="middle">{o.label}</Text>
+                    </group>
+                );
+            })}
+            {gates.map((g) => {
+                const done = clearedGates.includes(g.id);
+                const col = done ? "#34d399" : "#ff2e1f";
+                return (
+                    <group key={g.id} position={[g.p.x, 0, g.p.z]} rotation={[0, g.p.heading + Math.PI, 0]}>
+                        {[-1.35, 1.35].map((sx) => (
+                            <mesh key={sx} position={[sx, 1.15, 0]}>
+                                <cylinderGeometry args={[0.06, 0.08, 2.3, 8]} />
+                                <meshStandardMaterial color={col} emissive={col} emissiveIntensity={done ? 0.5 : 1.5} />
+                            </mesh>
+                        ))}
+                        <mesh position={[0, 2.32, 0]}>
+                            <boxGeometry args={[2.8, 0.14, 0.14]} />
+                            <meshStandardMaterial color={col} emissive={col} emissiveIntensity={done ? 0.5 : 1.5} />
+                        </mesh>
+                        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+                            <planeGeometry args={[2.5, 0.45]} />
+                            <meshBasicMaterial color={col} transparent opacity={done ? 0.25 : 0.65} side={THREE.DoubleSide} />
+                        </mesh>
+                        {!done && <Text font={FONT} position={[0, 2.65, 0]} fontSize={0.22} color="#ffd6d6" anchorX="center" anchorY="middle">{`APEX // ${g.label}`}</Text>}
+                    </group>
+                );
+            })}
+        </group>
+    );
+}
+
+export default function Scene({ state, near, preset = "golden", collected = [], clearedGates = [] }) {
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
     const groundCol = preset === "sakura" ? "#4e3966" : preset === "fjord" ? "#6d8572" : "#d9be94";
     const groundMaps = useMemo(() => groundPbrMaps(), []);
@@ -931,6 +989,7 @@ export default function Scene({ state, near, preset = "golden" }) {
             <Hills preset={preset} />
             <Landmarks preset={preset} />
             <Milestones />
+            <Objectives collected={collected} clearedGates={clearedGates} />
             {STOPS.map((s) => <Sign key={`s${s.i}`} stop={s} preset={preset} />)}
             {STOPS.map((s) => <Billboard key={s.i} stop={s} near={Math.abs(near - s.d) < 320} preset={preset} />)}
             <Rider state={state} preset={preset} />

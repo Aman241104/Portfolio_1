@@ -5,7 +5,7 @@ import { shot, KINDS } from "../../../content/work.js";
 import { cases } from "../../../content/cases.js";
 import { useFonts } from "../fonts.js";
 import { track } from "../../analytics.js";
-import { STOPS, END, LENGTH } from "./route.js";
+import { STOPS, END, LENGTH, LANE_X, CERT_ORBS, APEX_GATES } from "./route.js";
 import Scene from "./Scene.jsx";
 import "./ride.css";
 
@@ -104,20 +104,31 @@ export default function RideWorld() {
     useFonts(FONTS);
     const [flat] = useState(() => reduced || lowPower());
     const [force3d, setForce3d] = useState(false);
-    const state = useRef({ d: 0, v: 0, cruise: true, push: 0, hold: 0, snap: true });
+    const state = useRef({ d: 0, v: 0, cruise: true, push: 0, hold: 0, snap: true, lane: LANE_X, steer: 0, steerHold: 0 });
     const [hud, setHud] = useState({ d: 0, v: 0 });
     const [started, setStarted] = useState(false);
     const [map, setMap] = useState(false);
     const [cruise, setCruise] = useState(true);
     const [preset, setPreset] = useState("golden");
     const [near, setNear] = useState(0);
+    const [collected, setCollected] = useState([]);
+    const [clearedGates, setClearedGates] = useState([]);
+    const [quest, setQuest] = useState({ score: 0, combo: 0, topKmh: 0, toast: null });
     const visitedRef = useRef(new Set());
+    const collectedRef = useRef(new Set());
+    const gatesRef = useRef(new Set());
+    const questRef = useRef({ score: 0, combo: 0, topKmh: 0, toastTimer: 0 });
     const show3d = !flat || force3d;
 
     // the ride itself: speed eases toward a target; cruising eases off around every stop
     useEffect(() => {
         if (!show3d) return;
         let raf, last = performance.now();
+        const pushToast = (text) => {
+            clearTimeout(questRef.current.toastTimer);
+            setQuest((q) => ({ ...q, score: questRef.current.score, combo: questRef.current.combo, topKmh: questRef.current.topKmh, toast: text }));
+            questRef.current.toastTimer = setTimeout(() => setQuest((q) => ({ ...q, toast: null })), 2200);
+        };
         const tick = (now) => {
             const s = state.current, dt = Math.min(0.05, (now - last) / 1000); last = now;
             let target = 0;
@@ -132,13 +143,42 @@ export default function RideWorld() {
             }
             s.v += (target - s.v) * (1 - Math.exp(-dt * (target > s.v ? 1.6 : 2.4)));
             s.push *= Math.exp(-dt * 1.4);
+            s.steer += ((s.steerHold || 0) - s.steer) * (1 - Math.exp(-dt * 10));
+            if (started) {
+                s.lane = Math.max(-2.75, Math.min(2.75, (s.lane ?? LANE_X) + s.steer * dt * 5.2));
+            }
             s.d = Math.min(END + 30, Math.max(0, s.d + s.v * dt));
+            const kmh = s.v * 3.6;
+            if (kmh > questRef.current.topKmh) questRef.current.topKmh = Math.round(kmh);
             STOPS.forEach((st) => { if (s.d > st.d && !visitedRef.current.has(st.i)) { visitedRef.current.add(st.i); track("ride_stop", { project: st.w.slug }); } });
+            CERT_ORBS.forEach((o) => {
+                if (!collectedRef.current.has(o.id) && Math.abs(s.d - o.d) < 4.2 && Math.abs((s.lane ?? LANE_X) - o.lane) < 1.55) {
+                    collectedRef.current.add(o.id);
+                    questRef.current.score += 1000;
+                    setCollected(Array.from(collectedRef.current));
+                    pushToast(`+1000 PTS · ${o.label} Cert Collected`);
+                }
+            });
+            APEX_GATES.forEach((g) => {
+                if (!gatesRef.current.has(g.id) && Math.abs(s.d - g.d) < 3.6 && Math.abs((s.lane ?? LANE_X) - g.lane) < 1.65) {
+                    gatesRef.current.add(g.id);
+                    questRef.current.combo = Math.min(8, questRef.current.combo + 1);
+                    const pts = 500 * questRef.current.combo;
+                    questRef.current.score += pts;
+                    setClearedGates(Array.from(gatesRef.current));
+                    pushToast(`APEX x${questRef.current.combo} · +${pts} PTS (${g.label})`);
+                }
+            });
             raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
-        const hudT = setInterval(() => { const s = state.current; setHud({ d: s.d, v: s.v }); setNear((n) => (Math.abs(n - s.d) > 40 ? s.d : n)); }, 120);
-        return () => { cancelAnimationFrame(raf); clearInterval(hudT); };
+        const hudT = setInterval(() => {
+            const s = state.current;
+            setHud({ d: s.d, v: s.v });
+            setQuest((q) => ({ ...q, score: questRef.current.score, combo: questRef.current.combo, topKmh: questRef.current.topKmh }));
+            setNear((n) => (Math.abs(n - s.d) > 40 ? s.d : n));
+        }, 120);
+        return () => { cancelAnimationFrame(raf); clearInterval(hudT); clearTimeout(questRef.current.toastTimer); };
     }, [show3d, started]);
 
     // input: wheel and touch drags push speed; arrows hold throttle / brake; Space toggles cruise; M map
@@ -154,11 +194,16 @@ export default function RideWorld() {
             if (e.target.closest?.("input, textarea")) return;
             if (["ArrowUp", "w", "W"].includes(e.key)) { e.preventDefault(); begin(); s.hold = 1; }
             else if (["ArrowDown", "s", "S"].includes(e.key)) { e.preventDefault(); s.hold = -1; }
+            else if (["ArrowLeft", "a", "A"].includes(e.key)) { e.preventDefault(); begin(); s.steerHold = -1; }
+            else if (["ArrowRight", "d", "D"].includes(e.key)) { e.preventDefault(); begin(); s.steerHold = 1; }
             else if (e.key === " ") { e.preventDefault(); begin(); s.cruise = !s.cruise; setCruise(s.cruise); }
             else if (e.key === "m" || e.key === "M") setMap((m) => !m);
             else if (e.key === "b" || e.key === "B") setPreset((p) => BIOMES[(BIOMES.findIndex(([id]) => id === p) + 1) % BIOMES.length][0]);
         };
-        const ku = (e) => { if (["ArrowUp", "w", "W", "ArrowDown", "s", "S"].includes(e.key)) s.hold = 0; };
+        const ku = (e) => {
+            if (["ArrowUp", "w", "W", "ArrowDown", "s", "S"].includes(e.key)) s.hold = 0;
+            if (["ArrowLeft", "a", "A", "ArrowRight", "d", "D"].includes(e.key)) s.steerHold = 0;
+        };
         addEventListener("wheel", wheel, { passive: false }); addEventListener("touchstart", ts, { passive: true }); addEventListener("touchmove", tm, { passive: true });
         addEventListener("keydown", kd); addEventListener("keyup", ku);
         return () => { removeEventListener("wheel", wheel); removeEventListener("touchstart", ts); removeEventListener("touchmove", tm); removeEventListener("keydown", kd); removeEventListener("keyup", ku); };
@@ -186,10 +231,23 @@ export default function RideWorld() {
         go(STOPS[idx]);
     };
 
+    const resetRide = () => {
+        collectedRef.current.clear();
+        gatesRef.current.clear();
+        questRef.current = { score: 0, combo: 0, topKmh: 0, toastTimer: 0 };
+        setCollected([]);
+        setClearedGates([]);
+        setQuest({ score: 0, combo: 0, topKmh: 0, toast: null });
+        state.current.lane = LANE_X;
+        go(STOPS[0]);
+    };
+
+    const grade = quest.score >= 5000 ? "S" : quest.score >= 2500 ? "A" : "B";
+
     return (
         <div className="rd" data-started={started || undefined} data-preset={preset}>
             <Canvas className="rd-canvas" shadows dpr={[1, 1.6]} camera={{ fov: 52, near: 0.5, far: 1200, position: [-8, 3, 10] }} gl={{ antialias: true, powerPreference: "high-performance" }}>
-                <Suspense fallback={null}><Scene state={state} near={near} preset={preset} /></Suspense>
+                <Suspense fallback={null}><Scene state={state} near={near} preset={preset} collected={collected} clearedGates={clearedGates} /></Suspense>
             </Canvas>
             <div className="rd-grade" aria-hidden />
 
@@ -221,6 +279,15 @@ export default function RideWorld() {
                 </section>
             )}
 
+            {started && (
+                <div className="rd-quest" aria-label="Touge objectives">
+                    <span className="rd-q-item"><b>{String(quest.score).padStart(4, "0")}</b> PTS</span>
+                    <span className="rd-q-item">CERTS <b>{collected.length}/{CERT_ORBS.length}</b></span>
+                    <span className="rd-q-item">APEX <b>{clearedGates.length}/{APEX_GATES.length}</b></span>
+                    {quest.combo > 0 && <span className="rd-q-combo">x{quest.combo}</span>}
+                </div>
+            )}
+            {started && quest.toast && <p className="rd-toast" role="status">{quest.toast}</p>}
             {started && <Speedo kmh={hud.v * 3.6} visited={visited} />}
             {started && !atEnd && stop && <StopCard stop={stop} />}
             {started && !atEnd && !stop && (() => {
@@ -235,14 +302,20 @@ export default function RideWorld() {
             })()}
             {atEnd && (
                 <aside className="rd-card rd-end">
-                    <p className="rd-kicker">Next exit</p>
+                    <p className="rd-kicker">Touge complete · Grade {grade}</p>
                     <h2>Your team.</h2>
+                    <div className="rd-end-stats">
+                        <span><b>{quest.score}</b> Score</span>
+                        <span><b>{quest.topKmh} km/h</b> Top Speed</span>
+                        <span><b>{collected.length}/{CERT_ORBS.length}</b> AI Certs</span>
+                        <span><b>{clearedGates.length}/{APEX_GATES.length}</b> Apexes</span>
+                    </div>
                     <p>That was all {STOPS.length}. If one of them looked like the work you need, Aman is a full-stack engineer in Ahmedabad, open to on-site or hybrid roles.</p>
                     <p className="rd-actions">
                         <a className="rd-btn rd-go" href={`mailto:${profile.email}`}>{profile.email}</a>
                         <a className="rd-btn" href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
                         <a className="rd-btn" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>
-                        <button type="button" className="rd-btn" onClick={() => go(STOPS[0])}>Ride again</button>
+                        <button type="button" className="rd-btn" onClick={resetRide}>Ride again</button>
                     </p>
                 </aside>
             )}
@@ -251,7 +324,7 @@ export default function RideWorld() {
                     <button type="button" onClick={() => stepStop(-1)} aria-label="Previous stop">← Prev</button>
                     <button type="button" onClick={() => { state.current.cruise = !state.current.cruise; setCruise(state.current.cruise); }}>{cruise ? "Cruise on" : "Cruise off"}</button>
                     <button type="button" onClick={() => stepStop(1)} aria-label="Next stop">Next →</button>
-                    <span>Scroll / ↑ faster · Space pause · B biome · M map</span>
+                    <span>A/D steer · W/↑ gas · Space pause · B biome · M map</span>
                 </p>
             )}
             <p className="rd-progress" aria-hidden><i style={{ width: `${Math.min(100, (hud.d / END) * 100)}%` }} /></p>

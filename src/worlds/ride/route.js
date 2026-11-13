@@ -52,3 +52,23 @@ export function scenery() {
     }
     return out;
 }
+
+// Initial D / Touge Gameplay Objectives along the highway:
+// 4 Certification Orbs (aligned with Aman's verified AI certs) + 8 Apex Clipping Gates on key bends
+export const CERT_ORBS = [
+    { id: "aws", label: "AWS GenAI", d: 340, lane: 1.75, color: "#ff9900" },
+    { id: "google", label: "Google GenAI", d: 820, lane: -1.85, color: "#4285f4" },
+    { id: "msft", label: "Microsoft AI", d: 1320, lane: 1.85, color: "#00a4ef" },
+    { id: "claude", label: "Claude Code", d: 1820, lane: -1.65, color: "#ff2e1f" },
+];
+
+export const APEX_GATES = [
+    { id: 0, label: "HAIRPIN 01", d: 230, lane: -2.0 },
+    { id: 1, label: "SWEEPER 02", d: 490, lane: 1.8 },
+    { id: 2, label: "COAST BEND 03", d: 680, lane: -1.9 },
+    { id: 3, label: "TOUGE APEX 04", d: 970, lane: 1.9 },
+    { id: 4, label: "CHICANE 05", d: 1180, lane: -1.8 },
+    { id: 5, label: "RIDGE TURN 06", d: 1480, lane: 1.8 },
+    { id: 6, label: "NIGHT RUN 07", d: 1690, lane: -1.9 },
+    { id: 7, label: "FINAL APEX 08", d: 1960, lane: 1.6 },
+];

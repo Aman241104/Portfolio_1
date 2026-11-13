@@ -117,5 +117,12 @@
 .rd-next-pill:hover { border-color: var(--amber); transform: translateX(-3px); }
 .rd-next-pill span { font: 600 10.5px/1 "Saira", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); }
 .rd-next-pill b { font: 700 17px/1.15 "Saira Condensed", sans-serif; }
-@media (max-width: 760px) { .rd-biomes { display: none; } .rd-next-pill { bottom: 150px; right: 10px; } }
+.rd-quest { position: absolute; z-index: 4; top: 64px; left: 20px; display: flex; align-items: center; gap: 14px; padding: 8px 14px; border-radius: 3px; border: 1px solid rgba(255, 220, 180, .28); border-left: 3px solid var(--amber); background: var(--panel); font: 600 11.5px/1 "Saira", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.rd-quest b { color: var(--ink); font-size: 13px; margin-left: 3px; }
+.rd-q-combo { padding: 3px 8px; border-radius: 2px; background: var(--amber); color: #1b0d05; font: 800 12px/1 "Saira Condensed", sans-serif; letter-spacing: .06em; }
+.rd-toast { position: absolute; z-index: 5; top: 108px; left: 50%; transform: translateX(-50%); margin: 0; padding: 8px 16px; border-radius: 3px; border: 1px solid var(--amber); background: rgba(18, 11, 7, .92); color: var(--amber); font: 800 15px/1 "Saira Condensed", sans-serif; letter-spacing: .1em; text-transform: uppercase; animation: rd-rise .22s ease; pointer-events: none; }
+.rd-end-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0 12px; padding: 10px; border: 1px solid rgba(255, 220, 180, .22); border-radius: 3px; background: rgba(0, 0, 0, .25); }
+.rd-end-stats span { font: 600 11px/1.2 "Saira", sans-serif; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.rd-end-stats b { display: block; color: var(--amber); font: 800 18px/1.1 "Saira Condensed", sans-serif; }
+@media (max-width: 760px) { .rd-biomes { display: none; } .rd-next-pill { bottom: 150px; right: 10px; } .rd-quest { top: 56px; left: 10px; gap: 10px; padding: 6px 10px; } }
 @media (prefers-reduced-motion: reduce) { .rd-card, .rd-speedo, .rd-map, .rd-intro > * { animation: none; } .rd-needle { transition: none; } }
