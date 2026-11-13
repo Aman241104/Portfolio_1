@@ -264,9 +264,10 @@ export default function RideWorld() {
 
     const grade = quest.score >= 5000 ? "S" : quest.score >= 2500 ? "A" : "B";
 
+    const coarse = typeof window !== "undefined" && matchMedia("(pointer: coarse)").matches;
     return (
         <div className="rd" data-started={started || undefined} data-preset={preset}>
-            <Canvas className="rd-canvas" shadows dpr={[1, 1.6]} camera={{ fov: 52, near: 0.5, far: 1200, position: [-8, 3, 10] }} gl={{ antialias: true, powerPreference: "high-performance" }}>
+            <Canvas className="rd-canvas" shadows={!coarse} dpr={coarse ? [1, 1.2] : [1, 1.5]} camera={{ fov: 52, near: 0.5, far: 720, position: [-8, 3, 10] }} gl={{ antialias: !coarse, powerPreference: "high-performance" }}>
                 <Suspense fallback={null}><Scene state={state} near={near} preset={preset} collected={collected} clearedGates={clearedGates} /></Suspense>
             </Canvas>
             <div className="rd-grade" aria-hidden />

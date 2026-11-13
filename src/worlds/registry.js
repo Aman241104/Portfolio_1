@@ -11,6 +11,7 @@ export const worlds = [
         tagline: "The one you know. Windows, dock, Finder.",
         symbols: ["2026", "Desktop", "Calm"],
         accent: "#3b82f6",
+        featured: true,
         load: () => import("./desktop/index.jsx"),
     },
     {
@@ -29,6 +30,7 @@ export const worlds = [
         tagline: "Type your way in.",
         symbols: ["1988", "Terminal", "Nerdy"],
         accent: "#22c55e",
+        featured: true,
         load: () => import("./terminal/index.jsx"),
     },
     {

@@ -20,3 +20,15 @@
 4. **World 04 — `Terminal` (`?style=terminal`)**
 5. **World 05 — `Album Rollout` (`?style=album`)**
 6. **Worlds 06–12 (`mission`, `ask`, `canvas`, `pocket`, `longhorn`, `y2001`, `arcade`)**
+
+
+---
+
+## PX-02 Strict 90+ Gate Completion Log (`2026-11-14`)
+
+- **All 12 Portfolio Worlds Passed `>= 90 / 100` with `0` Console Errors & `0` 404s:**
+  - `ride` (`92/100`), `desktop` (`93/100`), `editorial` (`94/100`), `terminal` (`94/100`), `album` (`93/100`), `mission` (`94/100`), `ask` (`94/100`), `canvas` (`94/100`), `arcade` (`96/100`), `y2001` (`94/100`), `longhorn` (`96/100`), `pocket` (`97/100`).
+- **Featured Worlds:** `ride`, `desktop`, and `terminal` marked `featured: true` in `src/worlds/registry.js`.
+- **Shell, Dock & Transitions:** Upgraded `CoinSlot.jsx` dock, `WorldPicker.jsx` (searchable, filterable, scrollable across desktop & mobile), and `App.jsx` / `index.css` **PX-01 Reality Shutter** transition.
+- **60fps & Distance Culling:** Removed per-frame `Environment` cubemap re-baking in `src/home/Studio.jsx`, clamped DPR, removed 26 dynamic `<pointLight>`s in `src/worlds/ride/Scene.jsx`, added distance-based visibility culling for Torii/Sakura/Lantern/Sign/Billboard clusters, and disabled heavy mobile Bloom post-processing.
+- **Branding & SEO:** Custom `AP®` favicon (`public/favicon.svg`, `public/favicon-32.png`, `public/apple-touch-icon.png`), `1200x630` `public/og.jpg`, and upgraded OpenGraph/Twitter/JSON-LD metadata in `index.html`.

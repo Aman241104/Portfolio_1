@@ -422,15 +422,24 @@ function SakuraHighwayAtmosphere({ active, state }) {
     const toriiStops = useMemo(() => {
         const list = [];
         for (let d = 160; d < END - 60; d += 340) {
-            list.push(frame(d));
+            list.push({ ...frame(d), d });
         }
         return list;
     }, []);
+    const toriiGroupRefs = useRef([]);
 
     useFrame(({ clock }) => {
-        if (!active || !petalsRef.current) return;
-        const t = clock.getElapsedTime();
+        if (!active) return;
         const bikeD = state.current.d;
+        // Distance-based viewport/LOD culling: hide Torii/Sakura/Lantern clusters outside [-90m, +520m]
+        for (let i = 0; i < toriiStops.length; i++) {
+            const grp = toriiGroupRefs.current[i];
+            if (!grp) continue;
+            const d = toriiStops[i].d;
+            grp.visible = d >= bikeD - 90 && d <= bikeD + 520;
+        }
+        if (!petalsRef.current) return;
+        const t = clock.getElapsedTime();
         const f = frame(bikeD);
 
         for (let i = 0; i < count; i++) {
@@ -456,16 +465,15 @@ function SakuraHighwayAtmosphere({ active, state }) {
             <instancedMesh ref={petalsRef} args={[petalGeo, null, count]} frustumCulled={false}>
                 <meshBasicMaterial color="#ffb7c5" side={THREE.DoubleSide} transparent opacity={0.92} />
             </instancedMesh>
-            {/* Roadside Real BlenderKit PBR Torii Gates, Blooming Sakura Trees & Silk Lanterns */}
+            {/* Roadside Real BlenderKit PBR Torii Gates, Blooming Sakura Trees & Silk Lanterns (distance-culled, 0 dynamic pointLights) */}
             {toriiStops.map((g, idx) => (
-                <group key={idx} position={[g.x, 0, g.z]} rotation={[0, g.heading + Math.PI, 0]}>
+                <group key={idx} ref={(el) => { toriiGroupRefs.current[idx] = el; }} position={[g.x, 0, g.z]} rotation={[0, g.heading + Math.PI, 0]}>
                     <primitive object={toriiScene.clone(true)} position={[0, 0, 0]} scale={[14.5, 13.5, 14.5]} />
                     <primitive object={sakuraScene.clone(true)} position={[-14.5, 0, -3.5]} rotation={[0, 0.5, 0]} scale={5.4} />
                     <primitive object={sakuraScene.clone(true)} position={[14.5, 0, 3.5]} rotation={[0, -0.5, 0]} scale={5.4} />
                     {[-4.4, 4.4].map((lx) => (
                         <group key={`l-${lx}`} position={[lx, 6.1, 0]}>
                             <primitive object={lanternScene.clone(true)} scale={1.15} />
-                            <pointLight position={[0, 0.3, 0]} color="#ff6b4a" intensity={3.5} distance={10} />
                         </group>
                     ))}
                 </group>
@@ -961,12 +969,14 @@ export default function Scene({ state, near, preset = "golden", collected = [], 
             <Landmarks preset={preset} />
             <Milestones />
             <Objectives collected={collected} clearedGates={clearedGates} />
-            {STOPS.map((s) => <Sign key={`s${s.i}`} stop={s} preset={preset} />)}
-            {STOPS.map((s) => <Billboard key={s.i} stop={s} near={Math.abs(near - s.d) < 320} preset={preset} />)}
+            {STOPS.map((s) => Math.abs(near - s.d) < 540 ? <Sign key={`s${s.i}`} stop={s} preset={preset} /> : null)}
+            {STOPS.map((s) => Math.abs(near - s.d) < 540 ? <Billboard key={s.i} stop={s} near={Math.abs(near - s.d) < 320} preset={preset} /> : null)}
             <Rider state={state} preset={preset} />
-            <EffectComposer multisampling={0}>
-                <Bloom mipmapBlur luminanceThreshold={0.82} intensity={preset === "sakura" ? 0.65 : 0.34} />
-            </EffectComposer>
+            {!(typeof window !== "undefined" && matchMedia("(pointer: coarse)").matches) && (
+                <EffectComposer multisampling={0}>
+                    <Bloom mipmapBlur luminanceThreshold={0.82} intensity={preset === "sakura" ? 0.65 : 0.34} />
+                </EffectComposer>
+            )}
         </>
     );
 }

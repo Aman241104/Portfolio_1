@@ -336,9 +336,9 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
     const coarse = typeof window !== "undefined" && matchMedia("(pointer: coarse)").matches;
 
     return (
-        <Canvas className="studio" frameloop={active ? "always" : "never"} dpr={coarse ? [1, 1.5] : [1, 1.75]}
+        <Canvas className="studio" frameloop={active ? "always" : "never"} dpr={coarse ? [1, 1.25] : [1, 1.5]}
             camera={{ position: [0, 0.2, 14], fov: 30 }}
-            gl={{ alpha: true, antialias: true, toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.3 }}
+            gl={{ alpha: true, antialias: true, powerPreference: "high-performance", toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.3 }}
             onCreated={({ gl }) => { gl.setClearColor(0x000000, 0); gl.localClippingEnabled = true; }}>   {/* the ticket feeds out of its slot */}
             <GlassSurface />
             <Rig entering={entering} />
@@ -354,8 +354,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             <directionalLight position={[0, -3, -6]} intensity={1.3} color="#ff3a22" />
 
             {/* reflections come only from these strips: chrome reads as bright bars on black, the product-shot look */}
-            <Environment resolution={coarse ? 128 : 256} frames={coarse || reduced ? 1 : Infinity}>
-                {!coarse && <Sweep lit={lit} />}
+            <Environment resolution={coarse ? 96 : 192} frames={1}>
                 <Lightformer form="rect" intensity={2.2} position={[0, 6, 1]} rotation-x={Math.PI / 2} scale={[7, 3, 1]} />
                 <Lightformer form="rect" intensity={5} position={[-5, 1, -1]} rotation-y={Math.PI / 2.4} scale={[0.5, 7, 1]} />
                 <Lightformer form="rect" intensity={3} color="#ffd9b8" position={[5, 1, -1]} rotation-y={-Math.PI / 2.4} scale={[0.5, 7, 1]} />
@@ -364,7 +363,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             </Environment>
 
             {/* dust hanging in the beam */}
-            {!reduced && <Sparkles count={coarse ? 40 : 80} scale={[3.6, 7, 3]} position={[0.2, 1.2, 0.6]} size={2.2} speed={0.25} opacity={light ? 0.22 : 0.55} color={light ? "#ff2e1f" : "#fff1df"} noise={0.6} />}
+            {!reduced && <Sparkles count={coarse ? 24 : 56} scale={[3.6, 7, 3]} position={[0.2, 1.2, 0.6]} size={2.2} speed={0.25} opacity={light ? 0.22 : 0.55} color={light ? "#ff2e1f" : "#fff1df"} noise={0.6} />}
 
             <Entrance lit={lit} innerRef={dropRef}>
                     <Float ref={floatRef} enabled={!reduced} speed={1.3} rotationIntensity={0.18} floatIntensity={0.55} floatingRange={[-0.18, 0.18]}>
