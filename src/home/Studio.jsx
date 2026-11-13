@@ -313,8 +313,8 @@ const AtelierRig = ({ light }) => {
         orbMat.metalness = THREE.MathUtils.damp(orbMat.metalness, light ? 0.45 : 0.88, 6, dt);
         if (orb.current) {
             orb.current.position.x = THREE.MathUtils.damp(orb.current.position.x, orbX, 6, dt);
-            orb.current.position.y = -1.12 + Math.sin(clock.elapsedTime * 1.1) * 0.07;
-            orb.current.position.z = -1.2 + Math.sin(clock.elapsedTime * 0.72) * 0.14;
+            orb.current.position.y = 0.36 + Math.sin(clock.elapsedTime * 1.1) * 0.07;
+            orb.current.position.z = -1.55 + Math.sin(clock.elapsedTime * 0.72) * 0.14;
         }
     });
     return (
@@ -322,7 +322,7 @@ const AtelierRig = ({ light }) => {
             <directionalLight ref={frontFill} position={[2, 2, 9]} intensity={0.35} color="#ffffff" />
             <hemisphereLight ref={hemi} args={["#ffffff", light ? "#e4e2dd" : "#000000", 0.12]} />
             {/* Cohesive floating metallic sphere on the left: Crimson-Red Anodized Metal in Dark Mode, Bright Silver-Chrome in Light Mode */}
-            <mesh ref={orb} position={[orbX, -1.12, -1.2]} material={orbMat}>
+            <mesh ref={orb} position={[orbX, 0.36, -1.55]} material={orbMat}>
                 <sphereGeometry args={[0.25, 48, 32]} />
             </mesh>
         </>

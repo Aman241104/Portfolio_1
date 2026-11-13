@@ -29,7 +29,10 @@ export default function Skills() {
     return (
         <section className="skills-sec" aria-labelledby="skills-h">
             <div className="work-head">
-                <h2 id="skills-h">Skills <span className="mono">({total})</span></h2>
+                <div>
+                    <p className="mono sec-kicker">06 // STACK</p>
+                    <h2 id="skills-h">Skills <span className="mono">({total})</span></h2>
+                </div>
                 <p className="mono">Everything here is used in a project above</p>
             </div>
             <div className="skill-groups" onPointerOver={tick}>

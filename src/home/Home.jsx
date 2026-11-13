@@ -624,13 +624,12 @@ const Home = ({ onSelect }) => {
                             <ContactForm onSent={() => setPulse((n) => n + 1)} />
                         </div>
                     </div>
-                    <nav className="keys" aria-label="Site index" onPointerOver={(e) => {
+                    <nav className="keys keys-3" aria-label="Site index" onPointerOver={(e) => {
                         if (e.pointerType !== "mouse" || !e.target.closest?.(".key")) return;
                         const now = performance.now();
                         if (now - lastRatchet.current > 80) { lastRatchet.current = now; sfx.ratchet(); }
                     }}>
                         {[
-                            ["Worlds", `${worlds.length} ways to see this site`, worlds.map((w) => ({ label: w.name, hint: w.tagline, onClick: () => onSelect(w.id), icon: "→" }))],
                             ["Contact", "Résumé, email and profiles", [
                                 { label: "Résumé", hint: "One-page PDF", href: profile.resume, ext: true, icon: "↓" },
                                 { label: "Email", hint: profile.email, href: `mailto:${profile.email}`, icon: "↗" },
@@ -655,6 +654,22 @@ const Home = ({ onSelect }) => {
                             </div>
                         ))}
                     </nav>
+                    <section className="worlds-matrix-wrap" aria-label="12 portfolio realities">
+                        <div className="wm-head">
+                            <h3 className="mono">07 // REALITIES ({String(worlds.length).padStart(2, "0")})</h3>
+                            <p className="mono">12 interactive dimensions — pick any world</p>
+                        </div>
+                        <div className="worlds-matrix">
+                            {worlds.map((w, i) => (
+                                <button key={w.id} type="button" className="wm-cell" onClick={() => onSelect(w.id)}>
+                                    <span className="mono wm-idx">{String(i + 1).padStart(2, "0")}</span>
+                                    <span className="wm-name">{w.name}</span>
+                                    <span className="wm-tag">{w.tagline}</span>
+                                    <span className="wm-go" aria-hidden>→</span>
+                                </button>
+                            ))}
+                        </div>
+                    </section>
                     <SignOff />
                     <div className="legal mono">
                         <span>© 2026 Aman Patel. All realities reserved.</span>

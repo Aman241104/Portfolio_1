@@ -732,10 +732,10 @@
    Hidden-before-reveal only applies when motion is allowed, so reduced motion simply shows everything. ---- */
 @media (prefers-reduced-motion: no-preference) {
     /* Stats: labels slide in, digits roll like an odometer, rightmost digit spinning longest. */
-    .odo { display: inline-block; height: .9em; overflow: hidden; vertical-align: top; }
+    .odo { display: inline-block; height: 1.05em; overflow: hidden; vertical-align: top; }
     .odo > span { display: flex; flex-direction: column; transition: transform calc(1.1s + var(--k) * .18s) var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms); }
-    .odo i { font-style: normal; height: .9em; line-height: .9; }
-    .stats-row[data-in] .odo > span { transform: translateY(calc(var(--d) * -.9em)); }
+    .odo i { font-style: normal; height: 1.05em; line-height: 1.05em; display: flex; align-items: center; }
+    .stats-row[data-in] .odo > span { transform: translateY(calc(var(--d) * -1.05em)); }
     .stats-row:not([data-in]) .stat dt { opacity: 0; translate: 0 8px; }
     .stat dt { transition: opacity var(--t-3) var(--ease-out), translate var(--t-3) var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms); }
 
@@ -939,7 +939,7 @@
 /* 3. Shared Monumental "Portfolio" Wordmark & Red Signature Geometry */
 .home .hero-word {
     --word-size: clamp(104px, 21.4vw, 410px);
-    --word-bottom: clamp(54px, 6.8vh, 80px);
+    --word-bottom: clamp(64px, 7.6vh, 92px);
     font: 800 var(--word-size)/0.78 "Geist", sans-serif;
     letter-spacing: -0.055em;
     z-index: 1 !important;
@@ -976,10 +976,10 @@
     display: flex !important;
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: 14px;
     position: absolute;
     left: 6.2vw;
-    top: 53.5%;
+    top: 41%;
     z-index: 4;
 }
 .home .creative-script {
@@ -1055,18 +1055,28 @@
 .home .light-foot-bar {
     display: flex !important;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     position: absolute;
-    left: var(--gutter);
-    right: var(--gutter);
-    bottom: 20px;
-    z-index: 4;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    padding: 0 var(--gutter);
+    border-top: 1px solid rgba(237, 234, 227, .12);
+    background: rgba(5, 5, 6, .76);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 5;
     pointer-events: auto;
+}
+.home[data-light] .light-foot-bar {
+    border-top-color: rgba(20, 20, 22, .12);
+    background: rgba(235, 232, 226, .82);
 }
 .home .lf-left {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    gap: 16px;
 }
 .home .lf-idx {
     display: flex;
@@ -1083,9 +1093,9 @@
 }
 .home .lf-tag {
     margin: 0;
-    padding-top: 6px;
-    border-top: 1px solid rgba(237, 234, 227, .14);
-    font: 400 13px/1.3 "Geist", sans-serif;
+    padding-left: 16px;
+    border-left: 1px solid rgba(237, 234, 227, .16);
+    font: 400 12.5px/1.2 "Geist", sans-serif;
     color: var(--bone);
 }
 .home .lf-nav {
@@ -1848,4 +1858,467 @@
     .cert-card { clip-path: none; }
     .msg-sent { animation: none; }
 }
+
+/* ============================================================
+   AWWWARDS SOTM STRUCTURAL DESIGN OVERHAUL
+   12-Col Swiss Exhibition Grid, Sticky 35/65 Splits, Work Flagships
+   + Interactive Hover-Preview Index, Dossier Certs, Spec-Table Skills,
+   and 4x3 Reality Matrix Footer. Full Dark Studio ↔ Light Atelier parity.
+   ============================================================ */
+
+.sec-kicker {
+    margin: 0 0 10px !important;
+    color: var(--signal) !important;
+    font-size: 10.5px !important;
+    letter-spacing: .16em !important;
+}
+
+/* 1. Telemetry & Recruiter Calibration Grid (Stats.jsx) */
+.calib-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 4fr) minmax(0, 8fr);
+    gap: 0;
+    margin: 0 var(--gutter);
+    border-top: 1px solid rgba(237, 234, 227, .16);
+    border-bottom: 1px solid rgba(237, 234, 227, .16);
+}
+.home[data-light] .calib-grid {
+    border-color: rgba(20, 20, 22, .16);
+}
+.calib-rail {
+    padding: 26px 28px 26px 0;
+    border-right: 1px solid rgba(237, 234, 227, .14);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.home[data-light] .calib-rail {
+    border-right-color: rgba(20, 20, 22, .14);
+}
+.calib-lead {
+    margin: 0;
+    font: 400 14.5px/1.5 "Geist", sans-serif;
+    color: var(--bone);
+    max-width: 34ch;
+}
+.calib-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    margin-top: 4px;
+}
+.calib-links {
+    display: flex;
+    gap: 14px;
+    font-size: 11px !important;
+}
+.calib-links a,
+.calib-cv a {
+    color: var(--bone);
+    text-decoration: underline;
+    text-decoration-color: rgba(237, 234, 227, .28);
+    text-underline-offset: 4px;
+}
+.home[data-light] .calib-links a,
+.home[data-light] .calib-cv a {
+    text-decoration-color: rgba(20, 20, 22, .28);
+}
+.calib-links a:hover,
+.calib-cv a:hover {
+    color: var(--signal);
+    text-decoration-color: var(--signal);
+}
+.calib-cv {
+    margin: auto 0 0 !important;
+    font-size: 10.5px !important;
+    color: var(--smoke) !important;
+}
+.calib-grid .stats-row {
+    margin: 0;
+    border-top: 0;
+    grid-template-columns: repeat(3, 1fr);
+}
+.calib-grid .stat {
+    position: relative;
+    padding: 22px 20px 18px 22px !important;
+    border-right: 1px solid rgba(237, 234, 227, .1);
+    border-bottom: 1px solid rgba(237, 234, 227, .1);
+}
+.calib-grid .stat:nth-child(3n) { border-right: 0; }
+.calib-grid .stat:nth-child(n+4) { border-bottom: 0; }
+.home[data-light] .calib-grid .stat {
+    border-color: rgba(20, 20, 22, .1);
+}
+.calib-grid .stat::after {
+    content: "+";
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    font: 500 11px/1 "Geist Mono", monospace;
+    color: rgba(237, 234, 227, .22);
+}
+.home[data-light] .calib-grid .stat::after {
+    color: rgba(20, 20, 22, .22);
+}
+@media (max-width: 960px) {
+    .calib-grid { grid-template-columns: 1fr; }
+    .calib-rail { border-right: 0; border-bottom: 1px solid rgba(237, 234, 227, .14); padding: 22px 0; }
+    .calib-grid .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .calib-grid .stat:nth-child(3n) { border-right: 1px solid rgba(237, 234, 227, .1); }
+    .calib-grid .stat:nth-child(even) { border-right: 0; }
+    .calib-grid .stat:nth-child(n+4) { border-bottom: 1px solid rgba(237, 234, 227, .1); }
+    .calib-grid .stat:nth-child(n+5) { border-bottom: 0; }
+}
+
+/* 2. Work Flagships (12-col + 7/5-col) + Interactive Hover-Preview Index */
+.work-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+}
+.view-toggle {
+    display: inline-flex;
+    border: 1px solid rgba(237, 234, 227, .18);
+    border-radius: 999px;
+    padding: 3px;
+}
+.home[data-light] .view-toggle {
+    border-color: rgba(20, 20, 22, .18);
+}
+.view-toggle button {
+    padding: 6px 13px;
+    border-radius: 999px;
+    font: 500 11px/1 "Geist Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--smoke);
+    transition: background .2s, color .2s;
+}
+.view-toggle button[aria-pressed="true"] {
+    background: var(--bone);
+    color: var(--void);
+}
+.work-flagships {
+    list-style: none;
+    margin: 0 0 56px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 32px 28px;
+}
+.flagship-hero {
+    grid-column: span 12;
+}
+.flagship-hero > a {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 36px;
+    align-items: center;
+    padding-bottom: 36px;
+    border-bottom: 1px solid rgba(237, 234, 227, .14);
+}
+.home[data-light] .flagship-hero > a {
+    border-bottom-color: rgba(20, 20, 22, .14);
+}
+.flagship-hero .card-meta h3 {
+    font-size: clamp(28px, 3vw, 44px);
+    letter-spacing: -0.04em;
+    margin: 8px 0 10px;
+}
+.flagship-wide { grid-column: span 7; }
+.flagship-side { grid-column: span 5; }
+.card-foot-links {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+}
+@media (max-width: 960px) {
+    .flagship-hero > a { grid-template-columns: 1fr; gap: 20px; }
+    .flagship-wide, .flagship-side { grid-column: span 12; }
+}
+
+.ledger-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 0 12px;
+    border-top: 1px solid rgba(237, 234, 227, .18);
+    border-bottom: 1px solid rgba(237, 234, 227, .12);
+}
+.home[data-light] .ledger-head {
+    border-color: rgba(20, 20, 22, .16);
+}
+.work-ledger-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+    gap: 40px;
+    align-items: start;
+}
+.work-ledger {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.work-ledger li {
+    border-bottom: 1px solid rgba(237, 234, 227, .09);
+    transition: background .2s, border-color .2s;
+}
+.home[data-light] .work-ledger li {
+    border-bottom-color: rgba(20, 20, 22, .10);
+}
+.work-ledger li > a,
+.work-ledger .wl-static {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1.2fr) 172px minmax(0, 1fr) 20px;
+    gap: 16px;
+    align-items: center;
+    padding: 13px 8px;
+    text-decoration: none;
+    color: var(--bone);
+    transition: padding-left .22s var(--ease-out);
+}
+.wl-num { color: var(--smoke) !important; font-size: 10.5px !important; }
+.wl-title { font: 500 15.5px/1.2 "Geist", sans-serif; letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wl-kind { font-size: 10.5px !important; color: var(--smoke) !important; white-space: nowrap; }
+.wl-stack { font-size: 10px !important; color: var(--smoke) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .75; }
+.wl-go { color: var(--smoke); text-align: right; transition: transform .2s, color .2s; }
+.work-ledger li.is-hot {
+    background: rgba(237, 234, 227, .035);
+    border-bottom-color: var(--signal);
+}
+.home[data-light] .work-ledger li.is-hot {
+    background: rgba(20, 20, 22, .04);
+}
+.work-ledger li.is-hot > a,
+.work-ledger li.is-hot .wl-static { padding-left: 14px; }
+.work-ledger li.is-hot .wl-num,
+.work-ledger li.is-hot .wl-go { color: var(--signal) !important; }
+.work-ledger li.is-hot .wl-go { transform: translate(2px, -2px); }
+
+.work-stage {
+    position: sticky;
+    top: 84px;
+    padding: 20px 0 0;
+}
+.ws-meta {
+    margin-top: 16px;
+}
+.ws-meta h3 {
+    margin: 6px 0;
+    font: 600 24px/1.15 "Geist", sans-serif;
+    letter-spacing: -0.03em;
+    color: var(--bone);
+}
+.home[data-light] .ws-meta h3 {
+    font-family: "Playfair Display", Georgia, serif;
+}
+.ws-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+}
+.ws-open {
+    color: var(--signal) !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+@media (max-width: 1040px) {
+    .work-ledger-split { grid-template-columns: 1fr; }
+    .work-stage { display: none; }
+    .work-ledger li > a, .work-ledger .wl-static { grid-template-columns: 32px minmax(0, 1fr) 120px 20px; }
+    .wl-stack { display: none; }
+}
+
+/* 3. Sticky 35/65 Split Sections (Maintained & Experience) */
+.split-sec {
+    display: grid;
+    grid-template-columns: minmax(260px, 35%) minmax(0, 65%);
+    gap: 48px;
+    align-items: start;
+    padding-top: 9vh;
+    border-top: 1px solid rgba(237, 234, 227, .12);
+}
+.home[data-light] .split-sec {
+    border-top-color: rgba(20, 20, 22, .12);
+}
+.split-rail {
+    position: sticky;
+    top: 84px;
+}
+.split-rail h2 {
+    margin: 0 0 14px;
+    font: 600 clamp(32px, 3.8vw, 56px)/0.98 "Geist", sans-serif;
+    letter-spacing: -0.045em;
+    color: var(--bone);
+}
+.home[data-light] .split-rail h2 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 800;
+}
+.split-rail .kept-intro { margin: 0 0 18px; font-size: 14.5px; }
+.split-rail .kept-sum { color: var(--signal) !important; }
+.xp-span { margin: 0 0 18px !important; color: var(--smoke) !important; font-size: 11px !important; }
+@media (max-width: 960px) {
+    .split-sec { grid-template-columns: 1fr; gap: 24px; }
+    .split-rail { position: static; }
+}
+
+/* 4. Certifications: 4-Column Verified Dossier Strip (No Boxy Cards) */
+.certs-sec .cert-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    border-top: 1px solid rgba(237, 234, 227, .16);
+    border-bottom: 1px solid rgba(237, 234, 227, .16);
+}
+.home[data-light] .certs-sec .cert-grid {
+    border-color: rgba(20, 20, 22, .16);
+}
+.certs-sec .cert-card {
+    border: 0 !important;
+    border-right: 1px solid rgba(237, 234, 227, .12) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 24px 22px;
+}
+.certs-sec .cert-card:last-child { border-right: 0 !important; }
+.home[data-light] .certs-sec .cert-card {
+    border-right-color: rgba(20, 20, 22, .12) !important;
+}
+.certs-sec .cert-card::before {
+    top: 0;
+    bottom: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 2px;
+    border-radius: 0;
+}
+@media (max-width: 1100px) {
+    .certs-sec .cert-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .certs-sec .cert-card:nth-child(2n) { border-right: 0 !important; }
+    .certs-sec .cert-card:nth-child(-n+2) { border-bottom: 1px solid rgba(237, 234, 227, .12) !important; }
+}
+@media (max-width: 640px) {
+    .certs-sec .cert-grid { grid-template-columns: 1fr; }
+    .certs-sec .cert-card { border-right: 0 !important; border-bottom: 1px solid rgba(237, 234, 227, .12) !important; }
+    .certs-sec .cert-card:last-child { border-bottom: 0 !important; }
+}
+
+/* 5. Skills: Hairline Hardware Spec Table (Zero Rounded Pill Clutter) */
+.skills-sec .skill-groups {
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-top: 1px solid rgba(237, 234, 227, .16);
+}
+.home[data-light] .skills-sec .skill-groups {
+    border-top-color: rgba(20, 20, 22, .16);
+}
+.skills-sec .skill-group {
+    display: grid;
+    grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+    gap: 18px 36px;
+    align-items: start;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(237, 234, 227, .1);
+}
+.home[data-light] .skills-sec .skill-group {
+    border-bottom-color: rgba(20, 20, 22, .1);
+}
+.skills-sec .skill-group .keys-sub {
+    grid-column: 1;
+    margin: 0;
+}
+.skills-sec .skill-group h3 { grid-column: 1; }
+.skills-sec .skill-group ul {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    gap: 10px 22px;
+}
+.skills-sec .skill-group li {
+    padding: 5px 0;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border-bottom: 1px solid transparent !important;
+}
+@media (hover: hover) {
+    .skills-sec .skill-group li:hover {
+        background: transparent !important;
+        border-bottom-color: var(--brand, var(--signal)) !important;
+    }
+}
+@media (max-width: 760px) {
+    .skills-sec .skill-group { grid-template-columns: 1fr; gap: 8px; }
+    .skills-sec .skill-group ul { grid-column: 1; grid-row: auto; margin-top: 8px; }
+}
+
+/* 6. Footer: Balanced 3-Col Index + Full-Width 4x3 Reality Matrix */
+.keys.keys-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 760px) {
+    .keys.keys-3 { grid-template-columns: 1fr; }
+}
+.worlds-matrix-wrap {
+    max-width: 1200px;
+    margin: 56px auto 0;
+    padding-top: 28px;
+    border-top: 1px solid rgba(237, 234, 227, .14);
+}
+.home[data-light] .worlds-matrix-wrap {
+    border-top-color: rgba(20, 20, 22, .14);
+}
+.wm-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.wm-head h3 { margin: 0; color: var(--signal); }
+.worlds-matrix {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 1px solid rgba(237, 234, 227, .12);
+    border-left: 1px solid rgba(237, 234, 227, .12);
+}
+.home[data-light] .worlds-matrix {
+    border-color: rgba(20, 20, 22, .12);
+}
+.home .wm-cell {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) 16px;
+    grid-template-rows: auto auto;
+    gap: 4px 10px;
+    align-items: baseline;
+    text-align: left;
+    padding: 16px 18px;
+    border-right: 1px solid rgba(237, 234, 227, .12);
+    border-bottom: 1px solid rgba(237, 234, 227, .12);
+    color: var(--bone);
+    transition: background .2s, border-color .2s;
+}
+.home[data-light] .wm-cell {
+    border-color: rgba(20, 20, 22, .12);
+}
+.wm-idx { font-size: 10px !important; color: var(--smoke) !important; }
+.wm-name { font: 500 14.5px/1.2 "Geist", sans-serif; letter-spacing: -0.01em; }
+.wm-tag { grid-column: 2; font: 400 12px/1.3 "Geist", sans-serif; color: var(--smoke); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wm-go { grid-column: 3; grid-row: 1; color: var(--smoke); transition: transform .2s, color .2s; }
+@media (hover: hover) {
+    .wm-cell:hover { background: rgba(237, 234, 227, .05); }
+    .home[data-light] .wm-cell:hover { background: rgba(20, 20, 22, .05); }
+    .wm-cell:hover .wm-idx,
+    .wm-cell:hover .wm-go { color: var(--signal) !important; }
+    .wm-cell:hover .wm-go { transform: translateX(3px); }
+}
+@media (max-width: 960px) { .worlds-matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .worlds-matrix { grid-template-columns: 1fr; } }
 

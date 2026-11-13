@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import { work } from "../../content/work.js";
 import { skillGroups } from "../../content/skills.js";
+import { profile, socials } from "../../content/profile.js";
 import { sfx } from "#machine/sfx.js";
+import { track } from "../analytics.js";
+
+const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
 // The numbers strip: every figure comes from content/ (nothing typed in by hand except the two from the CV),
 // counting up once when the strip scrolls in. Plus the tape: a moving band between sections.
@@ -46,16 +50,33 @@ export default function Stats() {
         return () => io.disconnect();
     }, []);
     return (
-        <section className="stats" aria-label="In numbers">
+        <section className="stats" aria-label="Telemetry and recruiter fast path">
             <Tape items={["Open to work", "Full-stack engineer", "React · Node · Python", "Ahmedabad, India", "On-site or hybrid", "Available now"]} />
-            <dl ref={row} className="stats-row" data-reveal>
-                {STATS.map(([n, suf, label], i) => (
-                    <div key={label} className="stat" style={{ "--i": i }}>
-                        <dt className="mono">{label}</dt>
-                        <dd><Odo value={n} />{suf && <sup>{suf}</sup>}</dd>
+            <div className="calib-grid">
+                <aside className="calib-rail" aria-label="Recruiter fast path">
+                    <p className="mono sec-kicker">01 // TELEMETRY &amp; FAST PATH</p>
+                    <p className="calib-lead">Full-stack engineer in Ahmedabad, open to on-site or hybrid roles. Résumé, contact and {work.length} shipped builds.</p>
+                    <div className="calib-actions">
+                        <a className="block-btn magnet" href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "telemetry" })}>Résumé (PDF) ↓</a>
+                        <div className="calib-links mono">
+                            <a href={`mailto:${profile.email}`}>Email</a>
+                            {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
+                            <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
+                        </div>
                     </div>
-                ))}
-            </dl>
+                    <p className="mono calib-cv">Tailored: {[["fullstack", "Full-stack"], ["frontend", "Frontend"], ["ai", "AI products"]].map(([k, l], i) => (
+                        <span key={k}>{i ? " · " : ""}<a href={`/resume.html?for=${k}`} onClick={() => track("resume_opened", { from: "tailored", variant: k })}>{l}</a></span>
+                    ))}</p>
+                </aside>
+                <dl ref={row} className="stats-row" data-reveal>
+                    {STATS.map(([n, suf, label], i) => (
+                        <div key={label} className="stat" style={{ "--i": i }}>
+                            <dt className="mono">{label}</dt>
+                            <dd><Odo value={n} />{suf && <sup>{suf}</sup>}</dd>
+                        </div>
+                    ))}
+                </dl>
+            </div>
         </section>
     );
 }

@@ -36,14 +36,15 @@ export default function Maintained() {
     const up = Object.values(status).filter((ms) => ms >= 0).length;
 
     return (
-        <section ref={ref} className="kept" aria-labelledby="kept-h">
-            <div className="work-head">
+        <section ref={ref} className="kept split-sec" aria-labelledby="kept-h">
+            <aside className="split-rail">
+                <p className="mono sec-kicker">03 // PRODUCTION</p>
                 <h2 id="kept-h">Live &amp; maintained</h2>
+                <p className="kept-intro">Sites and products I built that are in production today. I still ship fixes, content and features on them.</p>
                 <p className="mono kept-sum" aria-live="polite">
-                    {Object.keys(status).length < list.length ? "Checking…" : `${up} of ${list.length} up · checked ${checked ? `${ago(checked.at)} from ${checked.from === "sin1" ? "Singapore" : "the server"}` : "from your browser just now"}`}
+                    {Object.keys(status).length < list.length ? "Checking endpoints…" : `${up} / ${list.length} operational · ${checked ? `${ago(checked.at)} (${checked.from === "sin1" ? "SIN1" : "server"})` : "live browser probe"}`}
                 </p>
-            </div>
-            <p className="kept-intro">Sites and products I built that are in production today. I still ship fixes, content and features on them.</p>
+            </aside>
             <ol className="kept-list" data-reveal>
                 {list.map((w, i) => {
                     const ms = status[w.slug];
