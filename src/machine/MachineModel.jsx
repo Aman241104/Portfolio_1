@@ -16,10 +16,10 @@ const WIRE = "#ff7a1a";
 
 export const mat = {
     // clear acrylic with a faint cool tint and hand-made smudge/scratch roughness, so it reads as glass, not CG
-    shell: new THREE.MeshPhysicalMaterial({ color: "#f4fbfb", roughness: 0.06, transmission: 1, thickness: 0.08, ior: 1.46, clearcoat: 1, clearcoatRoughness: 0.08, attenuationColor: "#cfe9e6", attenuationDistance: 2.5, specularIntensity: 1 }),
+    shell: new THREE.MeshPhysicalMaterial({ color: "#f4fbfb", roughness: 0.05, transmission: 1, thickness: 0.10, ior: 1.48, clearcoat: 1, clearcoatRoughness: 0.05, iridescence: 0.52, iridescenceIOR: 1.32, iridescenceThicknessRange: [120, 460], attenuationColor: "#cfe9e6", attenuationDistance: 2.5, specularIntensity: 1.15 }),
     // thick optical glass block: green edges, dispersion, smudges
     plinth: new THREE.MeshPhysicalMaterial({ color: "#ffffff", roughness: 0.05, transmission: 1, thickness: 2.4, ior: 1.52, dispersion: 3, clearcoat: 1, clearcoatRoughness: 0.06, attenuationColor: "#7fc4b8", attenuationDistance: 3 }),
-    chrome: new THREE.MeshPhysicalMaterial({ color: "#ffffff", metalness: 1, roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03 }),
+    chrome: new THREE.MeshPhysicalMaterial({ color: "#ffffff", metalness: 1, roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0.02, iridescence: 0.22, iridescenceIOR: 1.3, envMapIntensity: 1.35 }),
     brushed: new THREE.MeshPhysicalMaterial({ color: "#c4c7cc", metalness: 1, roughness: 0.3, anisotropy: 0.9 }),
     black: new THREE.MeshPhysicalMaterial({ color: "#0d0d0f", metalness: 0.2, roughness: 0.55 }),
     pcb: new THREE.MeshPhysicalMaterial({ color: "#10140f", metalness: 0.3, roughness: 0.4, clearcoat: 0.6 }),

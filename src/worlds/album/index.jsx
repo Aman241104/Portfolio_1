@@ -29,28 +29,70 @@ const SIDES = [
     { id: "deluxe", label: "Deluxe", note: "Concepts, demos & B-sides", kinds: ["concept"] },
 ];
 
-const Countdown = ({ onDone }) => {
-    const [n, setN] = useState(3);
-    const btn = useRef(null);
-    useEffect(() => { btn.current?.focus(); }, []);
+const VinylGate = ({ onEnter }) => {
+    const enterBtn = useRef(null);
+    useEffect(() => { enterBtn.current?.focus(); }, []);
     useEffect(() => {
-        if (n === 0) { const t = setTimeout(onDone, 450); return () => clearTimeout(t); }
-        const t = setTimeout(() => setN(n - 1), 420);
-        return () => clearTimeout(t);
-    }, [n, onDone]);
+        const onKey = (e) => {
+            if (e.key === "Escape") onEnter(false);
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [onEnter]);
     return (
-        <button ref={btn} type="button" className="drop" onClick={onDone} onKeyDown={(e) => e.key === "Escape" && onDone()} aria-label="Skip the intro">
-            <span className="drop-k">The album drops in</span>
-            <span className="drop-n" key={n}>{n || "OUT NOW"}</span>
-            <span className="drop-k">tap or press Esc to skip</span>
-        </button>
+        <div className="akira-gate" role="dialog" aria-label="Album entry">
+            <div className="akira-top mono">
+                <span>AP-001</span>
+                <span>SIDE A / SIDE B</span>
+                <span>© {new Date().getFullYear()}</span>
+            </div>
+            <div className="akira-center">
+                <div className="akira-vinyl" aria-hidden>
+                    <svg viewBox="0 0 200 200" width="144" height="144">
+                        <defs>
+                            <radialGradient id="vinylShade" cx="35%" cy="30%" r="70%">
+                                <stop offset="0%" stopColor="#26272c" />
+                                <stop offset="55%" stopColor="#111114" />
+                                <stop offset="100%" stopColor="#070709" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="100" cy="100" r="96" fill="url(#vinylShade)" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+                        {[86, 78, 70, 62, 54, 46].map((r) => (
+                            <circle key={r} cx="100" cy="100" r={r} fill="none" stroke="rgba(255,255,255,0.055)" strokeWidth="0.7" />
+                        ))}
+                        <circle cx="100" cy="100" r="34" fill="#4f64ff" />
+                        <circle cx="100" cy="100" r="32" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8" />
+                        <circle cx="100" cy="100" r="7" fill="#08080a" />
+                    </svg>
+                </div>
+                <h2 className="akira-title">SHIP IT<br /><span>AMAN PATEL</span></h2>
+                <p className="akira-kicker mono">BEST EXPERIENCED WITH SOUND ON</p>
+                <div className="akira-actions">
+                    <button ref={enterBtn} type="button" className="akira-enter mono" onClick={() => onEnter(true)}>
+                        ENTER WITH SOUND <span aria-hidden>›</span>
+                    </button>
+                    <button type="button" className="akira-mute mono" onClick={() => onEnter(false)}>
+                        ENTER WITHOUT SOUND
+                    </button>
+                </div>
+                <p className="akira-cue mono">RECORD CUED. NEEDLE&apos;S DOWN WHEN YOU ARE.</p>
+            </div>
+            <div className="akira-foot mono">
+                <span>PX-05 · AHMEDABAD</span>
+                <span>{work.length} TRACKS · 118 BPM</span>
+            </div>
+        </div>
     );
 };
 
 export default function AlbumWorld() {
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const [intro, setIntro] = useState(() => { try { return !reduced && !sessionStorage.getItem("px01-album-intro"); } catch { return !reduced; } });
-    const endIntro = () => { setIntro(false); try { sessionStorage.setItem("px01-album-intro", "1"); } catch { /* private mode */ } };
+    const endIntro = (withSound = false) => {
+        setIntro(false);
+        try { sessionStorage.setItem("px01-album-intro", "1"); } catch { /* private mode */ }
+        if (withSound) { setYt(null); play(); setPlaying(true); }
+    };
     const cover = useRef(null);
     const root = useRef(null);
     const [playing, setPlaying] = useState(false);
@@ -101,7 +143,7 @@ export default function AlbumWorld() {
 
     return (
         <div ref={root} className="album" data-era={era} data-intro={intro || undefined} data-playing={playing || undefined} style={{ "--beat": `${BEAT_MS}ms` }}>
-            {intro && <Countdown onDone={endIntro} />}
+            {intro && <VinylGate onEnter={endIntro} />}
 
             <nav className={`album-bar${scrolled ? " is-vis" : ""}`} aria-label="Album transport bar">
                 <div className="album-bar-in">

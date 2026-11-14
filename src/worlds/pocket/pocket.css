@@ -1,9 +1,18 @@
-/* POCKET COLOR: Realistic anodized handheld console + full-color 16-bit LCD screen. */
+/* POCKET COLOR: sadok.mx-inspired dithered rainbow ribbon + starfield + iconic teal handheld console. */
 .pk {
     --s0: #161822; --s1: #3b4260; --s2: #9cb898; --s3: #f4f6e8;
-    --shell: #2f3340; --shell-hi: #424758; --shell-lo: #1c1f28; --ink: #e8ecf2;
+    --shell: #149ca6; --shell-hi: #28cbd4; --shell-lo: #0c6f78; --ink: #e8ecf2;
+    position: relative; overflow-x: clip;
     min-height: 100dvh; padding: 8px 12px 68px; color: var(--ink); font: 400 14px/1.45 "Pixelify Sans", ui-monospace, monospace;
-    background: radial-gradient(90% 70% at 50% 10%, #262c38, #0e1015 75%);
+    background-color: #090a0e;
+    background-image:
+        radial-gradient(1.5px 1.5px at 14% 22%, rgba(255, 255, 255, .45) 50%, transparent 0),
+        radial-gradient(1.5px 1.5px at 78% 18%, rgba(255, 255, 255, .38) 50%, transparent 0),
+        radial-gradient(1.5px 1.5px at 32% 68%, rgba(255, 255, 255, .35) 50%, transparent 0),
+        radial-gradient(1.5px 1.5px at 86% 74%, rgba(255, 255, 255, .42) 50%, transparent 0),
+        linear-gradient(155deg, transparent 36%, rgba(255, 92, 168, .22) 45%, rgba(255, 206, 72, .20) 50%, rgba(56, 212, 232, .22) 56%, transparent 66%),
+        radial-gradient(85% 65% at 50% 45%, #161a24, #090a0e 78%);
+    background-size: 260px 260px, 310px 310px, 290px 290px, 340px 340px, 100% 100%, 100% 100%;
     display: flex; flex-direction: column; justify-content: center;
 }
 .pk button { font: inherit; cursor: pointer; }
@@ -20,11 +29,11 @@
     box-sizing: border-box; margin: 0 auto; padding: 18px 26px 16px;
     border-radius: 24px 24px 36px 36px / 24px 24px 52px 52px;
     background: linear-gradient(170deg, var(--shell-hi) 0%, var(--shell) 35%, var(--shell-lo) 100%);
-    border: 1px solid rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .22);
     box-shadow:
-        inset 0 2px 1px rgba(255, 255, 255, .24),
-        inset 0 -8px 16px rgba(0, 0, 0, .5),
-        0 30px 80px rgba(0, 0, 0, .72);
+        inset 0 2px 2px rgba(255, 255, 255, .42),
+        inset 0 -10px 18px rgba(0, 0, 0, .42),
+        0 34px 90px rgba(0, 0, 0, .82);
     display: grid; grid-template-columns: 164px minmax(0, 1fr) 164px;
     grid-template-areas: "pad screen ab" "pad screen ss" "keys keys keys";
     gap: 0 22px; align-items: center;
