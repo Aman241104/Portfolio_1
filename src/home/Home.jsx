@@ -431,22 +431,24 @@ const Home = ({ onSelect }) => {
     return (
         <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-phase={phase}
             data-light={light || undefined} data-entering={phase === "transitioning" || undefined}>
-            {/* Guaranteed 60fps SVG Fractal Ink-Bleed Transition Overlay (Works across WebGL + DOM in all browsers) */}
+            {/* GPU-composited 60fps Ink-Bleed Transition Overlay */}
             {inkWave && (
-                <svg className="ink-bleed-overlay" viewBox={`0 0 ${window.innerWidth} ${window.innerHeight}`} preserveAspectRatio="none" aria-hidden="true">
-                    <defs>
-                        <filter id="px01-ink-filter" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
-                            <feTurbulence type="fractalNoise" baseFrequency="0.014 0.018" numOctaves="4" seed="11" result="noise" />
-                            <feDisplacementMap in="SourceGraphic" in2="noise" scale="135" xChannelSelector="R" yChannelSelector="G" />
-                        </filter>
-                    </defs>
-                    <g filter="url(#px01-ink-filter)">
-                        {/* Vermilion red ink leading edge */}
-                        <circle className="ink-bleed-red" cx={inkWave.x} cy={inkWave.y} r="0" style={{ "--max-r": `${inkWave.maxR}px` }} fill="#ff2e1f" />
-                        {/* Theme paper/void ink body */}
-                        <circle className="ink-bleed-body" cx={inkWave.x} cy={inkWave.y} r="0" style={{ "--max-r": `${inkWave.maxR}px` }} fill={inkWave.toLight ? "#ebe8e2" : "#050506"} />
-                    </g>
-                </svg>
+                <div className="ink-bleed-overlay" aria-hidden="true">
+                    <span
+                        className="ink-bleed-red"
+                        style={{ left: `${inkWave.x}px`, top: `${inkWave.y}px`, width: `${inkWave.maxR * 2}px`, height: `${inkWave.maxR * 2}px` }}
+                    />
+                    <span
+                        className="ink-bleed-body"
+                        style={{
+                            left: `${inkWave.x}px`,
+                            top: `${inkWave.y}px`,
+                            width: `${inkWave.maxR * 2}px`,
+                            height: `${inkWave.maxR * 2}px`,
+                            background: inkWave.toLight ? "#ebe8e2" : "#050506",
+                        }}
+                    />
+                </div>
             )}
             <section ref={hero} className="hero" aria-label="PX-01, the reality selector">
                 {/* 0. Background layer: Unified sculpted architectural ridge (Dark Obsidian in Dark Mode ↔ Alabaster Limestone in Light Mode) */}

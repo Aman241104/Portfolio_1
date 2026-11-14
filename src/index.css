@@ -33,13 +33,13 @@
     position: fixed; inset: 0; z-index: 10050; pointer-events: none;
     background: var(--portal-bg, #050506); color: var(--portal-fg, #edeae3);
     display: grid; place-items: center; overflow: hidden;
-    will-change: clip-path, opacity;
+    will-change: transform, opacity;
 }
 .world-portal--in {
-    animation: portal-in 380ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: portal-in 320ms cubic-bezier(0.76, 0, 0.24, 1) both;
 }
 .world-portal--out {
-    animation: portal-out 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: portal-out 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .world-portal-edge {
     position: absolute; inset: 0;
@@ -48,7 +48,7 @@
 }
 .world-portal-hud {
     display: grid; justify-items: center; gap: 6px; text-align: center; padding: 20px;
-    animation: portal-hud 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: portal-hud 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .world-portal-kicker {
     font: 500 11px/1 "Geist Mono", monospace; letter-spacing: 0.18em; text-transform: uppercase;
@@ -62,12 +62,12 @@
     opacity: 0.65;
 }
 @keyframes portal-in {
-    0% { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
-    100% { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); }
+    0% { transform: translate3d(0, 100%, 0); }
+    100% { transform: translate3d(0, 0%, 0); }
 }
 @keyframes portal-out {
-    0% { clip-path: polygon(0 0%, 100% 0%, 100% 100%, 0 100%); opacity: 1; }
-    100% { clip-path: polygon(0 0%, 100% 0%, 100% 0%, 0 0%); opacity: 0.96; }
+    0% { transform: translate3d(0, 0%, 0); opacity: 1; }
+    100% { transform: translate3d(0, -100%, 0); opacity: 0.96; }
 }
 @keyframes portal-hud {
     0% { opacity: 0; transform: translateY(14px) scale(0.97); }

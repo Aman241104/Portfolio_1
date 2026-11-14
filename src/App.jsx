@@ -54,9 +54,14 @@ const App = () => {
         const t1 = setTimeout(() => {
             apply();
             window.scrollTo(0, 0);
-            setPortal((p) => (p ? { ...p, phase: "out" } : null));
-        }, 380);
-        const t2 = setTimeout(() => setPortal(null), 820);
+            // Wait two animation frames so heavy WebGL/DOM mounts settle behind the shutter before sliding out at 60fps
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    setPortal((p) => (p ? { ...p, phase: "out" } : null));
+                });
+            });
+        }, 320);
+        const t2 = setTimeout(() => setPortal(null), 780);
         timers.current = [t1, t2];
     };
 
