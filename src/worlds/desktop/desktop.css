@@ -385,7 +385,7 @@
 
 /* windows never run off-screen and never cover the dock */
 .world-desktop .os-window { max-height: calc(100dvh - 140px); max-width: calc(100dvw - 32px); overflow: auto; outline: none; }
-.world-desktop #dock { z-index: 950; }
+.world-desktop #dock { z-index: 950; bottom: 72px; }
 
 /* ============================================================ PX-OS skin: the home brand (void, bone, red ink,
    Geist), square bone windows, text controls, line icons. Overrides the macOS-template styles above. */
@@ -496,7 +496,7 @@
 .world-desktop #dock .dock-icon[data-minimized="true"]::after { content: ""; position: absolute; left: 36%; right: 36%; bottom: 0; height: 2px; background: var(--px-bone); opacity: .55; border-radius: 2px; }
 
 /* Right-side Recruiter Dossier */
-.world-desktop .px-dossier { position: absolute; right: 28px; top: 88px; width: 310px; z-index: 5; background: rgba(14, 14, 17, .82); backdrop-filter: blur(14px); border: 1px solid rgba(237, 234, 227, .16); border-top: 2px solid var(--px-red); border-radius: 4px; padding: 14px; color: var(--px-bone); display: flex; flex-direction: column; gap: 11px; box-shadow: 0 24px 60px rgba(0, 0, 0, .5); }
+.world-desktop .px-dossier { position: absolute; right: 28px; top: 88px; width: 348px; z-index: 5; background: rgba(14, 14, 17, .82); backdrop-filter: blur(14px); border: 1px solid rgba(237, 234, 227, .16); border-top: 2px solid var(--px-red); border-radius: 4px; padding: 14px; color: var(--px-bone); display: flex; flex-direction: column; gap: 11px; box-shadow: 0 24px 60px rgba(0, 0, 0, .5); }
 .world-desktop .px-dos-head { display: flex; justify-content: space-between; align-items: center; font: 500 10.5px "Geist Mono", monospace; letter-spacing: .08em; color: var(--px-smoke); }
 .world-desktop .px-dos-head b { color: var(--px-red); }
 .world-desktop .px-dos-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
@@ -506,10 +506,10 @@
 .world-desktop .px-dos-certs p { margin: 0 0 6px; display: flex; align-items: center; gap: 5px; font: 500 10.5px "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--px-smoke); }
 .world-desktop .px-dos-certs ul { position: static !important; display: flex !important; flex-direction: column; align-items: stretch !important; width: 100%; gap: 5px; margin: 0; padding: 0; list-style: none; }
 .world-desktop .px-dos-certs li { position: static !important; width: 100% !important; min-width: 0; max-width: 100%; transform: none !important; margin: 0 !important; }
-.world-desktop .px-dos-certs li a { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; padding: 6px 8px; border-radius: 3px; border: 1px solid rgba(237, 234, 227, .1); background: rgba(255, 255, 255, .03); text-decoration: none; color: var(--px-bone); font-size: 11.5px; }
+.world-desktop .px-dos-certs li a { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; padding: 6px 8px; border-radius: 3px; border: 1px solid rgba(237, 234, 227, .1); background: rgba(255, 255, 255, .03); text-decoration: none; color: var(--px-bone); font-size: 11.5px; }
 .world-desktop .px-dos-certs li a:hover { border-color: var(--px-red); }
-.world-desktop .px-dos-certs li b { font: 600 10px "Geist Mono", monospace; color: var(--px-red); flex-shrink: 0; max-width: 86px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.world-desktop .px-dos-certs li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .88; }
+.world-desktop .px-dos-certs li b { font: 600 9.5px "Geist Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--px-red); white-space: nowrap; }
+.world-desktop .px-dos-certs li span { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .92; }
 .world-desktop .px-dos-spot { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 3px; border: 1px dashed rgba(237, 234, 227, .24); background: transparent; color: var(--px-smoke); font: 500 11px "Geist Mono", monospace; cursor: pointer; }
 .world-desktop .px-dos-spot:hover { border-color: var(--px-bone); color: var(--px-bone); }
 @media (max-width: 1120px) { .world-desktop .px-dossier { display: none; } }
