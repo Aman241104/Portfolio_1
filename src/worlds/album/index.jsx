@@ -9,7 +9,10 @@ import { certifications } from "../../../content/certifications.js";
 import { onRepeat, watching } from "#content/taste.js";
 import { profile } from "#content/profile.js";
 import Deck from "./Deck.jsx";
+import { useFonts } from "../fonts.js";
 import "./album.css";
+
+const FONTS = ["Russo+One", "Archivo:wdth,wght@62..125,300..900", "Space+Mono"];
 
 // World 5: the portfolio as an album drop. Projects = tracklist, stack = features, case studies = liner notes,
 // concepts = deluxe edition, experience + certs = gatefold credits, résumé = merch.
@@ -86,6 +89,7 @@ const VinylGate = ({ onEnter }) => {
 };
 
 export default function AlbumWorld() {
+    useFonts(FONTS);
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const [intro, setIntro] = useState(() => { try { return !reduced && !sessionStorage.getItem("px01-album-intro"); } catch { return !reduced; } });
     const endIntro = (withSound = false) => {

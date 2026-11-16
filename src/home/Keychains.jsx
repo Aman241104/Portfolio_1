@@ -122,9 +122,9 @@ const DESKTOP = [
     { sx: -0.82, sy: 0.66, item: "react", outer: true }, { sx: -0.52, sy: 0.56, item: "typescript", outer: false },
     { sx: 0.52, sy: 0.56, item: "node", outer: false }, { sx: 0.82, sy: 0.66, item: "three", outer: true },
 ];
-// phones: a small even row on cables above the machine, clear of the lever on the right
+// phones: centered row on cables below the top bar and cleanly above the machine
 const PHONE = [
-    { sx: -0.62, sy: 0.46, item: "react" }, { sx: -0.2, sy: 0.49, item: "enter" }, { sx: 0.22, sy: 0.46, item: "node" },
+    { sx: -0.44, sy: 0.36, item: "react" }, { sx: 0.0, sy: 0.39, item: "enter" }, { sx: 0.44, sy: 0.36, item: "node" },
 ];
 const place = (aspect, framing) => {
     const { dist, lookY } = framing(aspect);

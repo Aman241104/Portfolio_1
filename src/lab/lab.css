@@ -4,6 +4,8 @@
     --signal: #ff2e1f;
     --muted: rgba(243, 240, 234, .62);
     --gutter: 32px;
+    --ease-out: cubic-bezier(.16, 1, .3, 1);
+    --ease-in-out: cubic-bezier(.65, 0, .35, 1);
 }
 
 .stage { position: fixed; inset: 0; background: var(--paper); color: var(--ink); overflow: hidden; }
@@ -78,6 +80,7 @@
     position: absolute; inset: 0; z-index: 5; background: #000; pointer-events: none;
 }
 .stage[data-ready] .curtain { animation: curtain 2.4s 0.2s var(--ease-in-out) forwards; }
+.stage[data-ready][data-shot] .curtain { animation: curtain 0.5s 0s var(--ease-in-out) forwards; }
 @keyframes curtain { to { opacity: 0; } }
 
 .titlecard {
@@ -98,6 +101,12 @@
 .ui-late { opacity: 0; transform: translateY(10px); transition: opacity .9s ease, transform .9s var(--ease-out); }
 .stage[data-arrived] .ui-late { opacity: 1; transform: none; }
 .stage[data-arrived] .sheet { transition-delay: .15s; }
+
+.shots { display: inline-flex; gap: 6px; align-items: center; justify-content: center; pointer-events: auto; background: rgba(16, 22, 26, .48); border: 1px solid rgba(243, 240, 234, .14); border-radius: 999px; padding: 4px 6px; backdrop-filter: blur(8px); }
+.shot-btn { background: transparent; border: 0; color: var(--muted); padding: 4px 9px; border-radius: 999px; cursor: pointer; font-size: 10px; transition: color .2s ease, background .2s ease; }
+.shot-btn:hover { color: var(--ink); }
+.shot-btn[aria-pressed="true"] { background: var(--ink); color: #111; }
+@media (max-width: 900px) { .shots { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {
     .curtain, .titlecard { animation: none; opacity: 0; }

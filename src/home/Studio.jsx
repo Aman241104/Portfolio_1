@@ -4,15 +4,15 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer, Float, PresentationControls, SpotLight, Sparkles, Preload } from "@react-three/drei";
 import { Machine, GlassSurface, mat } from "#machine/MachineModel.jsx";
 import Keychains from "./Keychains.jsx";
+import { CAMERA_SHOTS, LIGHTING_PRESETS, detectQualityTier } from "../three/cinematography.js";
 
 // Hero: PX-01 floating in a black void under one volumetric key light (docs/DESIGN_DIRECTION.md §10–11).
 // The canvas is transparent so the giant "Portfolio" word in the DOM sits behind the machine.
 // Intro (once `lit`): the machine drops in through the beam, spins once and settles; the key light ramps up.
 
 const reduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const KEY = 340;                       // key light intensity at full power (physical units, decay 2)
-const REEL_WINDOW = new THREE.Vector3(0, 0.42, 0);
-const DIVE = new THREE.Vector3(0, 0.42, 3.2);
+const REEL_WINDOW = CAMERA_SHOTS.REEL_MATCH_CUT.target;
+const DIVE = CAMERA_SHOTS.REEL_MATCH_CUT.position;
 const clamp01 = (x) => THREE.MathUtils.clamp(x, 0, 1);
 const outCubic = (k) => 1 - Math.pow(1 - k, 3);
 const outBack = (k, s = 1.4) => 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2);
@@ -36,12 +36,12 @@ const KeyLight = ({ lit, light, onBooted }) => {
     useFrame(({ clock }, dt) => {
         const t = since(clock);
         const k = reduced ? 1 : t === null ? 0 : clamp01((t - 0.1) / 0.9);
-        const baseKey = light ? 440 : KEY;
-        ref.current.intensity = THREE.MathUtils.damp(ref.current.intensity, baseKey * outCubic(k), 6, dt);
-        targetCol.set(light ? "#fffaf0" : "#fff3e6");
+        const preset = light ? LIGHTING_PRESETS.whiteLaboratory : LIGHTING_PRESETS.darkExhibition;
+        ref.current.intensity = THREE.MathUtils.damp(ref.current.intensity, preset.keyIntensity * outCubic(k), 6, dt);
+        targetCol.set(preset.keyColor);
         col.lerp(targetCol, 1 - Math.exp(-6 * dt));
         ref.current.color.copy(col);
-        ref.current.opacity = THREE.MathUtils.damp(ref.current.opacity, light ? 0.14 : 0.32, 6, dt);
+        ref.current.opacity = THREE.MathUtils.damp(ref.current.opacity, preset.keyOpacity, 6, dt);
         if (k === 1 && !done.current) { done.current = true; onBooted(); }
     });
     return (
@@ -131,6 +131,7 @@ const Ground = ({ floatRef, dropRef, light }) => {
         shadowDark: poolTexture([[0, "rgba(0,0,0,.9)"], [0.5, "rgba(0,0,0,.45)"], [1, "rgba(0,0,0,0)"]]),
         shadowLight: poolTexture([[0, "rgba(24,22,18,.38)"], [0.5, "rgba(24,22,18,.15)"], [1, "rgba(24,22,18,0)"]]),
     }), []);
+    useEffect(() => () => Object.values(tex).forEach((t) => t.dispose()), [tex]);
     useFrame((_, dt) => {
         const y = (floatRef.current?.position.y ?? 0) + (dropRef.current?.position.y ?? 0);
         const s = 1 + y * 0.6;
@@ -299,21 +300,25 @@ const AtelierRig = ({ light }) => {
         emissive: "#7a0b04",
         emissiveIntensity: 0.45,
     }), []);
+    useEffect(() => () => orbMat.dispose(), [orbMat]);
     useFrame(({ clock }, dt) => {
         const k = 1 - Math.exp(-6 * dt);
+        const preset = light ? LIGHTING_PRESETS.whiteLaboratory : LIGHTING_PRESETS.darkExhibition;
         mat.black.color.lerp(light ? LIGHT_BLACK : DARK_BLACK, k);
         mat.black.roughness = THREE.MathUtils.damp(mat.black.roughness, light ? 0.28 : 0.55, 6, dt);
         mat.black.metalness = THREE.MathUtils.damp(mat.black.metalness, light ? 0.35 : 0.2, 6, dt);
         mat.shell.attenuationColor.lerp(light ? LIGHT_SHELL : DARK_SHELL, k);
-        if (hemi.current) hemi.current.intensity = THREE.MathUtils.damp(hemi.current.intensity, light ? 0.95 : 0.12, 6, dt);
-        if (frontFill.current) frontFill.current.intensity = THREE.MathUtils.damp(frontFill.current.intensity, light ? 1.25 : 0.35, 6, dt);
+        if (hemi.current) hemi.current.intensity = THREE.MathUtils.damp(hemi.current.intensity, preset.hemiIntensity, 6, dt);
+        if (frontFill.current) frontFill.current.intensity = THREE.MathUtils.damp(frontFill.current.intensity, preset.frontFillIntensity, 6, dt);
         orbMat.color.lerp(light ? ORB_LIGHT_COL : ORB_DARK_COL, k);
         orbMat.emissive.lerp(light ? ORB_LIGHT_EMISSIVE : ORB_DARK_EMISSIVE, k);
-        orbMat.roughness = THREE.MathUtils.damp(orbMat.roughness, light ? 0.14 : 0.14, 6, dt);
-        orbMat.metalness = THREE.MathUtils.damp(orbMat.metalness, light ? 0.45 : 0.88, 6, dt);
+        orbMat.emissiveIntensity = THREE.MathUtils.damp(orbMat.emissiveIntensity, light ? 0.16 : 0.45, 6, dt);
+        orbMat.roughness = THREE.MathUtils.damp(orbMat.roughness, light ? 0.08 : 0.14, 6, dt);
+        orbMat.metalness = THREE.MathUtils.damp(orbMat.metalness, light ? 0.94 : 0.88, 6, dt);
         if (orb.current) {
+            orb.current.visible = aspect >= 0.85;
             orb.current.position.x = THREE.MathUtils.damp(orb.current.position.x, orbX, 6, dt);
-            orb.current.position.y = 0.36 + Math.sin(clock.elapsedTime * 1.1) * 0.07;
+            orb.current.position.y = 0.44 + Math.sin(clock.elapsedTime * 1.1) * 0.06;
             orb.current.position.z = -1.55 + Math.sin(clock.elapsedTime * 0.72) * 0.14;
         }
     });
@@ -333,10 +338,11 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
     const floatRef = useRef();
     const dropRef = useRef();
     useEffect(() => { onCreated?.(); }, [onCreated]);
-    const coarse = typeof window !== "undefined" && matchMedia("(pointer: coarse)").matches;
+    const tier = useMemo(() => detectQualityTier(), []);
+    const preset = light ? LIGHTING_PRESETS.whiteLaboratory : LIGHTING_PRESETS.darkExhibition;
 
     return (
-        <Canvas className="studio" frameloop={active ? "always" : "never"} dpr={coarse ? [1, 1.25] : [1, 1.5]}
+        <Canvas className="studio" frameloop={active ? "always" : "never"} dpr={tier.dpr}
             camera={{ position: [0, 0.2, 14], fov: 30 }}
             gl={{ alpha: true, antialias: true, powerPreference: "high-performance", toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.3 }}
             onCreated={({ gl }) => { gl.setClearColor(0x000000, 0); gl.localClippingEnabled = true; }}>   {/* the ticket feeds out of its slot */}
@@ -347,14 +353,14 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             <WinFlash jackpot={jackpot} />
 
             {/* rims: cool from behind-left, warm from behind-right, so every edge of the case is drawn in light */}
-            <directionalLight position={[-6, 3, -5]} intensity={light ? 3.2 : 2.6} color={light ? "#ffffff" : "#cfe0ff"} />
-            <directionalLight position={[6, 1.5, -4]} intensity={light ? 2.4 : 1.8} color="#ffd6b0" />
+            <directionalLight position={[-6, 3, -5]} intensity={preset.rimLeftIntensity} color={preset.rimLeftColor} />
+            <directionalLight position={[6, 1.5, -4]} intensity={preset.rimRightIntensity} color="#ffd6b0" />
             {/* separation: a cool top rim and a faint red kicker from below-behind (ties the machine to the red ink) */}
             <directionalLight position={[0, 7, -5]} intensity={1.6} color="#dfe8ff" />
             <directionalLight position={[0, -3, -6]} intensity={1.3} color="#ff3a22" />
 
             {/* reflections come only from these strips: chrome reads as bright bars on black, the product-shot look */}
-            <Environment resolution={coarse ? 96 : 192} frames={1}>
+            <Environment resolution={tier.envResolution} frames={1}>
                 <Lightformer form="rect" intensity={2.2} position={[0, 6, 1]} rotation-x={Math.PI / 2} scale={[7, 3, 1]} />
                 <Lightformer form="rect" intensity={5} position={[-5, 1, -1]} rotation-y={Math.PI / 2.4} scale={[0.5, 7, 1]} />
                 <Lightformer form="rect" intensity={3} color="#ffd9b8" position={[5, 1, -1]} rotation-y={-Math.PI / 2.4} scale={[0.5, 7, 1]} />
@@ -363,7 +369,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             </Environment>
 
             {/* dust hanging in the beam */}
-            {!reduced && <Sparkles count={coarse ? 24 : 56} scale={[3.6, 7, 3]} position={[0.2, 1.2, 0.6]} size={2.2} speed={0.25} opacity={light ? 0.22 : 0.55} color={light ? "#ff2e1f" : "#fff1df"} noise={0.6} />}
+            {!reduced && tier.sparkles > 0 && <Sparkles count={tier.sparkles} scale={[3.6, 7, 3]} position={[0.2, 1.2, 0.6]} size={2.2} speed={0.25} opacity={preset.sparklesOpacity} color={preset.sparklesColor} noise={0.6} />}
 
             <Entrance lit={lit} innerRef={dropRef}>
                     <Float ref={floatRef} enabled={!reduced} speed={1.3} rotationIntensity={0.18} floatIntensity={0.55} floatingRange={[-0.18, 0.18]}>

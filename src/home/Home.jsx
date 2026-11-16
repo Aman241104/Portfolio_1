@@ -4,7 +4,6 @@ import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
 import { profile, socials } from "#content/profile.js";
 import Work from "./Work.jsx";
-import { work } from "../../content/work.js";
 import Experience from "./Experience.jsx";
 import Maintained from "./Maintained.jsx";
 import Certifications from "./Certifications.jsx";
@@ -13,6 +12,7 @@ import Stats, { Tape } from "./Stats.jsx";
 import LiquidDock from "./LiquidDock.jsx";
 import Nudge from "./Nudge.jsx";
 import MultiverseName from "../lab/MultiverseName.jsx";
+import MotionDebug from "./MotionDebug.jsx";
 import sig from "./signature.json";
 import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
 import { track } from "../analytics.js";
@@ -74,7 +74,7 @@ const Boot = ({ target, onDone }) => {
     const [n, setN] = useState(0);
     const [skip] = useState(true);              // instant click-to-skip so recruiters are never gated
     const finish = useRef(onDone);
-    finish.current = onDone;
+    useEffect(() => { finish.current = onDone; }, [onDone]);
     // the count carries on from where it is when the next milestone arrives (it used to restart from 0 each time)
     const v = useRef(0);
     useEffect(() => {
@@ -308,7 +308,6 @@ const Home = ({ onSelect }) => {
     const [result, setResult] = useState(null);
     const [target, setTarget] = useState();
     const [plays, setPlays] = useState(427);
-    const [shared, setShared] = useState(false);       // true once the count comes from the shared counter (api/pulls.js)
     const [debug, setDebug] = useState(false);
     const [copied, setCopied] = useState(false);
     const [pulse, setPulse] = useState(0);                         // copy email → a ripple runs through the dunes
@@ -361,7 +360,7 @@ const Home = ({ onSelect }) => {
     const [lit, setLit] = useState(() => { try { return reduced() || !!sessionStorage.getItem("px01-booted"); } catch { return reduced(); } });
     const locked = useRef(0);
     const phaseRef = useRef(phase);
-    phaseRef.current = phase;
+    useEffect(() => { phaseRef.current = phase; }, [phase]);
     const bump = (v) => setProgress((p) => Math.max(p, v));
 
     useEffect(() => { monoReady.then(() => { setFontsOk(true); bump(35); }); }, []);
@@ -373,7 +372,7 @@ const Home = ({ onSelect }) => {
     useEffect(() => {
         if (import.meta.env.DEV) return;                // vite dev has no /api
         fetch("/api/pulls").then((r) => (r.ok ? r.json() : null)).then((d) => {
-            if (d && Number.isFinite(d.pulls)) { setPlays(d.pulls); setShared(true); }
+            if (d && Number.isFinite(d.pulls)) setPlays(d.pulls);
         }).catch(() => {});
     }, []);
 
@@ -402,7 +401,7 @@ const Home = ({ onSelect }) => {
     };
     const again = () => { setPhase("idle"); setTimeout(() => pullRef.current(), 30); };
     const pullRef = useRef(pull);
-    pullRef.current = pull;
+    useEffect(() => { pullRef.current = pull; });
 
     // Annotations pinned to the 3D lever + reel window (written as CSS vars, no re-render per frame).
     const onAnchors = ({ kx, ky, wx, wy, ww }) => {
@@ -426,7 +425,6 @@ const Home = ({ onSelect }) => {
     }, [heroOn]);
 
     const busy = phase !== "idle" && phase !== "armed";
-    const status = LABEL[phase] || (isTouch() ? "Tap the red knob" : "Drag the lever · Space");
 
     return (
         <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-phase={phase}
@@ -640,7 +638,7 @@ const Home = ({ onSelect }) => {
                             ]],
                             ["Social", "Elsewhere online", socials.filter((x) => !["LinkedIn", "Github"].includes(x.text)).map((x) => ({ label: x.text, hint: "Follow along", href: x.link, ext: true, icon: "↗" }))],
                             ["Play", "For the curious", [
-                                { label: "Pull the lever again", hint: "Back up to PX-01", onClick: pullAgain, knob: true },
+                                { label: "Pull the lever again", hint: "Back up to PX-01", knob: true },
                                 { label: "PX-01 lab", hint: "The machine on its own", href: "/lab/machine.html", icon: "↗" },
                             ]],
                         ].map(([title, sub, items]) => (
@@ -651,7 +649,7 @@ const Home = ({ onSelect }) => {
                                     const body = <><span className="k-label">{k.label}</span><span className="k-hint">{k.hint}</span>{k.knob ? <i aria-hidden className="k-dot" /> : <i aria-hidden>{k.icon}</i>}</>;
                                     return k.href
                                         ? <a key={k.label} className="key lg" href={k.href} {...(k.ext ? { target: "_blank", rel: "noreferrer" } : {})}>{body}</a>
-                                        : <button key={k.label} type="button" className={k.knob ? "key lg knob" : "key lg"} onClick={k.onClick}>{body}</button>;
+                                        : <button key={k.label} type="button" className={k.knob ? "key lg knob" : "key lg"} onClick={pullAgain}>{body}</button>;
                                 })}
                             </div>
                         ))}
@@ -683,6 +681,7 @@ const Home = ({ onSelect }) => {
             <LiquidDock on={!heroOn} resume={profile.resume} />
             <Nudge />
             <Cursor />
+            <MotionDebug phase={phase} light={light} />
         </main>
     );
 };

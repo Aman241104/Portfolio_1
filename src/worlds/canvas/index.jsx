@@ -11,7 +11,6 @@ import "./canvas.css";
 // zoom (zoom reads as a drawing scale), every project a sheet with dimension lines and a title block, skills as a bill
 // of materials, experience as the revision history. Pan/zoom/pinch/key plan are hand-written, one transform.
 const FONTS = ["B612+Mono:wght@400;700", "B612:wght@400;700", "Architects+Daughter"];
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const FW = 340, FH = 300, GAP = 48;
 
 // A drafter's revision cloud: scalloped arcs walked around a rectangle, drawn on with stroke-dashoffset when a sheet

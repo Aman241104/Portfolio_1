@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '.next', 'public', '.playwright-mcp', 'scripts']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -24,11 +24,21 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
   {
     // react-three-fiber scenes mutate three.js objects (textures, uniforms, materials) by design
-    files: ['src/lab/**/*.{js,jsx}'],
+    files: [
+      'src/lab/**/*.{js,jsx}',
+      'src/home/Studio.jsx',
+      'src/home/DotField.jsx',
+      'src/home/Keychains.jsx',
+      'src/machine/**/*.{js,jsx}',
+      'src/worlds/ride/**/*.{js,jsx}',
+      'src/worlds/longhorn/**/*.{js,jsx}',
+      'src/worlds/album/**/*.{js,jsx}',
+    ],
     rules: { 'react-hooks/immutability': 'off' },
   },
 ])

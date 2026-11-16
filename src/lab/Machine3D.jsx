@@ -6,6 +6,7 @@ import { Water } from "three/examples/jsm/objects/Water.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { EffectComposer, Bloom, DepthOfField, Vignette } from "@react-three/postprocessing";
 import { Machine, GlassSurface, mat } from "#machine/MachineModel.jsx";
+import { CAMERA_SHOTS } from "../three/cinematography.js";
 
 // D2 lab: "clear hardware on an island". The machine itself lives in src/machine/MachineModel.jsx.
 
@@ -411,15 +412,51 @@ const Ocean = () => {
 
 // Opens wide on the whole floating island (the diorama), then glides in until the reels fill the frame.
 const HOLD_WIDE = typeof location !== "undefined" && new URLSearchParams(location.search).get("shot") === "wide";
-const WIDE = { pos: new THREE.Vector3(7, -7.6, 44), look: new THREE.Vector3(0, -3.2, 0) };  // low over the water, far enough for negative space
-const CLOSE = { pos: new THREE.Vector3(1.5, 1.3, 12.8), look: new THREE.Vector3(-0.2, -0.95, 0) };
-const Rig = ({ onBooted, onStart }) => {
+const WIDE = { pos: new THREE.Vector3(7, -7.6, 44), look: new THREE.Vector3(0, -3.2, 0), fov: 32 };  // low over the water, far enough for negative space
+const CLOSE = { pos: new THREE.Vector3(1.5, 1.3, 12.8), look: new THREE.Vector3(-0.2, -0.95, 0), fov: 32 };
+const LAB_SHOT_MAP = {
+    wide: WIDE,
+    establishing: {
+        pos: new THREE.Vector3(...CAMERA_SHOTS.HERO_ESTABLISHING.position),
+        look: new THREE.Vector3(...CAMERA_SHOTS.HERO_ESTABLISHING.target).add(new THREE.Vector3(0, MACHINE_Y, 0)),
+        fov: CAMERA_SHOTS.HERO_ESTABLISHING.fov,
+    },
+    detail: {
+        pos: new THREE.Vector3(...CAMERA_SHOTS.THE_DETAIL.position).add(new THREE.Vector3(0, MACHINE_Y, 0)),
+        look: new THREE.Vector3(...CAMERA_SHOTS.THE_DETAIL.target).add(new THREE.Vector3(0, MACHINE_Y, 0)),
+        fov: CAMERA_SHOTS.THE_DETAIL.fov,
+    },
+    reel: {
+        pos: new THREE.Vector3(0, CAMERA_SHOTS.REEL_MATCH_CUT.position.y + MACHINE_Y, 3.8),
+        look: new THREE.Vector3(0, CAMERA_SHOTS.REEL_MATCH_CUT.target.y + MACHINE_Y, 0),
+        fov: 30,
+    },
+};
+
+const Rig = ({ onBooted, onStart, shot = "auto" }) => {
     const t0 = useRef(null);
     const done = useRef(false);
     const pos = useMemo(() => new THREE.Vector3(), []);
     const look = useMemo(() => new THREE.Vector3(), []);
+    const curLook = useMemo(() => new THREE.Vector3(0, -3.2, 0), []);
     useFrame(({ clock, camera, pointer }) => {
         if (t0.current === null) { t0.current = clock.elapsedTime; onStart?.(); }   // first rendered frame with everything loaded
+        const preset = shot !== "auto" ? LAB_SHOT_MAP[shot] : null;
+        if (preset) {
+            pos.copy(preset.pos);
+            pos.x += pointer.x * 0.25;
+            pos.y += pointer.y * 0.12;
+            look.copy(preset.look);
+            camera.position.lerp(pos, 0.08);
+            curLook.lerp(look, 0.08);
+            camera.lookAt(curLook);
+            if (Math.abs(camera.fov - preset.fov) > 0.05) {
+                camera.fov = THREE.MathUtils.lerp(camera.fov, preset.fov, 0.08);
+                camera.updateProjectionMatrix();
+            }
+            if (!done.current && shot !== "wide") { done.current = true; onBooted(); }
+            return;
+        }
         const t = clock.elapsedTime - t0.current;
         // ?shot=wide freezes the opening frame (for reviewing/art-directing the intro)
         const k = HOLD_WIDE ? 0 : THREE.MathUtils.clamp((t - 2.6) / 5, 0, 1); // hold the wide shot under the title card, then glide
@@ -428,7 +465,8 @@ const Rig = ({ onBooted, onStart }) => {
         look.lerpVectors(WIDE.look, CLOSE.look, e);
         pos.x += pointer.x * 0.8 * e; pos.y += pointer.y * 0.3 * e;        // parallax only once we've arrived
         camera.position.lerp(pos, 0.12);
-        camera.lookAt(look);
+        curLook.copy(look);
+        camera.lookAt(curLook);
         if (k === 1 && !done.current) { done.current = true; onBooted(); }
     });
     return null;
@@ -436,7 +474,7 @@ const Rig = ({ onBooted, onStart }) => {
 
 /* ---------------------------------------------------------------- scene */
 
-export default function Machine3D({ onSpin, onArrive, onReady }) {
+export default function Machine3D({ onSpin, onArrive, onReady, shot = "auto" }) {
     const [spinning, setSpinning] = useState(false);
     const [pulled, setPulled] = useState(false);
     const [booted, setBooted] = useState(false);
@@ -476,7 +514,7 @@ export default function Machine3D({ onSpin, onArrive, onReady }) {
                 <Birds />
                 <CloudBank />
                 {/* the camera move starts only once everything above has loaded, so the wide shot is never wasted on a blank canvas */}
-                <Rig onStart={onReady} onBooted={() => { setBooted(true); onArrive?.(); }} />
+                <Rig shot={shot} onStart={onReady} onBooted={() => { setBooted(true); onArrive?.(); }} />
             </Suspense>
             <Plinth />
             <Machine position={[0, MACHINE_Y, 0]} spinning={spinning} pulled={pulled} booted={booted} onPull={pull} />

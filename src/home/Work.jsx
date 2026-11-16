@@ -14,7 +14,7 @@ const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const touch = () => matchMedia("(pointer: coarse)").matches;
 const phone = () => matchMedia("(max-width: 760px)").matches;
 
-const Leaving = ({ item, rect }) => {
+const Leaving = ({ item, rect, mode = "external" }) => {
     const [open, setOpen] = useState(false);
     useEffect(() => { const r = requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true))); return () => cancelAnimationFrame(r); }, []);
     const box = open ? { left: 0, top: 0, width: "100vw", height: "100vh" } : { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
@@ -22,8 +22,8 @@ const Leaving = ({ item, rect }) => {
         <div className="leaving" data-open={open || undefined} role="status" aria-live="assertive">
             <img src={shot(item, 720)} alt="" style={box} />
             <div className="leaving-card">
-                <p className="mono">Leaving PX-01 · opening</p>
-                <p className="leaving-host">{host(item.url)}</p>
+                <p className="mono">{mode === "case" ? "PX-01 · Case study" : "Leaving PX-01 · opening"}</p>
+                <p className="leaving-host">{mode === "case" ? item.title : host(item.url)}</p>
                 <div className="leaving-bar"><i /></div>
                 <p className="mono">Back button brings you right back here</p>
             </div>
@@ -90,13 +90,24 @@ export default function Work() {
         track("project_opened", { project: item.slug, kind: item.kind });
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1 || reduced()) return;   // native behaviour
         e.preventDefault();
-        const img = e.currentTarget.querySelector("img");
-        setLeaving({ item, rect: img.getBoundingClientRect() });
+        const img = e.currentTarget.querySelector("img") || e.currentTarget.closest?.(".work-ledger-split")?.querySelector(".work-stage img");
+        if (!img) { window.open(item.url, "_blank", "noopener,noreferrer"); return; }
+        setLeaving({ item, rect: img.getBoundingClientRect(), mode: "external" });
         sfx.detent();
         setTimeout(() => {
             window.open(item.url, "_blank", "noopener,noreferrer");
             setLeaving(null);
         }, 420);
+    };
+
+    const openCase = (e, item) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1 || reduced()) return;
+        e.preventDefault();
+        const img = e.currentTarget.closest?.(".card, .work-stage")?.querySelector("img");
+        if (!img) { window.location.assign(`/case.html?p=${item.slug}`); return; }
+        setLeaving({ item, rect: img.getBoundingClientRect(), mode: "case" });
+        sfx.detent();
+        setTimeout(() => { window.location.assign(`/case.html?p=${item.slug}`); }, 380);
     };
 
     const renderCard = (w, i, cls = "card") => (
@@ -122,7 +133,7 @@ export default function Work() {
                     : <div className="card-static">{inner}</div>;
             })()}
             <div className="card-foot-links">
-                {cases[w.slug] && <a className="card-case mono" href={`/case.html?p=${w.slug}`}>Case study →</a>}
+                {cases[w.slug] && <a className="card-case mono" href={`/case.html?p=${w.slug}`} onClick={(e) => openCase(e, w)}>Case study →</a>}
                 {w.repo && w.repo !== w.url && <a className="card-code mono" href={w.repo} target="_blank" rel="noreferrer">Code ↗</a>}
             </div>
         </li>
@@ -219,7 +230,7 @@ export default function Work() {
                                 {staged.note && <p className="mono card-note">{staged.note}</p>}
                                 <div className="ws-actions">
                                     {staged.url && <a className="mono ws-open" href={staged.url} onClick={(e) => open(e, staged)}>Open live ↗</a>}
-                                    {cases[staged.slug] && <a className="card-case mono" href={`/case.html?p=${staged.slug}`}>Case study →</a>}
+                                    {cases[staged.slug] && <a className="card-case mono" href={`/case.html?p=${staged.slug}`} onClick={(e) => openCase(e, staged)}>Case study →</a>}
                                     {staged.repo && staged.repo !== staged.url && <a className="card-code mono" href={staged.repo} target="_blank" rel="noreferrer">Code ↗</a>}
                                 </div>
                             </div>

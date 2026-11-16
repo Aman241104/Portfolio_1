@@ -92,13 +92,13 @@ export default function Departures() {
     }, [runClientProbe]);
 
     useEffect(() => {
-        pollStatus();
+        const init = setTimeout(pollStatus, 0);
         const t = setInterval(pollStatus, 60000);
         fetch("/api/github")
             .then((r) => (r.ok ? r.json() : Promise.reject()))
             .then(setGh)
             .catch(() => setGh({ error: true, commits: [], days: {} }));
-        return () => clearInterval(t);
+        return () => { clearTimeout(init); clearInterval(t); };
     }, [pollStatus]);
 
     useEffect(() => {

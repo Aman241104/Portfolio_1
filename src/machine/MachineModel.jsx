@@ -73,6 +73,7 @@ const STOP_EASE = 2.4;
 const Reel = ({ index, x, spinning, target, onStop }) => {
     const ref = useRef();
     const { sharp, blur } = useReelTexture(index);
+    useEffect(() => () => { sharp.dispose(); blur.dispose(); }, [sharp, blur]);
     const drum = useRef();
     const speed = useRef(0);
     const stop = useRef(null);
@@ -200,6 +201,7 @@ const makeGear = (r, teeth, depth) => {
 const Gear = ({ r, teeth, position, material, dir = 1, spinning }) => {
     const ref = useRef();
     const geo = useMemo(() => makeGear(r, teeth, 0.05), [r, teeth]);
+    useEffect(() => () => geo.dispose(), [geo]);
     const v = useRef(0);
     useFrame((_, dt) => {
         v.current = THREE.MathUtils.damp(v.current, spinning ? 6 : 0, 3, dt);
@@ -233,6 +235,7 @@ const Spring = ({ position }) => {
         for (let i = 0; i <= 200; i++) { const t = i / 200, a = t * Math.PI * 2 * 9; pts.push(new THREE.Vector3(Math.cos(a) * 0.07, t * 0.5, Math.sin(a) * 0.07)); }
         return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 400, 0.008, 6, false);
     }, []);
+    useEffect(() => () => geo.dispose(), [geo]);
     return <mesh geometry={geo} material={mat.chrome} position={position} />;
 };
 
@@ -255,6 +258,7 @@ const Counter = ({ position, count = 427 }) => {
         draw(0);
         return { tex: t, draw };
     }, []);
+    useEffect(() => () => tex.dispose(), [tex]);
     const v = useRef(0), shown = useRef(0);
     useFrame((_, dt) => {
         v.current = count < v.current ? count : Math.min(count, v.current + Math.max(dt * 30, (count - v.current) * dt * 2.5));
@@ -278,8 +282,9 @@ const OledReadout = ({ position, spinning }) => {
         t.userData = { c, g: c.getContext("2d"), last: -1 };
         return t;
     }, []);
+    useEffect(() => () => tex.dispose(), [tex]);
     useFrame(({ clock }) => {
-        const { c, g } = tex.userData;
+        const { g } = tex.userData;
         const t = clock.elapsedTime;
         if (Math.floor(t * 14) === tex.userData.last) return;
         tex.userData.last = Math.floor(t * 14);
@@ -684,6 +689,19 @@ export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, t
         {[[-1.4, 0.6], [1.4, 0.6], [-1.4, -0.6], [1.4, -0.6]].map(([x, z], i) => (
             <mesh key={i} position={[x, -1.3, z]} material={mat.chrome}><cylinderGeometry args={[0.1, 0.12, 0.1, 24]} /></mesh>
         ))}
+        {/* 8 machined hex corner fasteners anchoring the front & rear acrylic plates */}
+        {[-1.58, 1.58].map((x) => [-1.14, 1.14].map((y) => [-0.855, 0.855].map((z) => (
+            <mesh key={`${x}_${y}_${z}`} position={[x, y, z]} rotation={[Math.PI / 2, 0, 0]} material={mat.chrome}>
+                <cylinderGeometry args={[0.028, 0.028, 0.024, 6]} />
+            </mesh>
+        ))))}
+        {/* brushed metal serial plate on lower front bezel */}
+        <mesh position={[0, -1.1, 0.842]} material={mat.brushed}>
+            <boxGeometry args={[0.72, 0.09, 0.01]} />
+        </mesh>
+        <Text font={MONO} fontSize={0.042} letterSpacing={0.14} color="#0d0d0f" anchorX="center" anchorY="middle" position={[0, -1.1, 0.849]}>
+            {`S/N ${String(count ?? 427).padStart(5, "0")}`}
+        </Text>
     </group>
 );
 

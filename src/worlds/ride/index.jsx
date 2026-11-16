@@ -7,6 +7,7 @@ import { useFonts } from "../fonts.js";
 import { track } from "../../analytics.js";
 import { STOPS, END, LENGTH, LANE_X, CERT_ORBS, APEX_GATES } from "./route.js";
 import Scene from "./Scene.jsx";
+import { detectQualityTier } from "../../three/cinematography.js";
 import "./ride.css";
 
 // World 12: RIDE, "Golden hour highway". A motorbike ride out of Ahmedabad at golden hour; each project is a roadside
@@ -129,6 +130,7 @@ export default function RideWorld() {
     const [map, setMap] = useState(false);
     const [cruise, setCruise] = useState(true);
     const [preset, setPreset] = useState("golden");
+    const [cameraMode, setCameraMode] = useState("chase");
     const [near, setNear] = useState(0);
     const [collected, setCollected] = useState([]);
     const [clearedGates, setClearedGates] = useState([]);
@@ -219,6 +221,8 @@ export default function RideWorld() {
             else if (e.key === " ") { e.preventDefault(); begin(); s.cruise = !s.cruise; setCruise(s.cruise); }
             else if (e.key === "m" || e.key === "M") setMap((m) => !m);
             else if (e.key === "b" || e.key === "B") setPreset((p) => BIOMES[(BIOMES.findIndex(([id]) => id === p) + 1) % BIOMES.length][0]);
+            else if (e.key === "c" || e.key === "C") setCameraMode((m) => (m === "chase" ? "iso" : "chase"));
+            else if (e.key === "r" || e.key === "R") { s.lane = LANE_X; s.steer = 0; }
         };
         const ku = (e) => {
             if (["ArrowUp", "w", "W", "ArrowDown", "s", "S"].includes(e.key)) s.hold = 0;
@@ -262,13 +266,20 @@ export default function RideWorld() {
         go(STOPS[0]);
     };
 
+    const handleKnock = () => {
+        questRef.current.score += 100;
+        clearTimeout(questRef.current.toastTimer);
+        setQuest((q) => ({ ...q, score: questRef.current.score, toast: "+100 PTS · Prop Smash" }));
+        questRef.current.toastTimer = setTimeout(() => setQuest((q) => ({ ...q, toast: null })), 1600);
+    };
+
     const grade = quest.score >= 5000 ? "S" : quest.score >= 2500 ? "A" : "B";
 
-    const coarse = typeof window !== "undefined" && matchMedia("(pointer: coarse)").matches;
+    const tier = detectQualityTier();
     return (
         <div className="rd" data-started={started || undefined} data-preset={preset}>
-            <Canvas className="rd-canvas" shadows={!coarse} dpr={coarse ? [1, 1.2] : [1, 1.5]} camera={{ fov: 52, near: 0.5, far: 720, position: [-8, 3, 10] }} gl={{ antialias: !coarse, powerPreference: "high-performance" }}>
-                <Suspense fallback={null}><Scene state={state} near={near} preset={preset} collected={collected} clearedGates={clearedGates} /></Suspense>
+            <Canvas className="rd-canvas" shadows={tier.name === "HIGH"} dpr={tier.dpr} camera={{ fov: 52, near: 0.5, far: 720, position: [-8, 3, 10] }} gl={{ antialias: tier.name !== "LOW", powerPreference: "high-performance" }}>
+                <Suspense fallback={null}><Scene state={state} near={near} preset={preset} collected={collected} clearedGates={clearedGates} started={started} cameraMode={cameraMode} onKnock={handleKnock} qualityTier={tier.name} /></Suspense>
             </Canvas>
             <div className="rd-grade" aria-hidden />
 
@@ -280,6 +291,7 @@ export default function RideWorld() {
                     ))}
                 </div>
                 <nav>
+                    <button type="button" onClick={() => setCameraMode((m) => (m === "chase" ? "iso" : "chase"))} aria-label="Toggle camera angle">Cam: {cameraMode === "chase" ? "Chase" : "3/4 Iso"}</button>
                     <button type="button" onClick={() => setMap(true)}>Map ({STOPS.length})</button>
                     <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "world" })}>Résumé</a>
                     <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
@@ -294,7 +306,7 @@ export default function RideWorld() {
                     <h1>Golden hour.<br />{STOPS.length} projects down the road.</h1>
                     <p>Every billboard on this highway is something Aman built, and most of them are live right now. It rides itself; scroll to go faster.</p>
                     <div className="rd-intro-cta">
-                        <button type="button" className="rd-btn rd-go rd-start" onClick={() => setStarted(true)}>Start the ride</button>
+                        <button type="button" className="rd-btn rd-go rd-start" onClick={() => setStarted(true)}>Click to ride</button>
                         <button type="button" className="rd-btn" onClick={() => setMap(true)}>See the route map</button>
                     </div>
                 </section>
@@ -348,7 +360,7 @@ export default function RideWorld() {
                     <button type="button" onClick={() => stepStop(-1)} aria-label="Previous stop">← Prev</button>
                     <button type="button" onClick={() => { state.current.cruise = !state.current.cruise; setCruise(state.current.cruise); }}>{cruise ? "Cruise on" : "Cruise off"}</button>
                     <button type="button" onClick={() => stepStop(1)} aria-label="Next stop">Next →</button>
-                    <span>A/D steer · W/↑ gas · Space pause · B biome · M map</span>
+                    <span>A/D steer · W/↑ gas · C cam · B biome · M map</span>
                 </p>
             )}
             <p className="rd-progress" aria-hidden><i style={{ width: `${Math.min(100, (hud.d / END) * 100)}%` }} /></p>

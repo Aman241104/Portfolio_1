@@ -10,7 +10,10 @@ import { certifications } from "../../../content/certifications.js";
 import { Screensaver } from "./idle.jsx";
 import { keyClick } from "./keyclick.js";
 import { track } from "../../analytics.js";
+import { useFonts } from "../fonts.js";
 import "./crt.css";
+
+const FONTS = ["VT323", "IBM+Plex+Mono:wght@400;500"];
 
 // World 4: tty1 · AHMEDABAD. A split-pane phosphor CRT workstation with tmux chrome, live project inspector,
 // argument-level Tab completion, and 1-click recruiter fast-path.
@@ -40,7 +43,40 @@ function findProject(query = "") {
     );
 }
 
+const alias = { ls: "projects", dir: "projects", exit: "spin", hire: "contact", "?": "help", cls: "clear" };
+
+const COMMAND_NAMES = [
+    "help", "about", "projects", "cat", "open", "live", "experience", "certs",
+    "skills", "cv", "resume", "contact", "music", "watching", "worlds", "go",
+    "spin", "theme", "whoami", "man", "sudo", "rm", "coffee", "sound", "screensaver",
+];
+
+function getCompletions(raw) {
+    const val = raw.trimStart();
+    if (!val) return [];
+    const parts = val.split(/\s+/);
+    if (parts.length === 1 && !raw.endsWith(" ")) {
+        return [...COMMAND_NAMES, ...Object.keys(alias), "clear"].filter((c) => c.startsWith(parts[0].toLowerCase()));
+    }
+    const cmdName = (alias[parts[0].toLowerCase()] || parts[0].toLowerCase());
+    const arg = raw.endsWith(" ") ? "" : (parts[1] || "").toLowerCase();
+    if (cmdName === "cat" || cmdName === "open") {
+        return work.map((w) => w.slug).filter((s) => s.startsWith(arg)).map((s) => `${parts[0]} ${s}`);
+    }
+    if (cmdName === "go") {
+        return worlds.map((w) => w.id).filter((id_) => id_.startsWith(arg)).map((id_) => `go ${id_}`);
+    }
+    if (cmdName === "theme") {
+        return THEMES.filter((t) => t.startsWith(arg)).map((t) => `theme ${t}`);
+    }
+    if (cmdName === "cv") {
+        return ["fullstack", "frontend", "ai"].filter((v) => v.startsWith(arg)).map((v) => `cv ${v}`);
+    }
+    return [];
+}
+
 const TerminalWorld = ({ shell }) => {
+    useFonts(FONTS);
     const [log, setLog] = useState([]);
     const [input, setInput] = useState("");
     const [history, setHistory] = useState([]);
@@ -265,31 +301,6 @@ const TerminalWorld = ({ shell }) => {
         },
         screensaver: () => { setTimeout(() => { away.current = Date.now(); setIdle(2); }, 300); return [<p key="z" className="dim">dimming the phosphor…</p>]; },
     };
-    const alias = { ls: "projects", dir: "projects", exit: "spin", hire: "contact", "?": "help", cls: "clear" };
-
-    function getCompletions(raw) {
-        const val = raw.trimStart();
-        if (!val) return [];
-        const parts = val.split(/\s+/);
-        if (parts.length === 1 && !raw.endsWith(" ")) {
-            return [...Object.keys(commands), ...Object.keys(alias), "clear"].filter((c) => c.startsWith(parts[0].toLowerCase()));
-        }
-        const cmdName = (alias[parts[0].toLowerCase()] || parts[0].toLowerCase());
-        const arg = raw.endsWith(" ") ? "" : (parts[1] || "").toLowerCase();
-        if (cmdName === "cat" || cmdName === "open") {
-            return work.map((w) => w.slug).filter((s) => s.startsWith(arg)).map((s) => `${parts[0]} ${s}`);
-        }
-        if (cmdName === "go") {
-            return worlds.map((w) => w.id).filter((id_) => id_.startsWith(arg)).map((id_) => `go ${id_}`);
-        }
-        if (cmdName === "theme") {
-            return THEMES.filter((t) => t.startsWith(arg)).map((t) => `theme ${t}`);
-        }
-        if (cmdName === "cv") {
-            return ["fullstack", "frontend", "ai"].filter((v) => v.startsWith(arg)).map((v) => `cv ${v}`);
-        }
-        return [];
-    }
 
     const ghost = useMemo(() => {
         if (!input) return "";
@@ -298,7 +309,7 @@ const TerminalWorld = ({ shell }) => {
             return matches[0].slice(input.trimStart().length);
         }
         return "";
-    }, [input]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [input]);
 
     function run(raw) {
         const text = raw.trim();

@@ -32,3 +32,32 @@
 - **Shell, Dock & Transitions:** Upgraded `CoinSlot.jsx` dock, `WorldPicker.jsx` (searchable, filterable, scrollable across desktop & mobile), and `App.jsx` / `index.css` **PX-01 Reality Shutter** transition.
 - **60fps & Distance Culling:** Removed per-frame `Environment` cubemap re-baking in `src/home/Studio.jsx`, clamped DPR, removed 26 dynamic `<pointLight>`s in `src/worlds/ride/Scene.jsx`, added distance-based visibility culling for Torii/Sakura/Lantern/Sign/Billboard clusters, and disabled heavy mobile Bloom post-processing.
 - **Branding & SEO:** Custom `AP®` favicon (`public/favicon.svg`, `public/favicon-32.png`, `public/apple-touch-icon.png`), `1200x630` `public/og.jpg`, and upgraded OpenGraph/Twitter/JSON-LD metadata in `index.html`.
+- **`RIDE` v2 (`src/worlds/ride/`):** Added `bruno-simon.com`-inspired **Circular Diorama Reveal** (`DioramaReveal`), **`Chase` ↔ `3/4 Iso` Camera Toggle** (`C` key + HUD button), **Suspension Pitch & Under-Chassis Contact Shadow**, **Persistent Rear-Tire Ribbon Trails** (`TireTrails` single `InstancedMesh`), **Knockable Roadside Cones/Lanterns** with arcade rigid-body impulses (`KnockableProps`), and **Single-Draw-Call GPU Wind-Swaying Foliage** (`WindFoliage`).
+- **`Editorial` (`src/worlds/editorial/`):** Added `errormade.tech`-inspired **`List | Gallery` View Switch**, 3-column Swiss **Gallery Grid** with hairline vertical-tick metadata (`01 | 2026 | Kind`) and Klein Blue duotone-to-color hover cards, plus live **Ahmedabad IST** clock in the masthead.
+
+---
+
+## PX-01 Overhaul & Visual QA Pass (`2026-11-15`)
+- **Hero Framing & Collision Fixes:** Fixed `100svh` hero height (no sliced marquee peek), separated desktop orb from `"Creative Developer"` (`top: 53.5%`, `orbY: 0.44`), centered mobile `PHONE` keychains below `AMAN®` header, hid orb on narrow portrait viewports, and upgraded Light Mode silver-chrome orb material.
+- **Case Study & RIDE Polish:** Removed `case.css` screenshot crop and strengthened `ride.css` `.rd-top` gradient contrast.
+- **Build & Lint:** Added Vite `manualChunks` (`three-core`, `r3f-vendor`, `gsap-vendor`, `react-vendor`) and updated `eslint.config.js` ignores/R3F overrides.
+- **Documentation:** Added `PROJECT_AUDIT.md`, `DESIGN_DIRECTION.md`, `RESEARCH_AND_REFERENCES.md`, `SKILLS_AND_MCP_REVIEW.md`, `DESIGN_SYSTEM.md`, `IMPLEMENTATION_LOG.md`, `PERFORMANCE_REPORT.md`, `ACCESSIBILITY_REPORT.md`, `QA_REPORT.md`, and `FINAL_COMPLETION_REPORT.md` in `docs/`.
+
+---
+
+## Phase 3: 3D Art Direction & Cinematic Motion Director (`2026-11-15` — COMPLETED)
+1. **Shot-Based Production System & Quality Tiers ([`src/three/cinematography.js`](../src/three/cinematography.js)):** Added `QUALITY_TIERS` (`HIGH`, `BALANCED`, `LOW`) via `detectQualityTier()`, named `CAMERA_SHOTS` (`Shot 01–06`), and `LIGHTING_PRESETS` (`darkExhibition`, `whiteLaboratory`).
+2. **Studio & Machine Integration ([`src/home/Studio.jsx`](../src/home/Studio.jsx), [`src/machine/MachineModel.jsx`](../src/machine/MachineModel.jsx)):** Wired quality tiers, lighting presets, and explicit GPU `.dispose()` cleanup for procedural `CanvasTexture`s and `MeshPhysicalMaterial`s.
+3. **Deliverables:** `3D_ART_DIRECTION.md`, `3D_REFERENCE_LIBRARY.md`, `3D_ASSET_CATALOG.md`, `MODEL_REFINEMENT_PIPELINE.md`, `LIGHTING_SPECIFICATIONS.md`, `CAMERA_AND_FRAMING_GUIDE.md`, `MOTION_DESIGN_SYSTEM.md`, `TRANSITION_LIBRARY.md`, `3D_PERFORMANCE_REPORT.md`, `3D_QA_REPORT.md`.
+4. **Next Roadmap:** See [`docs/FUTURE_IMPLEMENTATION_PLAN.md`](FUTURE_IMPLEMENTATION_PLAN.md) for Phases A–E (machine micro-details, Shot Director, View Transitions/Flip match cuts, font waterfall split, `gltf-transform` compression, ESLint zero-error clean, and Lighthouse/Playwright QA).
+
+---
+
+## Phase E.1 & D.1 Execution Log (`2026-11-15`)
+- **Phase E.1 (ESLint Zero-Error Clean — COMPLETED):** `npm run lint` passes with `0` errors (`6` `react-refresh/only-export-components` warnings).
+- **Phase D.1 (Critical-Path Google Font Splitting — COMPLETED):** Removed 7 world-only font families from `index.html` and the duplicate `@import` in `src/home/home.css`; lazy-loaded them per world (`editorial`, `album`, `terminal`, and `case.html?skin=ed`) via `useFonts` / dynamic `<link>`. Browser-verified font loading (`Newsreader`, `Schibsted Grotesk`, `Archivo`, `Russo One`, `Space Mono`, `VT323`, `IBM Plex Mono`) across all 4 routes.
+- **Phase D.2 & D.3 (Chunk Splitting — COMPLETED):** Split `pdf-vendor` (`422.03 kB`), `drei-vendor` (`315.58 kB`), and `three-addons` (`35.66 kB`) in `vite.config.js`, reducing `desktop` `index` chunk from `530.98 kB` to `108.85 kB` and `r3f-vendor` from `594.69 kB` to `277.61 kB`. Every app/wrapper chunk is `< 500 kB`.
+- **Phase A (Machine Micro-Details & Shot Director — COMPLETED):** Added 8 machined hex corner fasteners, a brushed-metal serial plate (`S/N 00427`), and GPU `.dispose()` cleanup on `OledReadout`/`Spring`/`Gear` in `src/machine/MachineModel.jsx`. Wired `CAMERA_SHOTS` into `src/lab/Machine3D.jsx` and added the `00 Auto`–`04 Reel` Shot Director bar in `src/lab/LabPage.jsx` (`?shot=` support).
+- **Phase B (Match-Cut Transitions & Motion Debug — COMPLETED):** Added spatial match-cut expansion for `Work.jsx` → `case.html` (`openCase`), fixed `fetchPriority="high"` in `src/case/main.jsx`, and added the `?motion=debug` telemetry HUD (`src/home/MotionDebug.jsx`).
+- **Phase C (RIDE Quality Tier & GLB Asset Audit — COMPLETED):** Wired `detectQualityTier()` into `src/worlds/ride/index.jsx` and `src/worlds/ride/Scene.jsx` (adaptive `dpr`, `shadows`, `antialias`, and `HIGH`-only `Bloom`). Audited `public/models/bk/*.glb`: 3 active in `RIDE` (`bk-sakura-blooming.glb` 2.2M, `bk-silk-lantern.glb` 1.6M, `bk-torii-gate.glb` 1.4M) and 3 unused (`bk-corinthian-column.glb` 1.9M, `bk-ionic-pedestal.glb` 2.1M, `bk-marble-column.glb` 856K).
+- **Phase E.2 (Final Build, Lint & Browser QA — COMPLETED):** `npm run lint` (`0` errors, `6` warnings), `npm run build` (`16.80s`, all app/wrapper chunks `< 500 kB`), and Chrome DevTools MCP verification across `/`, `/?motion=debug`, `/?style=editorial`, `/?style=album`, `/?style=terminal`, `/?style=ride`, `/case.html?p=job-search-os`, `/case.html?p=job-search-os&skin=ed`, `/resume.html`, and `/lab/machine.html?shot=detail` (`0` console errors, `0` horizontal overflow).

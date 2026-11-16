@@ -12,13 +12,22 @@ const Clock = () => {
 // Intro choreography: black → title card over the low wide shot of the island → the title fades as the
 // camera rises into the machine → the page UI (header + spec sheet) fades in only once the camera arrives.
 // Product-launch layout after arrival (N8 glass-camera ref): big serif model name, two spec columns, one CTA.
+const SHOTS = [
+    ["auto", "00 Auto"],
+    ["wide", "01 Wide"],
+    ["establishing", "02 Hero"],
+    ["detail", "03 Detail"],
+    ["reel", "04 Reel"],
+];
+
 const LabPage = () => {
     const [spinning, setSpinning] = useState(false);
     const [ready, setReady] = useState(false);
     const [arrived, setArrived] = useState(false);
+    const [shot, setShot] = useState(() => new URLSearchParams(location.search).get("shot") || "auto");
     return (
-        <div className="stage" data-ready={ready || undefined} data-arrived={arrived || undefined} data-shot={new URLSearchParams(location.search).get("shot") || undefined}>
-            <Machine3D onSpin={setSpinning} onReady={() => setReady(true)} onArrive={() => setArrived(true)} />
+        <div className="stage" data-ready={ready || undefined} data-arrived={arrived || undefined} data-shot={shot !== "auto" ? shot : undefined}>
+            <Machine3D shot={shot} onSpin={setSpinning} onReady={() => setReady(true)} onArrive={() => setArrived(true)} />
 
             <div className="curtain" aria-hidden />
             <div className="titlecard" aria-hidden={arrived}>
@@ -52,7 +61,11 @@ const LabPage = () => {
 
             <header className="bar top ui-late">
                 <MultiverseName scramble={spinning} />
-                <p className="mono">Portfolio — Aman Patel</p>
+                <div className="shots" role="group" aria-label="Camera shots">
+                    {SHOTS.map(([id, label]) => (
+                        <button key={id} type="button" className="shot-btn mono" aria-pressed={shot === id} onClick={() => setShot(id)}>{label}</button>
+                    ))}
+                </div>
                 <p className="mono right"><Clock /></p>
             </header>
 

@@ -8,7 +8,10 @@ import { experience } from "../../../content/experience.js";
 import { certifications } from "../../../content/certifications.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
+import { useFonts } from "../fonts.js";
 import "./editorial.css";
+
+const FONTS = ["Schibsted+Grotesk:wght@500;700;800;900", "Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400"];
 
 const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
@@ -27,12 +30,22 @@ const TITLE = "The Index";
 const words = (t) => t.split(" ").map((x, i) => <Fragment key={i}>{i > 0 && " "}<span className="ed-w"><span>{x}</span></span></Fragment>);
 
 export default function EditorialWorld() {
+    useFonts(FONTS);
     const root = useRef(null);
     const preview = useRef(null);
     const [kind, setKind] = useState("all");
     const [q, setQ] = useState("");
+    const [view, setView] = useState("list");
     const [peek, setPeek] = useState(null);
     const [folio, setFolio] = useState({ show: false, pct: 0 });
+    const [ist, setIst] = useState(() => new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false }));
+
+    useEffect(() => {
+        const id = setInterval(() => {
+            setIst(new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false }));
+        }, 15000);
+        return () => clearInterval(id);
+    }, []);
     const rows = useMemo(() => {
         const query = q.trim().toLowerCase();
         return work.filter((w) =>
@@ -108,7 +121,7 @@ export default function EditorialWorld() {
                 <i className="ed-folio-bar" style={{ width: `${folio.pct}%` }} aria-hidden />
             </nav>
             <header className="ed-mast">
-                <p className="ed-meta"><span>Ahmedabad</span><span>{today}</span><span>Vol. 2026 · {work.length} projects · {work.filter((w) => w.maintained).length} in production</span></p>
+                <p className="ed-meta"><span>Ahmedabad · {ist} IST</span><span>{today}</span><span>Vol. 2026 · {work.length} projects · {work.filter((w) => w.maintained).length} in production</span></p>
                 <h1 aria-label={TITLE}>{[...TITLE].map((c, i) => <span key={i} className="ed-ch" aria-hidden>{c === " " ? "\u00a0" : c}</span>)}</h1>
                 <p className="ed-deck"><em>The collected work of</em> {profile.name}, full-stack engineer. AI products, Android apps, live client sites.</p>
                 <nav className="ed-ear">
@@ -147,6 +160,10 @@ export default function EditorialWorld() {
                     <h2 id="ed-index">Index of work</h2>
                     <div className="ed-index-controls">
                         <input id="ed-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter by name or stack…" aria-label="Filter projects" />
+                        <div className="ed-view-switch" role="group" aria-label="View mode">
+                            <button type="button" aria-pressed={view === "list"} onClick={() => setView("list")}>List</button>
+                            <button type="button" aria-pressed={view === "gallery"} onClick={() => setView("gallery")}>Gallery</button>
+                        </div>
                         <div className="ed-tabs" role="tablist" aria-label="Filter by kind">
                             {Object.entries({ all: "All", ...KINDS }).map(([k, l]) => (
                                 <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>
@@ -156,21 +173,40 @@ export default function EditorialWorld() {
                         </div>
                     </div>
                 </div>
-                <ol className="ed-table" onPointerLeave={() => setPeek(null)}>
-                    <li className="ed-th" aria-hidden><span>№</span><span>Title</span><span>Kind</span><span>Year</span><span>Status</span><span /></li>
-                    {rows.map((w) => (
-                        <li key={w.slug}>
-                            <a href={href(w) || "#"} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer" onPointerEnter={() => setPeek(w)} onFocus={() => setPeek(w)}>
-                                <span className="ed-no">{String(work.indexOf(w) + 1).padStart(2, "0")}</span>
-                                <span className="ed-title">{w.title}<small>{w.line}</small>{w.stack && <em className="ed-stack">{w.stack}</em>}</span>
-                                <span>{KINDS[w.kind].replace(/s$/, "")}</span>
-                                <span>{w.year}</span>
-                                <span>{cases[w.slug] ? <b className="ed-ink">Case study</b> : w.live ? <b className="ed-ink">● {host(w.url)}</b> : w.url ? "Online" : "Private"}</span>
-                                <span aria-hidden>↗</span>
+                {view === "list" ? (
+                    <ol className="ed-table" onPointerLeave={() => setPeek(null)}>
+                        <li className="ed-th" aria-hidden><span>№</span><span>Title</span><span>Kind</span><span>Year</span><span>Status</span><span /></li>
+                        {rows.map((w) => (
+                            <li key={w.slug}>
+                                <a href={href(w) || "#"} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer" onPointerEnter={() => setPeek(w)} onFocus={() => setPeek(w)}>
+                                    <span className="ed-no">{String(work.indexOf(w) + 1).padStart(2, "0")}</span>
+                                    <span className="ed-title">{w.title}<small>{w.line}</small>{w.stack && <em className="ed-stack">{w.stack}</em>}</span>
+                                    <span>{KINDS[w.kind].replace(/s$/, "")}</span>
+                                    <span>{w.year}</span>
+                                    <span>{cases[w.slug] ? <b className="ed-ink">Case study</b> : w.live ? <b className="ed-ink">● {host(w.url)}</b> : w.url ? "Online" : "Private"}</span>
+                                    <span aria-hidden>↗</span>
+                                </a>
+                            </li>
+                        ))}
+                    </ol>
+                ) : (
+                    <div className="ed-gallery">
+                        {rows.map((w) => (
+                            <a key={w.slug} className="ed-gcard" href={href(w) || "#"} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer">
+                                <p className="ed-gcard-meta">
+                                    <span>{String(work.indexOf(w) + 1).padStart(2, "0")}</span>
+                                    <span>{w.year}</span>
+                                    <span>{KINDS[w.kind].replace(/s$/, "")}</span>
+                                </p>
+                                <Duo w={w} size={720} />
+                                <h3>{w.title}</h3>
+                                <p className="ed-gcard-line">{w.line}</p>
+                                {w.stack && <em className="ed-stack">{w.stack}</em>}
+                                <p className="ed-more">{cases[w.slug] ? "Read case study →" : w.url ? `${host(w.url)} ↗` : "Private build"}</p>
                             </a>
-                        </li>
-                    ))}
-                </ol>
+                        ))}
+                    </div>
+                )}
                 {fine && !reduced && (
                     <div ref={preview} className="ed-peek" data-on={peek ? "" : undefined} aria-hidden>
                         {peek && <Duo w={peek} size={720} className="ed-peek-img" />}

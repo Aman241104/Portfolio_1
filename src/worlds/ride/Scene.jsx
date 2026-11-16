@@ -119,10 +119,10 @@ function Sky({ preset }) {
         fog: false,
         uniforms: {
             sun: { value: SUN },
-            uZen: { value: new THREE.Vector3(...p.skyZen) },
-            uMid: { value: new THREE.Vector3(...p.skyMid) },
-            uHor: { value: new THREE.Vector3(...p.skyHor) },
-            uSunCol: { value: new THREE.Vector3(...p.sunColor) },
+            uZen: { value: new THREE.Vector3() },
+            uMid: { value: new THREE.Vector3() },
+            uHor: { value: new THREE.Vector3() },
+            uSunCol: { value: new THREE.Vector3() },
         },
         vertexShader: `
             varying vec3 v;
@@ -171,9 +171,9 @@ function CoastalOcean({ preset }) {
         uniforms: {
             uTime: { value: 0 },
             uSunDir: { value: SUN },
-            uDeep: { value: new THREE.Vector3(...p.waterDeep) },
-            uShallow: { value: new THREE.Vector3(...p.waterShallow) },
-            uGlint: { value: new THREE.Vector3(...p.waterGlint) },
+            uDeep: { value: new THREE.Vector3() },
+            uShallow: { value: new THREE.Vector3() },
+            uGlint: { value: new THREE.Vector3() },
         },
         vertexShader: `
             uniform float uTime;
@@ -318,8 +318,8 @@ function FjordCliffs({ preset }) {
         blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide,
         uniforms: {
-            uColor: { value: new THREE.Color(p.rayColor) },
-            uOpacity: { value: p.rayOpacity },
+            uColor: { value: new THREE.Color() },
+            uOpacity: { value: 0 },
         },
         vertexShader: `
             varying vec2 vUv;
@@ -787,8 +787,8 @@ function Landmarks({ preset }) {
     );
 }
 
-// ---- the autonomous sportbike (motorcycle.glb) + Akira/JDM LED tail-light trail ----
-function Rider({ state, preset }) {
+// ---- the autonomous sportbike (motorcycle.glb) + Akira/JDM LED tail-light trail + Chase/Iso camera ----
+function Rider({ state, preset, cameraMode = "chase" }) {
     const { scene } = useGLTF("/ride/motorcycle.glb");
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
     const bike = useMemo(() => {
@@ -799,6 +799,7 @@ function Rider({ state, preset }) {
     const root = useRef(), body = useRef(), light = useRef(), tailTrail = useRef();
     const f = useMemo(() => ({}), []), ahead = useMemo(() => ({}), []);
     const look = useMemo(() => new THREE.Vector3(), []);
+    const prevV = useRef(0);
     useFrame(({ camera }, dt) => {
         const s = state.current, d = s.d, lane = s.lane ?? LANE_X;
         frame(d, f); frame(d + 6, ahead);
@@ -808,6 +809,11 @@ function Rider({ state, preset }) {
         let dh = ahead.heading - f.heading; if (dh > Math.PI) dh -= Math.PI * 2; if (dh < -Math.PI) dh += Math.PI * 2;
         const lean = THREE.MathUtils.clamp(-dh * s.v * 0.9 - (s.steer || 0) * 0.28, -0.46, 0.46);
         body.current.rotation.z = THREE.MathUtils.damp(body.current.rotation.z, lean, 6, dt);
+        // Suspension pitch: squat back on throttle, dive forward on brake
+        const accel = (s.v - prevV.current) / Math.max(0.008, dt);
+        prevV.current = s.v;
+        const targetPitch = THREE.MathUtils.clamp(accel * 0.008, -0.09, 0.11);
+        body.current.rotation.x = THREE.MathUtils.damp(body.current.rotation.x, targetPitch, 7, dt);
         s.leanDeg = Math.round((body.current.rotation.z * 180) / Math.PI);
         body.current.position.y = Math.sin(d * 1.7) * 0.012 * Math.min(1, s.v / 6);
         // Stretch glowing Akira/JDM tail-light trail with speed
@@ -816,18 +822,20 @@ function Rider({ state, preset }) {
             tailTrail.current.scale.set(1, 1, stretch);
             tailTrail.current.position.z = 0.95 + stretch * 0.42;
         }
-        const back = 7.2 + s.v * 0.12, up = 2.6 + s.v * 0.03;
-        const cx = x - f.tx * back + f.rx * 0.6, cz = z - f.tz * back + f.rz * 0.6;
-        const k = 1 - Math.exp(-dt * (s.snap ? 30 : 4));
-        // eslint-disable-next-line react-hooks/immutability
+        const isIso = cameraMode === "iso";
+        const back = isIso ? 11.5 + s.v * 0.08 : 7.2 + s.v * 0.12;
+        const up = isIso ? 8.8 + s.v * 0.04 : 2.6 + s.v * 0.03;
+        const side = isIso ? 6.8 : 0.6;
+        const cx = x - f.tx * back + f.rx * side, cz = z - f.tz * back + f.rz * side;
+        const k = 1 - Math.exp(-dt * (s.snap ? 30 : 4.2));
         camera.position.x += (cx - camera.position.x) * k; camera.position.z += (cz - camera.position.z) * k; camera.position.y += (up - camera.position.y) * k;
-        const targetFov = 52 + THREE.MathUtils.clamp(s.v / 42, 0, 1) * 9;
+        const targetFov = (isIso ? 44 : 52) + THREE.MathUtils.clamp(s.v / 42, 0, 1) * 9;
         if (Math.abs(camera.fov - targetFov) > 0.05) {
-            // eslint-disable-next-line react-hooks/immutability
             camera.fov = THREE.MathUtils.damp(camera.fov, targetFov, 4, dt);
             camera.updateProjectionMatrix();
         }
-        look.set(x + f.tx * 9, 1.1, z + f.tz * 9);
+        const lookAhead = isIso ? 6 + s.v * 0.12 : 9;
+        look.set(x + f.tx * lookAhead, isIso ? 0.6 : 1.1, z + f.tz * lookAhead);
         camera.lookAt(look);
         s.snap = false;
         if (light.current) { light.current.position.set(x - SUN.x * 60, 40, z - SUN.z * 60); light.current.target.position.set(x, 0, z); light.current.target.updateMatrixWorld(); }
@@ -837,6 +845,11 @@ function Rider({ state, preset }) {
             <directionalLight ref={light} intensity={p.sunIntensity} color={p.sunHex} castShadow shadow-mapSize={[1024, 1024]}
                 shadow-camera-left={-40} shadow-camera-right={40} shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-far={140} shadow-bias={-0.0005} />
             <group ref={root}>
+                {/* Grounded contact shadow under chassis */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.035, 0]}>
+                    <circleGeometry args={[1.05, 18]} />
+                    <meshBasicMaterial color="#090604" transparent opacity={0.42} depthWrite={false} />
+                </mesh>
                 <group ref={body}>
                     <primitive object={bike} scale={0.0165} />
                     {/* Glowing JDM / Akira LED Tail-Light & Speed Trail */}
@@ -927,7 +940,251 @@ function Objectives({ collected = [], clearedGates = [] }) {
     );
 }
 
-export default function Scene({ state, near, preset = "golden", collected = [], clearedGates = [] }) {
+// ---- Phase R1: Bruno-Simon-inspired Circular Diorama Reveal at z = 0 ----
+function DioramaReveal({ started, preset }) {
+    const grpRef = useRef();
+    const ringRef = useRef();
+    const maskRef = useRef();
+    const p0 = useMemo(() => at(0, LANE_X), []);
+    const accent = preset === "sakura" ? "#ff7aa2" : preset === "fjord" ? "#7dd3fc" : "#ffb35c";
+    const anim = useRef({ scale: 1, opacity: 0.72, done: false });
+
+    useFrame(({ clock }, dt) => {
+        if (!grpRef.current || anim.current.done) return;
+        const a = anim.current;
+        if (!started) {
+            const pulse = 1 + Math.sin(clock.elapsedTime * 2.4) * 0.035;
+            if (ringRef.current) ringRef.current.scale.setScalar(pulse);
+            return;
+        }
+        a.scale = THREE.MathUtils.damp(a.scale, 36, 3.2, dt);
+        a.opacity = THREE.MathUtils.damp(a.opacity, 0, 4.5, dt);
+        if (ringRef.current) {
+            ringRef.current.scale.setScalar(a.scale);
+            ringRef.current.material.opacity = a.opacity;
+        }
+        if (maskRef.current) {
+            maskRef.current.scale.setScalar(a.scale);
+            maskRef.current.material.opacity = a.opacity * 0.75;
+        }
+        if (a.opacity < 0.01) {
+            a.done = true;
+            grpRef.current.visible = false;
+        }
+    });
+
+    return (
+        <group ref={grpRef} position={[p0.x, 0.045, p0.z]} rotation={[-Math.PI / 2, 0, 0]}>
+            <mesh ref={ringRef}>
+                <ringGeometry args={[4.8, 5.15, 64]} />
+                <meshBasicMaterial color={accent} transparent opacity={0.92} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+            <mesh ref={maskRef}>
+                <ringGeometry args={[5.15, 110, 64]} />
+                <meshBasicMaterial color="#09070a" transparent opacity={0.54} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+        </group>
+    );
+}
+
+// ---- Phase R2: Persistent Rear-Tire Skid & Dust Ribbon Trails (single InstancedMesh) ----
+function TireTrails({ state, preset }) {
+    const COUNT = 150;
+    const meshRef = useRef();
+    const cursor = useRef(0);
+    const lastD = useRef(-10);
+    const f = useMemo(() => ({}), []);
+    const dummy = useMemo(() => new THREE.Object3D(), []);
+
+    useEffect(() => {
+        if (!meshRef.current) return;
+        dummy.position.set(0, -50, 0);
+        dummy.scale.setScalar(0.001);
+        dummy.updateMatrix();
+        for (let i = 0; i < COUNT; i++) meshRef.current.setMatrixAt(i, dummy.matrix);
+        meshRef.current.instanceMatrix.needsUpdate = true;
+    }, [dummy]);
+
+    useFrame(() => {
+        const s = state.current;
+        if (!meshRef.current || s.v < 1.5) return;
+        if (Math.abs(s.d - lastD.current) < 0.55) return;
+        lastD.current = s.d;
+        frame(s.d, f);
+        const lane = s.lane ?? LANE_X;
+        const x = f.x + f.rx * lane - f.tx * 0.65;
+        const z = f.z + f.rz * lane - f.tz * 0.65;
+        const carving = Math.abs(s.steer || 0) > 0.35 || s.hold < 0;
+        dummy.position.set(x, 0.036, z);
+        dummy.rotation.set(-Math.PI / 2, 0, -f.heading);
+        dummy.scale.set(carving ? 1.45 : 0.9, 1, 1);
+        dummy.updateMatrix();
+        meshRef.current.setMatrixAt(cursor.current, dummy.matrix);
+        meshRef.current.instanceMatrix.needsUpdate = true;
+        cursor.current = (cursor.current + 1) % COUNT;
+    });
+
+    const trailColor = preset === "sakura" ? "#ff7aa2" : preset === "fjord" ? "#94a3b8" : "#1f1914";
+    return (
+        <instancedMesh ref={meshRef} args={[null, null, COUNT]} frustumCulled={false}>
+            <planeGeometry args={[0.24, 0.72]} />
+            <meshBasicMaterial color={trailColor} transparent opacity={preset === "sakura" ? 0.32 : 0.28} depthWrite={false} />
+        </instancedMesh>
+    );
+}
+
+// ---- Phase R3: Knockable Roadside Cones / Lanterns with Arcade Rigid-Body Impulse ----
+function KnockableProps({ state, preset, onKnock }) {
+    const props = useMemo(() => {
+        const list = [];
+        STOPS.forEach((st, i) => {
+            if (i % 2 !== 0) return;
+            for (const side of [-1, 1]) {
+                const d = st.d - 16 + (side > 0 ? 4 : 0);
+                const lane = side * (ROAD_W / 2 - 0.65);
+                const p = at(d, lane);
+                list.push({ id: list.length, d, lane, x0: p.x, z0: p.z, x: p.x, y: 0, z: p.z, vx: 0, vy: 0, vz: 0, rx: 0, rz: 0, vrx: 0, vrz: 0, hit: false });
+            }
+        });
+        return list;
+    }, []);
+    const meshRef = useRef();
+    const dummy = useMemo(() => new THREE.Object3D(), []);
+    const f = useMemo(() => ({}), []);
+
+    useEffect(() => {
+        if (!meshRef.current) return;
+        props.forEach((pr, i) => {
+            dummy.position.set(pr.x0, 0.28, pr.z0);
+            dummy.rotation.set(0, 0, 0);
+            dummy.scale.setScalar(1);
+            dummy.updateMatrix();
+            meshRef.current.setMatrixAt(i, dummy.matrix);
+        });
+        meshRef.current.instanceMatrix.needsUpdate = true;
+    }, [props, dummy]);
+
+    useFrame((_, dt) => {
+        if (!meshRef.current) return;
+        const s = state.current;
+        const bikeD = s.d;
+        frame(bikeD, f);
+        const bx = f.x + f.rx * (s.lane ?? LANE_X);
+        const bz = f.z + f.rz * (s.lane ?? LANE_X);
+        let dirty = false;
+
+        for (let i = 0; i < props.length; i++) {
+            const pr = props[i];
+            if (!pr.hit && Math.abs(pr.d - bikeD) < 3.5) {
+                const dx = pr.x - bx, dz = pr.z - bz;
+                if (dx * dx + dz * dz < 1.35 * 1.35) {
+                    pr.hit = true;
+                    const speed = Math.max(8, s.v);
+                    pr.vx = f.tx * speed * 0.65 + (dx >= 0 ? 3.5 : -3.5);
+                    pr.vy = 4.6 + Math.min(4, speed * 0.14);
+                    pr.vz = f.tz * speed * 0.65 + (dz >= 0 ? 1.8 : -1.8);
+                    pr.vrx = (i % 2 ? 1 : -1) * 9;
+                    pr.vrz = (i % 3 ? -1 : 1) * 11;
+                    onKnock?.();
+                }
+            }
+            if (pr.hit && (pr.y > 0.001 || pr.vy !== 0 || Math.abs(pr.vx) > 0.05)) {
+                pr.vy -= 18 * dt;
+                pr.x += pr.vx * dt;
+                pr.y += pr.vy * dt;
+                pr.z += pr.vz * dt;
+                pr.rx += pr.vrx * dt;
+                pr.rz += pr.vrz * dt;
+                if (pr.y <= 0) {
+                    pr.y = 0;
+                    pr.vy = Math.abs(pr.vy) > 1.8 ? -pr.vy * 0.38 : 0;
+                    pr.vx *= 0.62;
+                    pr.vz *= 0.62;
+                    pr.vrx *= 0.5;
+                    pr.vrz *= 0.5;
+                }
+                dummy.position.set(pr.x, pr.y + 0.28, pr.z);
+                dummy.rotation.set(pr.rx, 0, pr.rz);
+                dummy.updateMatrix();
+                meshRef.current.setMatrixAt(i, dummy.matrix);
+                dirty = true;
+            }
+        }
+        if (dirty) meshRef.current.instanceMatrix.needsUpdate = true;
+    });
+
+    const isSakura = preset === "sakura";
+    return (
+        <instancedMesh ref={meshRef} args={[null, null, props.length]} castShadow frustumCulled={false}>
+            <coneGeometry args={[0.24, 0.56, 8]} />
+            <meshStandardMaterial color={isSakura ? "#ff7aa2" : "#ff5a1f"} emissive={isSakura ? "#ff2e63" : "#000000"} emissiveIntensity={isSakura ? 0.65 : 0} roughness={0.45} />
+        </instancedMesh>
+    );
+}
+
+// ---- Phase R3: Single-draw-call Wind-Swaying Roadside Grass / Blossom Tufts ----
+function WindFoliage({ preset }) {
+    const COUNT = 320;
+    const meshRef = useRef();
+    const uTime = useMemo(() => ({ value: 0 }), []);
+    const tufts = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < COUNT; i++) {
+            const d = -20 + (i / COUNT) * (LENGTH + 80);
+            const side = i % 2 === 0 ? -1 : 1;
+            const off = side * (ROAD_W / 2 + 1.5 + ((i * 17) % 10) * 0.28);
+            const p = at(d, off);
+            if (p.x > 17.5) continue;
+            arr.push({ x: p.x, z: p.z, rot: (i * 1.37) % Math.PI, s: 0.75 + ((i * 13) % 5) * 0.16 });
+        }
+        return arr;
+    }, []);
+
+    const mat = useMemo(() => {
+        const m = new THREE.MeshStandardMaterial({ color: "#748a3a", roughness: 0.85, side: THREE.DoubleSide });
+        m.onBeforeCompile = (shader) => {
+            shader.uniforms.uTime = uTime;
+            shader.vertexShader = `uniform float uTime;\n` + shader.vertexShader.replace(
+                "#include <begin_vertex>",
+                `#include <begin_vertex>
+                float hMask = clamp((position.y + 0.35) / 0.7, 0.0, 1.0);
+                vec4 wp = instanceMatrix * vec4(transformed, 1.0);
+                transformed.x += sin(uTime * 2.4 + wp.x * 0.35 + wp.z * 0.25) * hMask * 0.24;
+                transformed.z += cos(uTime * 1.9 + wp.z * 0.3) * hMask * 0.14;`
+            );
+        };
+        return m;
+    }, [uTime]);
+
+    useEffect(() => {
+        mat.color.set(preset === "sakura" ? "#ff9eb5" : preset === "fjord" ? "#355846" : "#7c943e");
+    }, [preset, mat]);
+
+    useEffect(() => {
+        if (!meshRef.current) return;
+        const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+        tufts.forEach((t, i) => {
+            e.set(0, t.rot, 0);
+            q.setFromEuler(e);
+            m.compose(new THREE.Vector3(t.x, 0.34 * t.s, t.z), q, new THREE.Vector3(t.s, t.s, t.s));
+            meshRef.current.setMatrixAt(i, m);
+        });
+        meshRef.current.instanceMatrix.needsUpdate = true;
+    }, [tufts]);
+
+    useFrame(({ clock }) => {
+        uTime.value = clock.getElapsedTime();
+    });
+
+    if (!tufts.length) return null;
+    return (
+        <instancedMesh ref={meshRef} args={[null, mat, tufts.length]} frustumCulled={false}>
+            <coneGeometry args={[0.16, 0.7, 4]} />
+        </instancedMesh>
+    );
+}
+
+export default function Scene({ state, near, preset = "golden", collected = [], clearedGates = [], started = false, cameraMode = "chase", onKnock, qualityTier = "HIGH" }) {
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
     const groundCol = preset === "sakura" ? "#4e3966" : preset === "fjord" ? "#6d8572" : "#d9be94";
     const groundMaps = useMemo(() => groundPbrMaps(), []);
@@ -964,6 +1221,10 @@ export default function Scene({ state, near, preset = "golden", collected = [], 
             <FjordCliffs preset={preset} />
             <SakuraHighwayAtmosphere active={preset === "sakura"} state={state} />
             <Road preset={preset} />
+            <WindFoliage preset={preset} />
+            <TireTrails state={state} preset={preset} />
+            <KnockableProps state={state} preset={preset} onKnock={onKnock} />
+            <DioramaReveal started={started} preset={preset} />
             <Scenery preset={preset} />
             <Hills preset={preset} />
             <Landmarks preset={preset} />
@@ -971,8 +1232,8 @@ export default function Scene({ state, near, preset = "golden", collected = [], 
             <Objectives collected={collected} clearedGates={clearedGates} />
             {STOPS.map((s) => Math.abs(near - s.d) < 540 ? <Sign key={`s${s.i}`} stop={s} preset={preset} /> : null)}
             {STOPS.map((s) => Math.abs(near - s.d) < 540 ? <Billboard key={s.i} stop={s} near={Math.abs(near - s.d) < 320} preset={preset} /> : null)}
-            <Rider state={state} preset={preset} />
-            {!(typeof window !== "undefined" && matchMedia("(pointer: coarse)").matches) && (
+            <Rider state={state} preset={preset} cameraMode={cameraMode} />
+            {qualityTier === "HIGH" && (
                 <EffectComposer multisampling={0}>
                     <Bloom mipmapBlur luminanceThreshold={0.82} intensity={preset === "sakura" ? 0.65 : 0.34} />
                 </EffectComposer>

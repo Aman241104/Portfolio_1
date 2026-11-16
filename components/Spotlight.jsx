@@ -18,11 +18,13 @@ const Spotlight = ({ open, onClose }) => {
     const { setActiveLocation } = useLocationStore();
 
     useEffect(() => {
-        if (open) {
+        if (!open) return;
+        const t = setTimeout(() => {
             setQ("");
             setActive(0);
-            setTimeout(() => inputRef.current?.focus(), 20);
-        }
+            inputRef.current?.focus();
+        }, 20);
+        return () => clearTimeout(t);
     }, [open]);
 
     const items = useMemo(() => {
@@ -57,7 +59,7 @@ const Spotlight = ({ open, onClose }) => {
         return list.filter((it) => (`${it.title} ${it.meta} ${it.group} ${it.search || ""}`).toLowerCase().includes(query)).slice(0, 16);
     }, [q, openWindow, setActiveLocation]);
 
-    useEffect(() => { setActive(0); }, [q]);
+    const activeIdx = Math.min(active, Math.max(0, items.length - 1));
 
     if (!open) return null;
 
@@ -71,7 +73,7 @@ const Spotlight = ({ open, onClose }) => {
         if (e.key === "Escape") { e.preventDefault(); onClose(); }
         else if (e.key === "ArrowDown") { e.preventDefault(); setActive((i) => Math.min(items.length - 1, i + 1)); }
         else if (e.key === "ArrowUp") { e.preventDefault(); setActive((i) => Math.max(0, i - 1)); }
-        else if (e.key === "Enter" && items[active]) { e.preventDefault(); execute(items[active]); }
+        else if (e.key === "Enter" && items[activeIdx]) { e.preventDefault(); execute(items[activeIdx]); }
     };
 
     return (
@@ -79,7 +81,7 @@ const Spotlight = ({ open, onClose }) => {
             <div className="px-spotlight" onClick={(e) => e.stopPropagation()} onKeyDown={onKeyDown}>
                 <div className="px-spot-bar">
                     <Search size={16} aria-hidden />
-                    <input ref={inputRef} type="search" value={q} onChange={(e) => setQ(e.target.value)}
+                    <input ref={inputRef} type="search" value={q} onChange={(e) => { setQ(e.target.value); setActive(0); }}
                         placeholder="Search 26 projects, 4 AI certs, apps, or actions…" aria-label="Spotlight search" />
                     <kbd>ESC</kbd>
                 </div>
@@ -88,8 +90,8 @@ const Spotlight = ({ open, onClose }) => {
                     {items.map((it, i) => {
                         const Icon = it.id === "act-email" && copied ? Check : it.icon;
                         return (
-                            <li key={it.id} role="option" aria-selected={i === active}>
-                                <button type="button" className={i === active ? "is-active" : ""} onMouseEnter={() => setActive(i)} onClick={() => execute(it)}>
+                            <li key={it.id} role="option" aria-selected={i === activeIdx}>
+                                <button type="button" className={i === activeIdx ? "is-active" : ""} onMouseEnter={() => setActive(i)} onClick={() => execute(it)}>
                                     <span className="px-spot-l">
                                         <Icon size={15} aria-hidden />
                                         <b>{it.id === "act-email" && copied ? "Copied amanpatel2512006@gmail.com!" : it.title}</b>

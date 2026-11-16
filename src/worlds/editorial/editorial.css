@@ -134,3 +134,20 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 
 @media (max-width: 960px) { .ed-certs { grid-template-columns: repeat(2, 1fr); } .ed-cert { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--rule); padding-bottom: 16px; } }
 @media (max-width: 600px) { .ed-certs { grid-template-columns: 1fr; } .ed-folio > div { display: none; } }
+
+/* errormade.tech-inspired Swiss List | Gallery switch & vertical-tick gallery grid */
+.ed-view-switch { display: inline-flex; border: 1px solid var(--ink); margin-bottom: 18px; }
+.ed-view-switch button { border: 0; background: transparent; color: var(--ink); padding: 8px 12px; cursor: pointer; font: 600 11px/1 "Geist Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
+.ed-view-switch button[aria-pressed="true"] { background: var(--ikb); color: var(--paper); }
+.ed-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 20px; border-top: 2px solid var(--ink); padding-top: 22px; }
+.ed-gcard { display: flex; flex-direction: column; padding-bottom: 18px; border-bottom: 1px solid var(--rule); transition: transform .25s var(--ease-out); }
+.ed-gcard:hover { transform: translateY(-2px); }
+.ed-gcard-meta { display: flex; align-items: center; gap: 0; margin: 0 0 10px; font: 500 11px/1 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+.ed-gcard-meta span { padding-right: 10px; margin-right: 10px; border-right: 1px solid var(--rule); }
+.ed-gcard-meta span:first-child { color: var(--ikb); font-weight: 700; }
+.ed-gcard-meta span:last-child { border-right: 0; padding-right: 0; margin-right: 0; }
+.ed-gcard h3 { margin: 12px 0 4px; font: 800 20px/1.12 "Schibsted Grotesk", sans-serif; letter-spacing: -0.02em; }
+.ed-gcard-line { margin: 0; font: 400 14.5px/1.45 "Newsreader", Georgia, serif; color: var(--mute); }
+.ed-gcard .ed-more { margin-top: auto; padding-top: 8px; }
+@media (max-width: 960px) { .ed-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .ed-gallery { grid-template-columns: 1fr; } }

@@ -9,7 +9,13 @@ initAnalytics();
 const q = new URLSearchParams(location.search), slug = q.get("p");
 const ed = q.get("skin") === "ed";                      // opened from THE INDEX: same story, set as a broadsheet
 const skin = ed ? "&skin=ed" : "";
-if (ed) document.body.classList.add("ed-skin");
+if (ed) {
+    document.body.classList.add("ed-skin");
+    document.head.appendChild(Object.assign(document.createElement("link"), {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap",
+    }));
+}
 const c = cases[slug] || cases["job-search-os"];
 const w = work.find((x) => x.slug === (cases[slug] ? slug : "job-search-os"));
 const shot = `https://res.cloudinary.com/dhrcarq8g/image/upload/f_auto,q_auto,w_1600/${w.img || `portfolio/work/${w.slug}`}`;
@@ -27,7 +33,7 @@ const Case = () => (
             <dl className="facts">{c.facts.filter(([k]) => k !== "Links").map(([k, v]) => <div key={k}><dt className="mono">{k}</dt><dd>{v}</dd></div>)}</dl>
             <p className="links">{c.links.map(([l, h]) => <a key={l} href={h} target="_blank" rel="noreferrer">{l} ↗</a>)}</p>
         </header>
-        <figure><img src={shot} alt={`${c.title} screenshot`} fetchpriority="high" width="1600" height="1000" /></figure>
+        <figure><img src={shot} alt={`${c.title} screenshot`} fetchPriority="high" width="1600" height="1000" /></figure>
         {c.sections.map(([h, ps], i) => (
             <section key={h}>
                 <h2><span className="mono">{String(i + 1).padStart(2, "0")}</span>{h}</h2>

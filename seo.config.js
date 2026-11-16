@@ -29,20 +29,22 @@ const jsonLd = () => {
                 "@type": "ItemList", name: "Projects by Aman Patel", numberOfItems: work.length,
                 itemListElement: work.map((w, i) => ({
                     "@type": "ListItem", position: i + 1,
-                    item: { "@type": "CreativeWork", name: w.title, url: w.url, description: w.line, dateCreated: String(w.year), creator: { "@id": `${SITE}/#aman` }, genre: KINDS[w.kind] },
+                    item: { "@type": "CreativeWork", name: w.title, ...(w.url ? { url: w.url } : {}), description: w.line, dateCreated: String(w.year), creator: { "@id": `${SITE}/#aman` }, genre: KINDS[w.kind] },
                 })),
             },
         ],
     };
 };
 
+const link = (href, label) => `<a href="${esc(href)}" style="color:#edeae3;text-decoration:underline;text-underline-offset:2px">${esc(label)}</a>`;
+
 const body = () => `
 <main class="seo" style="max-width:760px;margin:0 auto;padding:48px 20px;font:15px/1.6 system-ui,sans-serif;color:#8a8780">
   <h1 style="color:#edeae3;margin:0">Aman Patel — Full-Stack Engineer in Ahmedabad</h1>
   <p>Full-stack engineer building web apps, AI products and 3D interfaces with React, Next.js, TypeScript and Python. Open to on-site or hybrid roles.
-  <a href="/files/resume.pdf">Résumé (PDF)</a> · <a href="mailto:patelaman0241@gmail.com">patelaman0241@gmail.com</a> · ${SAME_AS.map((u) => `<a href="${u}">${esc(u.replace(/^https:\/\/(www\.)?/, ""))}</a>`).join(" · ")}</p>
+  ${link("/files/resume.pdf", "Résumé (PDF)")} · ${link("mailto:patelaman0241@gmail.com", "patelaman0241@gmail.com")} · ${SAME_AS.map((u) => link(u, u.replace(/^https:\/\/(www\.)?/, ""))).join(" · ")}</p>
   <h2>Projects</h2>
-  <ul>${work.map((w) => `<li><a href="${esc(w.url)}">${esc(w.title)}</a> (${esc(KINDS[w.kind])}, ${w.year}): ${esc(w.line)}${w.stack ? ` — ${esc(w.stack)}` : ""}</li>`).join("")}</ul>
+  <ul>${work.map((w) => `<li>${w.url ? link(w.url, w.title) : `<strong style="color:#edeae3">${esc(w.title)}</strong>`} (${esc(KINDS[w.kind])}, ${w.year}): ${esc(w.line)}${w.stack ? ` — ${esc(w.stack)}` : ""}</li>`).join("")}</ul>
   <h2>Experience</h2>
   <ul>${experience.map((x) => `<li><strong>${esc(x.role)}</strong>, ${esc(x.org)} (${esc(x.when)}). ${x.points.map(esc).join(" ")}</li>`).join("")}</ul>
   <h2>Skills</h2>

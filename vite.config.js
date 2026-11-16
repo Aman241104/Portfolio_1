@@ -17,6 +17,13 @@ export default defineConfig({
         resume: resolve(dirname(fileURLToPath(import.meta.url)), 'resume.html'),
         case: resolve(dirname(fileURLToPath(import.meta.url)), 'case.html'),
       },
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/three/')) return 'three-core';
+          if (id.includes('node_modules/pdfjs-dist/')) return 'pdf-vendor';
+          if (id.includes('node_modules/gsap/')) return 'gsap-vendor';
+        },
+      },
     },
   },
   resolve: {
