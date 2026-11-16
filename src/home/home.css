@@ -755,24 +755,9 @@
 
     /* Experience: the timeline draws down as you reach it, each role lands after the line passes it. */
     .xp-list { position: relative; }
-    .xp-list::before { content: ""; position: absolute; left: -18px; top: 0; bottom: 0; width: 1px; background: linear-gradient(var(--signal), rgba(255, 46, 31, .1));
-        transform-origin: top; scale: 1 0; transition: scale 1.4s var(--ease-in-out); }
-    .xp-list[data-in]::before { scale: 1 1; }
     .xp-list:not([data-in]) > li { opacity: 0; translate: 0 24px; }
     .xp-list > li { transition: opacity var(--t-4) var(--ease-out), translate var(--t-4) var(--ease-out); transition-delay: calc(.2s + var(--i, 0) * .35s); }
-
-    /* Skills: chips cascade in, popping on a spring. */
-    .skill-group:not([data-in]) li { opacity: 0; scale: .6; }
-    .skill-group li { transition: opacity var(--t-2) var(--ease-out), scale var(--t-3) var(--ease-spring), border-color .2s, background .2s; transition-delay: calc(var(--i, 0) * 28ms); }
-    .skill-group[data-in] li:hover { transition-delay: 0s; }
-
-    /* Tapes: they swing into their tilt as they cross the viewport (scroll-driven, no JS; static where unsupported). */
-    @supports (animation-timeline: view()) {
-        .tape { animation: tape-swing linear both; animation-timeline: view(); animation-range: entry 0% cover 40%; }
-        @keyframes tape-swing { from { transform: rotate(calc(var(--tilt, -1.6deg) * -3)) translateX(-4%); } to { transform: rotate(var(--tilt, -1.6deg)); } }
-    }
 }
-@media (max-width: 760px) { .xp-list::before { left: -10px; } }
 
 /* ============================================================
    UNIFIED 1:1 CINEMA MATCH-CUT ARCHITECTURE (Dark Studio ↔ Light Atelier)
@@ -953,9 +938,6 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
 }
 .home .signature {
     right: 3.2vw;
@@ -1442,6 +1424,12 @@
     background: rgba(244, 242, 238, .85);
     box-shadow: inset 0 0 0 1px rgba(20, 20, 22, .12), 0 14px 36px rgba(20, 20, 22, .12);
 }
+.home[data-light] .ld-tab { color: rgba(20, 20, 22, .62); }
+.home[data-light] .ld-tab[aria-current] { color: #141416; }
+.home[data-light] .ld-tabs[data-press] .ld-puck {
+    background: rgba(20, 20, 22, .08);
+    box-shadow: inset 0 0 0 1px rgba(20, 20, 22, .22), 0 10px 26px rgba(20, 20, 22, .12);
+}
 .home[data-light] .ld-tab span,
 .home[data-light] .ld-tab svg { filter: none; }
 .home[data-light] .nudge input:not(.hp) {
@@ -1449,6 +1437,8 @@
     box-shadow: inset 0 0 0 1px rgba(20, 20, 22, .12);
 }
 .home[data-light] .nudge input::placeholder { color: rgba(20, 20, 22, .42); }
+.home[data-light] .nudge .nudge-go { background: #141416; color: #ebe8e2; }
+.home[data-light] .nudge .nudge-x { background: rgba(20, 20, 22, .08); color: #141416; }
 
 @media (max-width: 760px) {
     .home[data-light] .creative-callout,
@@ -1575,29 +1565,28 @@
 .ink-bleed-overlay {
     position: fixed;
     inset: 0;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     z-index: 9999;
     pointer-events: none;
     will-change: opacity;
-    animation: ink-overlay-fade 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: ink-overlay-fade 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .ink-bleed-red,
 .ink-bleed-body {
-    position: absolute;
-    border-radius: 50%;
-    transform: translate3d(-50%, -50%, 0) scale(0);
+    transform: scale(0);
     will-change: transform;
 }
 .ink-bleed-red {
-    background: radial-gradient(circle, #ff2e1f 70%, rgba(255, 46, 31, 0) 100%);
     animation: ink-circle-grow 0.56s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .ink-bleed-body {
-    animation: ink-circle-grow 0.62s 0.04s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: ink-circle-grow 0.64s 0.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes ink-circle-grow {
-    0% { transform: translate3d(-50%, -50%, 0) scale(0); }
-    100% { transform: translate3d(-50%, -50%, 0) scale(1); }
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
 }
 @keyframes ink-overlay-fade {
     0%, 58% { opacity: 1; }
@@ -1768,13 +1757,14 @@
 /* 7. Certifications: pointer-tracked radial gallery sheen, clip-path entrance, kinetic Verify arrow */
 .cert-card {
     overflow: hidden;
-    clip-path: inset(0 0 100% 0 round 10px);
+    clip-path: inset(0 0 100% 0);
     transition: transform .35s var(--ease-out), border-color .25s, box-shadow .35s, clip-path .7s var(--ease-out);
     transition-delay: calc(var(--i, 0) * 80ms);
 }
 .cert-grid[data-in] .cert-card {
-    clip-path: inset(0 0 0% 0 round 10px);
+    clip-path: inset(0 0 0% 0);
 }
+.skill-hits { margin-left: auto; padding-left: 6px; font-size: 10px; color: var(--smoke); opacity: .7; }
 .cert-card::after {
     content: "";
     position: absolute;

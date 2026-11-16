@@ -284,7 +284,7 @@ const ORB_LIGHT_COL = new THREE.Color("#f4f2ee");
 const ORB_DARK_EMISSIVE = new THREE.Color("#7a0b04");
 const ORB_LIGHT_EMISSIVE = new THREE.Color("#dad6ce");
 
-const AtelierRig = ({ light }) => {
+const AtelierRig = ({ light, jackpot, pulled }) => {
     const hemi = useRef();
     const frontFill = useRef();
     const orb = useRef();
@@ -301,7 +301,7 @@ const AtelierRig = ({ light }) => {
         emissiveIntensity: 0.45,
     }), []);
     useEffect(() => () => orbMat.dispose(), [orbMat]);
-    useFrame(({ clock }, dt) => {
+    useFrame(({ clock, pointer }, dt) => {
         const k = 1 - Math.exp(-6 * dt);
         const preset = light ? LIGHTING_PRESETS.whiteLaboratory : LIGHTING_PRESETS.darkExhibition;
         mat.black.color.lerp(light ? LIGHT_BLACK : DARK_BLACK, k);
@@ -317,9 +317,11 @@ const AtelierRig = ({ light }) => {
         orbMat.metalness = THREE.MathUtils.damp(orbMat.metalness, light ? 0.94 : 0.88, 6, dt);
         if (orb.current) {
             orb.current.visible = aspect >= 0.85;
-            orb.current.position.x = THREE.MathUtils.damp(orb.current.position.x, orbX, 6, dt);
-            orb.current.position.y = 0.44 + Math.sin(clock.elapsedTime * 1.1) * 0.06;
+            orb.current.position.x = THREE.MathUtils.damp(orb.current.position.x, orbX + pointer.x * 0.14, 6, dt);
+            orb.current.position.y = THREE.MathUtils.damp(orb.current.position.y, 0.44 + Math.sin(clock.elapsedTime * 1.1) * 0.06 + pointer.y * 0.08, 6, dt);
             orb.current.position.z = -1.55 + Math.sin(clock.elapsedTime * 0.72) * 0.14;
+            const s = pulled || jackpot ? 1.12 : 1;
+            orb.current.scale.setScalar(THREE.MathUtils.damp(orb.current.scale.x, s, 8, dt));
         }
     });
     return (
@@ -349,7 +351,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             <GlassSurface />
             <Rig entering={entering} />
             <KeyLight lit={lit} light={light} onBooted={onBooted} />
-            <AtelierRig light={light} />
+            <AtelierRig light={light} jackpot={jackpot} pulled={pulled} />
             <WinFlash jackpot={jackpot} />
 
             {/* rims: cool from behind-left, warm from behind-right, so every edge of the case is drawn in light */}

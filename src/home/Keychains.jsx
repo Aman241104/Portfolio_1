@@ -238,5 +238,5 @@ export default function Keychains({ lit, light = false, jackpot, framing }) {
         vel.current *= Math.exp(-3.2 * dt);                               // damping
         kick.current = THREE.MathUtils.clamp(kick.current + vel.current * dt * 10, -0.6, 0.6);
     });
-    return spots.map((spot, i) => <Keychain key={`${bucket}-${light ? "L" : "D"}-${i}`} spot={spot} index={i} lit={lit} light={light} jackpot={jackpot} kick={kick} />);
+    return spots.map((spot, i) => <Keychain key={`${bucket}-${i}`} spot={spot} index={i} lit={lit} light={light} jackpot={jackpot} kick={kick} />);
 }

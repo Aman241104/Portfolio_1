@@ -135,7 +135,7 @@ const DARK_INK = new THREE.Color(0.93, 0.92, 0.89);
 const LIGHT_INK = new THREE.Color(0.08, 0.08, 0.09);     // deep carbon iron-filings on warm paper
 const LIGHT_GLYPH = new THREE.Color(1.0, 0.18, 0.12);    // vermilion #ff2e1f code glyphs in Daylight Atelier
 const DARK_BG = new THREE.Color("#050506");
-const LIGHT_BG = new THREE.Color("#f2ede4");
+const LIGHT_BG = new THREE.Color("#ebe8e2");
 
 const Dust = ({ count, pulse, light, eventSource }) => {
     const geo = useMemo(() => build(count), [count]);
@@ -202,7 +202,7 @@ export default function DotField({ active, eventSource, pulse = 0, light = false
     return (
         <Canvas className="dots" frameloop={active ? "always" : "never"} dpr={[1, 1.5]} eventSource={eventSource} eventPrefix="client"
             camera={{ position: [0, 3.4, 12], fov: 45, far: 200 }} gl={{ antialias: false }}
-            onCreated={({ camera, gl }) => { camera.lookAt(0, 0.2, -10); gl.setClearColor(light ? "#f2ede4" : "#050506"); }}>
+            onCreated={({ camera, gl }) => { camera.lookAt(0, 0.2, -10); gl.setClearColor(light ? "#ebe8e2" : "#050506"); }}>
             <Dust count={count} pulse={pulse} light={light} eventSource={eventSource} />
         </Canvas>
     );

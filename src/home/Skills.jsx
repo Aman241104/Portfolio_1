@@ -6,6 +6,7 @@ import {
     siDocker, siGithub, siCloudinary, siResend, siPosthog, siN8n, siPytest, siVitest, siJest,
 } from "simple-icons";
 import { skillGroups } from "#content/skills.js";
+import { work } from "#content/work.js";
 import { sfx } from "#machine/sfx.js";
 
 // Skills as a panel of labelled chips: monochrome logos that take their brand colour on hover.
@@ -17,6 +18,10 @@ const ICONS = Object.fromEntries([
 ].map((i) => [i.title, i]));
 const bySlug = Object.fromEntries(Object.values(ICONS).map((i) => [i.slug, i]));
 const find = (name) => name && (bySlug[name.toLowerCase()] || ICONS[name]);
+const countProjects = (name) => {
+    const k = name.toLowerCase();
+    return work.reduce((n, w) => n + (`${w.stack || ""} ${w.line || ""}`.toLowerCase().includes(k) ? 1 : 0), 0);
+};
 
 export default function Skills() {
     const total = skillGroups.reduce((n, g) => n + g.items.length, 0);
@@ -43,10 +48,12 @@ export default function Skills() {
                         <ul>
                             {g.items.map(([name, icon], k) => {
                                 const i = find(icon);
+                                const hits = countProjects(name);
                                 return (
                                     <li key={name} style={{ "--i": k, ...(i && { "--brand": `#${i.hex}` }) }}>
                                         {i ? <svg viewBox="0 0 24 24" aria-hidden><path d={i.path} /></svg> : <b aria-hidden>{name.slice(0, 1)}</b>}
                                         {name}
+                                        {hits > 0 && <sup className="mono skill-hits" aria-hidden>×{hits}</sup>}
                                     </li>
                                 );
                             })}

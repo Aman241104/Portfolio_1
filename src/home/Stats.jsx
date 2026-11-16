@@ -23,9 +23,22 @@ const Odo = ({ value }) => (
     <b aria-label={String(value)}>
         {[...String(value)].map((c, i, all) => /\d/.test(c)
             ? <span key={i} className="odo" aria-hidden style={{ "--d": +c + 10, "--k": all.length - i }}><span>{"01234567890123456789".split("").map((d, j) => <i key={j}>{d}</i>)}</span></span>
-            : <span key={i} aria-hidden>{c}</span>)}
+            : <span key={i} className="odo-sep" aria-hidden style={{ display: "inline-flex", height: "1.05em", alignItems: "center" }}>{c}</span>)}
     </b>
 );
+
+const magMove = (e) => {
+    if (e.pointerType !== "mouse") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const dx = Math.max(-10, Math.min(10, (e.clientX - (r.left + r.width / 2)) * 0.22));
+    const dy = Math.max(-10, Math.min(10, (e.clientY - (r.top + r.height / 2)) * 0.22));
+    e.currentTarget.style.setProperty("--mx", `${dx.toFixed(1)}px`);
+    e.currentTarget.style.setProperty("--my", `${dy.toFixed(1)}px`);
+};
+const magLeave = (e) => {
+    e.currentTarget.style.setProperty("--mx", "0px");
+    e.currentTarget.style.setProperty("--my", "0px");
+};
 
 export function Tape({ items, tilt = -1.6 }) {
     const row = items.map((t) => <span key={t}>{t}<i aria-hidden>✶</i></span>);
@@ -57,7 +70,7 @@ export default function Stats() {
                     <p className="mono sec-kicker">01 // TELEMETRY &amp; FAST PATH</p>
                     <p className="calib-lead">Full-stack engineer in Ahmedabad, open to on-site or hybrid roles. Résumé, contact and {work.length} shipped builds.</p>
                     <div className="calib-actions">
-                        <a className="block-btn magnet" href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "telemetry" })}>Résumé (PDF) ↓</a>
+                        <a className="block-btn magnet" href={profile.resume} target="_blank" rel="noreferrer" onPointerMove={magMove} onPointerLeave={magLeave} onClick={() => track("resume_opened", { from: "telemetry" })}>Résumé (PDF) ↓</a>
                         <div className="calib-links mono">
                             <a href={`mailto:${profile.email}`}>Email</a>
                             {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}

@@ -69,7 +69,7 @@ const SIG = sig.strokes.map((st) => "M" + st.map(([x, y]) => `${((x + 1) * 100).
 
 // Boot screen = the loader (§5: "the loader is a brand moment"). The counter chases real milestones
 // (fonts → 3D code → first rendered frame), then the screen collapses to a line of light and the machine drops in.
-const BOOT_LINES = [[0, "PX-01 reality selector"], [0, "Firmware 2026.11 · Aman Patel"], [35, "Reels ............ OK"], [65, "3 realities ...... OK"], [100, "Key light ........ OK"]];
+const BOOT_LINES = [[0, "PX-01 reality selector"], [0, "Firmware 2026.11 · Aman Patel"], [35, "Reels ............ OK"], [65, "12 realities ..... OK"], [100, "Sidi Saiyyed jali  OK"]];
 const Boot = ({ target, onDone }) => {
     const [n, setN] = useState(0);
     const [skip] = useState(true);              // instant click-to-skip so recruiters are never gated
@@ -245,7 +245,7 @@ const ThemeToggle = ({ light, onToggle }) => {
     );
 };
 
-const MARQUEE = ["Pick a reality", "Desktop OS", "Editorial", "Terminal", "Album Rollout", "Ahmedabad, IN", "Open to work"];
+const MARQUEE = ["12 Realities", "Coastal Highway · RIDE", "Desktop OS", "Editorial", "Terminal", "Album Rollout", "Ahmedabad, IN", "Open to Full-Stack Roles"];
 
 // The machine as an explicit state machine, so a half-finished animation can never strand the UI:
 //   idle → armed (lever grabbed) → spinning → locking (reels report as they physically stop) → revealed → transitioning
@@ -429,24 +429,34 @@ const Home = ({ onSelect }) => {
     return (
         <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-phase={phase}
             data-light={light || undefined} data-entering={phase === "transitioning" || undefined}>
-            {/* GPU-composited 60fps Ink-Bleed Transition Overlay */}
+            {/* GPU-composited 60fps SVG Fractal Ink-Bleed Transition Overlay */}
             {inkWave && (
-                <div className="ink-bleed-overlay" aria-hidden="true">
-                    <span
-                        className="ink-bleed-red"
-                        style={{ left: `${inkWave.x}px`, top: `${inkWave.y}px`, width: `${inkWave.maxR * 2}px`, height: `${inkWave.maxR * 2}px` }}
-                    />
-                    <span
-                        className="ink-bleed-body"
-                        style={{
-                            left: `${inkWave.x}px`,
-                            top: `${inkWave.y}px`,
-                            width: `${inkWave.maxR * 2}px`,
-                            height: `${inkWave.maxR * 2}px`,
-                            background: inkWave.toLight ? "#ebe8e2" : "#050506",
-                        }}
-                    />
-                </div>
+                <svg className="ink-bleed-overlay" aria-hidden="true">
+                    <defs>
+                        <filter id="px01-ink-filter" x="-20%" y="-20%" width="140%" height="140%">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.014 0.018" numOctaves="3" seed="7" result="noise" />
+                            <feDisplacementMap in="SourceGraphic" in2="noise" scale="110" xChannelSelector="R" yChannelSelector="G" />
+                        </filter>
+                    </defs>
+                    <g filter="url(#px01-ink-filter)">
+                        <circle
+                            className="ink-bleed-red"
+                            cx={inkWave.x}
+                            cy={inkWave.y}
+                            r={inkWave.maxR}
+                            fill="#ff2e1f"
+                            style={{ transformOrigin: `${inkWave.x}px ${inkWave.y}px` }}
+                        />
+                        <circle
+                            className="ink-bleed-body"
+                            cx={inkWave.x}
+                            cy={inkWave.y}
+                            r={inkWave.maxR}
+                            fill={inkWave.toLight ? "#ebe8e2" : "#050506"}
+                            style={{ transformOrigin: `${inkWave.x}px ${inkWave.y}px` }}
+                        />
+                    </g>
+                </svg>
             )}
             <section ref={hero} className="hero" aria-label="PX-01, the reality selector">
                 {/* 0. Background layer: Unified sculpted architectural ridge (Dark Obsidian in Dark Mode ↔ Alabaster Limestone in Light Mode) */}
@@ -661,7 +671,7 @@ const Home = ({ onSelect }) => {
                         </div>
                         <div className="worlds-matrix">
                             {worlds.map((w, i) => (
-                                <button key={w.id} type="button" className="wm-cell" onClick={() => onSelect(w.id)}>
+                                <button key={w.id} type="button" className="wm-cell" onClick={() => enter(w.id)}>
                                     <span className="mono wm-idx">{String(i + 1).padStart(2, "0")}</span>
                                     <span className="wm-name">{w.name}</span>
                                     <span className="wm-tag">{w.tagline}</span>

@@ -67,6 +67,18 @@ export default function Work() {
     const archive = useShowcase ? shown.slice(3) : shown;
     const [stageSlug, setStageSlug] = useState(null);
     const staged = archive.find((w) => w.slug === stageSlug) || archive[0] || shown[0];
+    const secRef = useRef(null);
+    const [entered, setEntered] = useState(false);
+
+    useEffect(() => {
+        const el = secRef.current;
+        if (!el) return;
+        const io = new IntersectionObserver(([e]) => {
+            if (e.isIntersecting) { setEntered(true); io.disconnect(); }
+        }, { threshold: 0.05 });
+        io.observe(el);
+        return () => io.disconnect();
+    }, []);
 
     // back from the project (bfcache) → drop the transition overlay
     useEffect(() => {
@@ -140,7 +152,7 @@ export default function Work() {
     );
 
     return (
-        <section className="work" aria-labelledby="work-h">
+        <section ref={secRef} className="work" aria-labelledby="work-h">
             <div className="work-head">
                 <div>
                     <p className="mono sec-kicker">02 // ARCHIVE [{String(work.length).padStart(2, "0")}]</p>
@@ -177,7 +189,7 @@ export default function Work() {
 
             {useShowcase && (
                 <>
-                    <ul className="work-flagships" data-reveal onPointerMove={tilt} onPointerLeave={untilt}>
+                    <ul className="work-flagships" data-reveal data-in={entered ? "" : undefined} onPointerMove={tilt} onPointerLeave={untilt}>
                         {flagships.map((w, i) => renderCard(w, i, i === 0 ? "card flagship-hero" : i === 1 ? "card flagship-wide" : "card flagship-side"))}
                     </ul>
                     <div className="ledger-head">
@@ -188,7 +200,7 @@ export default function Work() {
             )}
 
             {!isPhone && (useShowcase || view === "index") ? (
-                <div className="work-ledger-split" data-reveal>
+                <div className="work-ledger-split" data-reveal data-in={entered ? "" : undefined}>
                     <ol className="work-ledger">
                         {archive.map((w, i) => {
                             const idx = useShowcase ? i + 4 : i + 1;
@@ -239,7 +251,7 @@ export default function Work() {
                 </div>
             ) : (
                 <>
-                    <ul ref={list} className="cards" data-reveal onPointerMove={tilt} onPointerLeave={untilt}>
+                    <ul ref={list} className="cards" data-reveal data-in={entered ? "" : undefined} onPointerMove={tilt} onPointerLeave={untilt}>
                         {visible.map((w, i) => renderCard(w, i))}
                     </ul>
                     {isPhone && <p className="mono swipe-hint" aria-hidden><span>{String(at + 1).padStart(2, "0")} / {String(shown.length).padStart(2, "0")}</span> Swipe for more →</p>}

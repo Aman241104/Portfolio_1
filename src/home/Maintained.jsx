@@ -8,7 +8,7 @@ const ping = async (url) => {
     for (let i = 0; i < 2; i++) {
         const t = performance.now();
         try {
-            await Promise.race([fetch(url, { mode: "no-cors", cache: "no-store" }), new Promise((_, no) => setTimeout(no, 12000))]);
+            await Promise.race([fetch(url, { mode: "no-cors", cache: "no-store" }), new Promise((_, no) => setTimeout(no, 5000))]);
             return Math.round(performance.now() - t);
         } catch { /* one retry */ }
     }
@@ -42,7 +42,7 @@ export default function Maintained() {
                 <h2 id="kept-h">Live &amp; maintained</h2>
                 <p className="kept-intro">Sites and products I built that are in production today. I still ship fixes, content and features on them.</p>
                 <p className="mono kept-sum" aria-live="polite">
-                    {Object.keys(status).length < list.length ? "Checking endpoints…" : `${up} / ${list.length} operational · ${checked ? `${ago(checked.at)} (${checked.from === "sin1" ? "SIN1" : "server"})` : "live browser probe"}`}
+                    {Object.keys(status).length < list.length ? `Probing ${Object.keys(status).length} / ${list.length}…` : `${up} / ${list.length} operational · ${checked ? `${ago(checked.at)} (${checked.from === "sin1" ? "SIN1" : "server"})` : "live browser probe"}`}
                 </p>
             </aside>
             <ol className="kept-list" data-reveal>
