@@ -111,3 +111,36 @@ Still open, with the target values it measured from the references:
 - **Pacing:** 140–180px between jobs (we use clamp(72px, 9vw, 136px)).
 - **Moodboard traits not yet expressed:** optical refraction with studio gradients; one huge word + a 45–55ch spec block; paper/vellum warmth.
 Rejected: un-overlapping the signature from "Portfolio" (Aman's locked taste); removing the print head (the full-page capture pinned it to the top — in a real viewport it only shows while paper passes the slot).
+
+## G. Implementation status (2026-11-17, commits ee51f1e · 5ff7e2d)
+| # | Idea | Status |
+|---|---|---|
+| 2 | Opal case study | ✅ already: case.html = one hero shot + first-person essay + Role/Year/Stack |
+| 3 | Machine-voice 404 | ✅ `public/404.html` "Reel jammed" |
+| 4 | A24 full-width flagship | ✅ 1600px print, title left, facts right |
+| 5 | Rauno sentence | ✅ readout lead at reading size |
+| 6 | Cappen edge labels | ✅ by design: hero bar + metadata row are edge-anchored; no extra labels added |
+| 8 | Obys moving titles | ✅ print-head job label slides in |
+| 9/19/33 | Worlds as cartridges / dial | ✅ cartridge rack (dial not built: one metaphor is enough) |
+| 10/44 | Boot as print | ✅ boot log on a paper slip (loader-inside-wordmark not built — the slip already makes the boot a brand moment) |
+| 11/39 | Jali | ✅ watermark beside the poster |
+| 12 | Numbered CTA | ✅ |
+| 13 | Recruiter mode | ✅ R key, `?recruiter`, bar toggle |
+| 14 | Enter with/without sound | ✅ |
+| 15 | Chrome key | ✅ |
+| 23 | Cable | ✅ |
+| 25 | Native-script name | ✅ અમન પટેલ |
+| 26/38 | Metadata row | ✅ |
+| 27/36 | Credits + client proof | ✅ ticket credits; two real quotes (Harsh — Aangan Boutique; Jay — Amee Patel site) |
+| 29 | Petrillo red moment | ✗ not built: conflicts with "red only for LED/carriage/hover" (§3b) — revisit only if Aman wants a red contact section |
+| 31 | Red payline | ✅ before every job label |
+| 37 | Three words | ✅ draft "Builds. Ships. Maintains." — Aman to confirm (content/profile.js `identity`) |
+| 41 | ⌘K | ✅ opens the rack; also finds projects |
+| 46 | Drop "50 tools" | ✅ → years building |
+| 47 | Start lights | ✅ |
+| 49 | Camera move | ✅ already: the studio camera pushes in as the hero scrolls away |
+| 50 | Title card | ✅ "Now entering" in the poster face |
+| 56 | Acrylic slab for flagship | ✗ not built: an effect; the full-width print does the job |
+| 57 | Poster statement | ✅ draft "I ship it, then I stay." — Aman to confirm (content/profile.js `poster`) |
+| 61 | Ticket roll | ✅ index rows as receipt line items |
+Open content questions for Aman: confirm/replace `identity` and `poster`; add Aangan Boutique, Amee Patel site and Wonder Appliances to `content/work.js`? (They are real client work from his chats but not on the confirmed list.)

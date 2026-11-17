@@ -64,6 +64,9 @@
 ### Governing Philosophy — "The Machine Prints It" (`2026-11-17`, chosen by Aman)
 Below the hero, everything is ONE strip of thermal paper fed out of PX-01 through a print head pinned to the screen bottom. Sections are print jobs (`Output 0X · Readout / Tickets / Live telemetry / Service log / Calibration / Parts list`), separated by perforations, ending torn off above the *Insert coin* contact. Full rules: `docs/AWWWARDS_PHILOSOPHY.md`. Hero: "one object, lit" (Aman, 2026-11-17) — machine, 2 charms, wordmark + signature, one CTA. Printout titles: Archivo 62% width, heavy, uppercase. Polish rules: docs/AWWWARDS_PHILOSOPHY.md §3b.
 
+### Reference pass (2026-11-17)
+`docs/REFERENCE_IDEAS.md` lists the best idea from all 61 references and what shipped (§G). Client quotes live in `content/profile.js` `quotes` — real words only, first names, never invent. `identity` and `poster` are Claude drafts awaiting Aman's words. Home button reset lives in `@layer base` (unlayered CSS beats every Tailwind utility).
+
 ### Working Model
 Claude Code builds. The `agy` CLI is the critic (`agy -p "<read-only brief>" --mode plan --sandbox --dangerously-skip-permissions`). Motion skills installed: `/motion` (+ `motion` MCP at mcp.motion.dev), Emil Kowalski's `animate`, `choreograph`, `review-animations`, `improve-animations`, `animation-performance`, plus existing `gsap-*`, `hyperframes`, `motion-design-studio`.
 
