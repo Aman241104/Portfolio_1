@@ -100,3 +100,14 @@ Judged against `AWWWARDS_PHILOSOPHY.md` (the machine prints it) and §3b (polish
 10. **Three-word identity** (#37) — Aman's words.
 11. **Jali pattern** on the paper (#39) — culture as identity.
 12. **⌘K jump menu** (#41).
+
+## F. Measured rules (agy comparative analysis, 2026-11-17, against pre-"one object" screenshots)
+Already shipped: hero cut to one object · no browser chrome · ≤ 2 families inside the paper · red only as ink.
+Still open, with the target values it measured from the references:
+- **Density:** ≤ 4 UI groups + 1 focal object per viewport; 55–65% negative space; ≤ 10–12 rows visible per viewport.
+- **Type ratio:** display ≥ 6× body (≥ 96px vs 14–15px). Our split-rail titles are close; card titles are not.
+- **One grid:** 12 columns, 24px gutter, 1280px max; label rail = cols 1–4, content = cols 5–12, every job.
+- **Borders/cards:** one border style, no gradient cards, ≤ 2 pills per viewport → the 9 glass contact keys are the main offender.
+- **Pacing:** 140–180px between jobs (we use clamp(72px, 9vw, 136px)).
+- **Moodboard traits not yet expressed:** optical refraction with studio gradients; one huge word + a 45–55ch spec block; paper/vellum warmth.
+Rejected: un-overlapping the signature from "Portfolio" (Aman's locked taste); removing the print head (the full-page capture pinned it to the top — in a real viewport it only shows while paper passes the slot).
