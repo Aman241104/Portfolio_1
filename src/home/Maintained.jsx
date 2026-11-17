@@ -37,8 +37,8 @@ export default function Maintained() {
 
     return (
         <section ref={ref} className="kept split-sec" aria-labelledby="kept-h">
-            <aside className="split-rail">
-                <p className="mono sec-kicker">03 // PRODUCTION</p>
+            <aside className="split-rail po-print" data-reveal>
+                <p className="mono sec-kicker">Output 03 · Live telemetry</p>
                 <h2 id="kept-h">Live &amp; maintained</h2>
                 <p className="kept-intro">Sites and products I built that are in production today. I still ship fixes, content and features on them.</p>
                 <p className="mono kept-sum" aria-live="polite">

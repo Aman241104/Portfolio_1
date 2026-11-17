@@ -1,3 +1,4 @@
+import { Barcode } from "./Printer.jsx";
 import { useEffect, useRef, useState } from "react";
 import { work, KINDS, shot } from "#content/work.js";
 import { sfx } from "#machine/sfx.js";
@@ -137,6 +138,11 @@ export default function Work() {
                             <p className="card-line">{w.line}</p>
                             {w.stack && <p className="mono card-stack">{w.stack}</p>}
                             {w.note && <p className="mono card-note">{w.note}</p>}
+                            <p className="tkt-stub" aria-hidden>
+                                <span>No. {String(i + 1).padStart(3, "0")}-{w.year}</span>
+                                <Barcode value={w.slug} />
+                                <span className="tkt-stamp">{w.live ? "Live" : w.url ? "Shipped" : "Private"}</span>
+                            </p>
                         </div>
                     </>
                 );
@@ -154,8 +160,8 @@ export default function Work() {
     return (
         <section ref={secRef} className="work" aria-labelledby="work-h">
             <div className="work-head">
-                <div>
-                    <p className="mono sec-kicker">02 // ARCHIVE [{String(work.length).padStart(2, "0")}]</p>
+                <div className="po-print" data-reveal>
+                    <p className="mono sec-kicker">Output 02 · Tickets</p>
                     <h2 id="work-h">Work <span className="mono">({String(work.length).padStart(2, "0")})</span></h2>
                 </div>
                 <div className="work-controls">

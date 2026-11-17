@@ -1,9 +1,9 @@
 # AGENTS.md — Unified Antigravity + Claude Code Co-Working System (`Portfolio_1`)
 
-> **Single Source of Truth for Both Agents (`2026-11-13`):**
+> **Single Source of Truth for Both Agents (updated `2026-11-17`):**
 > This file (`AGENTS.md`, symlinked as `CLAUDE.md` and `GEMINI.md`) is loaded automatically by **Google Antigravity** and **Anthropic Claude Code** whenever either agent opens `/home/whoever/personal-project/Portfolio_1`.
 > Whenever you complete a task, phase, or architectural decision, **update both**:
-> 1. [`docs/PX02_PRODUCTION_PLAN.md`](docs/PX02_PRODUCTION_PLAN.md) & [`docs/LIGHT_MODE_AND_TRANSITION_VISION.md`](docs/LIGHT_MODE_AND_TRANSITION_VISION.md)
+> 1. [`docs/AWWWARDS_PHILOSOPHY.md`](docs/AWWWARDS_PHILOSOPHY.md) (**the governing design philosophy**), [`docs/PX02_PRODUCTION_PLAN.md`](docs/PX02_PRODUCTION_PLAN.md) & [`docs/LIGHT_MODE_AND_TRANSITION_VISION.md`](docs/LIGHT_MODE_AND_TRANSITION_VISION.md)
 > 2. Claude's persistent memory files in `/home/whoever/.claude/projects/-home-whoever-personal-project/memory/` AND `/home/whoever/.claude/projects/-home-whoever-personal-project-Portfolio-1/memory/`
 
 ---
@@ -13,10 +13,11 @@
 - **Owner:** Aman Patel (Full-Stack & 3D Web Engineer, Ahmedabad, India — `amanpatel2512006@gmail.com`)
 - **Live Production URL:** `https://www.aman-patel.me` (auto-deploys from `main` on Vercel)
 - **Active Era:** `PX-01 / PX-02` — Elevating the `PX-01` "Multiverse Portfolio Machine" to an **Awwwards Site of the Day / Site of the Month** standard by preserving 100% of its industrial hardware focus ("One Object, Lit" + "4 Tokens, One Accent").
-- **Core Stack:** Vite 5 + React 18 + Three.js (`0.183`) + `@react-three/fiber` + `@react-three/drei` + `gsap`.
+- **Core Stack:** Vite 7 + React 19 + Three.js (`0.186`) + `@react-three/fiber` + `@react-three/drei` + `gsap`.
 
 ### Key Repository Map
 - `src/App.jsx` — Root URL controller (`?style=<id>`), lazy-loads all 12 worlds, mounts persistent `<CoinSlot />` & `<WorldBoundary />`.
+- `src/home/Printer.jsx` + `src/home/printout.css` — **"The Machine Prints It"** below-the-fold system: one thermal-paper strip (`.printout`, black film in Dark / white stock in Light), fixed `PrintHead`, `Perf` tear lines, project tickets with `Barcode` + stamp.
 - `src/home/Home.jsx` + `src/home/home.css` — Flagship hero & below-the-fold catalogue (`<Studio />`, `<ThemeToggle />`, `<SoundToggle />`, `<Marquee />`, `<Stats />`, `<Work />`, `<Maintained />`, `<Experience />`, `<Skills />`, `<Tape />`, `<DotField />`, `<SignOff />`).
 - `src/home/Studio.jsx` — R3F 3D Canvas, weighted `Entrance` drop (`y = 9`, `1.5π` spin), `KeyLight`, `AtelierRig` (with the cohesive floating metallic sphere at `[-5.15, -1.12, -1.2]`), `Ground` with procedural Sidi Saiyyed *jali* floor light/shadow (`jaliTexture`), and `Keychains`.
 - `src/machine/MachineModel.jsx` — 3D physical clear-case slot machine (`mat.shell`, `mat.chrome`, `mat.black`, `mat.pcb`, 3 spinning drums, pull lever, printed ticket).
@@ -62,12 +63,14 @@
 ### Active Skills (`.agents/skills/<name>/SKILL.md`)
 - `modern-web-guidance`, `avoid-ai-design`, `design-taste`, `reference-driven-design`, `high-end-visual-design`, `site-motion-excellence-director`, `web-motion-auditor`, `genjutsu-cast`, `genjutsu-paint`, `chrome-devtools`.
 
-### Next Build Queue (What We Start Making Next)
-1. **Home Studio Live Verification:** Verify the 1:1 Cinema Match-Cut transition (`Dark ↔ Light`), `"Playfair Display"` serif wordmark, and below-the-fold sections on `http://localhost:5173/`.
-2. **World-by-World Upgrade Pass (`src/worlds/*`):**
-   - **World 01 — `RIDE` (`?style=ride`):** Polish the coastal highway & **Sakura Touge** biome (`bk-sakura-blooming.glb`, `bk-torii-gate.glb`, `bk-silk-lantern.glb`).
-   - **World 02 — `Desktop OS` (`?style=desktop`)**
-   - **World 03 — `Editorial` (`?style=editorial`)**
-   - **World 04 — `Terminal` (`?style=terminal`)**
-   - **World 05 — `Album Rollout` (`?style=album`)**
-   - **Worlds 06–12 (`mission`, `ask`, `canvas`, `pocket`, `longhorn`, `y2001`, `arcade`)**
+### Governing Philosophy — "The Machine Prints It" (`2026-11-17`, chosen by Aman)
+Below the hero, everything is ONE strip of thermal paper fed out of PX-01 through a print head pinned to the screen bottom. Sections are print jobs (`Output 0X · Readout / Tickets / Live telemetry / Service log / Calibration / Parts list`), separated by perforations, ending torn off above the *Insert coin* contact. Full rules: `docs/AWWWARDS_PHILOSOPHY.md`. Hero: keep every element (Aman, 2026-11-17); only the bottom bar was slimmed to 5 links.
+
+### Working Model
+Claude Code builds. The `agy` CLI is the critic (`agy -p "<read-only brief>" --mode plan --sandbox --dangerously-skip-permissions`). Motion skills installed: `/motion` (+ `motion` MCP at mcp.motion.dev), Emil Kowalski's `animate`, `choreograph`, `review-animations`, `improve-animations`, `animation-performance`, plus existing `gsap-*`, `hyperframes`, `motion-design-studio`.
+
+### Next Build Queue
+1. Printout wave 2: Service log (Experience), Parts list BOM (Skills), Calibration slips (Certs), Insert-coin contact receipt.
+2. Scroll-linked 3D camera into the print head; ticket-feed world transitions.
+3. World-by-World Upgrade Pass (`src/worlds/*`) — all 12 passed the 90+ gate on 2026-11-14; next pass brings each into the print language where it fits.
+4. Lighthouse + 8-viewport QA; agy re-score loop until ≥ 8.5.

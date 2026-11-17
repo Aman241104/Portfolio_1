@@ -67,7 +67,7 @@ export default function Stats() {
             <Tape items={["Open to work", "Full-stack engineer", "React · Node · Python", "Ahmedabad, India", "On-site or hybrid", "Available now"]} />
             <div className="calib-grid">
                 <aside className="calib-rail" aria-label="Recruiter fast path">
-                    <p className="mono sec-kicker">01 // TELEMETRY &amp; FAST PATH</p>
+                    <p className="mono sec-kicker po-print" data-reveal>Output 01 · Readout &amp; fast path</p>
                     <p className="calib-lead">Full-stack engineer in Ahmedabad, open to on-site or hybrid roles. Résumé, contact and {work.length} shipped builds.</p>
                     <div className="calib-actions">
                         <a className="block-btn magnet" href={profile.resume} target="_blank" rel="noreferrer" onPointerMove={magMove} onPointerLeave={magLeave} onClick={() => track("resume_opened", { from: "telemetry" })}>Résumé (PDF) ↓</a>

@@ -3,6 +3,7 @@ import { worlds, RECRUITER_WORLD, findWorld } from "#worlds/registry.js";
 import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
 import { profile, socials } from "#content/profile.js";
+import { work } from "#content/work.js";
 import Work from "./Work.jsx";
 import Experience from "./Experience.jsx";
 import Maintained from "./Maintained.jsx";
@@ -13,6 +14,8 @@ import LiquidDock from "./LiquidDock.jsx";
 import Nudge from "./Nudge.jsx";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import MotionDebug from "./MotionDebug.jsx";
+import { PrintHead, Perf, Barcode } from "./Printer.jsx";
+import "./printout.css";
 import sig from "./signature.json";
 import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
 import { track } from "../analytics.js";
@@ -301,6 +304,7 @@ const Home = ({ onSelect }) => {
     const footerOn = useInView(footer, "200px");
     useReveal(footer);
     const land = useRef(null);
+    const paper = useRef(null);
     const [fontsOk, setFontsOk] = useState(false);
     const [booted, setBooted] = useState(false);
     const [phase, setPhase] = useState("idle");
@@ -568,24 +572,18 @@ const Home = ({ onSelect }) => {
                 <div className="light-foot-bar">
                     <div className="lf-left">
                         <p className="mono lf-idx"><span>01 / 07</span><i /></p>
-                        <p className="lf-tag">One developer. Multiple creative dimensions.</p>
+                        <p className="lf-tag">Pull the lever for a world. Scroll and the machine prints the work.</p>
                     </div>
                     <nav className="lf-nav" aria-label="Portfolio sections">
-                        <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>Projects</button>
+                        <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>Work</button>
                         <span aria-hidden>·</span>
-                        <button type="button" onClick={() => document.querySelector(".xp")?.scrollIntoView({ behavior: "smooth" })}>Experience</button>
-                        <span aria-hidden>·</span>
-                        <button type="button" onClick={() => document.querySelector(".certs-sec")?.scrollIntoView({ behavior: "smooth" })}>Certs</button>
-                        <span aria-hidden>·</span>
-                        <button type="button" onClick={() => document.querySelector(".skills-sec")?.scrollIntoView({ behavior: "smooth" })}>Skills</button>
+                        <button type="button" onClick={() => document.querySelector(".xp")?.scrollIntoView({ behavior: "smooth" })}>Service log</button>
                         <span aria-hidden>·</span>
                         <button type="button" onClick={() => document.querySelector(".land")?.scrollIntoView({ behavior: "smooth" })}>Contact</button>
                         <span aria-hidden>·</span>
                         <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "hero_bar" })}>Résumé ↗</a>
                         <span aria-hidden>·</span>
-                        <a href={profile.github} target="_blank" rel="noreferrer">GitHub ↗</a>
-                        <span aria-hidden>·</span>
-                        <button type="button" onClick={() => setPicking(true)}>All Worlds</button>
+                        <button type="button" onClick={() => setPicking(true)}>All 12 worlds</button>
                     </nav>
                     <button type="button" className="lf-scroll" onClick={() => document.querySelector(".stats")?.scrollIntoView({ behavior: "smooth" })}>
                         Scroll <i aria-hidden>︾</i>
@@ -609,12 +607,22 @@ const Home = ({ onSelect }) => {
             </div>
 
             <footer ref={footer} className="foot">
-<Stats />
-                <Work />
-                <Maintained />
-                <Experience />
-                <Certifications />
-                <Skills />
+                <p className="po-mouth" aria-hidden><span><b>●</b> PX-01 · Output tray</span><span>Feed 80mm · Thermal</span><span>Scroll to print ↓</span></p>
+                <div ref={paper} className="printout">
+                    <div data-out="01" data-label="Readout"><Stats /></div>
+                    <Perf label="✂ Output 02 · Tickets" />
+                    <div data-out="02" data-label="Tickets"><Work /></div>
+                    <Perf label="✂ Output 03 · Live telemetry" />
+                    <div data-out="03" data-label="Live telemetry"><Maintained /></div>
+                    <Perf label="✂ Output 04 · Service log" />
+                    <div data-out="04" data-label="Service log"><Experience /></div>
+                    <Perf label="✂ Output 05 · Calibration" />
+                    <div data-out="05" data-label="Calibration"><Certifications /></div>
+                    <Perf label="✂ Output 06 · Parts list" />
+                    <div data-out="06" data-label="Parts list"><Skills /></div>
+                    <p className="po-tear-note"><span>End of printout · {work.length} tickets · Thank you for pulling</span><Barcode value="aman-patel-px01" bars={44} /><span>Tear here ✂ · Insert coin below ↓</span></p>
+                </div>
+                <PrintHead root={paper} />
                 <Tape items={["Say hello", "Résumé one tap away", "Replies from a real person", "Ahmedabad · IST", "Open to full-stack roles"]} tilt={1.4} />
 
                 <div ref={land} className="land" onClick={ripple}>
@@ -623,7 +631,7 @@ const Home = ({ onSelect }) => {
                     </div>
                     <div className="foot-head">
                         <div>
-                            <p className="mono land-hint">↳ The dunes are live. {isTouch() ? "Tap them." : "Move through them, click them."}</p>
+                            <p className="mono land-hint"><b className="red">▮ Insert coin</b> · the dunes are live. {isTouch() ? "Tap them." : "Move through them, click them."}</p>
                             <h2>Pick a <b>reality</b>,<br />or skip the machine<br />and <b>say hello.</b></h2>
                         </div>
                         <div className="contact">

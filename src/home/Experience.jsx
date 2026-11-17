@@ -5,8 +5,8 @@ import { profile } from "#content/profile.js";
 export default function Experience() {
     return (
         <section className="xp split-sec" aria-labelledby="xp-h">
-            <aside className="split-rail">
-                <p className="mono sec-kicker">04 // TIMELINE</p>
+            <aside className="split-rail po-print" data-reveal>
+                <p className="mono sec-kicker">Output 04 · Service log</p>
                 <h2 id="xp-h">Experience</h2>
                 <p className="xp-span mono">2022 — PRESENT · AHMEDABAD / REMOTE</p>
                 <a className="mono xp-cv" href={profile.resume} target="_blank" rel="noreferrer">Full résumé (PDF) ↓</a>

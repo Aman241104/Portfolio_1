@@ -14,8 +14,8 @@ export default function Certifications() {
     return (
         <section className="xp certs-sec" aria-labelledby="certs-h">
             <div className="work-head">
-                <div>
-                    <p className="mono sec-kicker">05 // CREDENTIALS</p>
+                <div className="po-print" data-reveal>
+                    <p className="mono sec-kicker">Output 05 · Calibration</p>
                     <h2 id="certs-h">Certifications <span className="mono">({String(certifications.length).padStart(2, "0")})</span></h2>
                 </div>
                 <p className="mono">Verified AI, Cloud &amp; Agentic Engineering</p>
