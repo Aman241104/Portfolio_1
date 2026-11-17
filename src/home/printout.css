@@ -425,3 +425,5 @@
         linear-gradient(-45deg, transparent 33.333%, var(--paper) 33.333%, var(--paper) 66.667%, transparent 66.667%);
     background-size: 10px 20px; background-position: 0 -10px; }
 @media (max-width: 760px) { .home .cta-alt { flex-wrap: wrap; justify-content: center; row-gap: 12px; column-gap: 18px; } }
+.printout .ledger-more { margin-top: 18px; }
+.home .pull .cta-n { color: #141416 !important; opacity: .45; }

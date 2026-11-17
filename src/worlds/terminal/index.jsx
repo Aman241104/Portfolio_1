@@ -161,7 +161,7 @@ const TerminalWorld = ({ shell }) => {
                 <p key="e">
                     Fast path: <a className="tty-link" href={profile.resume} target="_blank" rel="noreferrer">[Résumé PDF ↗]</a>{" "}
                     · <a className="tty-link" href={`mailto:${profile.email}`}>[Email]</a>{" "}
-                    · {cmd("projects", "[All 26 Projects]")} · {cmd("live", "[13 Live Sites]")} · {cmd("certs", "[Certs]")} · {cmd("cv", "[Tailored CVs]")}
+                    · {cmd("projects", `[All ${work.length} Projects]`)} · {cmd("live", `[${work.filter((w) => w.live).length} Live Sites]`)} · {cmd("certs", "[Certs]")} · {cmd("cv", "[Tailored CVs]")}
                 </p>,
             ];
         },

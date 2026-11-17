@@ -65,7 +65,12 @@ export default function Work() {
     const [at, setAt] = useState(0);
     const useShowcase = !isPhone && view === "showcase" && kind === "all";
     const flagships = useShowcase ? shown.slice(0, 3) : [];
-    const archive = useShowcase ? shown.slice(3) : shown;
+    // strongest first: products/apps, then live client domains, then preview builds, then concepts (stable within each)
+    const rank = (w) => (w.kind === "client" ? (w.live ? 1 : 2) : w.kind === "concept" ? 3 : 0);
+    const archive = (useShowcase ? shown.slice(3) : shown).map((w, i) => [w, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([w]) => w);
+    const [ledgerAll, setLedgerAll] = useState(false);
+    const LEDGER_FIRST = 10;                                   // the critic's 10–12-rows-per-viewport rule
+    const ledgerRows = ledgerAll ? archive : archive.slice(0, LEDGER_FIRST);
     const [stageSlug, setStageSlug] = useState(null);
     const staged = archive.find((w) => w.slug === stageSlug) || archive[0] || shown[0];
     const secRef = useRef(null);
@@ -203,7 +208,7 @@ export default function Work() {
                         {flagships.map((w, i) => renderCard(w, i, i === 0 ? "card flagship-hero" : i === 1 ? "card flagship-wide" : "card flagship-side"))}
                     </ul>
                     <div className="ledger-head">
-                        <p className="mono">04–{String(work.length).padStart(2, "0")} // CLIENT &amp; PRODUCT INDEX ({archive.length})</p>
+                        <p className="mono">Client &amp; product index · {archive.length} more</p>
                         <p className="mono">Hover any row to inspect · Click to open live</p>
                     </div>
                 </>
@@ -211,8 +216,9 @@ export default function Work() {
 
             {!isPhone && (useShowcase || view === "index") ? (
                 <div className="work-ledger-split" data-reveal data-in={entered ? "" : undefined}>
+                    <div className="ledger-col">
                     <ol className="work-ledger">
-                        {archive.map((w, i) => {
+                        {ledgerRows.map((w, i) => {
                             const idx = useShowcase ? i + 4 : i + 1;
                             const isHot = staged?.slug === w.slug;
                             return (
@@ -238,6 +244,12 @@ export default function Work() {
                             );
                         })}
                     </ol>
+                    {archive.length > LEDGER_FIRST && (
+                        <button type="button" className="more ledger-more" onClick={() => setLedgerAll((v) => !v)}>
+                            {ledgerAll ? "Show fewer" : `Show all ${archive.length}`}
+                        </button>
+                    )}
+                    </div>
                     {staged && (
                         <aside className="work-stage" aria-live="polite">
                             <div className="card-shot" onPointerMove={tilt} onPointerLeave={untilt}>

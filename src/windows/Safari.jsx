@@ -3,9 +3,9 @@ import { WindowControls } from "#components";
 import { Search, ShieldHalf, MoveRight } from "lucide-react";
 import WindowWrapper from "#hoc/WindowWrapper.jsx";
 import { blogPosts } from "#constants";
-import { KINDS } from "../../content/work.js";
+import { KINDS, work } from "../../content/work.js";
 
-const FILTERS = { all: "All (26)", ...KINDS };
+const FILTERS = { all: `All (${work.length})`, ...KINDS };
 
 const Safari = () => {
     const [q, setQ] = useState("");
@@ -32,7 +32,7 @@ const Safari = () => {
                             type="search"
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            placeholder="Search 26 shipped projects, stack, or keywords…"
+                            placeholder={`Search ${work.length} shipped projects, stack, or keywords…`}
                             aria-label="Search shipped projects"
                         />
                     </div>

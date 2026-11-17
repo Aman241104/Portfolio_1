@@ -82,7 +82,7 @@ const Spotlight = ({ open, onClose }) => {
                 <div className="px-spot-bar">
                     <Search size={16} aria-hidden />
                     <input ref={inputRef} type="search" value={q} onChange={(e) => { setQ(e.target.value); setActive(0); }}
-                        placeholder="Search 26 projects, 4 AI certs, apps, or actions…" aria-label="Spotlight search" />
+                        placeholder={`Search ${work.length} projects, 4 AI certs, apps, or actions…`} aria-label="Spotlight search" />
                     <kbd>ESC</kbd>
                 </div>
                 <ul className="px-spot-list" role="listbox">

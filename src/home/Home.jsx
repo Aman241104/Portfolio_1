@@ -528,6 +528,11 @@ const Home = ({ onSelect }) => {
 
                 {/* Unified editorial annotations & red signature — identical coordinates across Dark ↔ Light */}
                 <div className="ink" aria-hidden>
+                    {/* Back by Aman's request (2026-11-17); the tag now states his real path instead of "[ EXPERIMENTAL PORTFOLIO ]" */}
+                    <div className="creative-callout">
+                        <p className="creative-script">Creative Developer<span className="creative-line" /></p>
+                        <p className="creative-tag mono">Designer → Full-stack → AI</p>
+                    </div>
                     <p className="signature">
                         Aman Patel
                         <svg className="sig-underline" viewBox="0 0 320 28" aria-hidden>
