@@ -1,4 +1,5 @@
 import { certifications } from "#content/certifications.js";
+import CertLogo from "./CertLogo.jsx";
 
 const trackSheen = (e) => {
     if (e.pointerType !== "mouse") return;
@@ -22,7 +23,7 @@ export default function Certifications() {
                 {certifications.map((c, i) => (
                     <li key={c.code} className="cert-card" style={{ "--i": i, "--cert-accent": c.accent }}>
                         <div className="cert-top">
-                            <span className="mono cert-code">{c.code}</span>
+                            <span className="cert-mark"><CertLogo id={c.logo} /><span className="mono cert-code">{c.code}</span></span>
                             <span className="mono cert-issuer">{c.short} · {c.date}</span>
                         </div>
                         <h3 className="cert-title">{c.title}</h3>

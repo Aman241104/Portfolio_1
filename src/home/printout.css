@@ -480,3 +480,8 @@
 /* rail titles are sized to the rail, not the viewport: "CERTIFICATIONS" (14 chars) overflowed into the content column */
 .printout .split-rail { container-type: inline-size; }
 .home .printout .split-rail h2, .home[data-light] .printout .split-rail h2 { font-size: clamp(44px, 16cqw, 104px); }
+
+/* Issuer logos on the certification slips — recognised faster than any label. */
+.cert-mark { display: inline-flex; align-items: center; gap: 10px; }
+.cert-logo { width: 22px; height: 22px; flex: none; color: var(--ink); }
+.cert-logo-wide { width: 38px; }
