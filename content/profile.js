@@ -3,10 +3,10 @@ export const profile = {
     name: "Aman Patel",
     role: "Creative full-stack developer",
     line: "I build AI products and interfaces that feel like something.",
-    // DRAFTS by Claude (2026-11-17) from Aman's real record — replace with his own words:
-    identity: "Builds. Ships. Maintains.",                      // three-word identity (aanandmadhav ref) — 11 live sites he still maintains
-    poster: ["I ship it,", "then I stay."],                     // the one poster statement in the printout
-    posterNote: "Eleven sites I built are still live and still mine to fix.",
+    // Aman's own picks (2026-11-17), from his brief: "a curious kid… whatever sparks my curiosity I do that".
+    identity: "Curious. Builds. Ships.",
+    poster: ["Curiosity is", "the whole job."],
+    posterNote: "Designer first, then web, then full-stack, now AI and ML. Whatever sparks it, I learn it and ship it.",
     // Real client words only (Aman shared the WhatsApp messages 2026-11-17). Exact wording, original order, trimmed at the
     // ends only; first names only; no phone numbers or other chat details. Never invent or reword a quote.
     quotes: [
