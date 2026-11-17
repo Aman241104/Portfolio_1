@@ -80,7 +80,7 @@ export function PrintHead({ root }) {
             <i className="po-carriage" />
             <div className="po-head-body mono">
                 <span className="po-led" />
-                <span className="po-job">{sec.label}</span>
+                <span key={sec.label} className="po-job">{sec.label}</span>
                 <span className="po-line"><b ref={line}>0000</b></span>
             </div>
         </div>

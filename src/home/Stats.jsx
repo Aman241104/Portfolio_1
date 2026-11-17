@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { work } from "../../content/work.js";
-import { skillGroups } from "../../content/skills.js";
 import { profile, socials } from "../../content/profile.js";
 import { sfx } from "#machine/sfx.js";
 import { track } from "../analytics.js";
@@ -14,7 +13,7 @@ const STATS = [
     [work.filter((w) => w.kind === "client").length, "", "Client websites"],
     [work.filter((w) => w.maintained).length, "", "Live, maintained by me"],
     [12, "+", "Client apps at Gravity"],
-    [skillGroups.reduce((n, g) => n + g.items.length, 0), "", "Tools used in projects"],
+    [new Date().getFullYear() - 2022, "", "Years building (since 2022)"],     // was "tools used": a tool count reads junior
     [8.67, "", "CGPA, B.E. at LDCE"],
 ];
 // Odometer: each digit is a strip of 0–9 (twice, so it rolls past once) that slides to its value when the row is
@@ -59,6 +58,12 @@ export default function Stats() {
                 <aside className="calib-rail" aria-label="Recruiter fast path">
                     <p className="mono sec-kicker po-print" data-reveal>Output 01 · Readout &amp; fast path</p>
                     <p className="calib-lead">Full-stack engineer in Ahmedabad, open to on-site or hybrid roles. Résumé, contact and {work.length} shipped builds.</p>
+                    {profile.quote && (
+                        <figure className="calib-quote">
+                            <blockquote>“{profile.quote.text}”</blockquote>
+                            <figcaption className="mono">{profile.quote.name} · {profile.quote.role}, {profile.quote.org}</figcaption>
+                        </figure>
+                    )}
                     <div className="calib-actions">
                         <a className="block-btn magnet" href={profile.resume} target="_blank" rel="noreferrer" onPointerMove={magMove} onPointerLeave={magLeave} onClick={() => track("resume_opened", { from: "telemetry" })}>Résumé (PDF) ↓</a>
                         <div className="calib-links mono">

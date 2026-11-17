@@ -101,7 +101,10 @@ const Boot = ({ target, onDone }) => {
     return (
         <div className="boot" data-out={out || undefined} data-skip={skip || undefined} aria-hidden onClick={skipNow}>
             <div className="boot-log mono">{BOOT_LINES.filter(([at]) => n >= at).map(([, l]) => <p key={l}>{l}</p>)}</div>
-            <p className="boot-hint mono">{skip ? "Click anywhere to skip" : isTouch() ? "Sound is off · switch it on top right" : "Sound is off · press S for clicks and coins"}</p>
+            <p className="boot-choice mono">
+                <button type="button" onClick={(e) => { e.stopPropagation(); setSound(true); skipNow(); }}>Enter with sound ›</button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); setSound(false); skipNow(); }}>Enter without sound</button>
+            </p>
             <div className="boot-line" />
         </div>
     );
@@ -309,7 +312,26 @@ const Home = ({ onSelect }) => {
     const [progress, setProgress] = useState(8);
     // Light Mode Gallery Atelier ("light") vs Dark Studio (default)
     const [light, setLight] = useState(() => { try { return localStorage.getItem("px01-theme") === "light"; } catch { return false; } });
-    const [inkWave, setInkWave] = useState(null);      // { x, y, r, toLight } for the guaranteed SVG fractal ink-bleed transition
+    const [inkWave, setInkWave] = useState(null);
+    // Recruiter mode (jld2nd's Developer/Creative switch, aimed at the job goal): skip the boot, no motion,
+    // land on the readout. ?recruiter in the URL turns it on for a shared link.
+    const [recruiter, setRecruiter] = useState(() => {
+        try { return new URLSearchParams(location.search).has("recruiter") || localStorage.getItem("px01-recruiter") === "1"; } catch { return false; }
+    });
+    useEffect(() => { try { localStorage.setItem("px01-recruiter", recruiter ? "1" : "0"); } catch { /* private mode */ } }, [recruiter]);
+    const toggleRecruiter = () => setRecruiter((r) => !r);
+    useEffect(() => {
+        const k = (e) => { if ((e.key === "r" || e.key === "R") && !e.metaKey && !e.ctrlKey && !e.target.closest?.("input, textarea")) setRecruiter((r) => !r); };
+        addEventListener("keydown", k);
+        return () => removeEventListener("keydown", k);
+    }, []);
+    const recruiterSeen = useRef(false);                       // react to toggles, not to the initial value
+    useEffect(() => {
+        if (!recruiterSeen.current) { recruiterSeen.current = true; return; }
+        sfx.tick(); track("recruiter_mode", { on: recruiter });
+        if (recruiter) requestAnimationFrame(() => document.querySelector(".stats")?.scrollIntoView({ behavior: "auto" }));
+    }, [recruiter]);      // { x, y, r, toLight } for the guaranteed SVG fractal ink-bleed transition
+    // inkWave = { x, y, r, toLight } for the SVG fractal ink-bleed transition
     useEffect(() => {
         try { localStorage.setItem("px01-theme", light ? "light" : "dark"); } catch { /* ignore */ }
         document.documentElement.dataset.theme = light ? "light" : "dark";
@@ -336,7 +358,7 @@ const Home = ({ onSelect }) => {
     };
 
     // the boot plays once per session; coming back from a world goes straight to the machine dropping in
-    const [lit, setLit] = useState(() => { try { return reduced() || !!sessionStorage.getItem("px01-booted"); } catch { return reduced(); } });
+    const [lit, setLit] = useState(() => { try { return reduced() || !!sessionStorage.getItem("px01-booted") || new URLSearchParams(location.search).has("recruiter") || localStorage.getItem("px01-recruiter") === "1"; } catch { return reduced(); } });
     const locked = useRef(0);
     const phaseRef = useRef(phase);
     useEffect(() => { phaseRef.current = phase; }, [phase]);
@@ -407,7 +429,7 @@ const Home = ({ onSelect }) => {
 
     return (
         <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-phase={phase}
-            data-light={light || undefined} data-entering={phase === "transitioning" || undefined}>
+            data-light={light || undefined} data-recruiter={recruiter || undefined} data-entering={phase === "transitioning" || undefined}>
             {/* GPU-composited 60fps SVG Fractal Ink-Bleed Transition Overlay */}
             {inkWave && (
                 <svg className="ink-bleed-overlay" aria-hidden="true">
@@ -489,6 +511,9 @@ const Home = ({ onSelect }) => {
                         <p className="brand-sub mono">FULL-STACK ENGINEER<br /><i aria-hidden>●</i> AHMEDABAD, INDIA</p>
                     </div>
                     <div className="mono right">
+                        <button type="button" className="recruiter-link" aria-pressed={recruiter} onClick={toggleRecruiter} title="Recruiter mode (R): straight to the résumé readout, no motion">
+                            <span className="theme-dot" aria-hidden />Recruiter
+                        </button>
                         <ThemeToggle light={light} onToggle={toggleLight} />
                         <span className="clock"><Clock /></span>
                         <SoundToggle />
@@ -524,12 +549,13 @@ const Home = ({ onSelect }) => {
                         </section>
                     ) : (
                         <div className="cta">
+                            <span className="start-lights" aria-hidden><i /><i /><i /><i /><i /></span>
                             <button type="button" className="pull" onClick={pull} disabled={busy}>
-                                PULL THE LEVER <i aria-hidden>→</i>
+                                <span className="cta-n mono" aria-hidden>01</span> Pull the lever <i aria-hidden>→</i>
                             </button>
                             <div className="cta-alt">
                                 <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>
-                                    JUST SHOW ME THE WORK
+                                    <span className="cta-n" aria-hidden>02</span> or scroll · it prints the work
                                 </button>
                                 <button type="button" className="phone-only" onClick={() => setPicking(true)}>All worlds</button>
                                 <a className="phone-only" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>
@@ -539,10 +565,12 @@ const Home = ({ onSelect }) => {
                 </div>
 
                 <div className="light-foot-bar">
-                    <div className="lf-left">
-                        <p className="mono lf-idx"><span>01 / 07</span><i /></p>
-                        <p className="lf-tag">Pull the lever for a world. Scroll and the machine prints the work.</p>
-                    </div>
+                    <dl className="lf-meta mono">
+                        <div><dt>Based in</dt><dd>Ahmedabad · IST</dd></div>
+                        <div><dt>Role</dt><dd>Full-stack engineer</dd></div>
+                        <div><dt>Status</dt><dd><i className="live-dot" aria-hidden />Available now</dd></div>
+                        <div className="lf-id"><dt>In three words</dt><dd>{profile.identity}</dd></div>
+                    </dl>
                     <nav className="lf-nav" aria-label="Portfolio sections">
                         <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>Work</button>
                         <span aria-hidden>·</span>
@@ -575,6 +603,11 @@ const Home = ({ onSelect }) => {
                     <div data-out="01" data-label="Readout"><Stats /></div>
                     <Perf />
                     <div data-out="02" data-label="Tickets"><Work /></div>
+                    <Perf />
+                    <section className="po-poster" data-out="02" data-label="Statement" aria-label="Statement">
+                        <p className="po-poster-line">{profile.poster.map((l) => <span key={l}>{l}</span>)}</p>
+                        <p className="po-poster-note">{profile.posterNote}</p>
+                    </section>
                     <Perf />
                     <div data-out="03" data-label="Live telemetry"><Maintained /></div>
                     <Perf />

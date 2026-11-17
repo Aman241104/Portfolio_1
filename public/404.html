@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reel jammed — Aman Patel</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,700..900&family=Geist:wght@400;500&family=Geist+Mono:wght@500&display=swap" />
+<style>
+  /* Lando's "VEERED OFF TRACK", in PX-01's voice: the machine printed a ticket for a reality that doesn't exist. */
+  :root { --studio: #050506; --paper: #18181b; --ink: #edeae3; --graphite: #8f8b83; --red: #ff3b2b; }
+  @media (prefers-color-scheme: light) { :root { --studio: #ebe8e2; --paper: #fdfcf9; --ink: #161518; --graphite: #6b675f; --red: #d81f12; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 24px 16px; background: var(--studio); color: var(--ink); font: 400 16px/1.55 "Geist", system-ui, sans-serif; }
+  .slot { width: min(560px, 100%); height: 18px; border-radius: 6px 6px 2px 2px; background: linear-gradient(#232328, #0c0c0e 75%); position: relative; z-index: 1; margin-bottom: -8px; }
+  .ticket { width: min(520px, calc(100% - 24px)); margin: 0 auto; padding: 40px 32px 34px; background: var(--paper); box-shadow: 0 0 0 1px rgb(127 127 127 / .14), 0 40px 90px -40px rgb(0 0 0 / .7); position: relative; animation: feed .9s cubic-bezier(.22, 1, .36, 1) both; }
+  .ticket::after { content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px;
+    background: linear-gradient(45deg, transparent 33.333%, var(--paper) 33.333%, var(--paper) 66.667%, transparent 66.667%),
+                linear-gradient(-45deg, transparent 33.333%, var(--paper) 33.333%, var(--paper) 66.667%, transparent 66.667%);
+    background-size: 12px 24px; background-position: 0 -12px; }
+  .meta { margin: 0 0 18px; font: 500 11px/1 "Geist Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--graphite); display: flex; justify-content: space-between; }
+  h1 { margin: 0; font: 800 clamp(64px, 16vw, 112px)/.84 "Archivo", sans-serif; font-stretch: 62%; text-transform: uppercase; letter-spacing: -0.01em; }
+  p.line { margin: 18px 0 26px; color: var(--graphite); max-width: 40ch; }
+  .rule { border-top: 1px dashed rgb(127 127 127 / .35); margin: 0 0 18px; }
+  nav { display: flex; flex-wrap: wrap; gap: 10px; }
+  a { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border: 1px solid rgb(127 127 127 / .35); border-radius: 999px; color: var(--ink); text-decoration: none; font: 500 11px/1 "Geist Mono", monospace; letter-spacing: .06em; text-transform: uppercase; transition: border-color .18s, color .18s; }
+  a:first-child { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  a:hover { border-color: var(--red); color: var(--red); }
+  a:first-child:hover { background: var(--red); color: #fff; }
+  a:active { scale: .97; }
+  @keyframes feed { from { clip-path: inset(0 0 100% 0); translate: 0 -12px; } to { clip-path: inset(0 0 -16px 0); translate: 0 0; } }
+  @media (prefers-reduced-motion: reduce) { .ticket { animation: none; } }
+</style>
+</head>
+<body>
+  <main>
+    <div class="slot" aria-hidden="true"></div>
+    <article class="ticket">
+      <p class="meta"><span>PX-01 · Error 404</span><span id="path"></span></p>
+      <h1>Reel<br />jammed</h1>
+      <p class="line">The machine printed a ticket for a reality that doesn't exist. Pull again, or go straight to the work.</p>
+      <div class="rule" aria-hidden="true"></div>
+      <nav aria-label="Ways out">
+        <a href="/">Pull again</a>
+        <a href="/#work">The work</a>
+        <a href="/files/resume.pdf">Résumé</a>
+      </nav>
+    </article>
+  </main>
+  <script>document.getElementById("path").textContent = location.pathname.slice(0, 28);</script>
+</body>
+</html>

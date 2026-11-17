@@ -129,7 +129,7 @@ export default function Work() {
                 const inner = (
                     <>
                         <div className="card-shot">
-                            <div className="card-img"><img src={shot(w, 720)} alt="" loading="lazy" /></div>
+                            <div className="card-img"><img src={shot(w, cls.includes("flagship-hero") ? 1600 : 720)} alt="" loading="lazy" /></div>
                         </div>
                         <div className="card-meta">
                             <p className="mono">{String(i + 1).padStart(2, "0")} · {KINDS[w.kind]} · {w.year}{w.live && <span className="live">● Live at {host(w.url).replace(/^www\./, "")}</span>}</p>
@@ -137,6 +137,11 @@ export default function Work() {
                             <p className="card-line">{w.line}</p>
                             {w.stack && <p className="mono card-stack">{w.stack}</p>}
                             {w.note && <p className="mono card-note">{w.note}</p>}
+                            <dl className="tkt-credits">
+                                <div><dt>Built by</dt><dd>Aman Patel</dd></div>
+                                <div><dt>For</dt><dd>{w.kind === "client" ? w.title : w.kind === "concept" ? "Study" : "Own product"}</dd></div>
+                                <div><dt>Year</dt><dd>{w.year}</dd></div>
+                            </dl>
                             <p className="tkt-stub" aria-hidden>
                                 <span>No. {String(i + 1).padStart(3, "0")}-{w.year}</span>
                                 <Barcode value={w.slug} />
@@ -157,7 +162,7 @@ export default function Work() {
     );
 
     return (
-        <section ref={secRef} className="work" aria-labelledby="work-h">
+        <section ref={secRef} id="work" className="work" aria-labelledby="work-h">
             <div className="work-head">
                 <div className="po-print" data-reveal>
                     <p className="mono sec-kicker">Output 02 · Tickets</p>
