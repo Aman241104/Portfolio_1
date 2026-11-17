@@ -21,13 +21,19 @@ Every decision below the hero must be answerable with: *"what would this machine
 | **Object** | One strip of thermal paper, fed from an *Output tray* under the hero, read through a **print head pinned to the bottom of the screen**. Scrolling = feeding paper. That is the signature gesture; nothing else competes with it. |
 | **Two papers** | **Dark Studio → black thermal film** (`#18181b` carbon stock lifted off the `#050506` void, bone ink, `#ff3b2b` red, lit rim). **Light Atelier → white receipt stock** (`#fdfcf9` on `#ebe8e2`, carbon ink, `#d81f12` red, real cast shadow). Never a white sheet in a dark room. |
 | **Jobs, not sections** | Each section is a print job: `Output 0X · <job>`. 01 Readout · 02 Tickets · 03 Live telemetry · 04 Service log · 05 Calibration · 06 Parts list → torn off → *Insert coin* (contact). |
-| **Perforation** | Jobs are separated by a dashed tear line with half-moon notches cut into both paper edges and a `✂ Output 0X` label. |
-| **Tickets** | Every project is a ticket: `No. 001-2026`, a barcode derived from its slug (same bars every visit), and a rubber stamp (`LIVE` / `SHIPPED` / `PRIVATE`) that thumps down when it prints. |
-| **Type** | Machine voice = Geist Mono, uppercase, wide tracking, tiny (9.5–11px). Human voice = Geist (dark) / Playfair Display (light) for titles only. Never medium-everything. |
-| **Colour** | 4 tokens + one accent, per paper. Red is *ink*, not decoration: kickers, stamps, the print-head LED, line counter. |
-| **Motion** | Mechanical, never floaty. Headers print in with `steps(10)` clip (the head laying lines), then the ink darkens. Stamps land with overshoot. LED blinks in `steps`. All of it collapses to static under `prefers-reduced-motion`. |
+| **Perforation** | Jobs are separated by a dashed tear line with half-moon notches cut into both paper edges. No label. |
+| **Tickets** | Every project is a ticket: `No. 001-2026`, a barcode derived from its slug (same bars every visit), and a plain state (`Live` with a green dot / `Shipped` / `Private`). |
+| **Type** | Machine voice = Geist Mono 11px, +0.06em, uppercase, graphite — one size only. Figures always tabular Geist. Human voice = Geist (dark) / Playfair Display (light) for titles only. Never medium-everything. |
+| **Colour** | 4 tokens + one accent, per paper. Red only for the print-head LED/carriage and hover/focus. Green only means "live". Kickers are graphite. |
+| **Motion** | One curve (`--px-ease`, decelerating, no overshoot), three durations (180 / 480 / 820ms). Headers rise 14px and fade in. The carriage runs only while paper feeds. Buttons scale to .97 on press. Static under `prefers-reduced-motion`. |
 | **Sound** | Optional (S). A new job reaching the head plays `sfx.print`. |
 | **Copy** | The machine speaks in labels (`Printing`, `Line 0412`, `Tear here ✂`); Aman speaks in sentences. No "creative dimensions" filler. |
+
+## 3b. Polish rules (Aman, 2026-11-17: "looks AI-generated… polish like Apple, not more effects")
+- Subtract before adding. No decorative glyphs (✂ ▮ ▸ ✶ ✺), no superscript counts, no marquees/tapes, no stamps, no joke copy.
+- One hairline (`--px-rule`); dashed only for perforations, ticket stubs and receipts.
+- One rhythm (`--px-sec`, `--px-head`) and one left edge for every job.
+- Related controls sit with what they act on and share one box model.
 
 ## 4. Non-negotiables kept from PX-01
 - The hero stays: machine, 4 keychains, sphere, "Creative Developer" callout, "Portfolio" wordmark, red signature, 1:1 match-cut, ink-bleed (Aman, 2026-11-17: keep everything; only the 9-link bar was slimmed to 5).
