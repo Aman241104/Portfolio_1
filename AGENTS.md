@@ -24,7 +24,7 @@
 - `src/home/Keychains.jsx` — 4 exhibition square charms (`UI-01 / REACT`, `LANG-02 / TYPESCRIPT`, `RUNTIME-03 / NODE.JS`, `ENGINE-04 / THREE.JS`) hanging at identical coordinates across both modes.
 - `src/home/DotField.jsx` — 70k-point interactive WebGL dust dunes + morphing code glyphs (`</>`, `{ }`, `AP`, `>_`).
 - `src/worlds/registry.js` — Registry of all 12 portfolio worlds (`ride` featured first, `desktop`, `editorial`, `terminal`, `album`, `mission`, `ask`, `canvas`, `pocket`, `longhorn`, `y2001`, `arcade`).
-- `content/profile.js` & `content/work.js` — Single source of truth for bio, socials, stats, and all **26 real shipped projects**.
+- `content/profile.js` & `content/work.js` — Single source of truth for bio, socials, stats, and all **43 real shipped projects** (17 added 2026-11-17 from both Vercel accounts).
 
 ---
 
@@ -51,8 +51,8 @@
 
 ### Rule 4: Content & Glass Integrity
 - **Zero Random Floating Ruins on Home:** External 3D environment assets (`public/models/bk/`) belong **exclusively** inside terrain-grounded worlds like **`RIDE` (`?style=ride`)**.
-- **No Unshipped Claims:** Only list the 26 confirmed projects in `content/work.js`.
-- **Recruiter Fast Path:** Résumé (`Aman_Patel_Resume.pdf`), Email, GitHub, and All 26 Projects must always be reachable within **1–2 clicks**.
+- **No Unshipped Claims:** Only list the confirmed projects in `content/work.js` (43 as of 2026-11-17).
+- **Recruiter Fast Path:** Résumé (`Aman_Patel_Resume.pdf`), Email, GitHub, and All projects must always be reachable within **1–2 clicks**.
 
 ---
 
