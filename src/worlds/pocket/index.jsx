@@ -288,9 +288,14 @@ export default function PocketWorld({ shell }) {
             else if (e.key === "Enter") { e.preventDefault(); if (m === "start") startPick(sel); else if (m === "talk" || m === "battle") doA(); else doStart(); }
         };
         const up = (e) => { if (keyDir[e.key] === g.current.held) g.current.held = null; };
+        keys.current = { down, up };          // fresh closures every render, but the listeners themselves bind once
+    });
+    const keys = useRef(null);
+    useEffect(() => {
+        const down = (e) => keys.current?.down(e), up = (e) => keys.current?.up(e);
         addEventListener("keydown", down); addEventListener("keyup", up);
         return () => { removeEventListener("keydown", down); removeEventListener("keyup", up); };
-    });
+    }, []);
 
     const START_ITEMS = ["DEX", "CARD", "RÉSUMÉ", sound ? "SOUND: ON" : "SOUND: OFF", "LEAVE"];
     const startPick = (i) => {
