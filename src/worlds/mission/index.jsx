@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { profile, socials } from "#content/profile.js";
-import { work, KINDS, shot } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { cases } from "../../../content/cases.js";
 import { certifications } from "../../../content/certifications.js";
@@ -14,7 +14,7 @@ const FONTS = ["Barlow+Condensed:wght@500;600;700", "Barlow:wght@400;500;600"];
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const hhmm = (d = new Date()) => d.toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" });
 const ago = (iso) => { const s = (Date.now() - new Date(iso)) / 1000; return s < 3600 ? `${Math.max(1, Math.round(s / 60))} MIN` : s < 86400 ? `${Math.round(s / 3600)} HRS` : `${Math.round(s / 86400)} DAYS`; };
-const fleet = work.filter((w) => w.maintained);
+const fleet = work.filter(inProduction);
 const PLATFORM = { product: "1", mobile: "2", client: "3", concept: "4" };
 
 const verdict = (s, w, probing) => {

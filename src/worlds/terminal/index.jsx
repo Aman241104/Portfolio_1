@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { profile, socials } from "#content/profile.js";
 import { onRepeat, topArtists, watching } from "#content/taste.js";
 import { worlds } from "#worlds/registry.js";
-import { work, KINDS, shot } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -26,7 +26,7 @@ const THEMES = ["amber", "green", "plain"];
 const POST = [
     "PX-01 BIOS v2026.11 · AHMEDABAD",
     `MEM CHECK ............ ${work.length} PROJECTS OK`,
-    `NET .................. ${work.filter((w) => w.maintained).length} SITES IN PRODUCTION`,
+    `NET .................. ${work.filter(inProduction).length} SITES IN PRODUCTION`,
     `CERTS ................ ${certifications.length} VERIFIED CREDENTIALS`,
     `ROLE ................. ${experience[0].role.toUpperCase()}`,
     "BOOTING tty1 .........",
@@ -44,6 +44,14 @@ function findProject(query = "") {
 }
 
 const alias = { ls: "projects", dir: "projects", exit: "spin", hire: "contact", "?": "help", cls: "clear" };
+
+// The status-bar clock ticks on its own: as world state it re-rendered the whole terminal (log included) every second.
+const fmt = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+function Clock() {
+    const [t, setT] = useState(fmt);
+    useEffect(() => { const id = setInterval(() => setT(fmt()), 1000); return () => clearInterval(id); }, []);
+    return t;
+}
 
 const COMMAND_NAMES = [
     "help", "about", "projects", "cat", "open", "live", "experience", "certs",
@@ -91,20 +99,12 @@ const TerminalWorld = ({ shell }) => {
     const [sound, setSound] = useState(false);
     const [idle, setIdle] = useState(0);
     const [inspected, setInspected] = useState(null);
-    const [clock, setClock] = useState(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
 
     const away = useRef(0);
     const bootedRef = useRef(false);
     const inputRef = useRef(null);
     const endRef = useRef(null);
     const id = useRef(0);
-
-    useEffect(() => {
-        const t = setInterval(() => {
-            setClock(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
-        }, 1000);
-        return () => clearInterval(t);
-    }, []);
 
     const cmd = (c, children) => (
         <button type="button" className="tty-cmd" onClick={() => run(c)}>{children || c}</button>
@@ -155,7 +155,7 @@ const TerminalWorld = ({ shell }) => {
                 <p key="a" className="tty-h">{profile.name.toUpperCase()} — {experience[0].role.toUpperCase()}</p>,
                 <p key="b">{profile.line}</p>,
                 <p key="c" className="dim">
-                    Now: {experience[0].org} ({experience[0].where}) · {work.length} shipped · {work.filter((w) => w.maintained).length} live in prod · {certifications.length} verified certs
+                    Now: {experience[0].org} ({experience[0].where}) · {work.length} shipped · {work.filter(inProduction).length} live in prod · {certifications.length} verified certs
                 </p>,
                 <p key="d" className="dim">Core stack: TypeScript · React · Next.js · Python · FastAPI · Three.js · PostgreSQL</p>,
                 <p key="e">
@@ -215,7 +215,7 @@ const TerminalWorld = ({ shell }) => {
         },
         live: () => [
             <p key="h" className="dim">in production today, still maintained:</p>,
-            ...work.filter((w) => w.maintained).map((w) => (
+            ...work.filter(inProduction).map((w) => (
                 <div key={w.slug} className="tty-row">
                     <span className="ok">●</span> {cmd(`cat ${w.slug}`, w.title)} <span className="dim">·</span> {ext(w.url, <>{host(w.url)} ↗</>)}
                 </div>
@@ -382,7 +382,7 @@ const TerminalWorld = ({ shell }) => {
     const wake = () => {
         const s = secondsSince(away.current);
         setIdle(0);
-        setLog((l) => [...l, { id: id.current++, cmd: null, out: [<p key="w">welcome back. you were away {s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`} · while you were gone, {work.filter((w) => w.maintained).length} sites stayed up. try {cmd("sudo hire aman")}</p>] }]);
+        setLog((l) => [...l, { id: id.current++, cmd: null, out: [<p key="w">welcome back. you were away {s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`} · while you were gone, {work.filter(inProduction).length} sites stayed up. try {cmd("sudo hire aman")}</p>] }]);
         inputRef.current?.focus();
     };
 
@@ -416,11 +416,11 @@ const TerminalWorld = ({ shell }) => {
         <div className={`tty tty-${theme}`} data-shake={shake || undefined} onClick={(e) => { if (!e.target.closest("a, button")) inputRef.current?.focus(); }}>
             <div className="tty-glass">
                 <div className="tty-tmux" aria-label="Session status bar">
-                    <span>[0:aman@px01] · ● {work.length} PROJECTS · {work.filter((w) => w.maintained).length} LIVE · AHMEDABAD</span>
+                    <span>[0:aman@px01] · ● {work.length} PROJECTS · {work.filter(inProduction).length} LIVE · AHMEDABAD</span>
                     <span className="tty-tmux-r">
                         <span>Tab · ↑↓ · Ctrl+L · /</span>
                         <button type="button" className="tty-cmd" onClick={() => run("theme")}>[{theme.toUpperCase()}]</button>
-                        <span>{clock}</span>
+                        <span><Clock /></span>
                     </span>
                 </div>
 
@@ -498,7 +498,7 @@ const TerminalWorld = ({ shell }) => {
                                     <dl className="tty-kv">
                                         <div><dt>HOST</dt><dd>{profile.name} · Ahmedabad, IN</dd></div>
                                         <div><dt>ROLE</dt><dd>{experience[0].role} @ {experience[0].org}</dd></div>
-                                        <div><dt>SHIPPED</dt><dd>{work.length} builds · {work.filter((w) => w.maintained).length} live in prod</dd></div>
+                                        <div><dt>SHIPPED</dt><dd>{work.length} builds · {work.filter(inProduction).length} live in prod</dd></div>
                                         <div><dt>STACK</dt><dd>TS · React · Next · Python · Three.js</dd></div>
                                         <div><dt>CERTS</dt><dd>{certifications.length} verified ({certifications.map((c) => c.issuer.split(" ")[0]).join(", ")})</dd></div>
                                     </dl>

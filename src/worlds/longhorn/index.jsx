@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { profile, socials } from "#content/profile.js";
-import { work, KINDS, shot, status } from "../../../content/work.js";
+import { work, KINDS, shot, status, inProduction } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -88,7 +88,7 @@ function ClockGadget() {
 }
 
 function StatusGadget({ sites }) {
-    const list = work.filter((w) => w.maintained);
+    const list = work.filter(inProduction);
     const up = list.filter((w) => sites?.[w.slug]?.ok).length;
     return (
         <div className="lh-gadget lh-status">

@@ -9,7 +9,7 @@
     border-radius: 22px / 18px; padding: clamp(16px, 2.2vw, 28px); box-shadow: 0 0 0 10px #0d0b08, 0 0 0 11px #2a241b, inset 0 0 90px rgba(0, 0, 0, .85), 0 30px 80px rgba(0, 0, 0, .7);
     text-shadow: 0 0 2px currentColor, 0 0 9px color-mix(in srgb, var(--fg) 45%, transparent); overflow: hidden; animation: tty-flicker 6s infinite; }
 .tty-plain .tty-glass { text-shadow: none; animation: none; box-shadow: 0 0 0 1px #333; border-radius: 6px; }
-.tty-scan { position: fixed; inset: 0; pointer-events: none; z-index: 5; background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px), radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, .55)); mix-blend-mode: multiply; }
+.tty-scan { position: fixed; inset: 0; pointer-events: none; z-index: 5; background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px), radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, .55)); }   /* plain blend: black-alpha scanlines look the same, without a full-screen multiply pass */
 .tty-plain .tty-scan { display: none; }
 @keyframes tty-flicker { 0%, 100% { opacity: 1; } 48% { opacity: .985; } 50% { opacity: .96; } 52% { opacity: .99; } }
 .tty p { margin: 0; }
@@ -104,3 +104,6 @@
     .tty-log > article:last-child .tty-echo { animation: tty-type 160ms steps(16, end) both; }
 }
 @keyframes tty-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* phones: no whole-glass flicker (a full-layer opacity animation on every frame) */
+@media (pointer: coarse) { .tty-glass { animation: none; } }
