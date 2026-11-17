@@ -29,6 +29,7 @@ export function PrintHead({ root }) {
     const [on, setOn] = useState(false);
     const [sec, setSec] = useState({ out: "01", label: "Readout" });
     const line = useRef(null);
+    const head = useRef(null);
     useEffect(() => {
         const paper = root.current;
         if (!paper) return;
@@ -56,21 +57,28 @@ export function PrintHead({ root }) {
         }), { rootMargin: "-99% 0px 0px 0px" });
         secs.forEach((s) => band.observe(s));
         // line counter: paper fed so far, in thermal-printer lines (~22px)
-        let raf = 0;
+        let raf = 0, idle = 0;
         const feed = () => {
             raf = 0;
             const r = paper.getBoundingClientRect();
             const fed = Math.max(0, Math.min(r.height, innerHeight - r.top));
             if (line.current) line.current.textContent = String(Math.round(fed / 22)).padStart(4, "0");
         };
-        const onScroll = () => { if (!raf) raf = requestAnimationFrame(feed); };
+        // the carriage only runs while paper is actually moving, and parks ~180ms after the scroll stops
+        const onScroll = () => {
+            if (!raf) raf = requestAnimationFrame(feed);
+            head.current?.setAttribute("data-feeding", "");
+            clearTimeout(idle);
+            idle = setTimeout(() => head.current?.removeAttribute("data-feeding"), 180);
+        };
         addEventListener("scroll", onScroll, { passive: true });
         feed();
-        return () => { vis.disconnect(); pr.disconnect(); band.disconnect(); removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+        return () => { vis.disconnect(); pr.disconnect(); band.disconnect(); removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); clearTimeout(idle); };
     }, [root]);
     return (
-        <div className="po-head" data-on={on || undefined} data-still={reduced() || undefined} aria-hidden>
+        <div ref={head} className="po-head" data-on={on || undefined} data-still={reduced() || undefined} aria-hidden>
             <div className="po-head-lip" />
+            <i className="po-carriage" />
             <div className="po-head-body mono">
                 <span className="po-led" />
                 <span className="po-state">Printing</span>

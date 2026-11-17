@@ -188,15 +188,20 @@ const ContactForm = ({ onSent }) => {
         try {
             const r = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
             const d = await r.json().catch(() => ({}));
-            if (r.ok) { setState({ phase: "sent", msg: d.no ? `Ticket No. ${String(d.no).padStart(4, "0")}` : "" }); onSent(); sfx.print(); track("contact_sent"); return; }
+            if (r.ok) { setState({ phase: "sent", msg: d.no ? `Ticket No. ${String(d.no).padStart(4, "0")}` : "", name: data.name, at: new Date() }); onSent(); sfx.print(); track("contact_sent"); return; }
             if (r.status === 400 || r.status === 429) { setState({ phase: "idle", msg: d.error }); return; }
             setState({ phase: "fallback", msg: d.error || "", href: mail() });
         } catch { setState({ phase: "fallback", msg: "", href: mail() }); }
     };
     if (state.phase === "sent") return (
-        <div className="msg-sent" role="status">
-            <p className="mono red">Delivered{state.msg ? ` · ${state.msg}` : ""}</p>
-            <p>Thanks. It's in my inbox, and my reply goes to the address you gave.</p>
+        <div className="msg-sent po-receipt" role="status">
+            <p className="mono po-r-head">PX-01 · Receipt</p>
+            <p className="mono">{state.msg || "Ticket"} · {state.at.toLocaleString("en-GB", { timeZone: "Asia/Kolkata", dateStyle: "short", timeStyle: "short" })} IST</p>
+            <p className="mono">From ........ {state.name}</p>
+            <p className="mono">Routed to ... Aman's inbox</p>
+            <p className="po-r-line">Thanks. It's in my inbox, and my reply goes to the address you gave.</p>
+            <Barcode value={`${state.name}${state.msg}`} bars={40} />
+            <p className="mono po-r-foot">Keep this ticket · no refunds on curiosity</p>
         </div>
     );
     return (
