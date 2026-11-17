@@ -57,10 +57,9 @@ export default function CanvasWorld() {
     const [vstate, setV] = useState({ x: 0, y: 0, k: 0.4 }); // for the minimap + zoom readout
     const [vpSize, setVpSize] = useState({ w: 0, h: 0 });
     const [focus, setFocus] = useState(null);
-    const [coords, setCoords] = useState({ x: 0, y: 0 });
+    const coordsEl = useRef(null);          // the X/Y readout is written to the DOM: a state here re-rendered all 44 sheets per pointer move
     // phones open on a plain scrolling print of the same drawing (readable, no pan/zoom work); the full sheet is one tap away
     const [list, setList] = useState(() => typeof window !== "undefined" && matchMedia("(max-width: 760px)").matches);
-    const [mate, setMate] = useState({ x: 300, y: 300, label: "A.P." });
     const pts = useRef(new Map()), last = useRef(null), start = useRef([0, 0]);
     const vel = useRef([0, 0]), coast = useRef(0);   // pan momentum (px/ms) and its rAF
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -169,15 +168,6 @@ export default function CanvasWorld() {
         }
     };
 
-    // the collaborator: drifts from frame to frame, sometimes "commenting"
-    useEffect(() => {
-        if (reduced) return;
-        const frames = items.filter((i) => i.type === "frame");
-        let i = 0;
-        const t = setInterval(() => { const f = frames[(i = (i + 1 + Math.floor(Math.random() * 3)) % frames.length)]; setMate({ x: f.x + 60 + Math.random() * 200, y: f.y + 40 + Math.random() * 160, label: Math.random() < 0.35 ? `A.P. · rev ${f.p.year}` : "A.P." }); }, 2600);
-        return () => clearInterval(t);
-    }, [items, reduced]);
-
     const open = useCallback((it) => {
         setFocus(it.p);
         if (!list) fitTo(it.x, it.y, FW, FH, 60, -170);
@@ -210,7 +200,7 @@ export default function CanvasWorld() {
                     {sections.map((s) => <button key={s.id} type="button" onClick={() => { setFocus(null); fitTo(s.x, s.y, s.w, s.h); }}>{s.label}</button>)}
                 </nav>
                 <div className="cv-zoom">
-                    <span className="cv-coords" aria-hidden>X:{String(coords.x).padStart(4, "0")} Y:{String(coords.y).padStart(4, "0")}</span>
+                    <span ref={coordsEl} className="cv-coords" aria-hidden>X:0000 Y:0000</span>
                     <button type="button" aria-label="Zoom out" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 0.8, true); }}>−</button>
                     <span>Scale {vstate.k >= 1 ? `${vstate.k.toFixed(1)}:1` : `1:${(1 / vstate.k).toFixed(1)}`}</span>
                     <button type="button" aria-label="Zoom in" onClick={() => { const b = vp.current.getBoundingClientRect(); zoomAt(b.width / 2, b.height / 2, 1.25, true); }}>+</button>
@@ -224,7 +214,7 @@ export default function CanvasWorld() {
                     const r = vp.current.getBoundingClientRect();
                     const bx = Math.round((e.clientX - r.left - view.current.x) / view.current.k);
                     const by = Math.round((e.clientY - r.top - view.current.y) / view.current.k);
-                    setCoords({ x: Math.max(0, bx), y: Math.max(0, by) });
+                    if (coordsEl.current) coordsEl.current.textContent = `X:${String(Math.max(0, bx)).padStart(4, "0")} Y:${String(Math.max(0, by)).padStart(4, "0")}`;
                 }
                 move(e);
             }} onPointerUp={up} onPointerCancel={up}>
@@ -292,9 +282,6 @@ export default function CanvasWorld() {
                             </div>
                         );
                     })}
-                    <div className="cv-mate" style={{ transform: `translate(${mate.x}px, ${mate.y}px)` }} aria-hidden>
-                        <svg viewBox="0 0 24 24"><path d="M3 21l3.5-1 12-12-2.5-2.5-12 12z" /><path d="M15.5 5.5l2.5-2.5 3 3-2.5 2.5" /></svg><span>{mate.label}</span>
-                    </div>
                 </div>
             </div>
 

@@ -82,9 +82,6 @@
 .cv-btn.ghost { border-color: var(--line); color: var(--line) !important; }
 
 /* the draughtsman's pencil, drifting from sheet to sheet */
-.cv-mate { left: 0; top: 0; transition: transform 1.6s var(--ease-in-out); pointer-events: none; display: flex; align-items: flex-start; z-index: 3; }
-.cv-mate svg { width: 26px; height: 26px; fill: var(--hi); stroke: var(--bar); stroke-width: 1; }
-.cv-mate span { margin: 18px 0 0 -2px; padding: 2px 8px; background: var(--hi); color: var(--bar); font: 700 12px "B612 Mono", monospace; white-space: nowrap; }
 /* inspector: a detail callout */
 .cv-inspect { position: absolute; z-index: 6; right: 14px; top: 64px; width: min(340px, calc(100vw - 28px)); padding: 20px; background: var(--bar); border: 1.5px solid var(--line); box-shadow: 8px 8px 0 rgba(5, 20, 40, .5); }
 .cv-tag { display: block; font: 400 11px "B612 Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
@@ -104,7 +101,7 @@
     .cv-zoom span { min-width: 70px; font-size: 11px; }
     .cv-inspect { top: auto; bottom: 120px; left: 12px; right: 12px; width: auto; }
 }
-@media (prefers-reduced-motion: reduce) { .cv-mate { transition: none; } }
+
 
 /* Arrival: the drawing is drafted in front of you. Zone outlines and sheet borders are drawn on (clip sweep from the
    corner), dimension lines extend, then each print develops out of an over-exposed white like a cyanotype. */
@@ -153,7 +150,7 @@
 .cv[data-list] { position: static; min-height: 100dvh; }
 .cv[data-list] .cv-bar { position: sticky; }
 .cv[data-list] .cv-jump, .cv[data-list] .cv-zoom, .cv[data-list] .cv-mini, .cv[data-list] .bp-zone, .cv[data-list] .bp-mate,
-.cv[data-list] .bp-dim, .cv[data-list] .bp-cloud, .cv[data-list] .cv-mate { display: none !important; }
+.cv[data-list] .bp-dim, .cv[data-list] .bp-cloud { display: none !important; }
 .cv[data-list] .cv-vp { position: static; cursor: auto; touch-action: auto; user-select: auto; -webkit-user-select: auto; padding: 24px 16px 140px; }
 .cv[data-list] .cv-board { position: static; transform: none !important; width: auto !important; height: auto !important; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; will-change: auto; }
 .cv[data-list] .cv-board > * { position: static !important; width: auto !important; max-width: 100%; }
