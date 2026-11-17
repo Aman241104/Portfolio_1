@@ -174,3 +174,22 @@ Source: agy CLI (read-only design audit of src/worlds/* against docs/REFERENCE_I
 3. **Shared Quality-Tier & `rAF` Visibility Gate (`src/three/cinematography.js`):** Extend `detectQualityTier()` beyond `ride` into a universal `useWorldPerf()` hook consumed by `ride`, `pocket`, `arcade`, `longhorn`, and `canvas`—exposing `dprCap`, `enablePostFX`, `reducedMotion`, and automatic `document.visibilityState === "hidden"` loop pausing.
 4. **Canonical Project Selector & Deep-Linking (`content/work.js`):** Standardize `shot(w, size)` responsive `srcSet`, `host(u)`, and `cases[w.slug]` URLs across all 12 worlds (removing 7 duplicate `host()` helpers), and support `?style=<id>&p=<slug>` so any world can open directly onto a specific project dossier.
 5. **Recruiter Fast-Path Contract (`?recruiter=1`):** Add a single global shortcut (`R` or `?recruiter=1` in `src/App.jsx`) that skips intros/gates (`album` `VinylGate`, `y2001` 56k loader, `terminal` `POST` boot, `longhorn` `Welcome` delay) and surfaces the world's Résumé + Live Projects immediately.
+
+---
+
+## Pass 1 status (2026-11-17) — verified against the code, then fixed
+| World | Shipped | agy claims that did NOT hold |
+|---|---|---|
+| Editorial | folio bar on a ref (no re-render per scroll), inProduction count, tidy phone masthead, no permanent will-change | — |
+| Album | waveforms = 1 SVG-masked element/track (was 1,760 animated nodes), Recruiter skips gate, counts, bar pill | scroll listener only re-renders twice (boolean) |
+| Pocket | key listeners bound once via ref | rAF already pauses in hidden tabs |
+| Canvas | coords via DOM, fake collaborator cursor removed | sheet draw-on is one-shot, kept |
+| Ask | call-slip hero replaces pixel avatar + template headline; counts | — |
+| Terminal | Clock isolated; no full-screen multiply; no flicker on phones | novelty commands kept (Aman's personality) |
+| Mission | statuses/probes via inProduction (Job Search OS/Pulse AI were "ARCHIVED"), honest PREVIEW/BUILT/PRIVATE | flaps share one self-stopping rAF; clock bails out |
+| 2001 | starfield drift via transform (was full-page repaint/frame) | sparkles are throttled + mouse-only, kept |
+| Arcade | DPR canvas buffer (sharp), loop idles off-screen/hidden, overlapping demo tag removed | mobile list-first default is the recruiter fast path, kept |
+| Longhorn | aurora without screen blend, still on phones; Recruiter opens Projects | Welcome Center auto-open is period-true, kept for visitors |
+| RIDE | Scene memoised (HUD tick re-rendered the 3D tree ~8×/s) | — (design cuts pending Aman) |
+| Desktop | folders frozen at 40% (Draggable mid-animation) fixed; phone dock overlap | windows already lazy-mount; it is already PX-OS, not a macOS clone |
+Pending Aman's call: RIDE cuts (points/orbs/gates/props; Fjord + Sakura biomes), any Desktop re-skin.
