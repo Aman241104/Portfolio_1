@@ -208,10 +208,10 @@
 }
 .po-head[data-feeding] .po-carriage { opacity: 1; }
 @media (prefers-reduced-motion: no-preference) {
-    /* ponytail: animates `left` on a 1px bar (layout, but tiny); move to translate + container units if it ever shows in a trace */
     .po-carriage { animation: po-carriage 1.4s var(--px-ease) infinite alternate; animation-play-state: paused; }
+    .po-head { container-type: inline-size; }
     .po-head[data-feeding] .po-carriage { animation-play-state: running; }
-    @keyframes po-carriage { to { left: calc(100% - 72px); } }
+    @keyframes po-carriage { to { translate: calc(100cqw - 88px) 0; } }
 }
 @media (max-width: 760px) { .po-head { display: none; } }
 
@@ -270,3 +270,41 @@
     .printout .stat dt { min-height: 3.9em; }
     .printout .calib-grid .stat:nth-child(odd) { padding-left: 0 !important; }
 }
+
+/* Project images are prints on the paper, not fake browser windows: no traffic-light chrome, no 3D hover tilt,
+   no red active border. One radius, one hairline edge. */
+.home .printout .card-shot { border: 0; border-radius: 4px; background: var(--paper-2); transform: none !important; }
+.printout .card[data-active] .card-shot { border-color: transparent; box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / .35), 0 24px 48px -28px rgb(0 0 0 / .5); }
+
+/* ---- Job titles as condensed poster type (Aman's moodboard: "GO SLOWER…", "SERVICES", "EXPLORING").
+   Archivo at 62% width, heavy, uppercase, tight leading. Same face in both papers. ---- */
+.home .printout :is(.work-head, .split-rail) h2,
+.home[data-light] .printout :is(.work-head, .split-rail) h2 {
+    font-family: "Archivo", "Geist", sans-serif; font-stretch: 62%; font-weight: 800; font-style: normal;
+    text-transform: uppercase; letter-spacing: -0.01em; line-height: .84; color: var(--ink);
+}
+.home .printout .work-head h2, .home[data-light] .printout .work-head h2 { font-size: clamp(72px, 10.5vw, 168px); }
+.home .printout .split-rail h2, .home[data-light] .printout .split-rail h2 { font-size: clamp(56px, 6.4vw, 104px); }
+.printout .card-meta h3 i { color: var(--graphite); transition: color var(--px-t1) var(--px-ease), translate var(--px-t1) var(--px-ease); }
+@media (hover: hover) { .printout .card a:hover .card-meta h3 i, .printout .flagship-hero > a:hover .card-meta h3 i { color: var(--thermal-red); translate: 2px -2px; } }
+
+/* ---- Round 3 (agy polish critique, verified): ---- */
+/* red leaks → graphite */
+.printout :is(.card-note, .kept-sum) { color: var(--graphite) !important; }
+/* skills with no project count get no leader */
+.printout .skills-sec .skill-group li:not(:has(.skill-hits))::after { display: none; }
+/* flagship cards end on the same line */
+.printout :is(.flagship-wide, .flagship-side) { display: flex; flex-direction: column; }
+.printout :is(.flagship-wide, .flagship-side) > :is(a, .card-static) { flex: 1; }
+.printout :is(.flagship-wide, .flagship-side) .card-foot-links { margin-top: auto; padding-top: 18px; }
+/* one family for titles inside the paper: Geist (light mode used Playfair here — three families per screen) */
+.home[data-light] .printout :is(.card-meta h3, .xp-list h3, .ws-meta h3, .cert-title, .kept-name, .wl-title) {
+    font-family: "Geist", sans-serif; font-weight: 600; letter-spacing: -0.03em;
+}
+@media (prefers-reduced-motion: no-preference) {
+    /* calmer arrivals: numbers roll in 700ms, timeline entries stagger 80ms, status lamps just switch on */
+    .printout .odo > span { transition-duration: 700ms; transition-timing-function: var(--px-ease); }
+    .printout .xp-list > li { transition-duration: var(--px-t2); transition-timing-function: var(--px-ease); transition-delay: calc(var(--i, 0) * 80ms); }
+    .printout .kept-list[data-in] .dot[data-state="up"] { animation: none; }
+}
+.printout .card-meta .live { color: var(--graphite) !important; }

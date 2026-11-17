@@ -129,7 +129,6 @@ export default function Work() {
                 const inner = (
                     <>
                         <div className="card-shot">
-                            <div className="chrome" aria-hidden><i /><i /><i /><span>{w.url ? host(w.url) : "private build"}</span></div>
                             <div className="card-img"><img src={shot(w, 720)} alt="" loading="lazy" /></div>
                         </div>
                         <div className="card-meta">
@@ -237,7 +236,6 @@ export default function Work() {
                     {staged && (
                         <aside className="work-stage" aria-live="polite">
                             <div className="card-shot" onPointerMove={tilt} onPointerLeave={untilt}>
-                                <div className="chrome" aria-hidden><i /><i /><i /><span>{staged.url ? host(staged.url) : "private build"}</span></div>
                                 <div className="card-img"><img src={shot(staged, 720)} alt="" loading="lazy" /></div>
                             </div>
                             <div className="ws-meta">

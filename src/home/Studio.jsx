@@ -274,34 +274,17 @@ const FirstFrame = ({ onFrame }) => {
     return null;
 };
 
-// Smoothly shifts PX-01's studio fill & floating sphere between Dark Studio (crimson-red anodized orb) and Light Mode Atelier (polished silver-chrome orb)
+// Smoothly shifts PX-01's studio fill and materials between Dark Studio and Light Atelier.
+// (The floating sphere was removed 2026-11-17: "one object, lit" — the machine is the only object in the room.)
 const DARK_BLACK = new THREE.Color("#0d0d0f");
 const LIGHT_BLACK = new THREE.Color("#141416");
 const DARK_SHELL = new THREE.Color("#cfe9e6");
 const LIGHT_SHELL = new THREE.Color("#e8ecef");
-const ORB_DARK_COL = new THREE.Color("#ff2214");
-const ORB_LIGHT_COL = new THREE.Color("#f4f2ee");
-const ORB_DARK_EMISSIVE = new THREE.Color("#7a0b04");
-const ORB_LIGHT_EMISSIVE = new THREE.Color("#dad6ce");
 
-const AtelierRig = ({ light, jackpot, pulled }) => {
+const AtelierRig = ({ light }) => {
     const hemi = useRef();
     const frontFill = useRef();
-    const orb = useRef();
-    const { size } = useThree();
-    const aspect = size.width / Math.max(1, size.height);
-    const orbX = aspect < 0.8 ? -2.2 : -THREE.MathUtils.clamp(aspect * 2.85, 2.95, 5.15);
-    const orbMat = useMemo(() => new THREE.MeshPhysicalMaterial({
-        color: "#ff2214",
-        metalness: 0.88,
-        roughness: 0.14,
-        clearcoat: 1,
-        clearcoatRoughness: 0.04,
-        emissive: "#7a0b04",
-        emissiveIntensity: 0.45,
-    }), []);
-    useEffect(() => () => orbMat.dispose(), [orbMat]);
-    useFrame(({ clock, pointer }, dt) => {
+    useFrame((_, dt) => {
         const k = 1 - Math.exp(-6 * dt);
         const preset = light ? LIGHTING_PRESETS.whiteLaboratory : LIGHTING_PRESETS.darkExhibition;
         mat.black.color.lerp(light ? LIGHT_BLACK : DARK_BLACK, k);
@@ -310,28 +293,11 @@ const AtelierRig = ({ light, jackpot, pulled }) => {
         mat.shell.attenuationColor.lerp(light ? LIGHT_SHELL : DARK_SHELL, k);
         if (hemi.current) hemi.current.intensity = THREE.MathUtils.damp(hemi.current.intensity, preset.hemiIntensity, 6, dt);
         if (frontFill.current) frontFill.current.intensity = THREE.MathUtils.damp(frontFill.current.intensity, preset.frontFillIntensity, 6, dt);
-        orbMat.color.lerp(light ? ORB_LIGHT_COL : ORB_DARK_COL, k);
-        orbMat.emissive.lerp(light ? ORB_LIGHT_EMISSIVE : ORB_DARK_EMISSIVE, k);
-        orbMat.emissiveIntensity = THREE.MathUtils.damp(orbMat.emissiveIntensity, light ? 0.16 : 0.45, 6, dt);
-        orbMat.roughness = THREE.MathUtils.damp(orbMat.roughness, light ? 0.08 : 0.14, 6, dt);
-        orbMat.metalness = THREE.MathUtils.damp(orbMat.metalness, light ? 0.94 : 0.88, 6, dt);
-        if (orb.current) {
-            orb.current.visible = aspect >= 0.85;
-            orb.current.position.x = THREE.MathUtils.damp(orb.current.position.x, orbX + pointer.x * 0.14, 6, dt);
-            orb.current.position.y = THREE.MathUtils.damp(orb.current.position.y, 0.44 + Math.sin(clock.elapsedTime * 1.1) * 0.06 + pointer.y * 0.08, 6, dt);
-            orb.current.position.z = -1.55 + Math.sin(clock.elapsedTime * 0.72) * 0.14;
-            const s = pulled || jackpot ? 1.12 : 1;
-            orb.current.scale.setScalar(THREE.MathUtils.damp(orb.current.scale.x, s, 8, dt));
-        }
     });
     return (
         <>
             <directionalLight ref={frontFill} position={[2, 2, 9]} intensity={0.35} color="#ffffff" />
             <hemisphereLight ref={hemi} args={["#ffffff", light ? "#e4e2dd" : "#000000", 0.12]} />
-            {/* Cohesive floating metallic sphere on the left: Crimson-Red Anodized Metal in Dark Mode, Bright Silver-Chrome in Light Mode */}
-            <mesh ref={orb} position={[orbX, 0.36, -1.55]} material={orbMat}>
-                <sphereGeometry args={[0.25, 48, 32]} />
-            </mesh>
         </>
     );
 };
@@ -351,7 +317,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
             <GlassSurface />
             <Rig entering={entering} />
             <KeyLight lit={lit} light={light} onBooted={onBooted} />
-            <AtelierRig light={light} jackpot={jackpot} pulled={pulled} />
+            <AtelierRig light={light} />
             <WinFlash jackpot={jackpot} />
 
             {/* rims: cool from behind-left, warm from behind-right, so every edge of the case is drawn in light */}

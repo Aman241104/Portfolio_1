@@ -116,11 +116,12 @@ const Thing = ({ kind, ...p }) =>
 /* ---------------------------------------------------------------- placement */
 
 // Unified 1:1 Match-Cut layout across both Dark Studio and Light Atelier:
-// The 4 exhibition charms (UI-01 REACT, LANG-02 TYPESCRIPT, RUNTIME-03 NODE.JS, ENGINE-04 THREE.JS)
+// The exhibition charms (UI-01 REACT, ENGINE-04 THREE.JS on desktop)
 // stay at the exact same 3D coordinates, scale, and sway phase during Dark ↔ Light transitions.
+// 2026-11-17 "one object, lit": two charms frame the machine instead of four crowding it (and the old outer pair
+// collided with the top bar). x is recomputed in place() from the machine box; "inner" = just beside the machine.
 const DESKTOP = [
-    { sx: -0.82, sy: 0.66, item: "react", outer: true }, { sx: -0.52, sy: 0.56, item: "typescript", outer: false },
-    { sx: 0.52, sy: 0.56, item: "node", outer: false }, { sx: 0.82, sy: 0.66, item: "three", outer: true },
+    { sx: -0.5, sy: 0.56, item: "react", outer: false }, { sx: 0.5, sy: 0.56, item: "three", outer: false },
 ];
 // phones: centered row on cables below the top bar and cleanly above the machine
 const PHONE = [

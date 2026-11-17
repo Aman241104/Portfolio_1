@@ -460,7 +460,6 @@ const Home = ({ onSelect }) => {
                     <circle cx="960" cy="-60" r="380" fill="url(#top-arch-glow)" />
                     <circle cx="-60" cy="590" r="310" fill="none" stroke="var(--ridge-line)" strokeWidth="1" />
                     <circle cx="1990" cy="540" r="290" fill="none" stroke="var(--ridge-line)" strokeWidth="1" />
-                    <path d="M 1860 440 L 1884 440 M 1872 428 L 1872 452" stroke="var(--ridge-cross)" strokeWidth="1" />
                     <path d="M 0 520 Q 190 560 360 660 Q 520 560 720 550 L 1220 550 Q 1450 560 1620 650 Q 1780 610 1920 640 L 1920 1080 L 0 1080 Z" fill="url(#ridge-top)" />
                     <path d="M 360 660 Q 520 560 720 550 L 960 690 L 360 880 Z" fill="url(#ridge-shadow)" />
                     <path d="M 0 895 L 58 904 L 132 942 L 228 968 L 340 1022 L 485 1080 L 0 1080 Z" fill="var(--rock-1)" opacity="0.65" />
@@ -489,7 +488,6 @@ const Home = ({ onSelect }) => {
                         <span className="mv-text">AMAN</span>
                         <p className="brand-sub mono">FULL-STACK ENGINEER<br /><i aria-hidden>●</i> AHMEDABAD, INDIA</p>
                     </div>
-                    <p className="mono center"><span className="star" aria-hidden>✦</span>PX‑01 -- REALITY SELECTOR</p>
                     <div className="mono right">
                         <ThemeToggle light={light} onToggle={toggleLight} />
                         <span className="clock"><Clock /></span>
@@ -499,10 +497,6 @@ const Home = ({ onSelect }) => {
 
                 {/* Unified editorial annotations & red signature — identical coordinates across Dark ↔ Light */}
                 <div className="ink" aria-hidden>
-                    <div className="creative-callout">
-                        <p className="creative-script">Creative Developer<span className="creative-line" /></p>
-                        <p className="creative-tag mono">[ EXPERIMENTAL PORTFOLIO ]</p>
-                    </div>
                     <p className="signature">
                         Aman Patel
                         <svg className="sig-underline" viewBox="0 0 320 28" aria-hidden>
