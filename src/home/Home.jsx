@@ -259,6 +259,8 @@ const ThemeToggle = ({ light, onToggle }) => {
 //   idle → armed (lever grabbed) → spinning → locking (reels report as they physically stop) → revealed → transitioning
 const LABEL = { idle: "", armed: "Armed — let go past the detent", spinning: "Spinning", locking: "Locking", revealed: "Reality selected", transitioning: "Entering" };
 const isTouch = () => matchMedia("(pointer: coarse)").matches;
+// footer link previews (public/previews/*, generated 2026-11-17); links without an image preview as text
+const PEEK_IMG = { "Résumé": "/previews/resume.webp", GitHub: "/previews/github.webp", "PX-01 lab": "/previews/lab.webp", "Pull the lever again": "/previews/lab.webp" };
 
 const Home = ({ onSelect }) => {
     const hero = useRef(null);
@@ -309,6 +311,7 @@ const Home = ({ onSelect }) => {
             .catch(() => { location.href = `mailto:${profile.email}`; });
     };
     const [picking, setPicking] = useState(false);
+    const [peek, setPeek] = useState(null);                       // footer link hover preview
     // ⌘K / Ctrl+K: the command menu (the world rack doubles as project search)
     useEffect(() => {
         const k = (e) => { if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); setPicking((p) => !p); } };
@@ -653,7 +656,13 @@ const Home = ({ onSelect }) => {
                         if (e.pointerType !== "mouse" || !e.target.closest?.(".key")) return;
                         const now = performance.now();
                         if (now - lastRatchet.current > 80) { lastRatchet.current = now; sfx.ratchet(); }
-                    }}>
+                    }} onPointerMove={(e) => {
+                        // plain links + a preview that follows the cursor (mouse only; decorative, the link text says it all)
+                        if (e.pointerType !== "mouse") return;
+                        const k = e.target.closest?.(".key");
+                        const land = e.currentTarget.parentElement; land.style.setProperty("--px", `${e.clientX}px`); land.style.setProperty("--py", `${e.clientY}px`);
+                        setPeek(k ? { label: k.dataset.label, hint: k.dataset.hint, img: k.dataset.img } : null);
+                    }} onPointerLeave={() => setPeek(null)}>
                         {[
                             ["Contact", "Résumé, email and profiles", [
                                 { label: "Résumé", hint: "One-page PDF", href: profile.resume, ext: true, icon: "↓" },
@@ -672,21 +681,29 @@ const Home = ({ onSelect }) => {
                                 <p className="keys-sub">{sub}</p>
                                 {items.map((k) => {
                                     const body = <><span className="k-label">{k.label}</span><span className="k-hint">{k.hint}</span>{k.knob ? <i aria-hidden className="k-dot" /> : <i aria-hidden>{k.icon}</i>}</>;
+                                    const peekData = { "data-label": k.label, "data-hint": k.hint, "data-img": PEEK_IMG[k.label] };
                                     return k.href
-                                        ? <a key={k.label} className="key lg" href={k.href} {...(k.ext ? { target: "_blank", rel: "noreferrer" } : {})}>{body}</a>
-                                        : <button key={k.label} type="button" className={k.knob ? "key lg knob" : "key lg"} onClick={pullAgain}>{body}</button>;
+                                        ? <a key={k.label} className="key" href={k.href} {...peekData} {...(k.ext ? { target: "_blank", rel: "noreferrer" } : {})}>{body}</a>
+                                        : <button key={k.label} type="button" className={k.knob ? "key knob" : "key"} {...peekData} onClick={pullAgain}>{body}</button>;
                                 })}
                             </div>
                         ))}
                     </nav>
+                    {peek && (
+                        <div className="key-peek" aria-hidden>
+                            {peek.img && <img src={peek.img} alt="" />}
+                            <p className="mono">{peek.label}</p>
+                            <p className="key-peek-hint">{peek.hint}</p>
+                        </div>
+                    )}
                     <section className="worlds-matrix-wrap" aria-label="12 portfolio realities">
                         <div className="wm-head">
-                            <h3 className="mono">07 // REALITIES ({String(worlds.length).padStart(2, "0")})</h3>
-                            <p className="mono">12 interactive dimensions — pick any world</p>
+                            <h3 className="mono">The 12 worlds</h3>
+                            <p className="mono">Scroll sideways · each one is a whole portfolio</p>
                         </div>
                         <div className="worlds-matrix">
                             {worlds.map((w, i) => (
-                                <button key={w.id} type="button" className="wm-cell" onClick={() => enter(w.id)}>
+                                <button key={w.id} type="button" className="wm-cell" style={{ "--wm-paper": w.paper || "#222" }} onClick={() => enter(w.id)}>
                                     <span className="mono wm-idx">{String(i + 1).padStart(2, "0")}</span>
                                     <span className="wm-name">{w.name}</span>
                                     <span className="wm-tag">{w.tagline}</span>

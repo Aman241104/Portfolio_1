@@ -18,13 +18,11 @@ const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-mo
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const SECTIONS = 9;
 const GB_KEY = "px01-y2001-guestbook-v1";
-const SEED_BOOK = {
-    hits: 1428,
-    entries: [
-        { name: "xX_CyberSurfer_Xx", homepage: "", created_at: "2001-08-14T10:00:00Z", message: "cool starfield!! signed ur guestbook, check out my angelfire page!!" },
-        { name: "Recruiter_2026", homepage: "", created_at: "2026-10-19T14:30:00Z", message: "Came for the 2001 nostalgia, stayed for the 26 shipped projects." },
-    ],
-};
+// No invented visitors or hit counts (Aman, 2026-11-17: "remove all that, replace with real"). Offline/dev starts at 0
+// with no entries; real signatures come from /api/guestbook (Neon, approved rows only).
+const SEED_BOOK = { hits: 0, entries: [] };
+// Real client words, pinned above visitor signatures and labelled as clients (same source as the home readout).
+const CLIENT_NOTES = (profile.quotes || []).map((q) => ({ name: q.name, role: `${q.role}, ${q.org}`, created_at: new Date(`1 ${q.date}`).toISOString(), message: q.text }));
 const isLocalDev = () => typeof window !== "undefined" && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
 function readLocalBook() {
     try {
@@ -114,7 +112,7 @@ export default function Y2001({ shell }) {
         if (isLocalDev()) {
             const lb = readLocalBook();
             if (day !== today) {
-                lb.hits = (lb.hits || SEED_BOOK.hits) + 1;
+                lb.hits = (lb.hits || 0) + 1;
                 writeLocalBook(lb);
                 try { localStorage.setItem("px01-y2001-hit", today); } catch { /* ignore */ }
             }
@@ -258,7 +256,10 @@ export default function Y2001({ shell }) {
                     <ol className="y-entries">
                         {book.state === "loading" && <li>Loading entries…</li>}
                         {book.state === "offline" && <li>The guestbook is napping. <a href={`mailto:${profile.email}`}>E-mail me</a> instead!</li>}
-                        {book.state === "ok" && !book.entries.length && <li>No entries yet. Be the first!!</li>}
+                        {CLIENT_NOTES.map((e) => (
+                            <li key={e.name} className="y-gb-client"><b>{e.name}</b> <i>({e.role})</i> wrote on {new Date(e.created_at).toLocaleDateString("en-IN", { month: "short", year: "numeric" })}:<q>{e.message}</q></li>
+                        ))}
+                        {book.state === "ok" && !book.entries.length && <li>No visitor entries yet. Be the first!!</li>}
                         {book.entries.map((e, i) => (
                             <li key={i}><b>{e.homepage ? <a href={e.homepage} target="_blank" rel="noreferrer nofollow ugc">{e.name}</a> : e.name}</b> wrote on {new Date(e.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}:<q>{e.message}</q></li>
                         ))}

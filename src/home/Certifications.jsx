@@ -12,14 +12,12 @@ const trackSheen = (e) => {
 // Verified AI & Engineering Certifications — editorial gallery index matching Dark Studio & Light Atelier.
 export default function Certifications() {
     return (
-        <section className="xp certs-sec" aria-labelledby="certs-h">
-            <div className="work-head">
-                <div className="po-print" data-reveal>
-                    <p className="mono sec-kicker">Output 05 · Calibration</p>
-                    <h2 id="certs-h">Certifications</h2>
-                </div>
-                <p className="mono">Verified AI, Cloud &amp; Agentic Engineering</p>
-            </div>
+        <section className="xp certs-sec split-sec" aria-labelledby="certs-h">
+            <aside className="split-rail po-print" data-reveal>
+                <p className="mono sec-kicker">Output 05 · Calibration</p>
+                <h2 id="certs-h">Certifications</h2>
+                <p className="mono xp-span">Verified AI, cloud &amp; agentic engineering</p>
+            </aside>
             <ul className="cert-grid" data-reveal onPointerMove={trackSheen}>
                 {certifications.map((c, i) => (
                     <li key={c.code} className="cert-card" style={{ "--i": i, "--cert-accent": c.accent }}>

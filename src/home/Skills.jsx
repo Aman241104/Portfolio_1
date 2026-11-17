@@ -31,14 +31,12 @@ export default function Skills() {
         if (now - lastTick.current > 70) { lastTick.current = now; sfx.tick(); }
     };
     return (
-        <section className="skills-sec" aria-labelledby="skills-h">
-            <div className="work-head">
-                <div className="po-print" data-reveal>
-                    <p className="mono sec-kicker">Output 06 · Parts list</p>
-                    <h2 id="skills-h">Skills</h2>
-                </div>
-                <p className="mono">Everything here is used in a project above</p>
-            </div>
+        <section className="skills-sec split-sec" aria-labelledby="skills-h">
+            <aside className="split-rail po-print" data-reveal>
+                <p className="mono sec-kicker">Output 06 · Parts list</p>
+                <h2 id="skills-h">Skills</h2>
+                <p className="mono xp-span">Everything here is used in a project above</p>
+            </aside>
             <div className="skill-groups" onPointerOver={tick}>
                 {skillGroups.map((g) => (
                     <div key={g.group} className="skill-group" data-reveal>

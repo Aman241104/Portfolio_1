@@ -1,7 +1,7 @@
 /* global process */
 // Uptime for the "Live & maintained" list, checked server-side (Vercel, Singapore) so visitors' ad-blockers,
 // privacy extensions or a site's cold start can't show false "down" dots. Cached 5 min at the edge.
-import { work } from "../content/work.js";
+import { work, inProduction } from "../content/work.js";
 
 const check = async (url) => {
     for (let attempt = 0; attempt < 2; attempt++) {                // one retry: cold starts are common on free tiers
@@ -15,7 +15,7 @@ const check = async (url) => {
 };
 
 export default async function handler(req, res) {
-    const sites = work.filter((w) => w.maintained);
+    const sites = work.filter(inProduction);
     const results = await Promise.all(sites.map(async (w) => [w.slug, await check(w.url)]));
     res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=900");
     res.status(200).json({ checkedAt: new Date().toISOString(), from: process.env.VERCEL_REGION || "local", sites: Object.fromEntries(results) });

@@ -208,6 +208,12 @@ export const work = [
         stack: "Next.js",
     },
     {
+        slug: "jukebox-media", kind: "client", year: 2026, live: true, title: "Jukebox Media",
+        url: "https://www.jukeboxmedia.in",
+        line: "Brand strategy and performance marketing agency: leadership, brands, the Jukebox method and client reviews.",
+        stack: "Next.js · WebGL gradient",
+    },
+    {
         slug: "decor-story", kind: "client", year: 2026, demo: true, title: "The Décor Story",
         url: "https://the-decor-story-web.vercel.app",
         line: "Wedding and event décor studio: galleries, packages and a check-your-date enquiry.",
@@ -271,6 +277,10 @@ export const work = [
 
 // Client builds that live on preview URLs are shown honestly as prototypes / demo builds, everywhere their line is read.
 work.forEach((w) => { if (w.demo) w.line = `Prototype · ${w.line}`; });
+
+// Everything in production today: sites Aman maintains + every client build on its own live domain.
+// Shared by the home "Live" list and api/status.js so the list and the uptime check never drift apart.
+export const inProduction = (w) => !!(w.maintained || w.live);
 
 // One status word for a project, for worlds that show one (Live / Prototype / Built / Private).
 export const status = (w) => (w.live ? "Live" : w.demo ? "Prototype" : w.url ? "Built" : "Private");

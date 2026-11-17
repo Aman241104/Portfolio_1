@@ -427,3 +427,56 @@
 @media (max-width: 760px) { .home .cta-alt { flex-wrap: wrap; justify-content: center; row-gap: 12px; column-gap: 18px; } }
 .printout .ledger-more { margin-top: 18px; }
 .home .pull .cta-n { color: #141416 !important; opacity: .45; }
+
+/* ---- Footer index: plain ruled links (no glass cards) with a preview that follows the cursor. ---- */
+.home .keys .key {
+    position: relative; display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px;
+    padding: 14px 0 !important; margin: 0 !important; border: 0 !important; border-bottom: 1px solid rgb(var(--bone-rgb) / .12) !important;
+    border-radius: 0 !important; background: none !important; box-shadow: none !important; backdrop-filter: none !important; color: var(--bone) !important;
+    text-align: left; transition: padding-left var(--px-t1) var(--px-ease);
+}
+.home .keys .key .k-label { grid-column: 1; }
+.home .keys .key .k-hint { grid-column: 1; color: var(--smoke) !important; }
+.home .keys .key i { position: static; transform: none; grid-column: 2; grid-row: 1; color: var(--smoke); transition: color var(--px-t1), translate var(--px-t1) var(--px-ease); }
+@media (hover: hover) {
+    .home .keys .key:hover { padding-left: 8px !important; background: none !important; color: var(--bone) !important; }
+    .home .keys .key:hover .k-hint { color: var(--smoke) !important; }
+    .home .keys .key:hover i { color: var(--signal); translate: 2px -2px; }
+}
+.key-peek {
+    position: fixed; z-index: 60; left: 0; top: 0; translate: calc(var(--px, -999px) + 22px) calc(var(--py, -999px) + 22px);
+    width: 240px; padding: 10px; border-radius: 6px; pointer-events: none;
+    background: var(--paper); color: var(--ink); box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / .12), 0 24px 48px -16px rgb(0 0 0 / .55);
+    animation: key-peek var(--px-t1) var(--px-ease) both;
+}
+.key-peek img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 3px; margin-bottom: 10px; }
+.key-peek .mono { margin: 0 0 4px; font-size: 11px !important; letter-spacing: .06em; color: var(--graphite) !important; }
+.key-peek-hint { margin: 0; font: 500 14px/1.35 "Geist", sans-serif; }
+@keyframes key-peek { from { opacity: 0; scale: .96; } }
+@media (hover: none) { .key-peek { display: none; } }
+
+/* ---- The 12 worlds: one horizontal rail of cartridges instead of a 4×3 grid. ---- */
+.home .worlds-matrix {
+    display: flex !important; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    padding-bottom: 14px; border: 0 !important; scrollbar-width: thin; scrollbar-color: rgb(var(--bone-rgb) / .2) transparent;
+    -webkit-mask-image: linear-gradient(90deg, #000 90%, transparent); mask-image: linear-gradient(90deg, #000 90%, transparent);
+}
+.home .worlds-matrix .wm-cell {
+    flex: 0 0 260px; scroll-snap-align: start; position: relative; padding-top: 22px !important;
+    border: 1px solid rgb(var(--bone-rgb) / .12) !important; border-radius: 6px !important; overflow: hidden;
+}
+.home .worlds-matrix .wm-cell::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 8px; background: var(--wm-paper);
+    background-image: repeating-linear-gradient(90deg, rgb(0 0 0 / .16) 0 1px, transparent 1px 6px); }
+.home .wm-head h3 { color: var(--bone) !important; }
+
+/* ---- Certifications & Skills in the split layout (title rail left, content right) like Live / Service log. ---- */
+.printout :is(.certs-sec, .skills-sec).split-sec { max-width: 1200px; margin: 0 auto; box-sizing: content-box; padding-left: var(--gutter); padding-right: var(--gutter); }
+.printout .certs-sec .cert-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.printout .skills-sec.split-sec .skill-group { grid-template-columns: 1fr; gap: 8px; }
+.printout .skills-sec.split-sec .skill-group ul { grid-column: 1; grid-row: auto; }
+/* the .land child rule (position: relative) was pulling the preview into the flow and shifting the layout:
+   pin it fixed, on top of everything, sitting above-right of the cursor */
+.home .land > .key-peek { position: fixed !important; z-index: 9000 !important; translate: calc(var(--px, -999px) + 16px) calc(var(--py, -999px) - 100% - 16px); }
+/* rail titles are sized to the rail, not the viewport: "CERTIFICATIONS" (14 chars) overflowed into the content column */
+.printout .split-rail { container-type: inline-size; }
+.home .printout .split-rail h2, .home[data-light] .printout .split-rail h2 { font-size: clamp(44px, 16cqw, 104px); }

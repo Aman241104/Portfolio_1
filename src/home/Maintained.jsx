@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { work, KINDS } from "#content/work.js";
+import { work, KINDS, inProduction } from "#content/work.js";
 
 // Production sites and products I built and still look after. Status comes from /api/status (checked server-side,
 // cached 5 min); if that's unavailable (local dev), the visitor's browser pings each site instead, with a retry.
@@ -17,7 +17,7 @@ const ping = async (url) => {
 const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "just now" : `${m} min ago`; };
 
 export default function Maintained() {
-    const list = work.filter((w) => w.maintained);
+    const list = work.filter(inProduction);
     const [status, setStatus] = useState({});
     const [checked, setChecked] = useState(null);       // { at, from } when the server check answered
     const ref = useRef(null);
@@ -40,7 +40,7 @@ export default function Maintained() {
             <aside className="split-rail po-print" data-reveal>
                 <p className="mono sec-kicker">Output 03 · Live telemetry</p>
                 <h2 id="kept-h">Live &amp; maintained</h2>
-                <p className="kept-intro">Sites and products I built that are in production today. I still ship fixes, content and features on them.</p>
+                <p className="kept-intro">Every site and product I built that is in production today, checked live. The ones marked maintained still get fixes, content and features from me.</p>
                 <p className="mono kept-sum" aria-live="polite">
                     {Object.keys(status).length < list.length ? `Probing ${Object.keys(status).length} / ${list.length}…` : `${up} / ${list.length} operational · ${checked ? `${ago(checked.at)} (${checked.from === "sin1" ? "SIN1" : "server"})` : "live browser probe"}`}
                 </p>
@@ -56,7 +56,7 @@ export default function Maintained() {
                                 <i className="dot" data-state={state} aria-hidden />
                                 <span className="kept-name">{w.title}</span>
                                 <span className="mono kept-host">{host(w.url)}</span>
-                                <span className="mono kept-kind">{w.kind === "client" ? "Client site" : KINDS[w.kind].replace(/s$/, "")}</span>
+                                <span className="mono kept-kind">{w.kind === "client" ? "Client site" : KINDS[w.kind].replace(/s$/, "")}{w.maintained ? " · maintained" : ""}</span>
                                 <span className="mono kept-ms">{state === "wait" ? "…" : state === "down" ? "no answer" : `up · ${ms} ms`}</span>
                             </a>
                         </li>

@@ -18,7 +18,8 @@ export const setSound = (v) => {
     subs.forEach((f) => f(v));
 };
 
-const buzz = (ms) => { try { navigator.vibrate?.(ms); } catch { /* ignore */ } };
+// only after the visitor has tapped/clicked once: before that Chrome blocks vibrate and logs a console error per call
+const buzz = (ms) => { try { if (navigator.userActivation?.hasBeenActive) navigator.vibrate?.(ms); } catch { /* ignore */ } };
 
 // A short pitched blip with an exponential decay.
 const blip = (freq, dur, gain, type = "square", t0 = 0) => {
