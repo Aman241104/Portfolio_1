@@ -23,6 +23,7 @@ Every decision below the hero must be answerable with: *"what would this machine
 | **Jobs, not sections** | Each section is a print job: `Output 0X · <job>`. 01 Readout · 02 Tickets · 03 Live telemetry · 04 Service log · 05 Calibration · 06 Parts list → torn off → *Insert coin* (contact). |
 | **Perforation** | Jobs are separated by a dashed tear line with half-moon notches cut into both paper edges. No label. |
 | **Tickets** | Every project is a ticket: `No. 001-2026`, a barcode derived from its slug (same bars every visit), and a plain state (`Live` with a green dot / `Shipped` / `Private`). |
+| **Job titles** | Archivo at 62% width, 800, uppercase, line-height .84 — poster type from Aman's moodboard. Same in both papers. |
 | **Type** | Machine voice = Geist Mono 11px, +0.06em, uppercase, graphite — one size only. Figures always tabular Geist. Human voice = Geist (dark) / Playfair Display (light) for titles only. Never medium-everything. |
 | **Colour** | 4 tokens + one accent, per paper. Red only for the print-head LED/carriage and hover/focus. Green only means "live". Kickers are graphite. |
 | **Motion** | One curve (`--px-ease`, decelerating, no overshoot), three durations (180 / 480 / 820ms). Headers rise 14px and fade in. The carriage runs only while paper feeds. Buttons scale to .97 on press. Static under `prefers-reduced-motion`. |
@@ -36,7 +37,7 @@ Every decision below the hero must be answerable with: *"what would this machine
 - Related controls sit with what they act on and share one box model.
 
 ## 4. Non-negotiables kept from PX-01
-- The hero stays: machine, 4 keychains, sphere, "Creative Developer" callout, "Portfolio" wordmark, red signature, 1:1 match-cut, ink-bleed (Aman, 2026-11-17: keep everything; only the 9-link bar was slimmed to 5).
+- Hero = **one object, lit** (Aman, 2026-11-17, after comparing with his references): machine, 2 charms (React, Three.js) beside it, "Portfolio" wordmark + red signature, one CTA pair, 5-link bar. Sphere, "Creative Developer" callout and centre pill removed. 1:1 match-cut and ink-bleed kept.
 - Recruiter fast path ≤ 2 taps (résumé is in the hero bar, readout job, dock, and contact).
 - Only the 26 projects in `content/work.js`.
 - Mobile first: the strip runs 8px from the screen edge; the print head hides on phones (the liquid dock owns the bottom).

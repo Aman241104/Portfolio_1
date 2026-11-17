@@ -31,20 +31,18 @@
 ## 2. Locked Visual Direction & Non-Negotiable Taste Rules (`docs/LIGHT_MODE_AND_TRANSITION_VISION.md`)
 
 ### Rule 1: 1:1 Cinema Match-Cut Architecture (`Dark Studio ↔ Light Gallery Atelier`)
-- **Zero Layout Shift Between Modes:** Every single element in the Hero (`AMAN® / FULL-STACK ENGINEER / ● AHMEDABAD, INDIA`, center pill `✦ PX-01 -- REALITY SELECTOR`, circular waveform `SoundToggle`, the 4 hanging `Keychains`, the floating metallic sphere at `[-5.15, -1.12, -1.2]`, the `"Creative Developer"` + `[ EXPERIMENTAL PORTFOLIO ]` callout at `left: 6.2vw; top: 53.5%`, the outline pill `PULL THE LEVER →` + `JUST SHOW ME THE WORK` at `right: 6.2vw; top: 47%`, the monumental `"Portfolio"` wordmark + red `"Aman Patel"` signature, the sculpted `<svg className="hero-ridge">`, and the bottom editorial bar `01 / 07 | One developer...`) occupies the **exact same pixel coordinates, sizes, and DOM tree** in both Dark Mode and Light Mode.
+- **Zero Layout Shift Between Modes:** Every element in the Hero (`AMAN® / FULL-STACK ENGINEER / ● AHMEDABAD, INDIA` + theme/clock/sound controls, the PX-01 machine, **2** hanging `Keychains` (React, Three.js) in the inner slot beside the machine, the outline pill `PULL THE LEVER →` + `JUST SHOW ME THE WORK`, the monumental `"Portfolio"` wordmark + red `"Aman Patel"` signature, the sculpted `<svg className="hero-ridge">`, and the 5-link bottom bar) occupies the **exact same pixel coordinates, sizes, and DOM tree** in both Dark Mode and Light Mode. **"One object, lit" (Aman, 2026-11-17):** the floating sphere, `"Creative Developer"` callout, centre `REALITY SELECTOR` pill and 2 inner keychains were removed — do not re-add hero elements.
 - When toggling `Dark ↔ Light`, **only** the colors, lighting, surface materials, and font-family (`"Geist"` in Dark Mode ↔ `"Playfair Display"` Didone serif in Light Mode) transform across the match-cut.
 
 ### Rule 2: Cohesive 3D Materials Across Both Modes
 - **Dark Mode ("Dark Studio" — Default):**
   - `--void: #050506` | `--bone: #edeae3` | `--smoke: #8a8780` | `--signal: #ff2e1f`
   - Sculpted dark obsidian ridge (`#111114 → #050506`) + subtle atmospheric `.dark-floor-fog`.
-  - 4 black-enamel charms with glowing brand logos (`Keychains.jsx`).
-  - Floating sphere on the left in **Glowing Crimson-Red Anodized Metal (`#ff2214`)** (`Studio.jsx`).
+  - 2 black-enamel charms with glowing brand logos (`Keychains.jsx`).
 - **Light Mode ("Gallery Atelier" — `.home[data-light]`):**
   - `--void: #ebe8e2` | `--bone: #141416` | `--smoke: #64615b` | `--signal: #e62117`
   - Sculpted alabaster/limestone ridge (`#faf9f6 → #e2dfd8`) + monumental `"Portfolio"` wordmark and section headers in **`Playfair Display` (weight 800)**.
-  - 4 frosted silver/optical-glass charms with deep carbon ink logos (`Keychains.jsx`).
-  - Floating sphere on the left in **Bright Polished Silver-Chrome (`#f4f2ee`)** (`Studio.jsx`).
+  - 2 frosted silver/optical-glass charms with deep carbon ink logos (`Keychains.jsx`).
   - In `DotField.jsx`, the 70k particle dunes shift to **deep carbon iron-filings (`#141417`)** with **`#ff2e1f` vermilion code glyphs** on warm paper.
 
 ### Rule 3: Guaranteed 60fps SVG Fractal Ink-Bleed Overlay (`Dark ↔ Light`)
@@ -64,7 +62,7 @@
 - `modern-web-guidance`, `avoid-ai-design`, `design-taste`, `reference-driven-design`, `high-end-visual-design`, `site-motion-excellence-director`, `web-motion-auditor`, `genjutsu-cast`, `genjutsu-paint`, `chrome-devtools`.
 
 ### Governing Philosophy — "The Machine Prints It" (`2026-11-17`, chosen by Aman)
-Below the hero, everything is ONE strip of thermal paper fed out of PX-01 through a print head pinned to the screen bottom. Sections are print jobs (`Output 0X · Readout / Tickets / Live telemetry / Service log / Calibration / Parts list`), separated by perforations, ending torn off above the *Insert coin* contact. Full rules: `docs/AWWWARDS_PHILOSOPHY.md`. Hero: keep every element (Aman, 2026-11-17); only the bottom bar was slimmed to 5 links.
+Below the hero, everything is ONE strip of thermal paper fed out of PX-01 through a print head pinned to the screen bottom. Sections are print jobs (`Output 0X · Readout / Tickets / Live telemetry / Service log / Calibration / Parts list`), separated by perforations, ending torn off above the *Insert coin* contact. Full rules: `docs/AWWWARDS_PHILOSOPHY.md`. Hero: "one object, lit" (Aman, 2026-11-17) — machine, 2 charms, wordmark + signature, one CTA. Printout titles: Archivo 62% width, heavy, uppercase. Polish rules: docs/AWWWARDS_PHILOSOPHY.md §3b.
 
 ### Working Model
 Claude Code builds. The `agy` CLI is the critic (`agy -p "<read-only brief>" --mode plan --sandbox --dangerously-skip-permissions`). Motion skills installed: `/motion` (+ `motion` MCP at mcp.motion.dev), Emil Kowalski's `animate`, `choreograph`, `review-animations`, `improve-animations`, `animation-performance`, plus existing `gsap-*`, `hyperframes`, `motion-design-studio`.
