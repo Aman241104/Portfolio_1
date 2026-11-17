@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { profile, socials } from "#content/profile.js";
 import { onRepeat, watching } from "#content/taste.js";
-import { work, KINDS, shot } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { certifications } from "../../../content/certifications.js";
 import { skillGroups } from "../../../content/skills.js";
@@ -37,7 +37,7 @@ export default function EditorialWorld() {
     const [q, setQ] = useState("");
     const [view, setView] = useState("list");
     const [peek, setPeek] = useState(null);
-    const [folio, setFolio] = useState({ show: false, pct: 0 });
+    const folioRef = useRef(null);
     const [ist, setIst] = useState(() => new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false }));
 
     useEffect(() => {
@@ -57,12 +57,18 @@ export default function EditorialWorld() {
     const fine = typeof window !== "undefined" && matchMedia("(pointer: fine)").matches;
 
     useEffect(() => {
-        const onScroll = () => {
+        // written straight to the element once per frame: a React state here re-rendered all 44 index rows per scroll event
+        let raf = 0;
+        const paint = () => {
+            raf = 0;
+            const el = folioRef.current; if (!el) return;
             const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-            setFolio({ show: window.scrollY > 360, pct: Math.min(100, (window.scrollY / max) * 100) });
+            el.toggleAttribute("data-show", window.scrollY > 360);
+            el.style.setProperty("--p", Math.min(1, window.scrollY / max).toFixed(4));
         };
+        const onScroll = () => { if (!raf) raf = requestAnimationFrame(paint); };
         window.addEventListener("scroll", onScroll, { passive: true });
-        return () => window.removeEventListener("scroll", onScroll);
+        return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
     }, []);
 
     useEffect(() => {
@@ -108,7 +114,7 @@ export default function EditorialWorld() {
 
     return (
         <div ref={root} className="ed">
-            <nav className="ed-folio" data-show={folio.show || undefined} aria-label="Section index">
+            <nav ref={folioRef} className="ed-folio" aria-label="Section index">
                 <span className="ed-folio-brand">THE INDEX · 2026</span>
                 <div>
                     <a href="#ed-front">Front Page</a>
@@ -118,10 +124,10 @@ export default function EditorialWorld() {
                     <a href="#ed-tools">Toolkit</a>
                     <a href="#ed-contact">Contact</a>
                 </div>
-                <i className="ed-folio-bar" style={{ width: `${folio.pct}%` }} aria-hidden />
+                <i className="ed-folio-bar" aria-hidden />
             </nav>
             <header className="ed-mast">
-                <p className="ed-meta"><span>Ahmedabad · {ist} IST</span><span>{today}</span><span>Vol. 2026 · {work.length} projects · {work.filter((w) => w.maintained).length} in production</span></p>
+                <p className="ed-meta"><span>Ahmedabad · {ist} IST</span><span>{today}</span><span>Vol. 2026 · {work.length} projects · {work.filter(inProduction).length} in production</span></p>
                 <h1 aria-label={TITLE}>{[...TITLE].map((c, i) => <span key={i} className="ed-ch" aria-hidden>{c === " " ? "\u00a0" : c}</span>)}</h1>
                 <p className="ed-deck"><em>The collected work of</em> {profile.name}, full-stack engineer. AI products, Android apps, live client sites.</p>
                 <nav className="ed-ear">
@@ -229,7 +235,7 @@ export default function EditorialWorld() {
                 <div>
                     <h2>In production</h2>
                     <ul className="ed-live">
-                        {work.filter((w) => w.maintained).map((w) => (
+                        {work.filter(inProduction).map((w) => (
                             <li key={w.slug}><a href={w.url} target="_blank" rel="noreferrer"><span>{w.title}</span><span className="ed-mono">{host(w.url)}</span></a></li>
                         ))}
                     </ul>

@@ -96,7 +96,7 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 
 /* letterpress reveal: each masthead letter rises from behind the rule; lead headline words likewise */
 .ed-mast h1 { overflow: hidden; }
-.ed-ch { display: inline-block; will-change: transform; }
+.ed-ch { display: inline-block; }   /* no permanent will-change: GSAP promotes during the entrance only */
 .ed-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; }
 .ed-w > span { display: inline-block; }
 .ed :is(h1, h2, h3, p, .ed-title, .ed-more) { font-variant-numeric: normal; }   /* tnum also widens , : . in Schibsted: keep it for the numeric columns only */
@@ -108,7 +108,7 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 .ed-folio > div { display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .ed-folio a { font: 500 11.5px/1 "Geist Mono", monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--ink); text-decoration: none; }
 .ed-folio a:hover { color: var(--ikb); }
-.ed-folio-bar { position: absolute; left: 0; bottom: -1px; height: 2px; background: var(--ikb); pointer-events: none; }
+.ed-folio-bar { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--ikb); pointer-events: none; transform-origin: left; transform: scaleX(var(--p, 0)); }
 
 .ed-duo { border: 1px solid rgba(15, 16, 18, .22); }
 .ed-duo img { filter: grayscale(1) contrast(1.26) brightness(.92) !important; }
@@ -151,3 +151,10 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 .ed-gcard .ed-more { margin-top: auto; padding-top: 8px; }
 @media (max-width: 960px) { .ed-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .ed-gallery { grid-template-columns: 1fr; } }
+
+/* phones: the masthead links as a tidy two-column ledger instead of three ragged centred rows */
+@media (max-width: 700px) {
+    .ed-ear { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; text-align: left; justify-items: start; }
+    .ed-ear a { margin: 0; padding: 4px 0; }
+    .ed-ear .ed-ink { grid-column: 1 / -1; }
+}
