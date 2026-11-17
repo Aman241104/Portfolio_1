@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { worlds, RECRUITER_WORLD, findWorld } from "#worlds/registry.js";
 import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
@@ -435,6 +435,8 @@ const Home = ({ onSelect }) => {
     }, [heroOn]);
 
     const busy = phase !== "idle" && phase !== "armed";
+    // known from the pull: the 3D ticket paints it in idle time during the spin, then only shows it on reveal
+    const ticketData = useMemo(() => (result ? { no: plays, name: result.name, symbols: result.symbols } : null), [result, plays]);
 
     return (
         <main className="home" data-lit={lit || undefined} data-booted={booted || undefined} data-phase={phase}
@@ -506,7 +508,7 @@ const Home = ({ onSelect }) => {
                 {fontsOk && (
                     <Suspense fallback={null}>
                         <Studio active={heroOn} count={lit ? plays : 0} debug={debug} onDebug={() => { setDebug((d) => !d); track("debug_toggled"); }}
-                            ticket={phase === "revealed" && result ? { no: plays, name: result.name, symbols: result.symbols } : null}
+                            ticket={phase === "revealed" ? ticketData : null} ticketData={ticketData}
                             onTicket={() => { if (!result) return; track("ticket_clicked", { world: result.id }); enter(result.id); }} spinning={phase === "spinning"} pulled={pulled} booted={booted}
                             target={target} entering={phase === "transitioning"} jackpot={phase === "revealed" || phase === "transitioning"} lit={lit} light={light}
                             onPull={pull} onArm={onArm} onReelStop={onReelStop} onAnchors={onAnchors}

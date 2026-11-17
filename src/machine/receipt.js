@@ -6,20 +6,57 @@ import * as THREE from "three";
 const W = 512;
 const rnd = (s) => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
-export const receiptTexture = (tk, aspect) => {
+// Created ONCE (blank paper) so the ticket material has its maps from the first frame: drei's <Preload all> then compiles
+// the heavy physical shader during the boot. Before, the maps appeared at the reveal, which forced a shader recompile
+// + two full canvas paints in the very frame the reels locked (the "freeze when the world detail comes").
+// draw(tk) repaints the same canvases; the caller runs it in idle time while the reels spin.
+export const createReceipt = (aspect) => {
     const H = Math.round(W * aspect), c = document.createElement("canvas"); c.width = W; c.height = H;
-    const g = c.getContext("2d");
-    // stock: warm off-white with a soft gradient (thermal paper is never pure white)
+    const b = document.createElement("canvas"); b.width = W / 2; b.height = Math.round(H / 2);
+    const base = { stock: paintStock(H), bump: paintBumpBase(b.width, b.height) };   // the expensive per-pixel work, once
+    const map = new THREE.CanvasTexture(c); map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 4;
+    const bump = new THREE.CanvasTexture(b);
+    const paint = (tk) => { paintReceipt(c, b, tk, H, base); map.needsUpdate = true; bump.needsUpdate = true; };
+    paint(null);
+    return { map, bump, draw: paint };
+};
+
+// stock: warm off-white with a soft gradient (thermal paper is never pure white), grain and fibres
+const paintStock = (H) => {
+    const s = document.createElement("canvas"); s.width = W; s.height = H;
+    const g = s.getContext("2d");
     const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#f6f1e6"); bg.addColorStop(1, "#ece5d6");
     g.fillStyle = bg; g.fillRect(0, 0, W, H);
-    // grain + fibres
     const img = g.getImageData(0, 0, W, H), d = img.data;
     for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - 0.5) * 14; d[i] += n; d[i + 1] += n; d[i + 2] += n - 2; }
     g.putImageData(img, 0, 0);
     g.strokeStyle = "rgba(120, 105, 80, .07)"; g.lineWidth = 0.6;
     for (let i = 0; i < 90; i++) { const x = rnd(i) * W, y = rnd(i + 9) * H, a = rnd(i + 3) * 6.28, l = 6 + rnd(i + 5) * 18; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a) * l * .5 + 3, y + Math.sin(a) * l * .5, x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
+    return s;
+};
 
-    // thermal ink: near-black, a touch blurred, density varies line to line
+// bump base: grain, fibres and the fold crease (per-ticket wrinkles are added on top in paintReceipt)
+const paintBumpBase = (bw, bh) => {
+    const s = document.createElement("canvas"); s.width = bw; s.height = bh;
+    const bg2 = s.getContext("2d"), bi = bg2.createImageData(bw, bh), bd = bi.data;
+    for (let i = 0; i < bd.length; i += 4) { const n = 128 + (Math.random() - 0.5) * 60; bd[i] = bd[i + 1] = bd[i + 2] = n; bd[i + 3] = 255; }
+    bg2.putImageData(bi, 0, 0);
+    bg2.strokeStyle = "rgba(255,255,255,.35)"; bg2.lineWidth = 0.8;
+    for (let i = 0; i < 70; i++) { const x = rnd(i + 40) * bw, y = rnd(i + 70) * bh, a = rnd(i + 11) * 6.28, l = 4 + rnd(i + 2) * 10; bg2.beginPath(); bg2.moveTo(x, y); bg2.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); bg2.stroke(); }
+    const fy = bh * 0.47, crease = bg2.createLinearGradient(0, fy - 6, 0, fy + 6);
+    crease.addColorStop(0, "rgba(255,255,255,0)"); crease.addColorStop(0.45, "rgba(255,255,255,.55)"); crease.addColorStop(0.55, "rgba(0,0,0,.5)"); crease.addColorStop(1, "rgba(0,0,0,0)");
+    bg2.fillStyle = crease; bg2.fillRect(0, fy - 6, bw, 12);
+    return s;
+};
+
+// per ticket: stamp the stock, print the ink. Cheap enough to run in one idle slice.
+const paintReceipt = (c, b, tk, H, base) => {
+    const g = c.getContext("2d");
+    g.globalCompositeOperation = "source-over"; g.filter = "none"; g.clearRect(0, 0, W, H);
+    g.drawImage(base.stock, 0, 0);
+
+    if (!tk) return;
+    // thermal ink: near-black, density varies line to line (no canvas blur filter: it cost more than the rest of the paint)
     const ink = (a = 1) => `rgba(28, 26, 23, ${a})`, red = "rgba(214, 40, 28, .92)";
     const P = 34, R = W - P;
     let y = 46;
@@ -30,7 +67,6 @@ export const receiptTexture = (tk, aspect) => {
         g.fillText(s, x, y);
     };
     const dots = (yy) => { g.fillStyle = ink(0.55); for (let x = P; x < R; x += 7) g.fillRect(x, yy, 3, 2); };
-    g.filter = "blur(0.35px)";
     text("PX-01 · REALITY SELECTOR", W / 2, 22, { align: "center", weight: 600 }); y += 26;
     text("AMAN PATEL — CLEAR EDITION", W / 2, 15, { align: "center", alpha: 0.6 }); y += 24;
     const now = new Date().toLocaleString("en-GB", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -53,7 +89,6 @@ export const receiptTexture = (tk, aspect) => {
     while (x < P + bw) { s = (s * 1103515245 + 12345) >>> 0; const w = 1 + (s % 4); if ((s >> 3) % 3) { g.fillStyle = ink(0.85); g.fillRect(x, y, w, 46); } x += w + 1 + ((s >> 5) % 2); }
     y += 64;
     text("THANK YOU FOR PLAYING", W / 2, 14, { align: "center", alpha: 0.55, track: 0.2 });
-    g.filter = "none";
     // thermal-printer flaws: a couple of faint dropout streaks through the print, and stock yellowing at the edges
     for (let i = 0; i < 3; i++) { const sy = 90 + rnd(tk.no + i) * (H - 260); g.fillStyle = "rgba(246, 241, 230, .45)"; g.fillRect(0, sy, W, 1 + rnd(i + 4) * 2); }
     const edge = g.createRadialGradient(W / 2, H * 0.45, Math.min(W, H) * 0.35, W / 2, H * 0.45, Math.max(W, H) * 0.75);
@@ -70,26 +105,14 @@ export const receiptTexture = (tk, aspect) => {
     for (let xx = 0, k = 0; xx <= W; xx += 9, k++) g.lineTo(xx, H - 5 - (k % 2 ? 7 : 0) - rnd(k) * 5);
     g.lineTo(W, H); g.closePath(); g.fill(); g.globalCompositeOperation = "source-over";
 
-    const map = new THREE.CanvasTexture(c);
-    map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 4;
-
-    // bump: the surface the light rakes across — grain, fibres, a fold crease, a few soft wrinkles
-    const b = document.createElement("canvas"); b.width = W / 2; b.height = Math.round(H / 2);
-    const bg2 = b.getContext("2d"), bi = bg2.createImageData(b.width, b.height), bd = bi.data;
-    for (let i = 0; i < bd.length; i += 4) { const n = 128 + (Math.random() - 0.5) * 60; bd[i] = bd[i + 1] = bd[i + 2] = n; bd[i + 3] = 255; }
-    bg2.putImageData(bi, 0, 0);
-    bg2.strokeStyle = "rgba(255,255,255,.35)"; bg2.lineWidth = 0.8;
-    for (let i = 0; i < 70; i++) { const x = rnd(i + 40) * b.width, y = rnd(i + 70) * b.height, a = rnd(i + 11) * 6.28, l = 4 + rnd(i + 2) * 10; bg2.beginPath(); bg2.moveTo(x, y); bg2.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); bg2.stroke(); }
-    const fy = b.height * 0.47, crease = bg2.createLinearGradient(0, fy - 6, 0, fy + 6);
-    crease.addColorStop(0, "rgba(255,255,255,0)"); crease.addColorStop(0.45, "rgba(255,255,255,.55)"); crease.addColorStop(0.55, "rgba(0,0,0,.5)"); crease.addColorStop(1, "rgba(0,0,0,0)");
-    bg2.fillStyle = crease; bg2.fillRect(0, fy - 6, b.width, 12);
+    // bump: the stamped base (grain, fibres, crease) plus a few soft wrinkles unique to this ticket
+    const bg2 = b.getContext("2d");
+    bg2.clearRect(0, 0, b.width, b.height); bg2.drawImage(base.bump, 0, 0);
     for (let i = 0; i < 4; i++) {
         const x = rnd(tk.no + i * 3) * b.width, y = rnd(tk.no + i * 5) * b.height, r = 20 + rnd(i) * 40;
         const w = bg2.createRadialGradient(x, y, 0, x, y, r); w.addColorStop(0, "rgba(255,255,255,.18)"); w.addColorStop(1, "rgba(255,255,255,0)");
         bg2.fillStyle = w; bg2.fillRect(x - r, y - r, r * 2, r * 2);
     }
-    const bump = new THREE.CanvasTexture(b);
-    return { map, bump };
 };
 
 // Sheet geometry: hangs from the slot (top edge at y=0), curls toward the viewer at the bottom, with a soft cross-bow.

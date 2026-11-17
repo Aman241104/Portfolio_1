@@ -302,7 +302,7 @@ const AtelierRig = ({ light }) => {
     );
 };
 
-export default function Studio({ count, ticket, onTicket, onDebug, debug, spinning, pulled, booted, target, entering, jackpot, lit, light = false, onPull, onArm, onReelStop, onAnchors, onBooted, onFrame, onCreated, active }) {
+export default function Studio({ count, ticket, ticketData, onTicket, onDebug, debug, spinning, pulled, booted, target, entering, jackpot, lit, light = false, onPull, onArm, onReelStop, onAnchors, onBooted, onFrame, onCreated, active }) {
     const floatRef = useRef();
     const dropRef = useRef();
     useEffect(() => { onCreated?.(); }, [onCreated]);
@@ -343,7 +343,7 @@ export default function Studio({ count, ticket, onTicket, onDebug, debug, spinni
                     <Float ref={floatRef} enabled={!reduced} speed={1.3} rotationIntensity={0.18} floatIntensity={0.55} floatingRange={[-0.18, 0.18]}>
                         <PresentationControls global={false} cursor={!entering} snap speed={1.4} polar={[-0.35, 0.35]} azimuth={[-0.9, 0.9]} damping={0.25}>
                             <Lean>
-                                <Machine spinning={spinning} pulled={pulled} booted={booted} target={target} jackpot={jackpot} count={count} ticket={ticket} onTicket={onTicket} onDebug={onDebug} onPull={onPull} onArm={onArm} onReelStop={onReelStop} />
+                                <Machine spinning={spinning} pulled={pulled} booted={booted} target={target} jackpot={jackpot} count={count} ticket={ticket} ticketData={ticketData} onTicket={onTicket} onDebug={onDebug} onPull={onPull} onArm={onArm} onReelStop={onReelStop} />
                                 <Anchors onAnchors={onAnchors} />
                             </Lean>
                         </PresentationControls>

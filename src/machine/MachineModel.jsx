@@ -4,7 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { RoundedBox, Text } from "@react-three/drei";
 import { worlds } from "#worlds/registry.js";
 import { sfx } from "./sfx.js";
-import { receiptTexture, receiptGeometry } from "./receipt.js";
+import { createReceipt, receiptGeometry } from "./receipt.js";
 
 // PX-01, the clear-case reality selector. Shared by the home screen (src/home) and the lab (/lab/machine.html).
 // Everything is code + PBR. Units ≈ decimetres. The machine is centred on its own origin.
@@ -609,16 +609,23 @@ const Payout = ({ jackpot }) => {
 
 // Win ticket: prints out of a slot under the case, curls toward you, and is the way in (click = enter the world).
 const TICKET_H = 1.05;
-const Ticket = ({ ticket, onTicket }) => {
+const Ticket = ({ ticket, ticketData, onTicket }) => {
     const root = useRef(), paper = useRef(), slot = useRef(), t = useRef(0), hot = useRef(false);
     const narrow = useThree((st) => st.size.width / st.size.height < 0.62);   // tall phones: shorter ticket so it clears the result card
     // fed out of the slot at full size (never stretched): everything above the slot is clipped away
     const clip = useMemo(() => new THREE.Plane(new THREE.Vector3(0, -1, 0), 0), []);
     const wp = useMemo(() => new THREE.Vector3(), []);
-    const tk = ticket;
     const sheet = useMemo(() => receiptGeometry(0.86, TICKET_H), []);
-    const tex = useMemo(() => (tk ? receiptTexture(tk, TICKET_H / 0.86) : null), [tk]);
-    useEffect(() => () => { tex?.map.dispose(); tex?.bump.dispose(); }, [tex]);
+    const tex = useMemo(() => createReceipt(TICKET_H / 0.86), []);          // maps exist from frame one → compiled at boot
+    useEffect(() => () => { tex.map.dispose(); tex.bump.dispose(); }, [tex]);
+    // paint the result while the reels are still spinning, in idle time, never in the reveal frame
+    useEffect(() => {
+        if (!ticketData) return;
+        const idle = window.requestIdleCallback || ((f) => setTimeout(f, 32));
+        const cancel = window.cancelIdleCallback || clearTimeout;
+        const id = idle(() => tex.draw(ticketData), { timeout: 900 });
+        return () => cancel(id);
+    }, [ticketData, tex]);
     useFrame(({ clock }, dt) => {
         t.current = ticket ? t.current + dt : 0;
         if (ticket && t.current - dt < 0.45 && t.current >= 0.45) sfx.print();
@@ -647,9 +654,9 @@ const Ticket = ({ ticket, onTicket }) => {
                     <mesh geometry={sheet} onClick={(e) => { e.stopPropagation(); onTicket?.(); }}
                         onPointerOver={() => { hot.current = true; document.body.style.cursor = "pointer"; }}
                         onPointerOut={() => { hot.current = false; document.body.style.cursor = ""; }}>
-                        <meshPhysicalMaterial map={tex?.map} bumpMap={tex?.bump} bumpScale={1.5} color="#ffffff"
+                        <meshPhysicalMaterial map={tex.map} bumpMap={tex.bump} bumpScale={1.5} color="#ffffff"
                             roughness={0.97} metalness={0} sheen={0.55} sheenRoughness={0.85} sheenColor="#fff6e6"
-                            emissiveMap={tex?.map} emissive="#ffffff" emissiveIntensity={0.26}
+                            emissiveMap={tex.map} emissive="#ffffff" emissiveIntensity={0.26}
                             clippingPlanes={[clip]} alphaTest={0.5} side={THREE.DoubleSide} />
                     </mesh>
                 </group>
@@ -658,7 +665,7 @@ const Ticket = ({ ticket, onTicket }) => {
     );
 };
 
-export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, target, jackpot, count, ticket, onTicket, onDebug, ...props }) => (
+export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, target, jackpot, count, ticket, ticketData, onTicket, onDebug, ...props }) => (
     <group {...props}>
         <Internals />
         <Mechanism spinning={spinning} count={count} />
@@ -685,7 +692,7 @@ export const Machine = ({ spinning, pulled, booted, onPull, onArm, onReelStop, t
         <Lever pulled={pulled} onPull={onPull} onArm={onArm} onDebug={onDebug} />
         <GlintSweep spinning={spinning} />
         <Payout jackpot={jackpot} />
-        <Ticket ticket={ticket} onTicket={onTicket} />
+        <Ticket ticket={ticket} ticketData={ticketData} onTicket={onTicket} />
         {[[-1.4, 0.6], [1.4, 0.6], [-1.4, -0.6], [1.4, -0.6]].map(([x, z], i) => (
             <mesh key={i} position={[x, -1.3, z]} material={mat.chrome}><cylinderGeometry args={[0.1, 0.12, 0.1, 24]} /></mesh>
         ))}

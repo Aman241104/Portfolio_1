@@ -5,6 +5,7 @@ export const certifications = [
         issuer: "Anthropic · Claude Academy",
         short: "ANTHROPIC",
         logo: "anthropic",
+        url: "https://www.linkedin.com/posts/aman-patel-fullstack_im-happy-to-share-that-ive-obtained-a-new-ugcPost-7526910202877669376-WAnM/",
         title: "Claude Code in Action",
         date: "2026",
         focus: "Agentic Coding · Tool Use · Production Workflows",
