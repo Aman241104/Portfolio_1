@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { drawCover } from "./cover.js";
 import { play, stop, BEAT_MS } from "./beat.js";
-import { work, KINDS, shot } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -18,12 +18,16 @@ const FONTS = ["Russo+One", "Archivo:wdth,wght@62..125,300..900", "Space+Mono"];
 // concepts = deluxe edition, experience + certs = gatefold credits, résumé = merch.
 const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+// One element per track: the 40 bars are an SVG mask (same seeded heights as before), the fill is the track colour.
+// Was 40 <i> per track × 44 tracks = 1,760 nodes, every one of them animating while the record played.
+const waveMask = (seed) => {
+    let h = hash(seed), rects = "";
+    for (let i = 0; i < 40; i++) { h = (h * 1103515245 + 12345) >>> 0; const v = 18 + (h % 82); rects += `<rect x="${i * 5}" y="${(100 - v) / 2}" width="3.4" height="${v}" rx=".6"/>`; }
+    return `url("data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100' preserveAspectRatio='none'>${rects}</svg>`)}")`;
+};
 const Wave = ({ seed }) => {
-    const bars = Array.from({ length: 40 }).reduce((acc) => {
-        const h = ((acc.h * 1103515245 + 12345) >>> 0);
-        return { h, v: [...acc.v, 18 + (h % 82)] };
-    }, { h: hash(seed), v: [] }).v;
-    return <span className="wave" aria-hidden>{bars.map((v, i) => <i key={i} style={{ "--h": `${v}%`, "--d": `${(i % 7) * 60}ms` }} />)}</span>;
+    const mask = useMemo(() => waveMask(seed), [seed]);
+    return <span className="wave" aria-hidden style={{ WebkitMaskImage: mask, maskImage: mask }} />;
 };
 
 const SIDES = [
@@ -91,7 +95,8 @@ const VinylGate = ({ onEnter }) => {
 export default function AlbumWorld() {
     useFonts(FONTS);
     const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const [intro, setIntro] = useState(() => { try { return !reduced && !sessionStorage.getItem("px01-album-intro"); } catch { return !reduced; } });
+    // the needle-drop gate is the signature entrance, but never in Recruiter mode (straight to the tracklist)
+    const [intro, setIntro] = useState(() => { try { return !reduced && !sessionStorage.getItem("px01-album-intro") && localStorage.getItem("px01-recruiter") !== "1"; } catch { return !reduced; } });
     const endIntro = (withSound = false) => {
         setIntro(false);
         try { sessionStorage.setItem("px01-album-intro", "1"); } catch { /* private mode */ }
@@ -172,9 +177,9 @@ export default function AlbumWorld() {
                     sleeve={<canvas ref={cover} className="cover-art" width="900" height="900" role="img" aria-label="Generated cover art: one ring per project" />} />
                 <div className="cover-copy">
                     <p className="mono">CAT. NO. PX-05 · AMAN PATEL · AHMEDABAD, {new Date().getFullYear()} · 118 BPM</p>
-                    <p className="cover-role">Full-Stack &amp; 3D Web Engineer · {work.length} Shipped Builds · {work.filter((w) => w.maintained).length} Live in Prod</p>
+                    <p className="cover-role">Full-Stack &amp; 3D Web Engineer · {work.length} Shipped Builds · {work.filter(inProduction).length} Live in Prod</p>
                     <h1>SHIP<br />IT<span>(Deluxe)</span></h1>
-                    <p className="cover-sub">{work.length} tracks · {work.filter((w) => w.live).length} out now on their own domains · {skillGroups.reduce((a, g) => a + g.items.length, 0)} instruments · {certifications.length} verified certs</p>
+                    <p className="cover-sub">{work.length} tracks · {work.filter((w) => w.live).length} out now on their own domains · {certifications.length} verified certs</p>
                     <div className="cover-cta">
                         <button type="button" className="btn" onClick={toggle} aria-pressed={playing}>{playing ? "❚❚ Pause the record" : "▶ Play the record"}</button>
                         <a href="#side-a" className="btn ghost">Side A · Products</a>

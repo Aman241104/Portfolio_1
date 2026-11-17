@@ -109,15 +109,15 @@
 .tt .meta { margin-top: 6px !important; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .single { font-style: normal; color: var(--c); }
 .liner { color: var(--paper); text-decoration: underline; text-decoration-color: var(--c); text-underline-offset: 4px; }
-.wave { display: flex; align-items: center; gap: 2px; height: 36px; }
-.wave i { flex: 1; height: var(--h); background: rgba(242, 240, 234, .22); border-radius: 1px; transform-origin: center; transition: background .3s; }
+.wave { display: block; height: 36px; background: rgba(242, 240, 234, .22); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; transform-origin: center; transition: background .3s; }
+
 @media (hover: hover) {
     .track:hover img { filter: none; }
-    .track:hover .wave i { background: var(--c); animation: pump .7s ease-in-out infinite alternate; animation-delay: var(--d); }
+    .track:hover .wave { background: var(--c); animation: pump .7s ease-in-out infinite alternate; }
     .track:hover b { color: var(--c); }
 }
-.track:active .wave i { background: var(--c); }
-@keyframes pump { to { transform: scaleY(.45); } }
+.track:active .wave { background: var(--c); }
+@keyframes pump { to { transform: scaleY(.62); } }
 .credits, .samples, .tour { padding-top: 70px; }
 .album h2 { margin: 0 0 18px; font: 400 clamp(32px, 4.5vw, 54px)/1 "Russo One", sans-serif; }
 .credits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px; }
@@ -146,7 +146,7 @@
     .credits dl { grid-template-columns: 1fr; }
     .tour li { font-size: 17px; }
 }
-@media (prefers-reduced-motion: reduce) { .wave i { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .wave { animation: none !important; } }
 
 /* era follows the side in view */
 .album { --c-era: var(--acid); }
@@ -156,7 +156,7 @@
 .album .btn:active { transform: scale(.97); }
 /* playing: the cover becomes the record, waveforms pump on the beat */
 .cover-art { transition: border-radius .8s var(--ease-out), box-shadow .8s; }
-.album[data-playing] .wave i { background: var(--c); animation: pump var(--beat) ease-in-out infinite alternate; animation-delay: var(--d); }
+.album[data-playing] .wave { background: var(--c); animation: pump var(--beat) ease-in-out infinite alternate; }
 .album[data-playing] .cover h1 { animation: album-thump var(--beat) ease-out infinite; }
 @keyframes album-thump { 0% { transform: scale(1.015); } 30% { transform: none; } }
 /* expandable tracks */
@@ -292,3 +292,7 @@
 @media (prefers-reduced-motion: reduce) { .disc { animation: none; } }
 /* The arrival waits behind the countdown and plays the moment the record is "out now". */
 .album[data-intro] .sleeve, .album[data-intro] .disc { animation-play-state: paused; }
+
+/* phones: the side pill never wraps; the track title gets the rest of the bar */
+.album-era-pill { white-space: nowrap; flex: none; }
+@media (max-width: 600px) { .album-bar-l .dim { display: none; } }
