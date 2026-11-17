@@ -286,7 +286,12 @@ export default function LonghornWorld({ shell }) {
     const toggleMin = (id) => setWins((ws) => ws.map((x) => (x.id === id ? { ...x, min: !x.min, z: x.min ? ++zTop : x.z } : x)));
 
     // first visit: the Welcome Center opens itself once the desktop has settled
-    useEffect(() => { const t = setTimeout(() => open("welcome"), reduced ? 0 : 1500); return () => clearTimeout(t); }, [open]);
+    // Recruiter mode skips the Welcome Center and opens the projects straight away
+    useEffect(() => {
+        let rec = false; try { rec = localStorage.getItem("px01-recruiter") === "1"; } catch { /* private mode */ }
+        const t = setTimeout(() => open(rec ? "explorer" : "welcome"), reduced || rec ? 0 : 1500);
+        return () => clearTimeout(t);
+    }, [open]);
     useEffect(() => {
         const key = (e) => { if ((e.key === "f" || e.key === "F") && !e.target.closest?.("input, textarea") && !flip) setFlip(true); };
         addEventListener("keydown", key);

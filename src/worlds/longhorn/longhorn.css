@@ -9,7 +9,7 @@
 
 /* ---- the wallpaper: four soft ribbons of light drifting over a deep ocean gradient (transform-only motion) ---- */
 .lh-aurora { position: absolute; inset: 0; background: radial-gradient(120% 90% at 70% 110%, #0b5b6e 0%, #04304a 40%, #021626 75%); }
-.lh-aurora i { position: absolute; width: 140vmax; height: 46vmax; left: -20vmax; border-radius: 50%; mix-blend-mode: screen; will-change: transform; }
+.lh-aurora i { position: absolute; width: 140vmax; height: 46vmax; left: -20vmax; border-radius: 50%; }   /* no screen blend: low-alpha light over dark looks the same with normal alpha, minus a full-screen blend pass per frame */
 .lh-aurora i:nth-child(1) { top: 8%; background: radial-gradient(closest-side, rgba(40, 220, 190, .55), transparent); animation: lh-drift 38s var(--ease-in-out) infinite alternate; }
 .lh-aurora i:nth-child(2) { top: 26%; background: radial-gradient(closest-side, rgba(70, 170, 255, .45), transparent); animation: lh-drift 52s var(--ease-in-out) -12s infinite alternate-reverse; }
 .lh-aurora i:nth-child(3) { top: 48%; height: 30vmax; background: radial-gradient(closest-side, rgba(120, 255, 170, .32), transparent); animation: lh-drift 44s var(--ease-in-out) -20s infinite alternate; }
@@ -222,3 +222,6 @@
     mask-image: radial-gradient(60% 34% at 45% 34%, #000 20%, transparent 75%); animation: lh-rays 30s linear infinite; }
 @keyframes lh-rays { to { transform: translateX(-23px) skewX(-6deg); } }
 @media (prefers-reduced-motion: reduce) { .lh-aurora::after { animation: none; } }
+
+/* phones: two still aurora bands instead of four drifting 140vmax layers */
+@media (pointer: coarse) { .lh-aurora i { animation: none !important; } .lh-aurora i:nth-child(n+3) { display: none; } }
