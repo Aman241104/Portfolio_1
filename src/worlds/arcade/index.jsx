@@ -122,6 +122,13 @@ export default function ShipBreaker() {
 
     useEffect(() => {
         const c = cv.current, ctx = c.getContext("2d");
+        // sharp on Retina: the backing buffer is W×H × devicePixelRatio (≤2); game logic stays in 640×480 units
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        c.width = W * dpr; c.height = H * dpr;
+        // idle when nobody can see it (scrolled away or tab hidden): no physics, no drawing
+        let onScreen = true;
+        const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; });
+        io.observe(c);
         let raf, acc = 0, prev = performance.now();
 
         const step = () => {
@@ -221,7 +228,7 @@ export default function ShipBreaker() {
 
         const draw = (t) => {
             const g = game.current;
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, W, H);
             if (g.shake > 0.3 && !reducedMotion) ctx.translate((Math.random() - 0.5) * g.shake, (Math.random() - 0.5) * g.shake);
             g.shake *= 0.86;
@@ -280,6 +287,7 @@ export default function ShipBreaker() {
         };
 
         const loop = (t) => {
+            if (!onScreen || document.hidden) { prev = t; raf = requestAnimationFrame(loop); return; }
             const dt = Math.min(100, t - prev); prev = t;
             const st = hudRef.current, g = game.current;
             if (g.stop > 0) { g.stop -= dt; acc = 0; }
@@ -304,7 +312,7 @@ export default function ShipBreaker() {
         };
         const ku = (e) => { keys.current[e.key] = false; };
         addEventListener("keydown", kd); addEventListener("keyup", ku);
-        return () => { cancelAnimationFrame(raf); removeEventListener("keydown", kd); removeEventListener("keyup", ku); };
+        return () => { cancelAnimationFrame(raf); io.disconnect(); removeEventListener("keydown", kd); removeEventListener("keyup", ku); };
     }, [blip]);
 
     const hiRef = useRef(0);
@@ -363,7 +371,6 @@ export default function ShipBreaker() {
                             onPointerMove={aim} onPointerDown={(e) => { aim(e); start(); }} />
                         {hud.state === "attract" && (
                             <div className="sb-over sb-attract" onClick={(e) => { if (!e.target.closest("button, a")) start(); }}>
-                                <span className="sb-demo-tag">AI DEMO · PRESS COIN</span>
                                 <div className="sb-attract-card">
                                     <p className="sb-title">High scores</p>
                                     {board}
