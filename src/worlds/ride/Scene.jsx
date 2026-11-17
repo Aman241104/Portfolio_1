@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, Text } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
@@ -1184,7 +1184,7 @@ function WindFoliage({ preset }) {
     );
 }
 
-export default function Scene({ state, near, preset = "golden", collected = [], clearedGates = [], started = false, cameraMode = "chase", onKnock, qualityTier = "HIGH" }) {
+function Scene({ state, near, preset = "golden", collected = [], clearedGates = [], started = false, cameraMode = "chase", onKnock, qualityTier = "HIGH" }) {
     const p = RIDE_PRESETS[preset] || RIDE_PRESETS.golden;
     const groundCol = preset === "sakura" ? "#4e3966" : preset === "fjord" ? "#6d8572" : "#d9be94";
     const groundMaps = useMemo(() => groundPbrMaps(), []);
@@ -1241,3 +1241,6 @@ export default function Scene({ state, near, preset = "golden", collected = [], 
         </>
     );
 }
+
+// memo: the HUD ticks every 120 ms in RideWorld; without this the whole 3D scene tree re-rendered ~8×/s for a speedometer
+export default memo(Scene);

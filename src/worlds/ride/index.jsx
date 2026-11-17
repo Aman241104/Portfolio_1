@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { useCallback, Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { profile, socials } from "#content/profile.js";
 import { shot, KINDS } from "../../../content/work.js";
@@ -235,6 +235,12 @@ export default function RideWorld() {
 
     const go = (stop) => { const s = state.current; s.d = Math.max(0, stop.d - 30); s.v = 4; s.snap = true; setMap(false); setStarted(true); setHud({ d: s.d, v: s.v }); setNear(s.d); };
     const stop = STOPS.find((s) => hud.d > s.d - 28 && hud.d < s.d + 22);
+    const handleKnock = useCallback(() => {          // stable identity so the memoised Scene isn't re-rendered by the HUD tick
+        questRef.current.score += 100;
+        clearTimeout(questRef.current.toastTimer);
+        setQuest((q) => ({ ...q, score: questRef.current.score, toast: "+100 PTS · Prop Smash" }));
+        questRef.current.toastTimer = setTimeout(() => setQuest((q) => ({ ...q, toast: null })), 1600);
+    }, []);
     const atEnd = hud.d > END - 40;
     const visited = STOPS.filter((s) => hud.d > s.d).length;
 
@@ -266,12 +272,6 @@ export default function RideWorld() {
         go(STOPS[0]);
     };
 
-    const handleKnock = () => {
-        questRef.current.score += 100;
-        clearTimeout(questRef.current.toastTimer);
-        setQuest((q) => ({ ...q, score: questRef.current.score, toast: "+100 PTS · Prop Smash" }));
-        questRef.current.toastTimer = setTimeout(() => setQuest((q) => ({ ...q, toast: null })), 1600);
-    };
 
     const grade = quest.score >= 5000 ? "S" : quest.score >= 2500 ? "A" : "B";
 
