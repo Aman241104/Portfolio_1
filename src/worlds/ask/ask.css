@@ -41,34 +41,24 @@
 @keyframes rd-pull { 40% { translate: 22px 0; rotate: 1.5deg; } }
 .rd-file:active { transform: translateX(28px) rotate(1.5deg); transition-duration: var(--t-1); }
 
-.jld-hero {
-    display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr);
-    gap: clamp(20px, 4vw, 44px); align-items: center;
-    padding: 5vh 0 3vh;
-}
-.jld-avatar-wrap { position: relative; display: grid; justify-items: center; }
-.jld-bubble {
-    position: relative; margin-bottom: 8px; padding: 6px 14px;
-    background: #141414; border: 2px solid #f3f1eb;
-    font: 700 15px "Courier Prime", monospace; color: var(--lime);
-    box-shadow: 3px 3px 0 #000;
-}
-.jld-avatar { width: clamp(140px, 18vw, 210px); height: auto; display: block; image-rendering: pixelated; }
-.jld-copy h1 {
-    margin: 0; font: 700 clamp(30px, 4vw, 52px)/1.06 "Hanken Grotesk", sans-serif;
-    letter-spacing: -0.03em; color: #f3f1eb;
-}
-.jld-copy p { margin: 14px 0 0; max-width: 48ch; color: rgba(243, 241, 235, .72); font-size: 16px; }
+/* the hero is a call slip: a cream card from the same stock as the catalogue, typed, with the red margin rule */
+.jld-hero { padding: 5vh 0 3vh; }
+.jld-copy { position: relative; max-width: 760px; padding: 26px 30px 26px 64px; color: var(--type); background:
+        linear-gradient(90deg, transparent 44px, var(--margin) 44px, var(--margin) 45.5px, transparent 45.5px), var(--card);
+    border-radius: 3px; box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 24px 50px -24px rgba(0, 0, 0, .7); transform: rotate(-.4deg); }
+.jld-slip { margin: 0 0 14px; font: 400 12px/1.2 "Courier Prime", monospace; letter-spacing: .08em; text-transform: uppercase; color: rgba(42, 38, 32, .6); }
+.jld-copy h1 { margin: 0; font: 700 clamp(26px, 3.4vw, 44px)/1.12 "Courier Prime", monospace; letter-spacing: -0.01em; color: var(--type); }
+.jld-copy p { margin: 14px 0 0; max-width: 52ch; color: rgba(42, 38, 32, .75); font-size: 16px; }
 .jld-modes { display: grid; gap: 6px; margin-top: 22px; justify-items: start; }
 .jld-modes button {
     background: none; border: 0; padding: 6px 2px;
     font: 700 15px "Courier Prime", monospace; letter-spacing: .02em;
-    color: rgba(243, 241, 235, .64); cursor: pointer;
+    color: rgba(42, 38, 32, .6); cursor: pointer;
     transition: color .18s, transform .18s;
 }
-.jld-modes button:hover { color: #f3f1eb; transform: translateX(4px); }
-.jld-modes button.is-active { color: var(--lime); }
-@media (max-width: 680px) { .jld-hero { grid-template-columns: 1fr; text-align: left; } .jld-avatar-wrap { justify-self: start; } }
+.jld-modes button:hover { color: var(--red); transform: translateX(4px); }
+.jld-modes button.is-active { color: var(--red); }
+
 .rd-intro h1 { margin: 0; font: 700 clamp(36px, 4.6vw, 60px)/1.02 "Hanken Grotesk", sans-serif; letter-spacing: -0.035em; max-width: 15ch; }
 .rd-intro p { margin: 18px 0 0; max-width: 50ch; color: #d6dacd; font-size: 17px; }
 .rd-thread { display: grid; gap: 34px; padding-top: 12px; }
@@ -174,3 +164,5 @@
 .rd-file:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .rd-tabs button { min-height: 44px; }
 .rd-who a, .rd-err a { display: inline-block; padding-block: 12px; }
+
+@media (max-width: 680px) { .jld-copy { padding: 20px 18px 20px 48px; background: linear-gradient(90deg, transparent 32px, var(--margin) 32px, var(--margin) 33.5px, transparent 33.5px), var(--card); } }

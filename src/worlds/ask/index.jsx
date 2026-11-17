@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { profile } from "#content/profile.js";
-import { work } from "../../../content/work.js";
+import { work, inProduction } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { certifications } from "../../../content/certifications.js";
@@ -18,35 +18,6 @@ const DRAWER = [
     ["School", "Where did he study?"],
     ["Hire", "Is he open to on-site or hybrid work?"],
 ];
-const PixelAvatar = () => (
-    <div className="jld-avatar-wrap" aria-hidden>
-        <div className="jld-bubble"><span>Hey!</span></div>
-        <svg className="jld-avatar" viewBox="0 0 16 18" shapeRendering="crispEdges">
-            {/* hair */}
-            <rect x="4" y="1" width="8" height="2" fill="#2a1622" />
-            <rect x="3" y="2" width="10" height="2" fill="#3a1e2e" />
-            <rect x="3" y="4" width="2" height="4" fill="#3a1e2e" />
-            <rect x="11" y="4" width="2" height="3" fill="#3a1e2e" />
-            {/* face */}
-            <rect x="4" y="4" width="8" height="7" fill="#eab892" />
-            <rect x="3" y="7" width="1" height="2" fill="#d99f77" />
-            <rect x="12" y="7" width="1" height="2" fill="#eab892" />
-            {/* glasses */}
-            <rect x="4" y="5" width="4" height="3" fill="#18181b" />
-            <rect x="9" y="5" width="4" height="3" fill="#18181b" />
-            <rect x="8" y="6" width="1" height="1" fill="#18181b" />
-            <rect x="5" y="6" width="2" height="1" fill="#f3f1eb" />
-            <rect x="10" y="6" width="2" height="1" fill="#f3f1eb" />
-            {/* smile */}
-            <rect x="6" y="9" width="4" height="1" fill="#f3f1eb" />
-            <rect x="7" y="10" width="2" height="1" fill="#9a5c4e" />
-            {/* neck & jacket */}
-            <rect x="6" y="11" width="4" height="2" fill="#d99f77" />
-            <rect x="3" y="12" width="10" height="6" fill="#222226" />
-            <rect x="6" y="13" width="4" height="5" fill="#161618" />
-        </svg>
-    </div>
-);
 const SAMPLE_JD = "We are hiring a Full-Stack & 3D Web Engineer to build interactive React / TypeScript / Next.js applications, Three.js / WebGL experiences, and Python FastAPI / PostgreSQL AI backends deployed on Docker and Cloud Run.";
 const tilt = (i) => [-1.1, 0.7, -0.4, 1.1, -0.8, 0.5][i % 6];
 
@@ -125,7 +96,7 @@ function localAsk(payload) {
 
     const lines = ranked.map((w) => `- **${w.title}** (${w.stack || w.kind}): ${w.line} [${addSrc(`${w.title} — ${w.year}`, w.url || `/case.html?p=${w.slug}`)}]`);
     return {
-        answer: `From Aman's portfolio file (**${work.length} shipped builds**, ${work.filter((w) => w.maintained).length} live in production):\n${lines.join("\n")}`,
+        answer: `From Aman's portfolio file (**${work.length} shipped builds**, ${work.filter(inProduction).length} live in production):\n${lines.join("\n")}`,
         sources,
     };
 }
@@ -278,13 +249,14 @@ export default function ReferenceDesk() {
 
                 <main className="rd-main">
                     <p className="rd-who">
-                        Aman Patel · Full-stack &amp; 3D engineer · {work.length} shipped · {work.filter((w) => w.maintained).length} live · {certifications.length} verified certs · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={`mailto:${profile.email}`}>Email</a>
+                        Aman Patel · Full-stack &amp; 3D engineer · {work.length} shipped · {work.filter(inProduction).length} live · {certifications.length} verified certs · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={`mailto:${profile.email}`}>Email</a>
                     </p>
                     {!thread.length && (
                         <section className="jld-hero">
-                            <PixelAvatar />
+                            {/* a library call slip, not a borrowed avatar hero (agy audit 2026-11-17): the desk is the concept */}
                             <div className="jld-copy">
-                                <h1>Turning Code into Memorable Digital Experiences.</h1>
+                                <p className="jld-slip">Call slip · Reference desk · Ahmedabad branch</p>
+                                <h1>Ask anything about Aman.<br />Every answer cites the work.</h1>
                                 <p>{tab === "ask"
                                     ? `Every answer is pulled from Aman's real file: ${work.length} shipped projects, experience, skills, and ${certifications.length} verified certs.`
                                     : "Paste a job description below. Matching skills get stamped and closest projects are footnoted for verification."}</p>
