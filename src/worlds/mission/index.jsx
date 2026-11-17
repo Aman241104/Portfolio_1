@@ -18,7 +18,7 @@ const fleet = work.filter(inProduction);
 const PLATFORM = { product: "1", mobile: "2", client: "3", concept: "4" };
 
 const verdict = (s, w, probing) => {
-    if (!w.live) return ["ARCHIVED", ""];
+    if (!inProduction(w)) return [w.demo ? "PREVIEW" : w.url ? "BUILT" : "PRIVATE", ""];   // honest labels, never "archived"
     if (s == null) return [probing ? "PROBING" : "STANDBY", ""];
     if (!s.ok) return ["OFFLINE", "down"];
     return s.ms > 1500 ? ["DELAYED", "late"] : ["ON TIME", "ok"];
@@ -56,7 +56,7 @@ export default function Departures() {
     const runClientProbe = useCallback(async () => {
         setProbing(true);
         const results = {};
-        await Promise.all(work.filter((w) => w.live && w.url).map(async (w) => {
+        await Promise.all(work.filter((w) => inProduction(w) && w.url).map(async (w) => {
             const t0 = performance.now();
             try {
                 const ctrl = new AbortController();
@@ -155,7 +155,7 @@ export default function Departures() {
                         <div><span>SHIPPED</span><b>{work.length} BUILDS</b></div>
                         <div><span>STATUS</span><b className="dp-live-dot">● OPEN TO WORK</b></div>
                     </div>
-                    <p>{fleet.length} maintained production systems &amp; {work.length} total shipped builds, probed live with real round-trip latency.</p>
+                    <p>{fleet.length} production systems &amp; {work.length} total shipped builds, probed live with real round-trip latency.</p>
                     <p className="dp-who">{experience[0].role} at {experience[0].org} · {experience[1].role}, LDCE · Ahmedabad on-site / hybrid / remote</p>
                     <p className="dp-cta dp-cta-top">
                         <a href={`mailto:${profile.email}`}>{profile.email}</a>
@@ -203,12 +203,12 @@ export default function Departures() {
                                 <li key={w.slug} className={isOpen ? "dp-item-open" : undefined}>
                                     <button type="button" className="dp-row dp-row-btn" data-tone={tone} aria-expanded={isOpen}
                                         onClick={() => setOpenSlug(isOpen ? null : w.slug)}>
-                                        <Flap key={`t-${scanId}`} text={w.live ? at.replace(":", ".") : String(w.year)} len={5} start={i * 35} />
+                                        <Flap key={`t-${scanId}`} text={inProduction(w) ? at.replace(":", ".") : String(w.year)} len={5} start={i * 35} />
                                         <Flap key={`d-${scanId}`} text={w.title} len={22} start={i * 35 + 25} className="dp-dest" />
                                         <span className="dp-via">{w.url ? host(w.url) : w.stack?.split("·")[0]?.trim()}</span>
                                         <Flap text={PLATFORM[w.kind]} len={1} start={i * 35} className="dp-plat" />
                                         <Flap key={`s-${scanId}`} text={v} len={8} start={i * 35 + 60} className="dp-status" />
-                                        <Flap key={`m-${scanId}`} text={s?.ok ? `${s.ms}MS` : w.live ? (s ? "TIMEOUT" : "...") : "LOCAL"} len={7} start={i * 35 + 80} />
+                                        <Flap key={`m-${scanId}`} text={s?.ok ? `${s.ms}MS` : inProduction(w) ? (s ? "TIMEOUT" : "...") : "—"} len={7} start={i * 35 + 80} />
                                     </button>
                                     {isOpen && (
                                         <div className="dp-drawer">
@@ -250,7 +250,7 @@ export default function Departures() {
                             <li key={w.slug} className="dp-row dp-arow">
                                 <Flap text={String(w.year)} len={5} start={i * 50} />
                                 <Flap text={w.title} len={20} start={i * 50 + 30} className="dp-dest" />
-                                <Flap text={w.live ? "SHIPPED" : "CONCEPT"} len={8} start={i * 50 + 60} />
+                                <Flap text={w.kind === "concept" ? "CONCEPT" : "SHIPPED"} len={8} start={i * 50 + 60} />
                             </li>
                         ))}
                     </ol>
