@@ -4,15 +4,22 @@
     --navy: #000033; --yel: #ffff00; --lime: #00ff00; --cyan: #00ffff; --red: #ff2020; --link: #8fb4ff; --visited: #d7a6ff;
     min-height: 100dvh; color: #f2f2ff; font: 400 17px/1.5 "Times New Roman", Times, serif; padding: 0 12px 120px;
     background-color: var(--navy);
-    /* the tile: a hand-placed starfield, repeated like it's a 4 KB GIF */
+    position: relative; isolation: isolate;
+}
+/* the tile: a hand-placed starfield, repeated like it's a 4 KB GIF. It drifts on a fixed layer that slides exactly one
+   tile per loop with transform (seamless, compositor-only); animating background-position repainted the whole page
+   every frame. Same speed as before: 128 px per 12 s. */
+.y2k::before {
+    content: ""; position: fixed; z-index: -1; inset: -112px -128px 0 0; pointer-events: none;
     background-image:
         radial-gradient(1.4px 1.4px at 12px 18px, #fff 99%, transparent), radial-gradient(1px 1px at 61px 44px, #cfe 99%, transparent),
         radial-gradient(1.8px 1.8px at 97px 9px, #ffd 99%, transparent), radial-gradient(1px 1px at 33px 83px, #fff 99%, transparent),
         radial-gradient(1.2px 1.2px at 82px 96px, #aef 99%, transparent), radial-gradient(1px 1px at 112px 61px, #fff 99%, transparent);
     background-size: 128px 112px;
-    animation: y-drift 120s linear infinite;
+    animation: y-drift 12s linear infinite;
 }
-@keyframes y-drift { to { background-position: -1280px 448px; } }
+@keyframes y-drift { to { transform: translate(-128px, 112px); } }
+@media (prefers-reduced-motion: reduce) { .y2k::before { animation: none; } }
 .y2k a { color: var(--link); }
 .y2k a:visited { color: var(--visited); }
 .y2k a:hover { color: var(--yel); background: #000080; }
