@@ -93,8 +93,14 @@ export function PrintHead({ root }) {
         secs.forEach((s) => band.observe(s));
         // line counter: paper fed so far, in thermal-printer lines (~22px)
         let raf = 0, idle = 0;
+        // headers print once they reach the lower screen. Checked on the scroll frame from a live query (only the ones
+        // still waiting), so a remounted section or an observer that missed a fast scroll can't leave one unprinted.
+        const printDue = () => {
+            for (const el of paper.querySelectorAll(".po-print:not([data-in])")) if (el.parentElement.getBoundingClientRect().top < innerHeight * 0.88) el.dataset.in = "";
+        };
         const feed = () => {
             raf = 0;
+            printDue();
             const r = paper.getBoundingClientRect();
             const fed = Math.max(0, Math.min(r.height, innerHeight - r.top));
             if (line.current) line.current.textContent = String(Math.round(fed / 22)).padStart(4, "0");

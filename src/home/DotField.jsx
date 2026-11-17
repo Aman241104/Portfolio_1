@@ -198,9 +198,9 @@ const Dust = ({ count, pulse, light, eventSource }) => {
 
 // `eventSource`: the footer element, so the dots react even when the cursor is over the footer's text.
 export default function DotField({ active, eventSource, pulse = 0, light = false }) {
-    const count = typeof window !== "undefined" && window.innerWidth < 700 ? 40000 : 95000;
+    const count = typeof window !== "undefined" && window.innerWidth < 700 ? 24000 : 95000;   // phones: fewer points (dense enough at phone size)
     return (
-        <Canvas className="dots" frameloop={active ? "always" : "never"} dpr={[1, 1.5]} eventSource={eventSource} eventPrefix="client"
+        <Canvas className="dots" frameloop={active ? "always" : "never"} dpr={typeof window !== "undefined" && window.innerWidth < 700 ? [1, 1.25] : [1, 1.5]} eventSource={eventSource} eventPrefix="client"
             camera={{ position: [0, 3.4, 12], fov: 45, far: 200 }} gl={{ antialias: false }}
             onCreated={({ camera, gl }) => { camera.lookAt(0, 0.2, -10); gl.setClearColor(light ? "#ebe8e2" : "#050506"); }}>
             <Dust count={count} pulse={pulse} light={light} eventSource={eventSource} />

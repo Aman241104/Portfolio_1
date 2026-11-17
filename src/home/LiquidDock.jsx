@@ -20,21 +20,21 @@ export default function LiquidDock({ on, resume }) {
     useLiquid(bar, BAR); useLiquid(puck, PUCK); useLiquid(act, ACT);
 
     useEffect(() => {
-        const spy = () => {
+        // which section crosses the 45% line: an IntersectionObserver on a 1px band there, instead of five
+        // querySelector + getBoundingClientRect reads every scroll frame
+        const els = TABS.map(({ sel }) => document.querySelector(sel));
+        const on = new Set();
+        const pick = () => {
             if (drag.current || locked(lock)) return;
-            const line = innerHeight * 0.45;
-            let i = 0;
-            TABS.forEach(({ sel }, k) => { const el = document.querySelector(sel); if (el && el.getBoundingClientRect().top < line) i = k; });
+            let i = 0; els.forEach((el, k) => { if (el && (on.has(el) || el.getBoundingClientRect().bottom < innerHeight * 0.45)) i = k; });
             setAt(i);
         };
-        // one read per frame, and a tab jump's lock ends when the smooth scroll actually ends (scrollend), not on a timer
-        let raf = 0;
-        const onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; spy(); }); };
-        const onEnd = () => { lock.current = 0; spy(); };
-        spy();
-        addEventListener("scroll", onScroll, { passive: true });
+        const io = new IntersectionObserver((es) => { es.forEach((e) => (e.isIntersecting ? on.add(e.target) : on.delete(e.target))); pick(); },
+            { rootMargin: "-45% 0px -55% 0px" });
+        els.forEach((el) => el && io.observe(el));
+        const onEnd = () => { lock.current = 0; pick(); };
         addEventListener("scrollend", onEnd);
-        return () => { cancelAnimationFrame(raf); removeEventListener("scroll", onScroll); removeEventListener("scrollend", onEnd); };
+        return () => { io.disconnect(); removeEventListener("scrollend", onEnd); };
     }, []);
 
     const go = (i) => {

@@ -5,7 +5,10 @@ import { useEffect } from "react";
 // the chromatic fringe — the web port of Mindcore's lens(height, amount, chromaticAberration).
 // Only Chromium renders SVG filters in backdrop-filter; everywhere else the CSS clear-glass fallback (.lg) stands.
 export const lensOk = typeof navigator !== "undefined" && !!navigator.userAgentData?.brands?.some((b) => /Chromium/.test(b.brand))
-    && !matchMedia("(prefers-reduced-transparency: reduce)").matches;
+    && !matchMedia("(prefers-reduced-transparency: reduce)").matches
+    // touch devices keep the clear-glass CSS fallback: on Android the SVG displacement backdrop re-filters every frame
+    // while content scrolls under the fixed dock, which was a major source of mobile frame drops
+    && !matchMedia("(pointer: coarse)").matches;
 const NS = "http://www.w3.org/2000/svg";
 let host = null, uid = 0;
 

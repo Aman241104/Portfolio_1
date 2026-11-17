@@ -281,9 +281,11 @@ const Home = ({ onSelect }) => {
         addEventListener("pointermove", light, { passive: true }); addEventListener("pointerdown", light, { passive: true });
         return () => { removeEventListener("pointermove", light); removeEventListener("pointerdown", light); };
     }, []);
-    const footerOn = useInView(footer, "200px");
-    useReveal(footer);
     const land = useRef(null);
+    // the dust field renders only while the contact area itself is near the screen. It used to watch <footer>,
+    // which wraps the whole printout, so 40–95k WebGL points rendered every frame while you scrolled the paper.
+    const landOn = useInView(land, "300px");
+    useReveal(footer);
     const paper = useRef(null);
     const [fontsOk, setFontsOk] = useState(false);
     const [booted, setBooted] = useState(false);
@@ -639,7 +641,7 @@ const Home = ({ onSelect }) => {
 
                 <div ref={land} className="land" onClick={ripple}>
                     <div className="foot-dots" aria-hidden>
-                        <Suspense fallback={null}><DotField active={footerOn} eventSource={footer} pulse={pulse} light={light} /></Suspense>
+                        <Suspense fallback={null}><DotField active={landOn} eventSource={footer} pulse={pulse} light={light} /></Suspense>
                     </div>
                     <div className="foot-head">
                         <div>

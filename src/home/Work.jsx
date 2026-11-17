@@ -134,7 +134,7 @@ export default function Work() {
                 const inner = (
                     <>
                         <div className="card-shot">
-                            <div className="card-img"><img src={shot(w, cls.includes("flagship-hero") ? 1600 : 720)} alt="" loading="lazy" /></div>
+                            <div className="card-img"><img src={shot(w, cls.includes("flagship-hero") ? 1600 : 720)} alt="" loading="lazy" decoding="async" /></div>
                         </div>
                         <div className="card-meta">
                             <p className="mono">{String(i + 1).padStart(2, "0")} · {KINDS[w.kind]} · {w.year}{w.live && <span className="live">● Live at {host(w.url).replace(/^www\./, "")}</span>}</p>
@@ -253,7 +253,7 @@ export default function Work() {
                     {staged && (
                         <aside className="work-stage" aria-live="polite">
                             <div className="card-shot" onPointerMove={tilt} onPointerLeave={untilt}>
-                                <div className="card-img"><img src={shot(staged, 720)} alt="" loading="lazy" /></div>
+                                <div className="card-img"><img src={shot(staged, 720)} alt="" loading="lazy" decoding="async" /></div>
                             </div>
                             <div className="ws-meta">
                                 <p className="mono">{KINDS[staged.kind]} · {staged.year}{staged.live && <span className="live"> ● Live</span>}</p>
