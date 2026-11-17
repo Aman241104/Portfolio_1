@@ -141,7 +141,7 @@ export default function Work() {
                             <p className="tkt-stub" aria-hidden>
                                 <span>No. {String(i + 1).padStart(3, "0")}-{w.year}</span>
                                 <Barcode value={w.slug} />
-                                <span className="tkt-stamp">{w.live ? "Live" : w.url ? "Shipped" : "Private"}</span>
+                                <span className="tkt-state" data-live={w.live || undefined}>{w.live ? "Live" : w.url ? "Shipped" : "Private"}</span>
                             </p>
                         </div>
                     </>
@@ -162,7 +162,7 @@ export default function Work() {
             <div className="work-head">
                 <div className="po-print" data-reveal>
                     <p className="mono sec-kicker">Output 02 · Tickets</p>
-                    <h2 id="work-h">Work <span className="mono">({String(work.length).padStart(2, "0")})</span></h2>
+                    <h2 id="work-h">Work</h2>
                 </div>
                 <div className="work-controls">
                     {!isPhone && (

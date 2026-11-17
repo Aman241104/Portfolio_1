@@ -24,7 +24,6 @@ const countProjects = (name) => {
 };
 
 export default function Skills() {
-    const total = skillGroups.reduce((n, g) => n + g.items.length, 0);
     const lastTick = useRef(0);
     const tick = (e) => {
         if (e.pointerType !== "mouse" || !e.target.closest?.("li")) return;
@@ -36,7 +35,7 @@ export default function Skills() {
             <div className="work-head">
                 <div className="po-print" data-reveal>
                     <p className="mono sec-kicker">Output 06 · Parts list</p>
-                    <h2 id="skills-h">Skills <span className="mono">({total})</span></h2>
+                    <h2 id="skills-h">Skills</h2>
                 </div>
                 <p className="mono">Everything here is used in a project above</p>
             </div>

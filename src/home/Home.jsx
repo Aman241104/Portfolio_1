@@ -9,17 +9,17 @@ import Experience from "./Experience.jsx";
 import Maintained from "./Maintained.jsx";
 import Certifications from "./Certifications.jsx";
 import Skills from "./Skills.jsx";
-import Stats, { Tape } from "./Stats.jsx";
+import Stats from "./Stats.jsx";
 import LiquidDock from "./LiquidDock.jsx";
 import Nudge from "./Nudge.jsx";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import MotionDebug from "./MotionDebug.jsx";
 import { PrintHead, Perf, Barcode } from "./Printer.jsx";
-import "./printout.css";
 import sig from "./signature.json";
 import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
 import { track } from "../analytics.js";
 import "./home.css";
+import "./printout.css";   // after home.css: the paper overrides the studio on equal specificity
 
 // Main screen (docs/DESIGN_DIRECTION.md §10–13): PX-01 floating in a dark exhibition space, the component archive
 // hanging either side, the giant "Portfolio" signed and annotated by hand, and a footer of dust you can touch.
@@ -201,7 +201,6 @@ const ContactForm = ({ onSent }) => {
             <p className="mono">Routed to ... Aman's inbox</p>
             <p className="po-r-line">Thanks. It's in my inbox, and my reply goes to the address you gave.</p>
             <Barcode value={`${state.name}${state.msg}`} bars={40} />
-            <p className="mono po-r-foot">Keep this ticket · no refunds on curiosity</p>
         </div>
     );
     return (
@@ -253,8 +252,6 @@ const ThemeToggle = ({ light, onToggle }) => {
     );
 };
 
-const MARQUEE = ["12 Realities", "Coastal Highway · RIDE", "Desktop OS", "Editorial", "Terminal", "Album Rollout", "Ahmedabad, IN", "Open to Full-Stack Roles"];
-
 // The machine as an explicit state machine, so a half-finished animation can never strand the UI:
 //   idle → armed (lever grabbed) → spinning → locking (reels report as they physically stop) → revealed → transitioning
 const LABEL = { idle: "", armed: "Armed — let go past the detent", spinning: "Spinning", locking: "Locking", revealed: "Reality selected", transitioning: "Entering" };
@@ -264,35 +261,8 @@ const Home = ({ onSelect }) => {
     const hero = useRef(null);
     const footer = useRef(null);
     const enterBtn = useRef(null);
-    const marqueeTrack = useRef(null);
     const lastRatchet = useRef(0);
     const heroOn = useInView(hero);
-    // Scroll-velocity WAAPI playbackRate + skewX shear on the marquee band
-    useEffect(() => {
-        const el = marqueeTrack.current;
-        if (!el || reduced()) return;
-        let lastY = window.scrollY, lastT = performance.now(), timer;
-        const onScroll = () => {
-            const y = window.scrollY, now = performance.now();
-            const dt = Math.max(8, now - lastT), dy = y - lastY;
-            lastY = y; lastT = now;
-            const v = dy / dt; // px per ms
-            const anim = el.getAnimations?.()[0];
-            if (anim) {
-                const dir = dy < -1 ? -1 : 1;
-                anim.playbackRate = dir * Math.min(4.2, 1 + Math.abs(v) * 1.4);
-            }
-            el.style.setProperty("--mskw", `${Math.max(-6, Math.min(6, v * 2.2)).toFixed(2)}deg`);
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                const a = el.getAnimations?.()[0];
-                if (a) a.playbackRate = 1;
-                el.style.setProperty("--mskw", "0deg");
-            }, 160);
-        };
-        window.addEventListener("scroll", onScroll, { passive: true });
-        return () => { window.removeEventListener("scroll", onScroll); clearTimeout(timer); };
-    }, []);
     // phones: the world pill steps aside while the liquid dock is up (one floating bar, not two)
     useEffect(() => { document.body.toggleAttribute("data-dock", !heroOn); return () => document.body.removeAttribute("data-dock"); }, [heroOn]);
     // liquid glass: the light inside any .lg panel follows the cursor / finger
@@ -605,30 +575,23 @@ const Home = ({ onSelect }) => {
                 {picking && <WorldPicker onSelect={(id) => enter(id)} onClose={() => setPicking(false)} />}
             </section>
 
-            <div className="marquee" aria-hidden>
-                <div ref={marqueeTrack} className="marquee-track">
-                    {[0, 1].map((k) => <span key={k}>{MARQUEE.map((m) => <span key={m}>{m}<i>✺</i></span>)}</span>)}
-                </div>
-            </div>
-
             <footer ref={footer} className="foot">
-                <p className="po-mouth" aria-hidden><span><b>●</b> PX-01 · Output tray</span><span>Feed 80mm · Thermal</span><span>Scroll to print ↓</span></p>
+                <p className="po-mouth" aria-hidden />
                 <div ref={paper} className="printout">
                     <div data-out="01" data-label="Readout"><Stats /></div>
-                    <Perf label="✂ Output 02 · Tickets" />
+                    <Perf />
                     <div data-out="02" data-label="Tickets"><Work /></div>
-                    <Perf label="✂ Output 03 · Live telemetry" />
+                    <Perf />
                     <div data-out="03" data-label="Live telemetry"><Maintained /></div>
-                    <Perf label="✂ Output 04 · Service log" />
+                    <Perf />
                     <div data-out="04" data-label="Service log"><Experience /></div>
-                    <Perf label="✂ Output 05 · Calibration" />
+                    <Perf />
                     <div data-out="05" data-label="Calibration"><Certifications /></div>
-                    <Perf label="✂ Output 06 · Parts list" />
+                    <Perf />
                     <div data-out="06" data-label="Parts list"><Skills /></div>
-                    <p className="po-tear-note"><span>End of printout · {work.length} tickets · Thank you for pulling</span><Barcode value="aman-patel-px01" bars={44} /><span>Tear here ✂ · Insert coin below ↓</span></p>
+                    <p className="po-tear-note"><Barcode value="aman-patel-px01" bars={44} /><span>{work.length} projects · printed in Ahmedabad</span></p>
                 </div>
                 <PrintHead root={paper} />
-                <Tape items={["Say hello", "Résumé one tap away", "Replies from a real person", "Ahmedabad · IST", "Open to full-stack roles"]} tilt={1.4} />
 
                 <div ref={land} className="land" onClick={ripple}>
                     <div className="foot-dots" aria-hidden>
@@ -636,7 +599,7 @@ const Home = ({ onSelect }) => {
                     </div>
                     <div className="foot-head">
                         <div>
-                            <p className="mono land-hint"><b className="red">▮ Insert coin</b> · the dunes are live. {isTouch() ? "Tap them." : "Move through them, click them."}</p>
+                            <p className="mono land-hint">The dunes are live. {isTouch() ? "Tap them." : "Move through them, click them."}</p>
                             <h2>Pick a <b>reality</b>,<br />or skip the machine<br />and <b>say hello.</b></h2>
                         </div>
                         <div className="contact">

@@ -16,7 +16,7 @@ export default function Certifications() {
             <div className="work-head">
                 <div className="po-print" data-reveal>
                     <p className="mono sec-kicker">Output 05 · Calibration</p>
-                    <h2 id="certs-h">Certifications <span className="mono">({String(certifications.length).padStart(2, "0")})</span></h2>
+                    <h2 id="certs-h">Certifications</h2>
                 </div>
                 <p className="mono">Verified AI, Cloud &amp; Agentic Engineering</p>
             </div>

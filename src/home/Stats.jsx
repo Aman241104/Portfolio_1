@@ -40,15 +40,6 @@ const magLeave = (e) => {
     e.currentTarget.style.setProperty("--my", "0px");
 };
 
-export function Tape({ items, tilt = -1.6 }) {
-    const row = items.map((t) => <span key={t}>{t}<i aria-hidden>✶</i></span>);
-    return (
-        <div className="tape" style={{ "--tilt": `${tilt}deg` }} aria-label={items.join(", ")}>
-            <div className="tape-track" aria-hidden>{row}{row}</div>
-        </div>
-    );
-}
-
 export default function Stats() {
     const row = useRef(null);
     useEffect(() => {
@@ -64,7 +55,6 @@ export default function Stats() {
     }, []);
     return (
         <section className="stats" aria-label="Telemetry and recruiter fast path">
-            <Tape items={["Open to work", "Full-stack engineer", "React · Node · Python", "Ahmedabad, India", "On-site or hybrid", "Available now"]} />
             <div className="calib-grid">
                 <aside className="calib-rail" aria-label="Recruiter fast path">
                     <p className="mono sec-kicker po-print" data-reveal>Output 01 · Readout &amp; fast path</p>
