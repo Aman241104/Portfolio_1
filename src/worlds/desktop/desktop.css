@@ -590,3 +590,6 @@
 .world-desktop .px-repo-card a:hover { color: var(--px-red) !important; }
 .world-desktop #contact ul li { background: var(--px-ink) !important; border: 1px solid var(--px-ink); border-radius: 4px !important; }
 .world-desktop #contact ul li:hover { background: var(--px-red) !important; border-color: var(--px-red); }
+
+/* phones: the iOS dock sits above the floating Worlds/Résumé pill instead of underneath it */
+@media (max-width: 1023px) { .world-desktop .px-dock-wrap { bottom: calc(76px + env(safe-area-inset-bottom)); } }

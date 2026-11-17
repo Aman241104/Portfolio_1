@@ -29,8 +29,16 @@ const Home = ({ onSpotlight }) => {
         setTimeout(() => setCopied(false), 1600);
     };
 
+    // Make each folder draggable only once its CSS pop-in has finished: created at mount, Draggable read the animation's
+    // first frame (scale .4) and froze it into an inline transform, so the folders stayed at 40% size for good.
     useGSAP(() => {
-        Draggable.create(".folder");
+        let alive = true, instances = [];
+        document.querySelectorAll(".folder").forEach((el) => {
+            Promise.all(el.getAnimations().map((a) => a.finished)).catch(() => {}).then(() => {
+                if (alive) instances.push(...Draggable.create(el));
+            });
+        });
+        return () => { alive = false; instances.forEach((d) => d.kill()); };
     }, []);
 
     return (
