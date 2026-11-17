@@ -18,7 +18,9 @@
     margin: 0; font: 500 11px/1.5 "Geist Mono", ui-monospace, monospace;
     letter-spacing: .12em; text-transform: uppercase; color: var(--smoke);
 }
-.home button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+/* In Tailwind's base layer: unlayered CSS beats every layer, so an unlayered reset silently stripped the utility
+   classes of anything rendered inside .home (the world picker lost its cards and pills when opened from home). */
+@layer base { .home button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; } }
 .home :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
 
 /* film grain over everything (§4: real texture, 2–3%) */

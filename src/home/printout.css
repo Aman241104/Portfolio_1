@@ -403,3 +403,25 @@
 .home .recruiter-link, .home .pull { text-transform: uppercase; letter-spacing: .12em; }
 .printout .flagship-hero .card-meta h3 { white-space: nowrap; }
 @media (max-width: 960px) { .printout .flagship-hero .card-meta h3 { white-space: normal; } }
+
+/* #39 mannan.io → the jali watermark beside the poster: the paper's own ink at 7%, masked from the canvas drawing. */
+.po-poster { position: relative; }
+.po-jali { position: absolute; right: var(--gutter); top: 50%; width: min(30vw, 380px); aspect-ratio: 600 / 760; translate: 0 -50%;
+    background: var(--ink); opacity: .07; mask-size: contain; -webkit-mask-size: contain; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; pointer-events: none; }
+@media (max-width: 760px) { .po-jali { width: 46vw; opacity: .05; } }
+
+/* #25 kyoosangchoi: the name in his own script (Gujarati), where the role used to be (the role now lives in the metadata row). */
+.home .brand-gu { font: 500 12px/1.2 "Hind Vadodara", sans-serif; letter-spacing: .02em; text-transform: none; }
+
+/* #10 Messenger/Igloo: the boot log is the first thing the machine prints — a narrow slip of the same paper. */
+.home .boot-log { background: var(--paper); color: var(--ink); padding: 18px 22px 20px; min-width: 260px; box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 30px 60px -24px rgb(0 0 0 / .8); }
+.home .boot-log p { color: var(--ink) !important; }
+
+/* #61 isometric stack → the index reads as one long receipt roll: dashed line items, not table rules. */
+.printout .work-ledger li { border-bottom: 1px dashed rgb(var(--ink-rgb) / .16) !important; }
+.home .boot-log { position: relative; }
+.home .boot-log::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px;
+    background: linear-gradient(45deg, transparent 33.333%, var(--paper) 33.333%, var(--paper) 66.667%, transparent 66.667%),
+        linear-gradient(-45deg, transparent 33.333%, var(--paper) 33.333%, var(--paper) 66.667%, transparent 66.667%);
+    background-size: 10px 20px; background-position: 0 -10px; }
+@media (max-width: 760px) { .home .cta-alt { flex-wrap: wrap; justify-content: center; row-gap: 12px; column-gap: 18px; } }

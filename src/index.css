@@ -51,11 +51,12 @@
     animation: portal-hud 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .world-portal-kicker {
-    font: 500 11px/1 "Geist Mono", monospace; letter-spacing: 0.18em; text-transform: uppercase;
-    color: #ff2e1f;
+    font: 500 11px/1 "Geist Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase;
+    opacity: .65;
 }
-.world-portal-name {
-    font: 600 clamp(26px, 5vw, 52px)/1.05 "Geist", system-ui, sans-serif; letter-spacing: -0.03em;
+.world-portal-name {   /* title card (Eva Sánchez ref): the world's name in the printout's poster face */
+    font: 800 clamp(64px, 12vw, 176px)/.86 "Archivo", "Geist", system-ui, sans-serif; font-stretch: 62%;
+    text-transform: uppercase; letter-spacing: -0.01em;
 }
 .world-portal-sym {
     font: 400 11px/1.2 "Geist Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;

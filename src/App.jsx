@@ -97,7 +97,7 @@ const App = () => {
         >
             <div className="world-portal-edge" />
             <div className="world-portal-hud">
-                <span className="world-portal-kicker">PX‑01 // REALITY SHIFT</span>
+                <span className="world-portal-kicker">PX‑01 · Now entering</span>
                 <strong className="world-portal-name">{portal.name}</strong>
                 <span className="world-portal-sym">{portal.symbols}</span>
             </div>

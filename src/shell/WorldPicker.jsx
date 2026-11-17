@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, X, ArrowUpRight, Sparkles, Dices, FileText, Mail } from "lucide-react";
+import { Search, X, ArrowUpRight, Dices, FileText, Mail } from "lucide-react";
 import { worlds } from "#worlds/registry.js";
 import { profile } from "#content/profile.js";
+import { work } from "#content/work.js";
 
 const GROUPS = [
     { id: "all", label: "All (12)" },
@@ -10,7 +11,8 @@ const GROUPS = [
     { id: "editorial", label: "Editorial & AI", ids: ["editorial", "album", "mission", "ask", "canvas"] },
 ];
 
-// Gallery of every world. Used by the machine ("Pick a world") and the coin slot ("Worlds").
+// Gallery of every world, shown as a rack of cartridges (library.jjangik.kr's numbered spines). Used by the machine,
+// the coin slot, and ⌘K / Ctrl+K anywhere on the home page — typing also finds projects (aadi.is-a.dev's command menu).
 const WorldPicker = ({ onSelect, onClose, current, onSpin }) => {
     const [query, setQuery] = useState("");
     const [group, setGroup] = useState("all");
@@ -52,6 +54,11 @@ const WorldPicker = ({ onSelect, onClose, current, onSpin }) => {
             );
         });
     }, [sorted, group, query]);
+    const projects = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (q.length < 2) return [];
+        return work.filter((w) => `${w.title} ${w.stack || ""} ${w.line}`.toLowerCase().includes(q)).slice(0, 6);
+    }, [query]);
 
     return (
         <div
@@ -72,7 +79,7 @@ const WorldPicker = ({ onSelect, onClose, current, onSpin }) => {
                         <div className="flex items-center gap-2.5">
                             <span className="inline-block w-2 h-2 rounded-full bg-[#ff2e1f] shadow-[0_0_8px_#ff2e1f]" />
                             <p className="m-0 text-[11px] tracking-[.14em] uppercase text-[#a39f96]" style={{ fontFamily: "'Geist Mono', monospace" }}>
-                                PX‑01 // Reality Selector · {worlds.length} Worlds
+                                PX‑01 · {worlds.length} cartridges · ⌘K
                             </p>
                         </div>
                         <button
@@ -95,7 +102,7 @@ const WorldPicker = ({ onSelect, onClose, current, onSpin }) => {
                                 type="search"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Filter worlds by vibe, era, or name…"
+                                placeholder="Find a world or a project…"
                                 aria-label="Filter worlds"
                                 className="w-full pl-8 pr-3 py-2 rounded-lg bg-[#141418] border border-[#edeae3]/12 text-[13px] text-[#edeae3] placeholder:text-[#7a7770] focus:outline-none focus:border-[#ff2e1f]/70"
                             />
@@ -124,8 +131,21 @@ const WorldPicker = ({ onSelect, onClose, current, onSpin }) => {
                 </div>
 
                 {/* Scrollable Grid */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5">
-                    {filtered.length === 0 ? (
+                <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5" style={{ scrollbarColor: "rgba(237,234,227,.18) transparent" }}>
+                    {projects.length > 0 && (
+                        <ul className="list-none p-0 m-0 mb-4 border-y border-[#edeae3]/10">
+                            {projects.map((w) => (
+                                <li key={w.slug}>
+                                    <a href={w.url || `/case.html?p=${w.slug}`} target={w.url ? "_blank" : undefined} rel="noreferrer"
+                                        className="group flex items-center justify-between gap-3 py-2.5 border-b border-[#edeae3]/8 last:border-0 text-[#edeae3] no-underline">
+                                        <span className="text-[14px] font-medium">{w.title}</span>
+                                        <span className="text-[10px] tracking-[.06em] uppercase text-[#8a8780] group-hover:text-[#ff2e1f]" style={{ fontFamily: "'Geist Mono', monospace" }}>Project · {w.year} ↗</span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    {filtered.length === 0 && projects.length > 0 ? null : filtered.length === 0 ? (
                         <div className="py-12 text-center text-[#8a8780] text-[14px]">
                             No worlds match "{query}".{" "}
                             <button type="button" onClick={() => { setQuery(""); setGroup("all"); }} className="text-[#ff2e1f] underline underline-offset-4 cursor-pointer">
@@ -141,38 +161,26 @@ const WorldPicker = ({ onSelect, onClose, current, onSpin }) => {
                                         <button
                                             type="button"
                                             onClick={() => { onClose(); onSelect(w.id); }}
-                                            className={`group w-full h-full text-left p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-                                                isCurrent
-                                                    ? "bg-[#171414] border-[#ff2e1f]/70 shadow-[0_0_0_1px_rgba(255,46,31,0.3)]"
-                                                    : "bg-[#111114] border-[#edeae3]/10 hover:border-[#edeae3]/30 hover:bg-[#16161b]"
+                                            className={`group w-full h-full text-left rounded-[6px] border overflow-hidden transition-colors cursor-pointer flex flex-col active:scale-[.98] ${
+                                                isCurrent ? "bg-[#151517] border-[#edeae3]/45" : "bg-[#111114] border-[#edeae3]/10 hover:border-[#edeae3]/30"
                                             }`}
                                         >
-                                            <div>
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="inline-flex items-center gap-2 text-[10px] tracking-[.12em] uppercase text-[#8a8780]" style={{ fontFamily: "'Geist Mono', monospace" }}>
-                                                        <span
-                                                            className="w-2.5 h-2.5 rounded-full border border-white/25 shrink-0"
-                                                            style={{ background: w.paper || "#111" }}
-                                                            aria-hidden="true"
-                                                        />
-                                                        {w.featured ? (
-                                                            <span className="inline-flex items-center gap-1 text-[#ff2e1f] font-medium"><Sparkles size={10} /> Featured</span>
-                                                        ) : (
-                                                            `W‑${String(i + 1).padStart(2, "0")}`
-                                                        )}
-                                                        {isCurrent && <span className="text-[#ff2e1f] font-semibold">· ACTIVE</span>}
+                                            {/* the cartridge label: each world's own paper colour, with grip ridges */}
+                                            <span aria-hidden="true" className="block h-[10px] w-full" style={{ background: w.paper || "#222", backgroundImage: "repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 1px, transparent 1px 6px)" }} />
+                                            <span className="flex items-start gap-4 p-4 flex-1">
+                                                <span className="shrink-0 text-[44px] leading-[.8] font-extrabold text-[#edeae3]/25 group-hover:text-[#edeae3]/60 transition-colors" style={{ fontFamily: "Archivo, Geist, sans-serif", fontStretch: "62%" }}>
+                                                    {String(i + 1).padStart(2, "0")}
+                                                </span>
+                                                <span className="min-w-0 flex-1">
+                                                    <span className="flex items-center justify-between gap-2">
+                                                        <span className="block text-[17px] font-semibold tracking-[-0.02em] text-[#edeae3]">{w.name}</span>
+                                                        <ArrowUpRight size={15} className="text-[#8a8780] group-hover:text-[#ff2e1f] transition-colors shrink-0" />
                                                     </span>
-                                                    <ArrowUpRight size={15} className="text-[#8a8780] group-hover:text-[#ff2e1f] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
-                                                </div>
-                                                <span className="block mt-2 text-[19px] font-semibold tracking-[-0.02em] text-[#edeae3] group-hover:text-white">
-                                                    {w.name}
+                                                    <span className="block mt-1 text-[13px] leading-snug text-[#edeae3]/60">{w.tagline}</span>
+                                                    <span className="block mt-2.5 text-[10px] tracking-[.06em] uppercase text-[#8a8780]" style={{ fontFamily: "'Geist Mono', monospace" }}>
+                                                        {w.symbols.join(" · ")}{w.featured ? " · Featured" : ""}{isCurrent ? " · Inserted" : ""}
+                                                    </span>
                                                 </span>
-                                                <span className="block mt-1 text-[13px] leading-snug text-[#edeae3]/65">
-                                                    {w.tagline}
-                                                </span>
-                                            </div>
-                                            <span className="block mt-3 pt-2.5 border-t border-[#edeae3]/8 text-[10px] tracking-[.12em] uppercase text-[#8a8780]" style={{ fontFamily: "'Geist Mono', monospace" }}>
-                                                {w.symbols.join(" · ")}
                                             </span>
                                         </button>
                                     </li>

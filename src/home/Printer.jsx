@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { sfx } from "#machine/sfx.js";
 
 // "The machine prints it" (docs/AWWWARDS_PHILOSOPHY.md). Everything below the hero is one strip of thermal paper
@@ -6,6 +6,42 @@ import { sfx } from "#machine/sfx.js";
 // Sections declare themselves with data-out="02" data-label="Tickets"; the head reads whichever is at the slot.
 
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// The Sidi Saiyyed jali (Ahmedabad's tree-of-life window), the same geometry the hero floor light falls through
+// (Studio.jsx jaliTexture), drawn crisp as a mask so CSS inks it in each paper's colour. mannan.io's lesson:
+// culture is the most "only this person" identity there is. Used once, as the watermark beside the poster.
+const drawJali = () => {
+    const W = 600, H = 760, c = document.createElement("canvas"); c.width = W; c.height = H;
+    const g = c.getContext("2d"); g.strokeStyle = "#fff"; g.lineCap = "round";
+    const cx = W / 2, base = H - 20, aw = W - 40, top = 20;
+    const arch = new Path2D();
+    arch.moveTo(cx - aw / 2, base); arch.lineTo(cx - aw / 2, top + aw * 0.5);
+    arch.quadraticCurveTo(cx - aw / 2, top, cx, top); arch.quadraticCurveTo(cx + aw / 2, top, cx + aw / 2, top + aw * 0.5);
+    arch.lineTo(cx + aw / 2, base); arch.closePath();
+    g.lineWidth = 4; g.stroke(arch);
+    g.save(); g.clip(arch);
+    const branch = (x, y, ang, len, w, depth) => {
+        const ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len, curl = ang + (depth % 2 ? 0.5 : -0.5);
+        g.lineWidth = w; g.beginPath(); g.moveTo(x, y);
+        g.quadraticCurveTo(x + Math.cos(curl) * len * 0.6, y + Math.sin(curl) * len * 0.6, ex, ey); g.stroke();
+        if (depth === 0) {
+            g.lineWidth = 2.5; g.beginPath();
+            for (let a = 0; a < 9; a += 0.3) g.lineTo(ex + Math.cos(a + ang) * a * 2.2, ey + Math.sin(a + ang) * a * 2.2);
+            g.stroke(); return;
+        }
+        branch(ex, ey, ang - 0.55, len * 0.72, w * 0.7, depth - 1);
+        branch(ex, ey, ang + 0.55, len * 0.72, w * 0.7, depth - 1);
+    };
+    branch(cx, base - 150, -Math.PI / 2, 190, 16, 5);
+    g.lineWidth = 3;
+    for (let x = cx - aw / 2; x < cx + aw / 2; x += 34) for (let y = base - 150; y < base; y += 34) { g.beginPath(); g.arc(x + 17, y + 17, 12, 0, Math.PI * 2); g.stroke(); }
+    g.restore();
+    return c.toDataURL();
+};
+export const Jali = ({ className = "po-jali" }) => {
+    const url = useMemo(() => drawJali(), []);
+    return <i className={className} aria-hidden style={{ WebkitMaskImage: `url(${url})`, maskImage: `url(${url})` }} />;
+};
 
 // Deterministic barcode from any string: same slug, same bars, every visit.
 export const Barcode = ({ value, bars = 34, className = "po-barcode" }) => {

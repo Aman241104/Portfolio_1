@@ -14,7 +14,7 @@ import LiquidDock from "./LiquidDock.jsx";
 import Nudge from "./Nudge.jsx";
 import MultiverseName from "../lab/MultiverseName.jsx";
 import MotionDebug from "./MotionDebug.jsx";
-import { PrintHead, Perf, Barcode } from "./Printer.jsx";
+import { PrintHead, Perf, Barcode, Jali } from "./Printer.jsx";
 import sig from "./signature.json";
 import { sfx, setSound, soundOn, onSound } from "#machine/sfx.js";
 import { track } from "../analytics.js";
@@ -309,6 +309,12 @@ const Home = ({ onSelect }) => {
             .catch(() => { location.href = `mailto:${profile.email}`; });
     };
     const [picking, setPicking] = useState(false);
+    // ⌘K / Ctrl+K: the command menu (the world rack doubles as project search)
+    useEffect(() => {
+        const k = (e) => { if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); setPicking((p) => !p); } };
+        addEventListener("keydown", k);
+        return () => removeEventListener("keydown", k);
+    }, []);
     const [progress, setProgress] = useState(8);
     // Light Mode Gallery Atelier ("light") vs Dark Studio (default)
     const [light, setLight] = useState(() => { try { return localStorage.getItem("px01-theme") === "light"; } catch { return false; } });
@@ -508,7 +514,7 @@ const Home = ({ onSelect }) => {
                 <header className="bar">
                     <div className="bar-brand">
                         <span className="mv-text">AMAN</span>
-                        <p className="brand-sub mono">FULL-STACK ENGINEER<br /><i aria-hidden>●</i> AHMEDABAD, INDIA</p>
+                        <p className="brand-sub mono"><span className="brand-gu" lang="gu">અમન પટેલ</span><br /><i aria-hidden>●</i> AHMEDABAD, INDIA</p>
                     </div>
                     <div className="mono right">
                         <button type="button" className="recruiter-link" aria-pressed={recruiter} onClick={toggleRecruiter} title="Recruiter mode (R): straight to the résumé readout, no motion">
@@ -605,6 +611,7 @@ const Home = ({ onSelect }) => {
                     <div data-out="02" data-label="Tickets"><Work /></div>
                     <Perf />
                     <section className="po-poster" data-out="02" data-label="Statement" aria-label="Statement">
+                        <Jali />
                         <p className="po-poster-line">{profile.poster.map((l) => <span key={l}>{l}</span>)}</p>
                         <p className="po-poster-note">{profile.posterNote}</p>
                     </section>

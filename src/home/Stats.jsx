@@ -58,12 +58,12 @@ export default function Stats() {
                 <aside className="calib-rail" aria-label="Recruiter fast path">
                     <p className="mono sec-kicker po-print" data-reveal>Output 01 · Readout &amp; fast path</p>
                     <p className="calib-lead">Full-stack engineer in Ahmedabad, open to on-site or hybrid roles. Résumé, contact and {work.length} shipped builds.</p>
-                    {profile.quote && (
-                        <figure className="calib-quote">
-                            <blockquote>“{profile.quote.text}”</blockquote>
-                            <figcaption className="mono">{profile.quote.name} · {profile.quote.role}, {profile.quote.org}</figcaption>
+                    {profile.quotes?.map((q) => (
+                        <figure key={q.name} className="calib-quote">
+                            <blockquote>“{q.text}”</blockquote>
+                            <figcaption className="mono">{q.name} · {q.org}</figcaption>
                         </figure>
-                    )}
+                    ))}
                     <div className="calib-actions">
                         <a className="block-btn magnet" href={profile.resume} target="_blank" rel="noreferrer" onPointerMove={magMove} onPointerLeave={magLeave} onClick={() => track("resume_opened", { from: "telemetry" })}>Résumé (PDF) ↓</a>
                         <div className="calib-links mono">
