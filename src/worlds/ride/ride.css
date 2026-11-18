@@ -31,8 +31,10 @@
 @media (prefers-reduced-motion: no-preference) { .rd-intro { animation: rd-rise .7s var(--ease-out) both; } }
 @keyframes rd-rise { from { opacity: 0; translate: 0 24px; } }
 
-.rd-speed { position: absolute; z-index: 4; left: 20px; bottom: 20px; margin: 0; font: 600 12px "Saira", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.rd-speed b { display: block; font: 800 44px/1 "Saira Condensed", sans-serif; letter-spacing: .02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.rd-dash { position: absolute; z-index: 4; left: 20px; bottom: 20px; display: flex; align-items: flex-end; gap: 22px; }
+.rd-dash p { margin: 0; font: 600 12px "Saira", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.rd-dash b { display: block; font: 800 44px/1 "Saira Condensed", sans-serif; letter-spacing: .02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.rd-lapt b { font-size: 28px; }
 
 /* ticket card: slides in while the car sits beside a ticket */
 .rd-card { position: absolute; z-index: 4; right: 20px; bottom: 84px; width: min(400px, calc(100vw - 40px)); padding: 18px 20px; background: var(--panel);
@@ -82,7 +84,7 @@
     .rd-hint { left: 12px; right: 12px; bottom: 76px; translate: none; } .rd-hint span { display: none; }
     .rd-pads { display: grid; width: 100%; grid-template-columns: 58px 58px 1fr 58px 58px 58px; gap: 8px; }
     .rd-pads button:nth-child(3) { grid-column: 4; }
-    .rd-speed { bottom: 148px; }
+    .rd-dash { bottom: 148px; }
     .rd-card { bottom: 148px; }
 }
 @media (max-width: 760px) {
@@ -90,7 +92,7 @@
     .rd-top { padding: 10px 12px; } .rd-top nav { gap: 4px; } .rd-top nav a, .rd-top nav button { padding: 0 9px; font-size: 13px; }
     .rd-top nav a[href*="github"], .rd-top nav a[href*="linkedin"] { display: none; }
     .rd-card { left: 10px; right: 10px; width: auto; padding: 14px; } .rd-card h2 { font-size: 24px; }
-    .rd-hint span { display: none; } .rd-speed { bottom: 76px; }
+    .rd-hint span { display: none; } .rd-dash { bottom: 76px; left: 12px; } .rd-dash b { font-size: 34px; } .rd-lapt b { font-size: 22px; }
     .rd-intro { left: 12px; right: 12px; bottom: 76px; padding: 18px; }   /* clears the global Worlds dock */
 }
 @media (prefers-reduced-motion: reduce) { .rd-card, .rd-map, .rd-intro { animation: none; } }

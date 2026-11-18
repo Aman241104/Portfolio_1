@@ -10,6 +10,7 @@ const ac = () => {
     return ctx;
 };
 export const soundOn = () => on;
+export const audioCtx = () => ac();   // shared context for other synths (RIDE engine)
 export const onSound = (fn) => { subs.add(fn); return () => subs.delete(fn); };
 export const setSound = (v) => {
     on = v;

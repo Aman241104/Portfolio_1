@@ -6,7 +6,7 @@ import { EffectComposer, Bloom, TiltShift2, Vignette } from "@react-three/postpr
 import * as THREE from "three";
 import { shot } from "../../../content/work.js";
 import { Machine } from "../../machine/MachineModel.jsx";
-import { CURVE, ROAD_W, PLINTH, STOPS, SECTORS, SPAWN, onTrack, standoff } from "./track.js";
+import { CURVE, ROAD_W, PLINTH, STOPS, SECTORS, SPAWN, START_T, onTrack, standoff, trackT } from "./track.js";
 
 // RIDE: a classic coupe on the PX-01 test track, shot like a miniature — high camera, long lens, tilt-shift,
 // one warm key light with soft shadows. Physics: Rapier raycast vehicle (real suspension, grip, drift) plus
@@ -26,37 +26,54 @@ const rubber = new THREE.MeshStandardMaterial({ color: "#151515", roughness: 0.9
 const lampOn = new THREE.MeshBasicMaterial({ color: "#fff3d6", toneMapped: false });
 const tailOn = new THREE.MeshBasicMaterial({ color: "#ff3b2a", toneMapped: false });
 
+// fastback cabin: side profile extruded across the car (windscreen rake at the front, long sloping rear)
+const cabinGeo = (() => {
+    const s = new THREE.Shape();
+    s.moveTo(-1.6, 0); s.lineTo(0.66, 0); s.lineTo(0.14, 0.46); s.lineTo(-0.92, 0.46); s.lineTo(-1.6, 0);
+    const g = new THREE.ExtrudeGeometry(s, { depth: 1.44, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05, bevelSegments: 3, curveSegments: 2 });
+    g.translate(0, 0, -0.72); return g;
+})();
+const grilleMat = new THREE.MeshStandardMaterial({ color: "#050506", roughness: 0.6, metalness: 0.4 });
+
 function Coupe() {
-    // body ~4.3 m long; the group origin is the chassis collider centre
+    // ~4.3 m long; the group origin is the chassis collider centre. Body sits between the wheels; arches carry over them.
     return (
         <group position={[0, -0.12, 0]}>
-            <RoundedBox args={[4.3, 0.56, 1.86]} radius={0.22} smoothness={4} material={paint} castShadow position={[0, 0.05, 0]} />
-            {/* long hood, set-back cabin, short deck — the classic coupe silhouette */}
-            <RoundedBox args={[2.0, 0.5, 1.6]} radius={0.24} smoothness={4} material={paint} castShadow position={[-0.35, 0.52, 0]} />
-            <RoundedBox args={[1.86, 0.4, 1.66]} radius={0.16} smoothness={3} material={glass} position={[-0.35, 0.5, 0]} />
+            <RoundedBox args={[4.3, 0.52, 1.66]} radius={0.2} smoothness={4} material={paint} castShadow position={[0, 0.05, 0]} />
+            {WHEELS.map(([x, z]) => (
+                <RoundedBox key={`${x}${z}`} args={[1.12, 0.42, 0.3]} radius={0.14} smoothness={3} material={paint} castShadow position={[x, 0.1, z * 1.02]} />
+            ))}
+            <mesh geometry={cabinGeo} material={glass} position={[0, 0.3, 0]} castShadow />
+            <mesh material={paint} position={[-0.39, 0.775, 0]} castShadow><boxGeometry args={[1.02, 0.05, 1.46]} /></mesh>
+            {/* hood bulge between the stripes, ducktail on the deck */}
+            <RoundedBox args={[1.3, 0.08, 0.2]} radius={0.03} smoothness={2} material={paint} position={[1.25, 0.34, 0]} />
+            <mesh material={paint} position={[-2.02, 0.36, 0]} rotation={[0, 0, -0.25]} castShadow><boxGeometry args={[0.3, 0.05, 1.5]} /></mesh>
             {/* racing stripes over hood, roof and deck */}
             {[-0.2, 0.2].map((z) => (
                 <group key={z}>
-                    <mesh material={stripe} position={[1.25, 0.335, z]}><boxGeometry args={[1.8, 0.012, 0.16]} /></mesh>
-                    <mesh material={stripe} position={[-0.35, 0.775, z]}><boxGeometry args={[1.5, 0.012, 0.16]} /></mesh>
-                    <mesh material={stripe} position={[-1.75, 0.335, z]}><boxGeometry args={[0.75, 0.012, 0.16]} /></mesh>
+                    <mesh material={stripe} position={[1.22, 0.315, z]}><boxGeometry args={[1.85, 0.012, 0.15]} /></mesh>
+                    <mesh material={stripe} position={[-0.39, 0.803, z]}><boxGeometry args={[1.0, 0.012, 0.15]} /></mesh>
+                    <mesh material={stripe} position={[-1.78, 0.315, z]}><boxGeometry args={[0.55, 0.012, 0.15]} /></mesh>
                 </group>
             ))}
-            {/* chrome bumpers */}
+            {/* grille, chrome bumpers, exhaust */}
+            <mesh material={grilleMat} position={[2.151, 0.08, 0]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[0.8, 0.18]} /></mesh>
             {[2.18, -2.18].map((x) => (
-                <mesh key={x} material={chrome} position={[x, -0.08, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-                    <capsuleGeometry args={[0.07, 1.62, 4, 10]} />
-                </mesh>
+                <mesh key={x} material={chrome} position={[x, -0.1, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow><capsuleGeometry args={[0.065, 1.5, 4, 10]} /></mesh>
             ))}
-            {/* round headlights + tail lights */}
-            {[-0.62, 0.62].map((z) => (
+            {[-0.45, -0.3].map((z) => (
+                <mesh key={z} material={chrome} position={[-2.2, -0.22, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.045, 0.045, 0.2, 10]} /></mesh>
+            ))}
+            {/* round headlights + tail lights, wing mirrors */}
+            {[-0.58, 0.58].map((z) => (
                 <group key={z}>
-                    <mesh material={chrome} position={[2.14, 0.1, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.17, 0.17, 0.06, 20]} /></mesh>
-                    <mesh material={lampOn} position={[2.175, 0.1, z]} rotation={[0, 0, Math.PI / 2]}><circleGeometry args={[0.13, 20]} /></mesh>
-                    <mesh material={tailOn} position={[-2.16, 0.12, z]} rotation={[0, -Math.PI / 2, 0]}><planeGeometry args={[0.3, 0.12]} /></mesh>
+                    <mesh material={chrome} position={[2.13, 0.09, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.16, 0.16, 0.06, 20]} /></mesh>
+                    <mesh material={lampOn} position={[2.165, 0.09, z]} rotation={[0, Math.PI / 2, 0]}><circleGeometry args={[0.12, 20]} /></mesh>
+                    <mesh material={tailOn} position={[-2.152, 0.12, z]} rotation={[0, -Math.PI / 2, 0]}><planeGeometry args={[0.32, 0.1]} /></mesh>
+                    <mesh material={chrome} position={[0.55, 0.42, z * 1.42]}><boxGeometry args={[0.1, 0.07, 0.12]} /></mesh>
                 </group>
             ))}
-            <Text font={FONT} fontSize={0.16} color={BONE} position={[-2.16, -0.1, 0]} rotation={[0, -Math.PI / 2, 0]} letterSpacing={0.12}>PX-01</Text>
+            <Text font={FONT} fontSize={0.14} color={BONE} position={[-2.153, -0.06, 0]} rotation={[0, -Math.PI / 2, 0]} letterSpacing={0.12}>PX-01</Text>
         </group>
     );
 }
@@ -71,16 +88,17 @@ function Wheel({ front }) {
     );
 }
 
-const _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _look = new THREE.Vector3(), _cam = new THREE.Vector3();
+const _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _fwd = new THREE.Vector3(), _look = new THREE.Vector3(), _cam = new THREE.Vector3();
 const CAM_OFF = new THREE.Vector3(-24, 33, 38);                  // fixed world-space angle: diorama, never spins with the car
 
-function Car({ input, api, onNear, onSpeed, light }) {
+function Car({ input, api, onNear, onTick, onLap, light }) {
     const body = useRef(), wheels = useRef([]);
     const { world } = useRapier();
     const ctrl = useRef(null);
     const camera = useThree((s) => s.camera);
     const nearRef = useRef(-1);
     const steer = useRef(0);
+    const lap = useRef({ t: -1, lastU: 0, running: false, t0: 0, half: false });
 
     useEffect(() => {
         const vc = world.createVehicleController(body.current);
@@ -106,7 +124,7 @@ function Car({ input, api, onNear, onSpeed, light }) {
         };
         api.current = {
             reset: () => { const p = body.current.translation(); const f = nearestOnTrack(p.x, p.z); place(f.x, f.z, f.yaw); },
-            home: () => place(SPAWN.x, SPAWN.z, SPAWN.yaw),
+            home: () => { place(SPAWN.x, SPAWN.z, SPAWN.yaw); lap.current = { t: -1, lastU: 0, running: false, t0: 0, half: false }; },
             go: (s) => { const p = standoff(s); place(p.x, p.z, p.yaw); },
         };
         return () => { world.removeVehicleController(vc); ctrl.current = null; };
@@ -144,6 +162,34 @@ function Car({ input, api, onNear, onSpeed, light }) {
         const p = b.translation();
         if (p.y < -12) api.current.home();                              // drove off the plinth
 
+        // sideways slip (m/s): the car's velocity along its own right axis → squeal, skid marks, dust
+        const r = b.rotation(), lv = b.linvel();
+        _q.set(r.x, r.y, r.z, r.w);
+        _v.set(0, 0, 1).applyQuaternion(_q);
+        const slip = Math.abs(lv.x * _v.x + lv.z * _v.z);
+        const skidding = (slip > 2.6 || (k.brake && Math.abs(speed) > 4) || (braking && Math.abs(speed) > 9));
+        if (skidding && fx.mark) {
+            const yaw = Math.atan2(-(_fwd.set(1, 0, 0).applyQuaternion(_q)).z, _fwd.x);
+            for (const i of [2, 3]) {
+                if (!vc.wheelIsInContact(i)) continue;
+                const c = vc.wheelContactPoint(i);
+                if (c) { fx.mark(c.x, c.z, yaw); if (Math.random() < 0.35) fx.puff(c.x, c.z); }
+            }
+        }
+
+        // laps: crossing the start line forwards, having passed the far side of the loop since
+        const L = lap.current, tr = trackT(p.x, p.z, L.t);
+        L.t = tr.t;
+        const u = (tr.t - START_T + 1) % 1, now = performance.now();
+        if (tr.dist < ROAD_W * 1.5) {
+            if (L.lastU > 0.85 && u < 0.15) {
+                if (L.running && L.half) onLap((now - L.t0) / 1000);
+                L.running = true; L.t0 = now; L.half = false;
+            } else if (L.lastU < 0.15 && u > 0.85) L.half = false;      // reversed over the line: lap void
+            if (u > 0.4 && u < 0.6) L.half = true;
+            L.lastU = u;
+        }
+
         // camera: fixed diorama angle, eased; pulls back a touch with speed
         const pull = (camera.aspect < 1 ? 1.5 : 1) * (1 + Math.min(0.25, Math.abs(speed) / 120));   // portrait sees less width: back off
         _look.set(p.x, 0.6, p.z);
@@ -158,7 +204,7 @@ function Car({ input, api, onNear, onSpeed, light }) {
         let best = -1, bd = 9.5 * 9.5;
         for (const s of STOPS) { const d = (s.x - p.x) ** 2 + (s.z - p.z) ** 2; if (d < bd) { bd = d; best = s.i; } }
         if (best !== nearRef.current) { nearRef.current = best; onNear(best); }
-        onSpeed(speed);
+        onTick(speed, Math.max(0, fwd), slip, L.running ? (now - L.t0) / 1000 : null);
     });
 
     return (
@@ -213,7 +259,7 @@ function Track() {
         red.current.instanceMatrix.needsUpdate = white.current.instanceMatrix.needsUpdate = true;
     }, [kerbs]);
     const n = kerbs.length;
-    const start = onTrack(1 - 35 / CURVE.getLength() + 14 / CURVE.getLength());
+    const start = onTrack(START_T);
     return (
         <group>
             <mesh geometry={road} receiveShadow><meshStandardMaterial color="#2b2a2a" roughness={0.88} /></mesh>
@@ -243,54 +289,132 @@ function Track() {
     );
 }
 
-// ── tickets: one standing thermal-paper slab per project ────────────────────────────────────
+// ── tickets: one standing thermal-paper slab per project, its face printed onto one canvas texture ──────────
+// (one texture + two quads per ticket instead of ~10 text meshes per side: 44 tickets stay cheap on phones)
 const paperMat = new THREE.MeshStandardMaterial({ color: "#fbfaf6", roughness: 0.78 });
-const barcodeTex = (() => {
-    if (typeof document === "undefined") return null;
-    const c = document.createElement("canvas"); c.width = 256; c.height = 32;
-    const g = c.getContext("2d"); g.fillStyle = "#fbfaf6"; g.fillRect(0, 0, 256, 32); g.fillStyle = INK;
-    let x = 0, s = 7; while (x < 256) { s = (s * 16807) % 2147483647; const w = 1 + (s % 4); if (s % 3) g.fillRect(x, 0, w, 32); x += w + 1 + (s % 3); }
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.RepeatWrapping; return t;
-})();
+const TW = 256, TH = 424;                                         // canvas units; the ticket is 3.2 × 5.3 m
+const fontsReady = typeof document !== "undefined" ? document.fonts.load('800 20px "Archivo"').catch(() => {}) : Promise.resolve();
 
-function Ticket({ stop, active }) {
-    const [tex, setTex] = useState(null);
-    const bar = useMemo(() => { const t = barcodeTex.clone(); t.offset.x = (stop.i * 0.137) % 1; t.repeat.x = 0.5; t.needsUpdate = true; return t; }, [stop.i]);
+function wrap(g, text, x, y, maxW, lh, maxLines) {
+    const words = text.split(/\s+/); let line = "", n = 0;
+    for (let i = 0; i < words.length; i++) {
+        const test = line ? `${line} ${words[i]}` : words[i];
+        if (g.measureText(test).width > maxW && line) {
+            if (++n === maxLines) { g.fillText(`${line}…`, x, y); return y + lh; }
+            g.fillText(line, x, y); y += lh; line = words[i];
+        } else line = test;
+    }
+    if (line) { g.fillText(line, x, y); y += lh; }
+    return y;
+}
+
+function printTicket(canvas, s, img) {
+    const g = canvas.getContext("2d"), k = canvas.width / TW;
+    g.setTransform(k, 0, 0, k, 0, 0);
+    g.fillStyle = "#fbfaf6"; g.fillRect(0, 0, TW, TH);
+    g.fillStyle = SIGNAL; g.font = '600 10px "Geist Mono", ui-monospace, monospace';
+    g.fillText(`№ ${String(s.i + 1).padStart(2, "0")} · ${s.kind.toUpperCase()}`, 14, 22);
+    g.fillStyle = "#d9d5cc"; g.fillRect(14, 30, 228, 143);
+    if (img) {                                                     // cover-fit, top-aligned like the site's thumbnails
+        const sc = Math.max(228 / img.width, 143 / img.height);
+        g.save(); g.beginPath(); g.rect(14, 30, 228, 143); g.clip();
+        g.drawImage(img, 14 + (228 - img.width * sc) / 2, 30, img.width * sc, img.height * sc); g.restore();
+    }
+    g.fillStyle = INK; g.font = '800 23px "Archivo", "Geist", system-ui, sans-serif';
+    let y = wrap(g, s.title.toUpperCase(), 14, 205, 228, 24, 3);
+    g.fillStyle = "#64615b"; g.font = '400 11.5px "Geist", system-ui, sans-serif';
+    wrap(g, s.w.line, 14, y + 6, 228, 15, 4);
+    // status stamp
+    const live = s.status === "Live";
+    g.save(); g.translate(186, 352); g.rotate(-0.12);
+    g.strokeStyle = g.fillStyle = live ? SIGNAL : "#64615b"; g.lineWidth = 2; g.strokeRect(-36, -14, 72, 24);
+    g.font = '700 12px "Geist Mono", ui-monospace, monospace'; g.textAlign = "center"; g.fillText(s.status.toUpperCase(), 0, 3); g.restore();
+    // barcode from the slug
+    g.fillStyle = INK; let x = 14, h = 0;
+    for (const ch of s.w.slug.repeat(4)) { h = (h * 31 + ch.charCodeAt(0)) >>> 0; const w = 1 + (h % 3); if (x + w > 150) break; if (h % 5) g.fillRect(x, 378, w, 32); x += w + 1 + ((h >> 3) % 2); }
+    g.fillStyle = "#64615b"; g.font = '400 8px "Geist Mono", ui-monospace, monospace'; g.fillText(s.w.slug.toUpperCase().slice(0, 26), 14, 418);
+}
+
+function Ticket({ stop, active, res = 1 }) {
+    const tex = useMemo(() => {
+        const c = document.createElement("canvas"); c.width = TW * res; c.height = TH * res;
+        const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+    }, [res]);
     useEffect(() => {
-        let live = true;
-        new THREE.TextureLoader().setCrossOrigin("anonymous").load(shot(stop.w, 480), (t) => {
-            if (!live) return t.dispose();
-            t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; setTex(t);
-        });
-        return () => { live = false; };
-    }, [stop.w]);
-    useEffect(() => () => { tex?.dispose(); bar.dispose(); }, [tex, bar]);
+        let alive = true;
+        fontsReady.then(() => { if (!alive) return; printTicket(tex.image, stop); tex.needsUpdate = true; });
+        const img = new Image(); img.crossOrigin = "anonymous"; img.decoding = "async";
+        img.onload = () => fontsReady.then(() => { if (!alive) return; printTicket(tex.image, stop, img); tex.needsUpdate = true; });
+        img.src = shot(stop.w, 360 * res);
+        return () => { alive = false; img.onload = null; tex.dispose(); };
+    }, [stop, tex, res]);
     const lift = useRef();
     useFrame((_, dt) => { if (lift.current) lift.current.position.y += ((active ? 0.35 : 0) - lift.current.position.y) * (1 - Math.exp(-dt * 6)); });
-    const live = stop.status === "Live";
     return (
         <RigidBody type="fixed" colliders={false} position={[stop.x, 0, stop.z]} rotation={[0, stop.face, 0]}>
             <CuboidCollider args={[1.7, 2.8, 0.12]} position={[0, 2.8, 0]} />
             <group ref={lift}>
                 <mesh material={paperMat} position={[0, 2.85, 0]} castShadow receiveShadow><boxGeometry args={[3.2, 5.3, 0.1]} /></mesh>
-                {[0, Math.PI].map((r) => <group key={r} rotation={[0, r, 0]}>
-                <mesh position={[0, 3.85, 0.056]}>
-                    <planeGeometry args={[2.86, 1.79]} />
-                    <meshBasicMaterial map={tex} color={tex ? "#ffffff" : "#d9d5cc"} toneMapped={false} />
-                </mesh>
-                <Text font={FONT} fontSize={0.15} color={SIGNAL} anchorX="left" position={[-1.43, 5.15, 0.06]} letterSpacing={0.14}>{`№ ${String(stop.i + 1).padStart(2, "0")} · ${stop.kind.toUpperCase()}`}</Text>
-                <Text font={FONT} fontSize={0.3} color={INK} anchorX="left" anchorY="top" maxWidth={2.86} lineHeight={1.05} position={[-1.43, 2.78, 0.06]}>{stop.title.toUpperCase()}</Text>
-                <Text font={FONT} fontSize={0.13} color="#64615b" anchorX="left" anchorY="top" maxWidth={2.86} lineHeight={1.3} position={[-1.43, 2.0, 0.06]}>{stop.w.line}</Text>
-                <mesh position={[0, 0.72, 0.056]}><planeGeometry args={[2.86, 0.34]} /><meshBasicMaterial map={bar} toneMapped={false} /></mesh>
-                {/* status stamp */}
-                <group position={[0.95, 1.25, 0.06]} rotation={[0, 0, 0.12]}>
-                    <Text font={FONT} fontSize={0.2} color={live ? SIGNAL : "#64615b"} letterSpacing={0.12}>{stop.status.toUpperCase()}</Text>
-                </group>
-                </group>)}
-                {/* steel stand */}
+                {[0, Math.PI].map((r) => (
+                    <group key={r} rotation={[0, r, 0]} position={[0, 2.85, 0]}>
+                        <mesh position={[0, 0, 0.052]}>
+                            <planeGeometry args={[3.2, 5.3]} />
+                            <meshStandardMaterial map={tex} roughness={0.8} />
+                        </mesh>
+                    </group>
+                ))}
                 <mesh material={chrome} position={[0, 0.12, -0.02]} castShadow><boxGeometry args={[1.2, 0.24, 0.6]} /></mesh>
             </group>
         </RigidBody>
+    );
+}
+
+// ── skid marks + dust: ring buffers, one instanced draw each ─────────────────────────────────
+const fx = { mark: null, puff: null };
+const MARKS = 900, PUFFS = 48;
+function Skids() {
+    const marks = useRef(), puffs = useRef(), life = useRef(new Float32Array(PUFFS));
+    const pos = useRef(new Float32Array(PUFFS * 2));
+    useEffect(() => {
+        const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(1, 1, 1), v = new THREE.Vector3();
+        let mi = 0, pi = 0, lastX = 1e9, lastZ = 1e9;
+        const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
+        for (let i = 0; i < MARKS; i++) marks.current.setMatrixAt(i, hidden);
+        for (let i = 0; i < PUFFS; i++) puffs.current.setMatrixAt(i, hidden);
+        marks.current.instanceMatrix.needsUpdate = puffs.current.instanceMatrix.needsUpdate = true;
+        fx.mark = (x, z, yaw) => {
+            if ((x - lastX) ** 2 + (z - lastZ) ** 2 < 0.04) return;      // ~20 cm spacing
+            lastX = x; lastZ = z;
+            m.compose(v.set(x, 0.016, z), q.setFromEuler(e.set(-Math.PI / 2, 0, yaw, "YXZ")), sc);
+            marks.current.setMatrixAt(mi, m); mi = (mi + 1) % MARKS;
+            marks.current.instanceMatrix.needsUpdate = true;
+        };
+        fx.puff = (x, z) => { life.current[pi] = 1; pos.current[pi * 2] = x; pos.current[pi * 2 + 1] = z; pi = (pi + 1) % PUFFS; };
+        return () => { fx.mark = fx.puff = null; };
+    }, []);
+    const m = useMemo(() => new THREE.Matrix4(), []), v = useMemo(() => new THREE.Vector3(), []), s = useMemo(() => new THREE.Vector3(), []), q = useMemo(() => new THREE.Quaternion(), []);
+    useFrame((_, dt) => {
+        const L = life.current; let any = false;
+        for (let i = 0; i < PUFFS; i++) {
+            if (L[i] <= 0) continue;
+            L[i] = Math.max(0, L[i] - dt * 1.4); any = true;
+            const a = 1 - L[i], k = L[i] > 0 ? 0.3 + a * 1.3 : 0;
+            m.compose(v.set(pos.current[i * 2], 0.25 + a * 0.9, pos.current[i * 2 + 1]), q, s.set(k, k * 0.7, k));
+            puffs.current.setMatrixAt(i, m);
+        }
+        if (any) puffs.current.instanceMatrix.needsUpdate = true;
+    });
+    return (
+        <>
+            <instancedMesh ref={marks} args={[null, null, MARKS]} frustumCulled={false}>
+                <planeGeometry args={[0.42, 0.22]} />   {/* long side along the direction of travel; overlaps at 20 cm spacing */}
+                <meshBasicMaterial color="#111111" transparent opacity={0.4} depthWrite={false} />
+            </instancedMesh>
+            <instancedMesh ref={puffs} args={[null, null, PUFFS]} frustumCulled={false}>
+                <icosahedronGeometry args={[0.5, 1]} />
+                <meshStandardMaterial color="#e8e2d6" roughness={1} transparent opacity={0.45} depthWrite={false} />
+            </instancedMesh>
+        </>
     );
 }
 
@@ -373,7 +497,7 @@ function Plinth() {
     );
 }
 
-function Scene({ input, api, onNear, onSpeed, tier = "HIGH" }) {
+function Scene({ input, api, onNear, onTick, onLap, tier = "HIGH" }) {
     const light = useRef();
     const high = tier === "HIGH", low = tier === "LOW";
     return (
@@ -393,15 +517,22 @@ function Scene({ input, api, onNear, onSpeed, tier = "HIGH" }) {
             <Physics gravity={[0, -14, 0]} timeStep="vary">
                 <Plinth />
                 <Track />
-                {STOPS.map((s) => <TicketSlot key={s.i} stop={s} />)}
+                {STOPS.map((s) => <TicketSlot key={s.i} stop={s} res={high ? 1.5 : 1} />)}
                 <Props />
-                <Car input={input} api={api} onNear={onNear} onSpeed={onSpeed} light={light} />
+                <Car input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} light={light} />
+                <Skids />
             </Physics>
 
-            {!low && (
-                <EffectComposer multisampling={high ? 4 : 0}>
-                    <TiltShift2 blur={high ? 0.22 : 0.16} taper={0.6} start={[0.5, 0.0]} end={[0.5, 1.0]} samples={high ? 10 : 6} />
+            {high && (
+                <EffectComposer multisampling={4}>
+                    <TiltShift2 blur={0.22} taper={0.6} start={[0.5, 0.0]} end={[0.5, 1.0]} samples={10} />
                     <Bloom intensity={0.35} luminanceThreshold={0.92} mipmapBlur />
+                    <Vignette offset={0.25} darkness={0.55} />
+                </EffectComposer>
+            )}
+            {!high && !low && (
+                <EffectComposer multisampling={0}>
+                    <TiltShift2 blur={0.16} taper={0.6} start={[0.5, 0.0]} end={[0.5, 1.0]} samples={6} />
                     <Vignette offset={0.25} darkness={0.55} />
                 </EffectComposer>
             )}
@@ -412,10 +543,10 @@ function Scene({ input, api, onNear, onSpeed, tier = "HIGH" }) {
 // tickets light up (lift) when the car is next to them; the active index lives on a tiny store so only 2 boards re-render
 const activeStore = { i: -1, subs: new Set() };
 export const setActiveTicket = (i) => { activeStore.i = i; activeStore.subs.forEach((f) => f()); };
-function TicketSlot({ stop }) {
+function TicketSlot({ stop, res }) {
     const [active, setActive] = useState(false);
     useEffect(() => { const f = () => setActive(activeStore.i === stop.i); activeStore.subs.add(f); return () => activeStore.subs.delete(f); }, [stop.i]);
-    return <Ticket stop={stop} active={active} />;
+    return <Ticket stop={stop} active={active} res={res} />;
 }
 
 export default memo(Scene);

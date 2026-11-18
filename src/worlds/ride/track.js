@@ -53,3 +53,18 @@ order.forEach((kind, k) => {
 export const SPAWN = (() => { const f = onTrack(1 - 35 / LENGTH); return { x: f.x, z: f.z, yaw: Math.atan2(-f.tz, f.tx) }; })();
 // where the car is placed for stop s: on the road, right beside its board
 export function standoff(s) { const f = onTrack(s.t); return { x: f.x, z: f.z, yaw: Math.atan2(-f.tz, f.tx) }; }
+
+// start/finish line: 14 m ahead of the spawn point
+export const START_T = 1 - 21 / LENGTH;
+
+// fraction of the loop nearest to (x, z). With a previous answer it only searches nearby, so it's cheap per frame.
+const N = 400, SAMPLES = Array.from({ length: N }, (_, i) => { const f = onTrack(i / N); return [f.x, f.z]; });
+export function trackT(x, z, prev = -1) {
+    let bi = 0, bd = Infinity;
+    const from = prev < 0 ? 0 : Math.round(prev * N) - 14, to = prev < 0 ? N : Math.round(prev * N) + 14;
+    for (let j = from; j < to; j++) {
+        const i = ((j % N) + N) % N, d = (SAMPLES[i][0] - x) ** 2 + (SAMPLES[i][1] - z) ** 2;
+        if (d < bd) { bd = d; bi = i; }
+    }
+    return { t: bi / N, dist: Math.sqrt(bd) };
+}

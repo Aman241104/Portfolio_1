@@ -207,5 +207,9 @@ pulling up beside one opens its card. Fixed high camera + fov 30 + TiltShift2 = 
 biomes/props and public/ride assets removed.
 Gotchas: vehicle forward = chassis +X needs axle (0,0,+1) — with (0,0,-1) engine force drives backwards. Chassis mass
 150 with ENGINE 620/rear wheel (Rapier scales suspension by chassis mass).
-Next for RIDE: sound (engine pitch, tyre squeal), skid marks + dust, a better car silhouette (wheel arches), finish-line
-contact gate, lap timer, perf pass on phones (shadows/EffectComposer off on BALANCED?).
+RIDE v2.1 (same day): synthesised engine + tyre squeal (src/worlds/ride/engine.js, follows the site sound switch),
+skid marks + dust (instanced ring buffers), fastback coupe with arches/ducktail/grille, lap timer + best lap
+(localStorage `ride-best-lap`, anti-cheat halfway checkpoint) with a "Like how it handles?" contact card per lap,
+tickets printed to one canvas texture each (was ~440 troika text meshes), BALANCED tier drops bloom + MSAA.
+Rapier adds ~855 KB gz to the RIDE chunk only (lazy). Ideas left: night mode with headlights, ghost car of your best
+lap, gamepad support, photo mode.
