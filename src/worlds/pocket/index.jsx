@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { profile, socials } from "#content/profile.js";
+import { host } from "#content/work.js";
 import { cases } from "../../../content/cases.js";
 import { useFonts } from "../fonts.js";
 import { track } from "../../analytics.js";
@@ -16,7 +17,6 @@ const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-mo
 const STEP_MS = 170;
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const linkedin = socials.find((s) => /linkedin/i.test(s.text || s.id));
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const loadCaught = () => { try { return new Set(JSON.parse(localStorage.getItem("px01-pocket-dex") || "[]")); } catch { return new Set(); } };
 
 // ---- a tiny original chiptune (square waves), only when sound is switched on ----

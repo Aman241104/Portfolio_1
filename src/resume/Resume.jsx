@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { work } from "../../content/work.js";
+import { work, host } from "../../content/work.js";
 import { experience } from "../../content/experience.js";
 import { skillGroups } from "../../content/skills.js";
 
@@ -45,7 +45,6 @@ const DETAIL = {
     mindcore: ["Native Android (Kotlin, Jetpack Compose): share a reel, post, link or screenshot; AI extracts repos, tools, certs and jobs, verifies each online, and answers questions about the library with sources."],
 };
 
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 export default function Resume() {
     const [key, setKey] = useState(() => {

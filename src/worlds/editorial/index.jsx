@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { profile, socials } from "#content/profile.js";
 import { onRepeat, watching } from "#content/taste.js";
-import { work, KINDS, shot, inProduction } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction, host } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { certifications } from "../../../content/certifications.js";
 import { skillGroups } from "../../../content/skills.js";
@@ -17,7 +17,6 @@ const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
 // World 2: THE INDEX. A one-ink broadsheet (paper, ink, International Klein Blue). Front page first, then a Swiss
 // project index with a cursor-following duotone preview. The recruiter view: everything one scroll away.
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const bySlug = (s) => work.find((w) => w.slug === s);
 const LEAD = bySlug("job-search-os"), SECOND = [bySlug("whatsapp-ai"), bySlug("mindcore")];
 const today = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });

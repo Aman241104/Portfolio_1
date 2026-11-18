@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { profile, socials } from "#content/profile.js";
-import { work, KINDS, shot, status, inProduction } from "../../../content/work.js";
+import { work, KINDS, shot, status, inProduction, host } from "../../../content/work.js";
+import { liveStatus } from "../../status.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -14,7 +15,6 @@ import "./longhorn.css";
 // (a live site-status gadget, an Ahmedabad clock), and the signature: a 3D flip stack of project windows.
 const FONTS = ["Mulish:wght@400;600;700;800"];
 const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const LENS = { edge: 16, amount: 26, fringe: 0.18, extra: "saturate(1.6) brightness(1.08)" };
 const linkedin = socials.find((s) => /linkedin/i.test(s.text || s.id));
 
@@ -250,21 +250,7 @@ export default function LonghornWorld({ shell }) {
 
     useEffect(() => { const i = setInterval(() => setClock(new Date()), 15000); return () => clearInterval(i); }, []);
     useEffect(() => {
-        const probeLocal = async () => {
-            const list = work.filter((w) => w.maintained && w.url);
-            const entries = await Promise.all(list.map(async (w) => {
-                const t0 = performance.now();
-                try {
-                    await fetch(w.url, { mode: "no-cors", cache: "no-store" });
-                    return [w.slug, { ok: true, ms: Math.max(18, Math.round(performance.now() - t0)) }];
-                } catch {
-                    return [w.slug, { ok: false, ms: 0 }];
-                }
-            }));
-            setSites(Object.fromEntries(entries));
-        };
-        if (/^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname)) { probeLocal(); return; }
-        fetch("/api/status").then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => setSites(d.sites || {})).catch(probeLocal);
+        liveStatus().then((d) => setSites(d.sites));
     }, []);
 
     const open = useCallback((kind, payload) => {

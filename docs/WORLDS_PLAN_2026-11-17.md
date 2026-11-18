@@ -193,3 +193,8 @@ Source: agy CLI (read-only design audit of src/worlds/* against docs/REFERENCE_I
 | RIDE | Scene memoised (HUD tick re-rendered the 3D tree ~8×/s) | — (design cuts pending Aman) |
 | Desktop | folders frozen at 40% (Draggable mid-animation) fixed; phone dock overlap | windows already lazy-mount; it is already PX-OS, not a macOS clone |
 Pending Aman's call: RIDE cuts (points/orbs/gates/props; Fjord + Sakura biomes), any Desktop re-skin.
+
+## Cross-world systems (2026-11-18)
+- `host()` lives once in `content/work.js` (was 12 copies across home, worlds, mobile, résumé).
+- `src/status.js` `liveStatus(fresh?)`: one /api/status check with browser-ping fallback, cached 60 s; used by home Maintained, Mission (60 s poll + R re-scan = fresh), Longhorn. Replaced 3 hand-rolled probes.
+- Still open: ticket-feed portal transition, `?style=<id>&p=<slug>` deep links, shared useWorldPerf.

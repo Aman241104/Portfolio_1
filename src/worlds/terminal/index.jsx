@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { profile, socials } from "#content/profile.js";
 import { onRepeat, topArtists, watching } from "#content/taste.js";
 import { worlds } from "#worlds/registry.js";
-import { work, KINDS, shot, inProduction } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction, host } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -17,7 +17,6 @@ const FONTS = ["VT323", "IBM+Plex+Mono:wght@400;500"];
 
 // World 4: tty1 · AHMEDABAD. A split-pane phosphor CRT workstation with tmux chrome, live project inspector,
 // argument-level Tab completion, and 1-click recruiter fast-path.
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const secondsSince = (t) => Math.round((Date.now() - t) / 1000);
 const live = work.filter((w) => w.live);

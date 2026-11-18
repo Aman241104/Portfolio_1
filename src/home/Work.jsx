@@ -1,6 +1,6 @@
 import { Barcode } from "./Printer.jsx";
 import { useEffect, useRef, useState } from "react";
-import { work, KINDS, shot } from "#content/work.js";
+import { work, KINDS, shot, host } from "#content/work.js";
 import { sfx } from "#machine/sfx.js";
 import { track } from "../analytics.js";
 import { cases } from "#content/cases.js";
@@ -9,7 +9,6 @@ import { cases } from "#content/cases.js";
 // kind, real screenshots (Cloudinary) in a browser frame. The shot scrolls through the page on hover; on touch the card
 // crossing the middle of the screen does it instead. Opening a live site plays a short "leaving PX-01" transition
 // (cmd/ctrl/middle-click still opens a normal new tab).
-const host = (u = "") => u.replace(/^https?:\/\//, "").replace(/\/$/, "");
 const FIRST = 9;
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const touch = () => matchMedia("(pointer: coarse)").matches;
@@ -137,7 +136,7 @@ export default function Work() {
                             <div className="card-img"><img src={shot(w, cls.includes("flagship-hero") ? 1600 : 720)} alt="" loading="lazy" decoding="async" /></div>
                         </div>
                         <div className="card-meta">
-                            <p className="mono">{String(i + 1).padStart(2, "0")} · {KINDS[w.kind]} · {w.year}{w.live && <span className="live">● Live at {host(w.url).replace(/^www\./, "")}</span>}</p>
+                            <p className="mono">{String(i + 1).padStart(2, "0")} · {KINDS[w.kind]} · {w.year}{w.live && <span className="live">● Live at {host(w.url)}</span>}</p>
                             <h3>{w.title} {w.url && <i aria-hidden>↗</i>}</h3>
                             <p className="card-line">{w.line}</p>
                             {w.stack && <p className="mono card-stack">{w.stack}</p>}

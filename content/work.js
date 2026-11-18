@@ -8,6 +8,9 @@ export const KINDS = { product: "Products", mobile: "Mobile apps", client: "Clie
 // Card image on Cloudinary (also used by the other worlds and SEO).
 export const shot = (item, w = 900) => `https://res.cloudinary.com/dhrcarq8g/image/upload/f_auto,q_auto,w_${w}/${item.img || `portfolio/work/${item.slug}`}`;
 
+// "https://www.x.com/" → "x.com"
+export const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+
 export const work = [
     {
         slug: "job-search-os", kind: "product", year: 2026, maintained: true, title: "Job Search OS", img: "portfolio/projects/job-search-os",

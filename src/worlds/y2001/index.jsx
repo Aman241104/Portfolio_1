@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { profile } from "#content/profile.js";
-import { work, KINDS, shot, status } from "../../../content/work.js";
+import { work, KINDS, shot, status, host } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -15,7 +15,6 @@ import "./y2001.css";
 // top to bottom while the status bar fills, pictures resolve from chunky pixels, the odometer rolls to the real count.
 const FONTS = ["Comic+Neue:wght@400;700"];
 const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const SECTIONS = 9;
 const GB_KEY = "px01-y2001-guestbook-v1";
 // No invented visitors or hit counts (Aman, 2026-11-17: "remove all that, replace with real"). Offline/dev starts at 0

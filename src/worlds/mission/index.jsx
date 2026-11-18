@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { profile, socials } from "#content/profile.js";
-import { work, KINDS, shot, inProduction } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction, host } from "../../../content/work.js";
+import { liveStatus } from "../../status.js";
 import { experience } from "../../../content/experience.js";
 import { cases } from "../../../content/cases.js";
 import { certifications } from "../../../content/certifications.js";
@@ -11,7 +12,6 @@ import "./mission.css";
 // World 6: DEPARTURES · Mission Control. Live-probed production fleet, Swiss split-flap telemetry,
 // interactive platform/stack filtering, expandable project inspector, and verified credentials.
 const FONTS = ["Barlow+Condensed:wght@500;600;700", "Barlow:wght@400;500;600"];
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const hhmm = (d = new Date()) => d.toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" });
 const ago = (iso) => { const s = (Date.now() - new Date(iso)) / 1000; return s < 3600 ? `${Math.max(1, Math.round(s / 60))} MIN` : s < 86400 ? `${Math.round(s / 3600)} HRS` : `${Math.round(s / 86400)} DAYS`; };
 const fleet = work.filter(inProduction);
@@ -53,47 +53,19 @@ export default function Departures() {
 
     useEffect(() => { const t = setInterval(() => setClock(hhmm()), 5000); return () => clearInterval(t); }, []);
 
-    const runClientProbe = useCallback(async () => {
+    const pollStatus = useCallback((fresh) => {
         setProbing(true);
-        const results = {};
-        await Promise.all(work.filter((w) => inProduction(w) && w.url).map(async (w) => {
-            const t0 = performance.now();
-            try {
-                const ctrl = new AbortController();
-                const timer = setTimeout(() => ctrl.abort(), 4500);
-                await fetch(w.url, { mode: "no-cors", cache: "no-store", signal: ctrl.signal });
-                clearTimeout(timer);
-                results[w.slug] = { ok: true, ms: Math.max(28, Math.round(performance.now() - t0)) };
-            } catch {
-                results[w.slug] = { ok: false, ms: 0 };
-            }
-        }));
-        setSites(results);
-        setChecked({ checkedAt: new Date().toISOString(), from: "client-edge" });
-        setProbing(false);
-        setScanId((n) => n + 1);
+        liveStatus(fresh === true).then((d) => {
+            setSites(d.sites);
+            setChecked(d);
+            setProbing(false);
+            setScanId((n) => n + 1);
+        });
     }, []);
-
-    const pollStatus = useCallback(() => {
-        setProbing(true);
-        fetch("/api/status")
-            .then((r) => (r.ok ? r.json() : Promise.reject()))
-            .then((d) => {
-                if (d?.sites && Object.keys(d.sites).length) {
-                    setSites(d.sites);
-                    setChecked(d);
-                    setProbing(false);
-                    setScanId((n) => n + 1);
-                } else {
-                    runClientProbe();
-                }
-            })
-            .catch(() => runClientProbe());
-    }, [runClientProbe]);
 
     useEffect(() => {
         const init = setTimeout(pollStatus, 0);
-        const t = setInterval(pollStatus, 60000);
+        const t = setInterval(() => pollStatus(true), 60000);
         fetch("/api/github")
             .then((r) => (r.ok ? r.json() : Promise.reject()))
             .then(setGh)
@@ -104,7 +76,7 @@ export default function Departures() {
     useEffect(() => {
         const onKey = (e) => {
             if (e.target.closest("input, textarea, select")) return;
-            if (e.key.toLowerCase() === "r") pollStatus();
+            if (e.key.toLowerCase() === "r") pollStatus(true);
             else if (e.key === "1") { setTechFilter(null); setFilter("product"); }
             else if (e.key === "2") { setTechFilter(null); setFilter("mobile"); }
             else if (e.key === "3") { setTechFilter(null); setFilter("client"); }
@@ -186,7 +158,7 @@ export default function Departures() {
                                 </button>
                             )}
                         </div>
-                        <button type="button" className="dp-rescan" onClick={pollStatus} disabled={probing}>
+                        <button type="button" className="dp-rescan" onClick={() => pollStatus(true)} disabled={probing}>
                             {probing ? "PROBING…" : "↻ RE-SCAN [R]"}
                         </button>
                     </div>

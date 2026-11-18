@@ -1,7 +1,7 @@
 import { useCallback, Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { profile, socials } from "#content/profile.js";
-import { shot, KINDS } from "../../../content/work.js";
+import { shot, KINDS, host } from "../../../content/work.js";
 import { cases } from "../../../content/cases.js";
 import { useFonts } from "../fonts.js";
 import { track } from "../../analytics.js";
@@ -23,7 +23,6 @@ const lowPower = () => {
     } catch { return true; }
 };
 const CRUISE = 13, MAX = 42;                                       // m/s: ~47 km/h cruise, ~150 km/h flat out
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 
 function Speedo({ kmh, visited, d, leanDeg = 0, tps = 0 }) {

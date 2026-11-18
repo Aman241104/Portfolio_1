@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { ChevronLeft, Github, ExternalLink, BookOpen } from "lucide-react";
-import { work, KINDS, shot } from "../../../content/work.js";
+import { work, KINDS, shot, host } from "../../../content/work.js";
 import { cases } from "../../../content/cases.js";
 
 // Phone "Projects" app: every project as a screenshot card, filter chips by kind, detail with live/code/case links.
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 const Detail = ({ w, onBack }) => (
     <div className="pb-28">

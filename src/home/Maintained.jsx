@@ -1,19 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { work, KINDS, inProduction } from "#content/work.js";
+import { work, KINDS, inProduction, host } from "#content/work.js";
+import { liveStatus } from "../status.js";
 
-// Production sites and products I built and still look after. Status comes from /api/status (checked server-side,
-// cached 5 min); if that's unavailable (local dev), the visitor's browser pings each site instead, with a retry.
-const host = (u) => u.replace(/^https?:\/\//, "").replace(/\/$/, "").replace(/^www\./, "");
-const ping = async (url) => {
-    for (let i = 0; i < 2; i++) {
-        const t = performance.now();
-        try {
-            await Promise.race([fetch(url, { mode: "no-cors", cache: "no-store" }), new Promise((_, no) => setTimeout(no, 5000))]);
-            return Math.round(performance.now() - t);
-        } catch { /* one retry */ }
-    }
-    return -1;
-};
+// Production sites and products I built and still look after, checked live (src/status.js).
 const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "just now" : `${m} min ago`; };
 
 export default function Maintained() {
@@ -25,10 +14,10 @@ export default function Maintained() {
         const io = new IntersectionObserver(([e]) => {
             if (!e.isIntersecting) return;
             io.disconnect();
-            fetch("/api/status").then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => {
+            liveStatus().then((d) => {
                 setStatus(Object.fromEntries(list.map((w) => [w.slug, d.sites[w.slug]?.ok ? d.sites[w.slug].ms : -1])));
                 setChecked({ at: d.checkedAt, from: d.from });
-            }).catch(() => list.forEach((w) => ping(w.url).then((ms) => setStatus((s) => ({ ...s, [w.slug]: ms })))));
+            });
         }, { rootMargin: "200px" });
         io.observe(ref.current);
         return () => io.disconnect();
@@ -42,7 +31,7 @@ export default function Maintained() {
                 <h2 id="kept-h">Live &amp; maintained</h2>
                 <p className="kept-intro">Every site and product I built that is in production today, checked live. The ones marked maintained still get fixes, content and features from me.</p>
                 <p className="mono kept-sum" aria-live="polite">
-                    {Object.keys(status).length < list.length ? `Probing ${Object.keys(status).length} / ${list.length}…` : `${up} / ${list.length} operational · ${checked ? `${ago(checked.at)} (${checked.from === "sin1" ? "SIN1" : "server"})` : "live browser probe"}`}
+                    {Object.keys(status).length < list.length ? `Probing ${Object.keys(status).length} / ${list.length}…` : `${up} / ${list.length} operational · ${checked.from === "browser" ? "live browser probe" : `${ago(checked.at)} (${checked.from === "sin1" ? "SIN1" : "server"})`}`}
                 </p>
             </aside>
             <ol className="kept-list" data-reveal>

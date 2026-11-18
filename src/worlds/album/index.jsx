@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef, useState } from "react";
 import { drawCover } from "./cover.js";
 import { play, stop, BEAT_MS } from "./beat.js";
-import { work, KINDS, shot, inProduction } from "../../../content/work.js";
+import { work, KINDS, shot, inProduction, host } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -16,7 +16,6 @@ const FONTS = ["Russo+One", "Archivo:wdth,wght@62..125,300..900", "Space+Mono"];
 
 // World 5: the portfolio as an album drop. Projects = tracklist, stack = features, case studies = liner notes,
 // concepts = deluxe edition, experience + certs = gatefold credits, résumé = merch.
-const host = (u = "") => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 const hash = (s) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 // One element per track: the 40 bars are an SVG mask (same seeded heights as before), the fill is the track colour.
 // Was 40 <i> per track × 44 tracks = 1,760 nodes, every one of them animating while the record played.
