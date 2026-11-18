@@ -30,6 +30,7 @@ const Cell = memo(({ ch, delay }) => {
         let n = 0;
         const flips = 2 + Math.floor(Math.random() * 3);   // 2–4 riffles: reads as a riffle, half the DOM writes
         const job = { at: performance.now() + delay, step(now) {
+            if (!box.current) { jobs.delete(job); return; }   // cell unmounted while its job was queued in this frame
             n++;
             const last = n >= flips;
             // The riffle is a blur of character swaps (paint only, contained); only the landing gets a real fold,

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { worlds, RECRUITER_WORLD, findWorld } from "#worlds/registry.js";
+const POOL = worlds.filter((w) => !w.beta).length;   // the worlds the lever can land on
 import WorldPicker from "#shell/WorldPicker.jsx";
 import { pickWorld } from "#machine/Machine.jsx";
 import { profile, socials } from "#content/profile.js";
@@ -569,7 +570,10 @@ const Home = ({ onSelect }) => {
                         <div className="cta">
                             <span className="start-lights" aria-hidden><i /><i /><i /><i /><i /></span>
                             <button type="button" className="pull" onClick={pull} disabled={busy}>
-                                <span className="cta-n mono" aria-hidden>01</span> Pull the lever <i aria-hidden>→</i>
+                                {/* phones: the key is the lever — the knob sits in a slot and travels down it on press */}
+                                <span className="pull-slot" aria-hidden><i className="pull-ball" /></span>
+                                <span className="pull-txt"><b>Pull the lever</b><small>Spins one of {POOL} worlds</small></span>
+                                <span className="pull-desk"><span className="cta-n mono" aria-hidden>01</span> Pull the lever <i aria-hidden>→</i></span>
                             </button>
                             <div className="cta-alt">
                                 <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>

@@ -497,3 +497,43 @@
     /* fixed bars over scrolling content: solid instead of a live blur */
     .home .light-foot-bar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--void); }
 }
+
+/* ---- Phones: the primary key *is* the lever (Aman 2026-11-18: "the pull button needs a lot more"). A machined
+   chrome keycap with a recessed slot holding the same red knob as PX-01's lever; the knob nudges down now and then,
+   and travels the slot when pressed. Desktop keeps the compact chrome key (.pull-desk). ---- */
+.home .pull-slot, .home .pull-txt { display: none; }
+@media (max-width: 760px) {
+    .home .cta .pull, .home[data-light] .cta .pull {
+        justify-content: flex-start; gap: 14px; min-height: 58px; padding: 7px 18px 7px 11px !important; border-radius: 15px;
+        text-transform: none; letter-spacing: 0;
+        background:
+            repeating-linear-gradient(90deg, rgb(255 255 255 / .05) 0 1px, transparent 1px 3px),
+            linear-gradient(180deg, #fbfaf7 0%, #e3e1db 44%, #cbc9c3 56%, #efeee9 100%) !important;
+        box-shadow: 0 1px 0 #fff inset, 0 -2px 0 rgb(0 0 0 / .16) inset, 0 0 0 1px rgb(0 0 0 / .4), 0 14px 30px -10px rgb(0 0 0 / .7) !important;
+        transition: scale 120ms var(--px-ease), box-shadow 120ms !important;
+    }
+    .home .cta .pull:active { scale: .985; box-shadow: 0 1px 0 #fff inset, 0 2px 6px rgb(0 0 0 / .25) inset, 0 0 0 1px rgb(0 0 0 / .45), 0 6px 14px -8px rgb(0 0 0 / .6) !important; }
+    .home .cta .pull-desk { display: none; }
+    .home .cta .pull-slot {
+        display: block; position: relative; flex: none; width: 22px; height: 42px; border-radius: 11px;
+        background: linear-gradient(180deg, #2a2a2e, #141416); box-shadow: 0 1px 2px rgb(0 0 0 / .6) inset, 0 1px 0 rgb(255 255 255 / .7);
+    }
+    .home .cta .pull-ball {
+        position: absolute; left: 50%; top: 3px; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #fff 0 8%, #ff8a7c 16%, #ff2e1f 46%, #a3170c 100%);
+        box-shadow: 0 2px 4px rgb(0 0 0 / .45);
+        transition: translate 260ms cubic-bezier(.3, 1.5, .5, 1);
+    }
+    .home .cta .pull:active .pull-ball, .home .cta .pull:disabled .pull-ball { translate: 0 16px; transition-duration: 120ms; }
+    .home .cta .pull-txt { display: grid; gap: 3px; text-align: left; }
+    .home .cta .pull-txt b { font: 600 17px/1.1 "Geist", system-ui, sans-serif; color: #141416; letter-spacing: -.01em; }
+    .home .cta .pull-txt small { font: 500 10.5px/1.2 "Geist Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: #5a5852; }
+    .home .cta .pull:disabled { opacity: 1; }
+    .home .cta .pull:disabled .pull-txt b::after { content: "…"; }
+    .home .below { gap: 8px; } .home .cta { gap: 8px; } .home .cta-alt { row-gap: 6px !important; }   /* the taller key must not climb into the wordmark */
+}
+@media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+    /* an occasional nudge down the slot: "this pulls" — once the machine has booted */
+    .home[data-booted] .cta .pull:not(:active):not(:disabled) .pull-ball { animation: pull-nudge 4.2s 2.6s ease-in-out infinite; }
+}
+@keyframes pull-nudge { 0%, 78%, 100% { translate: 0 0; } 86% { translate: 0 9px; } 92% { translate: 0 2px; } }

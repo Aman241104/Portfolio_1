@@ -59,7 +59,7 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 .ed-peek { position: fixed; left: 0; top: 0; z-index: 40; width: 320px; pointer-events: none; opacity: 0; transform-origin: top left; transition: opacity .25s; box-shadow: 0 24px 60px rgba(0, 0, 0, .25); }
 .ed-peek[data-on] { opacity: 1; }
 /* experience + production */
-.ed-cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; }
+.ed-cols { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 56px; }
 .ed-xp { padding: 0 0 18px; margin-bottom: 18px; border-bottom: 1px solid var(--rule); }
 .ed-xp h3 { font-size: 24px; font-weight: 800; }
 .ed-xp h3 em { font: italic 400 22px "Newsreader", serif; color: var(--mute); }
@@ -81,7 +81,7 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 @media (max-width: 900px) {
     .ed-front { grid-template-columns: 1fr; gap: 28px; }
     .ed-lead, .ed-side { grid-column: auto; padding-right: 0; border-right: 0; }
-    .ed-cols { grid-template-columns: 1fr; gap: 30px; }
+    .ed-cols { grid-template-columns: minmax(0, 1fr); gap: 30px; }   /* plain 1fr cannot shrink below its widest child */
     .ed-tools { grid-template-columns: 1fr 1fr; }
     .ed-th { display: none !important; }
     .ed-table li > a { grid-template-columns: 34px minmax(0, 1fr) 18px; gap: 4px 10px; }
@@ -158,3 +158,4 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
     .ed-ear a { margin: 0; padding: 4px 0; }
     .ed-ear .ed-ink { grid-column: 1 / -1; }
 }
+.ed-live a > * { min-width: 0; } .ed-live .ed-mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* long domains (classicorganicchemicals.com) overflowed 320px phones */

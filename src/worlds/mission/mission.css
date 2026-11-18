@@ -87,12 +87,12 @@ a.dp-row:focus-visible { outline: 2px solid var(--yel); outline-offset: -2px; }
 .dp-cap { margin: 6px 0 14px !important; }
 .dp-lines ul { list-style: none; margin: 0; padding: 0; }
 .dp-lines li { border-top: 1px solid #222220; }
-.dp-line-btn { width: 100%; display: grid; grid-template-columns: minmax(0, 11em) 1fr 2em; gap: 12px; align-items: center; padding: 8px 6px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; transition: background .15s; }
+.dp-line-btn { width: 100%; display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) 2em; gap: 12px; align-items: center; padding: 8px 6px; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; transition: background .15s; }
 .dp-line-btn:hover, .dp-line-btn.is-active { background: #1a1a18; }
 .dp-line-btn.is-active b { color: var(--yel); }
 .dp-lines b { font: 600 18px "Barlow Condensed", sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dp-lines em { font: 600 18px "Barlow Condensed", sans-serif; font-style: normal; text-align: right; color: var(--yel); }
-.dp-seg { display: flex; gap: 3px; }
+.dp-seg { display: flex; gap: 3px; min-width: 0; overflow: hidden; }   /* many segments must not widen the row */
 .dp-seg i { width: 14px; height: 14px; background: var(--yel); }
 .dp-seg i:nth-child(n + 2) { opacity: .85; }
 
@@ -136,7 +136,7 @@ a.dp-row:focus-visible { outline: 2px solid var(--yel); outline-offset: -2px; }
     .dp-th { display: none; }
     .dp-arow { grid-template-columns: 5.6em minmax(0, 1fr); }
     .dp-arow > :nth-child(3) { display: none; }
-    .dp-split { grid-template-columns: 1fr; }
+    .dp-split { grid-template-columns: minmax(0, 1fr); }   /* plain 1fr can't shrink below its widest child */
     .dp-map { grid-template-columns: 1fr; gap: 28px; }
     .dp-map::before { left: 10px; right: auto; top: 12px; bottom: 30%; width: 6px; height: auto; }
     .dp-map::after { left: 10px; right: auto; top: 70%; bottom: 0; width: 6px; height: auto; background: repeating-linear-gradient(180deg, var(--yel) 0 14px, transparent 14px 24px); }

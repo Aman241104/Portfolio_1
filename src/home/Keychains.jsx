@@ -155,8 +155,9 @@ const place = (aspect, framing) => {
         if (phone) {
             const bottomY = (p, k) => new THREE.Vector3(p.x, p.y - 1.7 * k, p.z).project(cam).y;
             const clear = box.max.y + 0.04;
-            for (let y = sy; y <= 0.82 && bottomY(pos, scale) < clear; y += 0.02) pos = at(y);
-            while (scale > 0.6 && bottomY(pos, scale) < clear) scale -= 0.05;
+            // rise toward the top bar only as far as 0.72 (the header's identity + toggles sit above that), then shrink
+            for (let y = sy; y <= 0.72 && bottomY(pos, scale) < clear; y += 0.02) pos = at(y);
+            while (scale > 0.55 && bottomY(pos, scale) < clear) scale -= 0.05;
         }
         return { pos, item, seed: i + 1, cable: true, phone, scale };
     });
