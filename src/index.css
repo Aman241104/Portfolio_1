@@ -29,25 +29,27 @@
     to { opacity: 1; }
 }
 
-.world-portal {
+.world-portal {   /* the shutter is a strip of thermal paper fed out of PX-01: torn zig-zag edges top and bottom */
     position: fixed; inset: 0; z-index: 10050; pointer-events: none;
     background: var(--portal-bg, #050506); color: var(--portal-fg, #edeae3);
-    display: grid; place-items: center; overflow: hidden;
-    will-change: transform, opacity;
+    display: grid; place-items: center;
+    will-change: transform;
 }
+.world-portal::before, .world-portal::after {
+    content: ""; position: absolute; left: 0; right: 0; height: 12px; background: inherit;
+    -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 18px 100%;
+            mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 18px 100%;
+}
+.world-portal::before { bottom: 100%; }
+.world-portal::after { top: 100%; transform: scaleY(-1); }
 .world-portal--in {
     animation: portal-in 320ms cubic-bezier(0.76, 0, 0.24, 1) both;
 }
 .world-portal--out {
     animation: portal-out 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.world-portal-edge {
-    position: absolute; inset: 0;
-    border-top: 2px solid #ff2e1f;
-    box-shadow: inset 0 0 80px rgba(255, 46, 31, 0.08);
-}
 .world-portal-hud {
-    display: grid; justify-items: center; gap: 6px; text-align: center; padding: 20px;
+    display: grid; justify-items: center; gap: 10px; text-align: center; padding: 20px;
     animation: portal-hud 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .world-portal-kicker {
@@ -62,13 +64,16 @@
     font: 400 11px/1.2 "Geist Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;
     opacity: 0.65;
 }
+.world-portal-kicker, .world-portal-sym { padding: 8px 0; border-block: 1px dashed currentColor; border-color: color-mix(in srgb, currentColor 35%, transparent); min-width: min(420px, 80vw); }
+.world-portal-kicker { border-top: 0; } .world-portal-sym { border-bottom: 0; }
+.world-portal-bars { width: 180px; height: 28px; fill: currentColor; opacity: .8; margin-top: 4px; }
 @keyframes portal-in {
-    0% { transform: translate3d(0, 100%, 0); }
+    0% { transform: translate3d(0, calc(100% + 14px), 0); }
     100% { transform: translate3d(0, 0%, 0); }
 }
 @keyframes portal-out {
-    0% { transform: translate3d(0, 0%, 0); opacity: 1; }
-    100% { transform: translate3d(0, -100%, 0); opacity: 0.96; }
+    0% { transform: translate3d(0, 0%, 0); }
+    100% { transform: translate3d(0, calc(-100% - 14px), 0); }
 }
 @keyframes portal-hud {
     0% { opacity: 0; transform: translateY(14px) scale(0.97); }
