@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { linkedProject, shareProject } from "#shell/deepLink.js";
 import { Canvas } from "@react-three/fiber";
 import { profile, socials } from "#content/profile.js";
 import { shot, KINDS, host } from "../../../content/work.js";
@@ -127,7 +128,7 @@ export default function RideWorld() {
     const show3d = !flat || force3d;
 
     const onNear = useCallback((i) => {
-        setNear(i); setActiveTicket(i);
+        setNear(i); setActiveTicket(i); shareProject(i >= 0 ? STOPS[i].w.slug : null);
         if (i >= 0 && !seen.current.has(i)) { seen.current.add(i); track("ride_stop", { project: STOPS[i].w.slug }); }
     }, []);
     const onTick = useCallback((v, throttle, slip, elapsed) => {
@@ -143,6 +144,14 @@ export default function RideWorld() {
         track("ride_lap", { seconds: Math.round(time) });
         clearTimeout(lapTimer.current); lapTimer.current = setTimeout(() => setLap(null), n === 1 ? 10000 : 4000);
     }, []);
+
+    useEffect(() => {   // ?p=<slug>: park beside that ticket once the physics world is up
+        const p = linkedProject(), s = p && STOPS.find((x) => x.w.slug === p.slug);
+        if (!s || !show3d) return;
+        let tries = 0;
+        const t = setInterval(() => { if (api.current || ++tries > 40) { clearInterval(t); api.current?.go(s); setStarted(true); } }, 150);   // skip the gate: the link is the project
+        return () => clearInterval(t);
+    }, [show3d]);
 
     useEffect(() => {
         if (!show3d) return;

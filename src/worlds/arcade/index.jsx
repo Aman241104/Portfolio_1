@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { linkedProject } from "#shell/deepLink.js";
 import { profile } from "#content/profile.js";
 import { work, KINDS, shot } from "../../../content/work.js";
 import { skillGroups } from "../../../content/skills.js";
@@ -55,7 +56,7 @@ export default function ShipBreaker() {
     const [got, setGot] = useState([]);
     const [all, setAll] = useState(() => typeof window !== "undefined" && matchMedia("(max-width: 760px)").matches);
     const [toast, setToast] = useState(null);
-    const [inspected, setInspected] = useState(work[0]);
+    const [inspected, setInspected] = useState(() => linkedProject() ?? work[0]);
     const [scores, setScores] = useState([]);
     const [initials, setInitials] = useState("");
     const [saved, setSaved] = useState(null);

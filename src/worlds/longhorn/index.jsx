@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { linkedProject, shareProject } from "#shell/deepLink.js";
 import { profile, socials } from "#content/profile.js";
 import { work, KINDS, shot, status, inProduction, host } from "../../../content/work.js";
 import { liveStatus } from "../../status.js";
@@ -256,6 +257,7 @@ export default function LonghornWorld({ shell }) {
     const open = useCallback((kind, payload) => {
         setStart(false);
         const id = kind === "project" ? `p-${payload.slug}` : kind;
+        if (kind === "project") shareProject(payload.slug);
         setWins((ws) => {
             const have = ws.find((x) => x.id === id);
             if (have) return ws.map((x) => (x.id === id ? { ...x, z: ++zTop, min: false } : x));
@@ -263,6 +265,7 @@ export default function LonghornWorld({ shell }) {
             return [...ws, { id, kind, payload, z: ++zTop, pos: small ? { x: 0, y: 0 } : { x: 160 + n * 34, y: 40 + n * 28 } }];
         });
     }, []);
+    useEffect(() => { const p = linkedProject(); if (p) open("project", p); }, [open]);   // ?p=<slug>: open its window
     const close = (id) => {
         if (reduced) return setWins((ws) => ws.filter((x) => x.id !== id));
         setWins((ws) => ws.map((x) => (x.id === id ? { ...x, closing: true } : x)));

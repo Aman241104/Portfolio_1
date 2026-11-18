@@ -198,7 +198,8 @@ Pending Aman's call: RIDE cuts (points/orbs/gates/props; Fjord + Sakura biomes),
 - `host()` lives once in `content/work.js` (was 12 copies across home, worlds, mobile, résumé).
 - `src/status.js` `liveStatus(fresh?)`: one /api/status check with browser-ping fallback, cached 60 s; used by home Maintained, Mission (60 s poll + R re-scan = fresh), Longhorn. Replaced 3 hand-rolled probes.
 - Ticket-feed portal (2026-11-18): the world shutter is a thermal strip with torn zig-zag edges; centre prints `PX-01 · Ticket № NN · Now entering`, poster name, symbols, id-seeded barcode; the world's chunk is prefetched (`next.load()`) as it feeds in.
-- Still open: `?style=<id>&p=<slug>` deep links, shared useWorldPerf.
+- Deep links (2026-11-18): `?style=<id>&p=<slug>` via src/shell/deepLink.js (`linkedProject`, `useShareProject`). Works in Mission, Terminal (boots into `cat <slug>`), Canvas (flies to the sheet), Album, Longhorn (opens the window), Arcade (inspector), RIDE (parks beside the ticket, skips the gate). Opening a project writes ?p= back; App drops ?p= on world change. Not wired (no project view): Editorial, Desktop, 2001, Ask, Pocket.
+- Still open: shared useWorldPerf.
 
 ## RIDE v2 — PX-01 test track (2026-11-18, Aman chose: classic car / abstract PX-01 track / miniature tilt-shift)
 Replaces the on-rails golden-hour bike ride. Free driving with Rapier raycast-vehicle physics (`@react-three/rapier`):

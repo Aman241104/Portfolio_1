@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { linkedProject, useShareProject } from "#shell/deepLink.js";
 import { profile, socials } from "#content/profile.js";
 import { onRepeat, topArtists, watching } from "#content/taste.js";
 import { worlds } from "#worlds/registry.js";
@@ -98,6 +99,7 @@ const TerminalWorld = ({ shell }) => {
     const [sound, setSound] = useState(false);
     const [idle, setIdle] = useState(0);
     const [inspected, setInspected] = useState(null);
+    useShareProject(inspected?.slug);
 
     const away = useRef(0);
     const bootedRef = useRef(false);
@@ -329,7 +331,8 @@ const TerminalWorld = ({ shell }) => {
         if (!booting) {
             if (!bootedRef.current) {
                 bootedRef.current = true;
-                run("about");
+                const linked = linkedProject();
+                run(linked ? `cat ${linked.slug}` : "about");   // ?p=<slug>: boot straight into that project
             }
             return;
         }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { linkedProject, useShareProject } from "#shell/deepLink.js";
 import { profile } from "#content/profile.js";
 import { work, KINDS, shot, status } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
@@ -172,6 +173,13 @@ export default function CanvasWorld() {
         setFocus(it.p);
         if (!list) fitTo(it.x, it.y, FW, FH, 60, -170);
     }, [fitTo, list]);
+    useShareProject(focus?.slug);
+    useEffect(() => {   // ?p=<slug>: fly to that sheet once the board has laid out
+        const p = linkedProject(), it = p && items.find((i) => i.type === "frame" && i.p.slug === p.slug);
+        if (!it) return;
+        const t = setTimeout(() => open(it), 400);
+        return () => clearTimeout(t);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         const frames = items.filter((i) => i.type === "frame");

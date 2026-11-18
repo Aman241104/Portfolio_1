@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { linkedProject, useShareProject } from "#shell/deepLink.js";
 import { profile, socials } from "#content/profile.js";
 import { work, KINDS, shot, inProduction, host } from "../../../content/work.js";
 import { liveStatus } from "../../status.js";
@@ -48,7 +49,8 @@ export default function Departures() {
     const [gh, setGh] = useState(null);
     const [filter, setFilter] = useState("live");
     const [techFilter, setTechFilter] = useState(null);
-    const [openSlug, setOpenSlug] = useState(null);
+    const [openSlug, setOpenSlug] = useState(() => linkedProject()?.slug ?? null);
+    useShareProject(openSlug);
     const [scanId, setScanId] = useState(0);
 
     useEffect(() => { const t = setInterval(() => setClock(hhmm()), 5000); return () => clearInterval(t); }, []);

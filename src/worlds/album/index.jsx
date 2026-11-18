@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useRef, useState } from "react";
+import { linkedProject, useShareProject } from "#shell/deepLink.js";
 import { drawCover } from "./cover.js";
 import { play, stop, BEAT_MS } from "./beat.js";
 import { work, KINDS, shot, inProduction, host } from "../../../content/work.js";
@@ -104,7 +105,8 @@ export default function AlbumWorld() {
     const cover = useRef(null);
     const root = useRef(null);
     const [playing, setPlaying] = useState(false);
-    const [open, setOpen] = useState(null);
+    const [open, setOpen] = useState(() => linkedProject()?.slug ?? null);
+    useShareProject(open);
     const [yt, setYt] = useState(null);
     const [era, setEra] = useState("a");
     const [scrolled, setScrolled] = useState(false);

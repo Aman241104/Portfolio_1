@@ -17,6 +17,7 @@ const syncUrl = (id) => {
     const url = new URL(location.href);
     if (id) url.searchParams.set("style", id);
     else url.searchParams.delete("style");
+    url.searchParams.delete("p");   // a project deep link belongs to the world it was opened in
     history.replaceState(null, "", url);
 };
 
