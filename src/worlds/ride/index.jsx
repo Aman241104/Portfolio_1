@@ -138,9 +138,10 @@ export default function RideWorld() {
     const onLap = useCallback((time) => {
         const n = ++laps.current, prev = readBest(), isBest = !prev || time < prev;
         if (isBest) { try { localStorage.setItem("ride-best-lap", String(time)); } catch { /* private mode */ } setBest(time); }
-        setLap({ n, time, best: prev, isBest });
+        // the pitch card once (first lap); after that a one-line result in the dash, so driving isn't interrupted
+        setLap({ n, time, best: prev, isBest, card: n === 1 });
         track("ride_lap", { seconds: Math.round(time) });
-        clearTimeout(lapTimer.current); lapTimer.current = setTimeout(() => setLap(null), 12000);
+        clearTimeout(lapTimer.current); lapTimer.current = setTimeout(() => setLap(null), n === 1 ? 10000 : 4000);
     }, []);
 
     useEffect(() => {
@@ -174,7 +175,7 @@ export default function RideWorld() {
     return (
         <div className="rd" data-started={started || undefined}>
             <Canvas className="rd-canvas" shadows={tier.name !== "LOW" ? "soft" : false} dpr={tier.dpr} camera={{ fov: 30, near: 1, far: 400, position: [-24, 33, 68] }} gl={{ antialias: tier.name !== "LOW", powerPreference: "high-performance" }}>
-                <Suspense fallback={null}><Scene input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} tier={tier.name} /></Suspense>
+                <Suspense fallback={null}><Scene input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} started={started} tier={tier.name} /></Suspense>
             </Canvas>
 
             <header className="rd-top">
@@ -196,17 +197,18 @@ export default function RideWorld() {
                     <p>Every ticket standing round this track is something Aman built, and most of them are live right now. Pull up next to one to open it.</p>
                     <div className="rd-intro-cta">
                         <button type="button" className="rd-btn rd-go rd-start" onClick={begin}>Start driving</button>
-                        <button type="button" className="rd-btn" onClick={() => setMap(true)}>Just show me the list</button>
+                        <button type="button" className="rd-btn" onClick={() => setMap(true)}>See all {STOPS.length} tickets</button>
                     </div>
                 </section>
             )}
 
-            {started && lap && !map && <LapCard lap={lap} onClose={() => setLap(null)} />}
-            {started && !lap && near >= 0 && !map && <StopCard stop={STOPS[near]} />}
+            {started && lap?.card && !map && <LapCard lap={lap} onClose={() => setLap(null)} />}
+            {started && !lap?.card && near >= 0 && !map && <StopCard stop={STOPS[near]} />}
             {started && (
                 <div className="rd-dash" aria-hidden>
                     <p className="rd-speed"><b ref={kmh}>000</b> km/h</p>
                     <p className="rd-lapt"><b ref={lapEl}>–:––.–</b> lap{best ? ` · best ${lapTime(best)}` : " · cross the line"}</p>
+                    {lap && !lap.card && <p className="rd-lapnote" role="status">Lap {lap.n} · {lapTime(lap.time)}{lap.isBest ? " · new best" : ""}</p>}
                 </div>
             )}
             {started && (

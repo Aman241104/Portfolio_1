@@ -16,15 +16,16 @@ const VOID = "#0b0b0d", FLOOR = "#b8b2a6", INK = "#141416", SIGNAL = "#ff2e1f", 
 
 // ── car tuning (chassis forward = +X, axle = Z) ────────────────────────────────────────────
 const WHEELS = [[1.32, 0.86], [1.32, -0.86], [-1.3, 0.86], [-1.3, -0.86]];   // [x, z]: front L/R, rear L/R
-const WHEEL_R = 0.38, REST = 0.32, MASS = 150, ENGINE = 620, BRAKE = 7, STEER = 0.55, TOP = 32;   // TOP m/s ≈ 115 km/h
+const WHEEL_R = 0.38, REST = 0.32, MASS = 150, ENGINE = 560, BRAKE = 7, STEER = 0.55, TOP = 27;   // TOP m/s ≈ 97 km/h: fast for the plinth, still stoppable at a ticket
 
-const paint = new THREE.MeshPhysicalMaterial({ color: "#0e0e10", metalness: 0.55, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.08 });
+const paint = new THREE.MeshPhysicalMaterial({ color: "#17181c", metalness: 0.4, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.06 });   // graphite: chamfers catch the key light
 const stripe = new THREE.MeshPhysicalMaterial({ color: SIGNAL, roughness: 0.35, clearcoat: 1 });
 const chrome = new THREE.MeshStandardMaterial({ color: "#ffffff", metalness: 1, roughness: 0.12 });
-const glass = new THREE.MeshPhysicalMaterial({ color: "#1b2026", metalness: 0.2, roughness: 0.05, transmission: 0, opacity: 0.85, transparent: true, clearcoat: 1 });
+const glass = new THREE.MeshPhysicalMaterial({ color: "#6d7f8c", metalness: 0.6, roughness: 0.06, opacity: 0.92, transparent: true, clearcoat: 1 });   // reads apart from the body
 const rubber = new THREE.MeshStandardMaterial({ color: "#151515", roughness: 0.92 });
 const lampOn = new THREE.MeshBasicMaterial({ color: "#fff3d6", toneMapped: false });
-const tailOn = new THREE.MeshBasicMaterial({ color: "#ff3b2a", toneMapped: false });
+const tailOn = new THREE.MeshBasicMaterial({ color: "#7a1810", toneMapped: false });   // flares on braking (Car)
+const TAIL_DIM = new THREE.Color("#7a1810"), TAIL_LIT = new THREE.Color("#ff3b2a").multiplyScalar(1.6);
 
 // fastback cabin: side profile extruded across the car (windscreen rake at the front, long sloping rear)
 const cabinGeo = (() => {
@@ -78,27 +79,27 @@ function Coupe() {
     );
 }
 
-function Wheel({ front }) {
+function Wheel() {
     return (
         <group>
             <mesh material={rubber} rotation={[Math.PI / 2, 0, 0]} castShadow><cylinderGeometry args={[WHEEL_R, WHEEL_R, 0.3, 24]} /></mesh>
-            <mesh material={chrome} position={[0, 0, front ? 0.152 : 0.152]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.22, 0.22, 0.01, 20]} /></mesh>
+            <mesh material={chrome} position={[0, 0, 0.152]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.22, 0.22, 0.01, 20]} /></mesh>
             <mesh material={chrome} position={[0, 0, -0.152]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.22, 0.22, 0.01, 20]} /></mesh>
         </group>
     );
 }
 
-const _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _fwd = new THREE.Vector3(), _look = new THREE.Vector3(), _cam = new THREE.Vector3();
+const _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _fwd = new THREE.Vector3(), _look = new THREE.Vector3(), _cam = new THREE.Vector3(), _off = new THREE.Vector3(), _aim = new THREE.Vector3(SPAWN.x, 0.6, SPAWN.z);
 const CAM_OFF = new THREE.Vector3(-24, 33, 38);                  // fixed world-space angle: diorama, never spins with the car
 
-function Car({ input, api, onNear, onTick, onLap, light }) {
+function Car({ input, api, onNear, onTick, onLap, light, started, shadow }) {
     const body = useRef(), wheels = useRef([]);
     const { world } = useRapier();
     const ctrl = useRef(null);
     const camera = useThree((s) => s.camera);
     const nearRef = useRef(-1);
     const steer = useRef(0);
-    const lap = useRef({ t: -1, lastU: 0, running: false, t0: 0, half: false });
+    const lap = useRef({ t: -1, lastU: 0, running: false, t0: 0, prog: 0 });
 
     useEffect(() => {
         const vc = world.createVehicleController(body.current);
@@ -111,7 +112,7 @@ function Car({ input, api, onNear, onTick, onLap, light }) {
             vc.setWheelMaxSuspensionTravel(i, 0.3);
             vc.setWheelSuspensionCompression(i, 2.6);
             vc.setWheelSuspensionRelaxation(i, 3.4);
-            vc.setWheelFrictionSlip(i, i < 2 ? 2.4 : 2.1);
+            vc.setWheelFrictionSlip(i, i < 2 ? 2.4 : 1.9);
             vc.setWheelSideFrictionStiffness(i, 1.15);
             vc.setWheelMaxSuspensionForce(i, 1e5);
         }
@@ -124,7 +125,7 @@ function Car({ input, api, onNear, onTick, onLap, light }) {
         };
         api.current = {
             reset: () => { const p = body.current.translation(); const f = nearestOnTrack(p.x, p.z); place(f.x, f.z, f.yaw); },
-            home: () => { place(SPAWN.x, SPAWN.z, SPAWN.yaw); lap.current = { t: -1, lastU: 0, running: false, t0: 0, half: false }; },
+            home: () => { place(SPAWN.x, SPAWN.z, SPAWN.yaw); lap.current = { t: -1, lastU: 0, running: false, t0: 0, prog: 0 }; },
             go: (s) => { const p = standoff(s); place(p.x, p.z, p.yaw); },
         };
         return () => { world.removeVehicleController(vc); ctrl.current = null; };
@@ -146,9 +147,10 @@ function Car({ input, api, onNear, onTick, onLap, light }) {
             vc.setWheelSteering(i, isFront ? steer.current : 0);
             vc.setWheelEngineForce(i, !isFront && !braking ? fwd * ENGINE * Math.max(0, 1 - Math.abs(speed) / TOP) : 0);   // tapers to 0 at top speed
             vc.setWheelBrake(i, braking ? BRAKE : k.brake ? (isFront ? 1 : 4) : fwd === 0 ? 0.25 : 0);
-            if (!isFront) vc.setWheelFrictionSlip(i, k.brake ? 0.9 : 2.1);  // handbrake: rear lets go → drift
+            if (!isFront) vc.setWheelFrictionSlip(i, k.brake ? 0.8 : 1.9);  // handbrake: rear lets go → drift
         }
         vc.updateVehicle(dt);
+        tailOn.color.copy(braking || k.brake || (fwd < 0 && Math.abs(speed) < 1) ? TAIL_LIT : TAIL_DIM);
 
         // wheels follow the suspension
         for (let i = 0; i < 4; i++) {
@@ -169,33 +171,43 @@ function Car({ input, api, onNear, onTick, onLap, light }) {
         const slip = Math.abs(lv.x * _v.x + lv.z * _v.z);
         const skidding = (slip > 2.6 || (k.brake && Math.abs(speed) > 4) || (braking && Math.abs(speed) > 9));
         if (skidding && fx.mark) {
-            const yaw = Math.atan2(-(_fwd.set(1, 0, 0).applyQuaternion(_q)).z, _fwd.x);
             for (const i of [2, 3]) {
                 if (!vc.wheelIsInContact(i)) continue;
                 const c = vc.wheelContactPoint(i);
-                if (c) { fx.mark(c.x, c.z, yaw); if (Math.random() < 0.35) fx.puff(c.x, c.z); }
+                if (c) { fx.mark(i, c.x, c.z); if (Math.random() < 0.35) fx.puff(c.x, c.z); }
             }
         }
 
-        // laps: crossing the start line forwards, having passed the far side of the loop since
-        const L = lap.current, tr = trackT(p.x, p.z, L.t);
-        L.t = tr.t;
-        const u = (tr.t - START_T + 1) % 1, now = performance.now();
+        // laps: progress only accrues in small forward steps *on the road*, so infield shortcuts and reversing don't
+        // count; a lap is crossing the line forwards with ≥ 90% of the loop driven since the last crossing.
+        const L = lap.current, tr = trackT(p.x, p.z, L.t), now = performance.now();
         if (tr.dist < ROAD_W * 1.5) {
-            if (L.lastU > 0.85 && u < 0.15) {
-                if (L.running && L.half) onLap((now - L.t0) / 1000);
-                L.running = true; L.t0 = now; L.half = false;
-            } else if (L.lastU < 0.15 && u > 0.85) L.half = false;      // reversed over the line: lap void
-            if (u > 0.4 && u < 0.6) L.half = true;
-            L.lastU = u;
-        }
+            const u = (tr.t - START_T + 1) % 1;
+            let d = u - L.lastU; if (d > 0.5) d -= 1; else if (d < -0.5) d += 1;
+            if (L.t >= 0 && Math.abs(d) < 0.03) L.prog += d;
+            if (L.t >= 0 && L.lastU > 0.85 && u < 0.15) {
+                if (L.running && L.prog > 0.9) onLap((now - L.t0) / 1000);
+                L.running = true; L.t0 = now; L.prog = 0;
+            }
+            L.lastU = u; L.t = tr.t;
+        } else L.t = -1;                                                  // off the road: search the whole loop next frame
 
         // camera: fixed diorama angle, eased; pulls back a touch with speed
-        const pull = (camera.aspect < 1 ? 1.5 : 1) * (1 + Math.min(0.25, Math.abs(speed) / 120));   // portrait sees less width: back off
-        _look.set(p.x, 0.6, p.z);
-        _cam.copy(CAM_OFF).multiplyScalar(pull).add(_look);
+        // portrait sees less width; before the start the shot opens wider so the PX-01 and the track read first
+        const pull = (camera.aspect < 1 ? 1.5 : 1) * (started ? 1 + Math.min(0.25, Math.abs(speed) / 120) : 1.3);
+        const ax = THREE.MathUtils.clamp(lv.x * 0.28, -6, 6), az = THREE.MathUtils.clamp(lv.z * 0.28, -6, 6);   // look ahead of the nose
+        _look.set(p.x + ax, 0.6, p.z + az);
+        _aim.lerp(_look, 1 - Math.exp(-dt * 5));
+        _off.copy(CAM_OFF).multiplyScalar(pull);
+        _cam.copy(_aim).add(_off);
         camera.position.lerp(_cam, 1 - Math.exp(-dt * 3.2));
-        camera.lookAt(_v.copy(camera.position).sub(CAM_OFF.clone().multiplyScalar(pull)));
+        camera.lookAt(_v.copy(camera.position).sub(_off));
+        // soft contact shadow: stays on the floor, fades as the car leaves it
+        if (shadow.current) {
+            shadow.current.position.set(p.x, 0.04, p.z);
+            shadow.current.rotation.z = Math.atan2(-(_fwd.set(1, 0, 0).applyQuaternion(_q)).z, _fwd.x);
+            shadow.current.material.opacity = 0.5 * THREE.MathUtils.clamp(1.6 - p.y, 0, 1);
+        }
 
         // key light + shadow frustum ride along with the car
         if (light.current) { light.current.position.set(p.x - 26, 42, p.z + 18); light.current.target.position.set(p.x, 0, p.z); light.current.target.updateMatrixWorld(); }
@@ -214,7 +226,7 @@ function Car({ input, api, onNear, onTick, onLap, light }) {
             <Coupe />
             {WHEELS.map(([x, z], i) => (
                 <group key={i} ref={(el) => (wheels.current[i] = el)} position={[x, -0.12 - REST, z]}>
-                    <Wheel front={i < 2} />
+                    <Wheel />
                 </group>
             ))}
         </RigidBody>
@@ -234,7 +246,7 @@ function Track() {
         const N = 360, pos = [], idx = [], kerb = [];
         for (let i = 0; i <= N; i++) {
             const f = onTrack(i / N);
-            for (const s of [-1, 1]) pos.push(f.x + f.nx * s * ROAD_W / 2, 0.012, f.z + f.nz * s * ROAD_W / 2);
+            for (const s of [-1, 1]) pos.push(f.x + f.nx * s * ROAD_W / 2, 0.03, f.z + f.nz * s * ROAD_W / 2);
             if (i < N) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
         }
         const g = new THREE.BufferGeometry();
@@ -266,7 +278,7 @@ function Track() {
             <instancedMesh ref={red} args={[null, null, n]} receiveShadow castShadow><boxGeometry args={[1.6, 0.1, 0.7]} /><meshStandardMaterial color={SIGNAL} roughness={0.6} /></instancedMesh>
             <instancedMesh ref={white} args={[null, null, n]} receiveShadow castShadow><boxGeometry args={[1.6, 0.1, 0.7]} /><meshStandardMaterial color="#f2efe8" roughness={0.6} /></instancedMesh>
             {/* chequered start line */}
-            <group position={[start.x, 0.02, start.z]} rotation={[0, Math.atan2(-start.tz, start.tx), 0]}>
+            <group position={[start.x, 0.04, start.z]} rotation={[0, Math.atan2(-start.tz, start.tx), 0]}>
                 {Array.from({ length: 18 }, (_, i) => (
                     <mesh key={i} position={[((i / 9) | 0) * 0.5 - 0.25, 0, (i % 9) - 4]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
                         <planeGeometry args={[0.5, 1]} /><meshStandardMaterial color={(i + ((i / 9) | 0)) % 2 ? "#f2efe8" : INK} roughness={0.7} />
@@ -279,7 +291,7 @@ function Track() {
                 let yaw = Math.atan2(-f.tz, f.tx);
                 if (Math.sin(yaw) * CAM_OFF.x + Math.cos(yaw) * CAM_OFF.z < 0) yaw += Math.PI;   // label "up" must point away from the camera
                 return (
-                    <group key={s.kind} position={[f.x, 0.025, f.z]} rotation={[-Math.PI / 2, 0, yaw]}>
+                    <group key={s.kind} position={[f.x, 0.045, f.z]} rotation={[-Math.PI / 2, 0, yaw]}>
                         <Text font={FONT} fontSize={1.5} color={BONE} anchorX="center" anchorY="middle" letterSpacing={0.04}>{s.label.toUpperCase()}</Text>
                         <Text font={FONT} fontSize={0.55} color={SIGNAL} anchorX="center" anchorY="middle" position={[0, 1.35, 0]} letterSpacing={0.2}>{`OUTPUT ${s.n} · ${s.count} TICKETS`}</Text>
                     </group>
@@ -335,6 +347,8 @@ function printTicket(canvas, s, img) {
     g.fillStyle = "#64615b"; g.font = '400 8px "Geist Mono", ui-monospace, monospace'; g.fillText(s.w.slug.toUpperCase().slice(0, 26), 14, 418);
 }
 
+const LOAD_RANK = new Map(STOPS.map((s) => [s.i, Math.hypot(s.x - SPAWN.x, s.z - SPAWN.z)]).sort((a, b) => a[1] - b[1]).map(([i], r) => [i, r]));
+
 function Ticket({ stop, active, res = 1 }) {
     const tex = useMemo(() => {
         const c = document.createElement("canvas"); c.width = TW * res; c.height = TH * res;
@@ -345,8 +359,8 @@ function Ticket({ stop, active, res = 1 }) {
         fontsReady.then(() => { if (!alive) return; printTicket(tex.image, stop); tex.needsUpdate = true; });
         const img = new Image(); img.crossOrigin = "anonymous"; img.decoding = "async";
         img.onload = () => fontsReady.then(() => { if (!alive) return; printTicket(tex.image, stop, img); tex.needsUpdate = true; });
-        img.src = shot(stop.w, 360 * res);
-        return () => { alive = false; img.onload = null; tex.dispose(); };
+        const later = setTimeout(() => { img.src = shot(stop.w, 360 * res); }, LOAD_RANK.get(stop.i) * 110);   // ~5 s, nearest first
+        return () => { alive = false; clearTimeout(later); img.onload = null; tex.dispose(); };
     }, [stop, tex, res]);
     const lift = useRef();
     useFrame((_, dt) => { if (lift.current) lift.current.position.y += ((active ? 0.35 : 0) - lift.current.position.y) * (1 - Math.exp(-dt * 6)); });
@@ -377,15 +391,20 @@ function Skids() {
     const pos = useRef(new Float32Array(PUFFS * 2));
     useEffect(() => {
         const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(1, 1, 1), v = new THREE.Vector3();
-        let mi = 0, pi = 0, lastX = 1e9, lastZ = 1e9;
+        let mi = 0, pi = 0;
+        const last = {};                                               // per wheel: each draws its own ribbon
         const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
         for (let i = 0; i < MARKS; i++) marks.current.setMatrixAt(i, hidden);
         for (let i = 0; i < PUFFS; i++) puffs.current.setMatrixAt(i, hidden);
         marks.current.instanceMatrix.needsUpdate = puffs.current.instanceMatrix.needsUpdate = true;
-        fx.mark = (x, z, yaw) => {
-            if ((x - lastX) ** 2 + (z - lastZ) ** 2 < 0.04) return;      // ~20 cm spacing
-            lastX = x; lastZ = z;
-            m.compose(v.set(x, 0.016, z), q.setFromEuler(e.set(-Math.PI / 2, 0, yaw, "YXZ")), sc);
+        fx.mark = (w, x, z) => {
+            const l = last[w], now = performance.now();
+            last[w] = { x, z, at: now };
+            if (!l || now - l.at > 120) return;                        // first contact of a new skid: start the ribbon here
+            const dx = x - l.x, dz = z - l.z, len = Math.hypot(dx, dz);
+            if (len < 0.15) { last[w] = l; return; }
+            // one quad spanning from the previous contact to this one → a continuous strip
+            m.compose(v.set((x + l.x) / 2, 0.036, (z + l.z) / 2), q.setFromEuler(e.set(-Math.PI / 2, 0, Math.atan2(-dz, dx), "YXZ")), sc.set(len + 0.06, 1, 1));
             marks.current.setMatrixAt(mi, m); mi = (mi + 1) % MARKS;
             marks.current.instanceMatrix.needsUpdate = true;
         };
@@ -407,7 +426,7 @@ function Skids() {
     return (
         <>
             <instancedMesh ref={marks} args={[null, null, MARKS]} frustumCulled={false}>
-                <planeGeometry args={[0.42, 0.22]} />   {/* long side along the direction of travel; overlaps at 20 cm spacing */}
+                <planeGeometry args={[1, 0.22]} />   {/* unit length, scaled per segment */}
                 <meshBasicMaterial color="#111111" transparent opacity={0.4} depthWrite={false} />
             </instancedMesh>
             <instancedMesh ref={puffs} args={[null, null, PUFFS]} frustumCulled={false}>
@@ -497,8 +516,35 @@ function Plinth() {
     );
 }
 
-function Scene({ input, api, onNear, onTick, onLap, tier = "HIGH" }) {
-    const light = useRef();
+// soft radial blob under the car (grounds it where the shadow map is soft)
+const blobTex = (() => {
+    if (typeof document === "undefined") return null;
+    const c = document.createElement("canvas"); c.width = c.height = 128;
+    const g = c.getContext("2d"), r = g.createRadialGradient(64, 64, 8, 64, 64, 64);
+    r.addColorStop(0, "rgba(0,0,0,1)"); r.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+})();
+
+// a black pylon on the shoulder where each sector begins: big sector number, red cap
+function SectorMarker({ s }) {
+    const f = onTrack(s.t), off = ROAD_W / 2 + 4.2;
+    return (
+        <RigidBody type="fixed" colliders="cuboid" position={[f.x + f.nx * off, 0, f.z + f.nz * off]} rotation={[0, Math.atan2(-f.nx, -f.nz), 0]}>
+            <mesh position={[0, 3.4, 0]} castShadow receiveShadow><boxGeometry args={[1.6, 6.8, 1.6]} /><meshStandardMaterial color={INK} roughness={0.45} metalness={0.2} /></mesh>
+            <mesh position={[0, 6.9, 0]} castShadow><boxGeometry args={[1.64, 0.22, 1.64]} /><meshStandardMaterial color={SIGNAL} roughness={0.5} /></mesh>
+            {[0, Math.PI].map((r) => (
+                <group key={r} rotation={[0, r, 0]}>
+                    <Text font={FONT} fontSize={1.3} color={BONE} position={[0, 5.2, 0.81]} anchorY="middle">{s.n}</Text>
+                    <Text font={FONT} fontSize={0.2} color={BONE} position={[0, 4.15, 0.81]} maxWidth={1.4} textAlign="center" anchorY="top" letterSpacing={0.08}>{s.label.toUpperCase()}</Text>
+                </group>
+            ))}
+        </RigidBody>
+    );
+}
+
+function Scene({ input, api, onNear, onTick, onLap, started, tier = "HIGH" }) {
+    const light = useRef(), shadow = useRef();
     const high = tier === "HIGH", low = tier === "LOW";
     return (
         <>
@@ -514,25 +560,30 @@ function Scene({ input, api, onNear, onTick, onLap, tier = "HIGH" }) {
                 <Lightformer form="rect" intensity={1.2} position={[10, 2, -6]} rotation-y={-Math.PI / 2} scale={[10, 2, 1]} />
             </Environment>
 
+            <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[SPAWN.x, 0.04, SPAWN.z]}>
+                <planeGeometry args={[5.2, 2.6]} />
+                <meshBasicMaterial map={blobTex} transparent opacity={0.5} depthWrite={false} toneMapped={false} />
+            </mesh>
             <Physics gravity={[0, -14, 0]} timeStep="vary">
                 <Plinth />
                 <Track />
-                {STOPS.map((s) => <TicketSlot key={s.i} stop={s} res={high ? 1.5 : 1} />)}
+                {STOPS.map((s) => <TicketSlot key={s.i} stop={s} res={high ? 1.25 : 1} />)}
                 <Props />
-                <Car input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} light={light} />
+                <Car input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} light={light} started={started} shadow={shadow} />
+                {SECTORS.map((s) => <SectorMarker key={s.kind} s={s} />)}
                 <Skids />
             </Physics>
 
             {high && (
                 <EffectComposer multisampling={4}>
-                    <TiltShift2 blur={0.22} taper={0.6} start={[0.5, 0.0]} end={[0.5, 1.0]} samples={10} />
+                    <TiltShift2 blur={0.16} taper={0.5} start={[0, 0.5]} end={[1, 0.5]} samples={10} />
                     <Bloom intensity={0.35} luminanceThreshold={0.92} mipmapBlur />
                     <Vignette offset={0.25} darkness={0.55} />
                 </EffectComposer>
             )}
             {!high && !low && (
                 <EffectComposer multisampling={0}>
-                    <TiltShift2 blur={0.16} taper={0.6} start={[0.5, 0.0]} end={[0.5, 1.0]} samples={6} />
+                    <TiltShift2 blur={0.12} taper={0.5} start={[0, 0.5]} end={[1, 0.5]} samples={6} />
                     <Vignette offset={0.25} darkness={0.55} />
                 </EffectComposer>
             )}

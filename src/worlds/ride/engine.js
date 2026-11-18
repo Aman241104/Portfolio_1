@@ -37,7 +37,7 @@ export function createEngine() {
             a.frequency.setTargetAtTime(f, t, 0.05);
             b.frequency.setTargetAtTime(f * 0.5, t, 0.05);
             lp.frequency.setTargetAtTime(380 + r * 700 + throttle * 900, t, 0.08);
-            eg.gain.setTargetAtTime(0.028 + throttle * 0.045, t, 0.1);
+            eg.gain.setTargetAtTime(v < 0.5 && !throttle ? 0.012 : 0.028 + throttle * 0.045, t, 0.15);   // near-silent idle while reading a ticket
             squeal.gain.setTargetAtTime(Math.min(0.09, Math.max(0, slip - 2.2) * 0.025), t, 0.05);
         },
         stop() {

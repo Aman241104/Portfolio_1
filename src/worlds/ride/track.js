@@ -39,7 +39,7 @@ order.forEach((kind, k) => {
     slot += 2;
     items.forEach(({ w }) => {
         const t = (slot + 0.5) / SLOTS, f = onTrack(t);
-        const off = ROAD_W / 2 + 4.2;
+        const off = ROAD_W / 2 + 4.0 + (STOPS.length % 2) * 0.9;   // every other ticket steps back: a staggered wall, not a fence
         STOPS.push({
             i: STOPS.length, w, t, title: w.title, kind: KINDS[w.kind], status: status(w),
             x: f.x + f.nx * off, z: f.z + f.nz * off,
