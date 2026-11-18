@@ -36,46 +36,52 @@ const cabinGeo = (() => {
     g.translate(0, 0, -0.72); return g;
 })();
 const grilleMat = new THREE.MeshStandardMaterial({ color: "#050506", roughness: 0.6, metalness: 0.4 });
+const REAL_M = { paint, stripe, chrome, glass, lampOn, tailOn, grilleMat };
+// the ghost of your best lap: one translucent signal-red material for the whole body, never writes depth (no z-fighting
+// with the real car when they overlap)
+const ghostMat = new THREE.MeshBasicMaterial({ color: SIGNAL, transparent: true, opacity: 0.38, depthWrite: false });   // bone vanished on the light floor
+const GHOST_M = { paint: ghostMat, stripe: ghostMat, chrome: ghostMat, glass: ghostMat, lampOn: ghostMat, tailOn: ghostMat, grilleMat: ghostMat };
 
-function Coupe() {
+function Coupe({ ghost }) {
+    const M = ghost ? GHOST_M : REAL_M;
     // ~4.3 m long; the group origin is the chassis collider centre. Body sits between the wheels; arches carry over them.
     return (
         <group position={[0, -0.12, 0]}>
-            <RoundedBox args={[4.3, 0.52, 1.66]} radius={0.2} smoothness={4} material={paint} castShadow position={[0, 0.05, 0]} />
+            <RoundedBox args={[4.3, 0.52, 1.66]} radius={0.2} smoothness={4} material={M.paint} castShadow position={[0, 0.05, 0]} />
             {WHEELS.map(([x, z]) => (
-                <RoundedBox key={`${x}${z}`} args={[1.12, 0.42, 0.3]} radius={0.14} smoothness={3} material={paint} castShadow position={[x, 0.1, z * 1.02]} />
+                <RoundedBox key={`${x}${z}`} args={[1.12, 0.42, 0.3]} radius={0.14} smoothness={3} material={M.paint} castShadow position={[x, 0.1, z * 1.02]} />
             ))}
-            <mesh geometry={cabinGeo} material={glass} position={[0, 0.3, 0]} castShadow />
-            <mesh material={paint} position={[-0.39, 0.775, 0]} castShadow><boxGeometry args={[1.02, 0.05, 1.46]} /></mesh>
+            <mesh geometry={cabinGeo} material={M.glass} position={[0, 0.3, 0]} castShadow />
+            <mesh material={M.paint} position={[-0.39, 0.775, 0]} castShadow><boxGeometry args={[1.02, 0.05, 1.46]} /></mesh>
             {/* hood bulge between the stripes, ducktail on the deck */}
-            <RoundedBox args={[1.3, 0.08, 0.2]} radius={0.03} smoothness={2} material={paint} position={[1.25, 0.34, 0]} />
-            <mesh material={paint} position={[-2.02, 0.36, 0]} rotation={[0, 0, -0.25]} castShadow><boxGeometry args={[0.3, 0.05, 1.5]} /></mesh>
+            <RoundedBox args={[1.3, 0.08, 0.2]} radius={0.03} smoothness={2} material={M.paint} position={[1.25, 0.34, 0]} />
+            <mesh material={M.paint} position={[-2.02, 0.36, 0]} rotation={[0, 0, -0.25]} castShadow><boxGeometry args={[0.3, 0.05, 1.5]} /></mesh>
             {/* racing stripes over hood, roof and deck */}
             {[-0.2, 0.2].map((z) => (
                 <group key={z}>
-                    <mesh material={stripe} position={[1.22, 0.315, z]}><boxGeometry args={[1.85, 0.012, 0.15]} /></mesh>
-                    <mesh material={stripe} position={[-0.39, 0.803, z]}><boxGeometry args={[1.0, 0.012, 0.15]} /></mesh>
-                    <mesh material={stripe} position={[-1.78, 0.315, z]}><boxGeometry args={[0.55, 0.012, 0.15]} /></mesh>
+                    <mesh material={M.stripe} position={[1.22, 0.315, z]}><boxGeometry args={[1.85, 0.012, 0.15]} /></mesh>
+                    <mesh material={M.stripe} position={[-0.39, 0.803, z]}><boxGeometry args={[1.0, 0.012, 0.15]} /></mesh>
+                    <mesh material={M.stripe} position={[-1.78, 0.315, z]}><boxGeometry args={[0.55, 0.012, 0.15]} /></mesh>
                 </group>
             ))}
             {/* grille, chrome bumpers, exhaust */}
-            <mesh material={grilleMat} position={[2.151, 0.08, 0]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[0.8, 0.18]} /></mesh>
+            <mesh material={M.grilleMat} position={[2.151, 0.08, 0]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[0.8, 0.18]} /></mesh>
             {[2.18, -2.18].map((x) => (
-                <mesh key={x} material={chrome} position={[x, -0.1, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow><capsuleGeometry args={[0.065, 1.5, 4, 10]} /></mesh>
+                <mesh key={x} material={M.chrome} position={[x, -0.1, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow><capsuleGeometry args={[0.065, 1.5, 4, 10]} /></mesh>
             ))}
             {[-0.45, -0.3].map((z) => (
-                <mesh key={z} material={chrome} position={[-2.2, -0.22, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.045, 0.045, 0.2, 10]} /></mesh>
+                <mesh key={z} material={M.chrome} position={[-2.2, -0.22, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.045, 0.045, 0.2, 10]} /></mesh>
             ))}
             {/* round headlights + tail lights, wing mirrors */}
             {[-0.58, 0.58].map((z) => (
                 <group key={z}>
-                    <mesh material={chrome} position={[2.13, 0.09, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.16, 0.16, 0.06, 20]} /></mesh>
-                    <mesh material={lampOn} position={[2.165, 0.09, z]} rotation={[0, Math.PI / 2, 0]}><circleGeometry args={[0.12, 20]} /></mesh>
-                    <mesh material={tailOn} position={[-2.152, 0.12, z]} rotation={[0, -Math.PI / 2, 0]}><planeGeometry args={[0.32, 0.1]} /></mesh>
-                    <mesh material={chrome} position={[0.55, 0.42, z * 1.42]}><boxGeometry args={[0.1, 0.07, 0.12]} /></mesh>
+                    <mesh material={M.chrome} position={[2.13, 0.09, z]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.16, 0.16, 0.06, 20]} /></mesh>
+                    <mesh material={M.lampOn} position={[2.165, 0.09, z]} rotation={[0, Math.PI / 2, 0]}><circleGeometry args={[0.12, 20]} /></mesh>
+                    <mesh material={M.tailOn} position={[-2.152, 0.12, z]} rotation={[0, -Math.PI / 2, 0]}><planeGeometry args={[0.32, 0.1]} /></mesh>
+                    <mesh material={M.chrome} position={[0.55, 0.42, z * 1.42]}><boxGeometry args={[0.1, 0.07, 0.12]} /></mesh>
                 </group>
             ))}
-            <Text font={FONT} fontSize={0.14} color={BONE} position={[-2.153, -0.06, 0]} rotation={[0, -Math.PI / 2, 0]} letterSpacing={0.12}>PX-01</Text>
+            {!ghost && <Text font={FONT} fontSize={0.14} color={BONE} position={[-2.153, -0.06, 0]} rotation={[0, -Math.PI / 2, 0]} letterSpacing={0.12}>PX-01</Text>}
         </group>
     );
 }
@@ -107,6 +113,9 @@ function Headlights() {
     );
 }
 
+// the running lap's clock, shared with the ghost (one car only)
+const lapClock = { running: false, t0: 0 };
+
 function Car({ input, api, onNear, onTick, onLap, light, started, shadow, night }) {
     const body = useRef(), wheels = useRef([]);
     const { world } = useRapier();
@@ -114,7 +123,7 @@ function Car({ input, api, onNear, onTick, onLap, light, started, shadow, night 
     const camera = useThree((s) => s.camera);
     const nearRef = useRef(-1);
     const steer = useRef(0);
-    const lap = useRef({ t: -1, lastU: 0, running: false, t0: 0, prog: 0 });
+    const lap = useRef({ t: -1, lastU: 0, running: false, t0: 0, prog: 0, rec: [], recAt: 0 });
 
     useEffect(() => {
         const vc = world.createVehicleController(body.current);
@@ -140,7 +149,7 @@ function Car({ input, api, onNear, onTick, onLap, light, started, shadow, night 
         };
         api.current = {
             reset: () => { const p = body.current.translation(); const f = nearestOnTrack(p.x, p.z); place(f.x, f.z, f.yaw); },
-            home: () => { place(SPAWN.x, SPAWN.z, SPAWN.yaw); lap.current = { t: -1, lastU: 0, running: false, t0: 0, prog: 0 }; },
+            home: () => { place(SPAWN.x, SPAWN.z, SPAWN.yaw); lap.current = { t: -1, lastU: 0, running: false, t0: 0, prog: 0, rec: [], recAt: 0 }; lapClock.running = false; },
             go: (s) => { const p = standoff(s); place(p.x, p.z, p.yaw); },
         };
         return () => { world.removeVehicleController(vc); ctrl.current = null; };
@@ -201,11 +210,18 @@ function Car({ input, api, onNear, onTick, onLap, light, started, shadow, night 
             let d = u - L.lastU; if (d > 0.5) d -= 1; else if (d < -0.5) d += 1;
             if (L.t >= 0 && Math.abs(d) < 0.03) L.prog += d;
             if (L.t >= 0 && L.lastU > 0.85 && u < 0.15) {
-                if (L.running && L.prog > 0.9) onLap((now - L.t0) / 1000);
-                L.running = true; L.t0 = now; L.prog = 0;
+                if (L.running && L.prog > 0.9) onLap((now - L.t0) / 1000, L.rec);
+                L.running = true; L.t0 = now; L.prog = 0; L.rec = []; L.recAt = 0;
+                lapClock.running = true; lapClock.t0 = now;
             }
             L.lastU = u; L.t = tr.t;
         } else L.t = -1;                                                  // off the road: search the whole loop next frame
+        // record the lap for the ghost: 20 Hz, [seconds, x, y, z, qx, qy, qz, qw], rounded (~30 KB a lap)
+        if (L.running && now - L.recAt >= 50) {
+            L.recAt = now;
+            const r2 = (v) => Math.round(v * 100) / 100, r3 = (v) => Math.round(v * 1000) / 1000;
+            L.rec.push([r2((now - L.t0) / 1000), r2(p.x), r2(p.y), r2(p.z), r3(r.x), r3(r.y), r3(r.z), r3(r.w)]);
+        }
 
         // camera: fixed diorama angle, eased; pulls back a touch with speed
         // portrait sees less width; before the start the shot opens wider so the PX-01 and the track read first
@@ -533,6 +549,28 @@ function Plinth({ night }) {
     );
 }
 
+// replays the best lap in sync with the running lap clock: finds the bracketing samples and interpolates
+const _ga = new THREE.Quaternion(), _gb = new THREE.Quaternion();
+function Ghost({ samples }) {
+    const ref = useRef(), idx = useRef(0);
+    useFrame(() => {
+        const g = ref.current; if (!g) return;
+        const s = samples, n = s.length;
+        if (!lapClock.running || n < 2) { g.visible = false; return; }
+        const t = (performance.now() - lapClock.t0) / 1000;
+        if (t > s[n - 1][0]) { g.visible = false; return; }               // the ghost has finished: you're behind
+        let i = idx.current;
+        if (i >= n - 1 || s[i][0] > t) i = 0;                             // new lap (or reset): start over
+        while (i < n - 2 && s[i + 1][0] < t) i++;
+        idx.current = i;
+        const a = s[i], b = s[i + 1], k = Math.min(1, Math.max(0, (t - a[0]) / Math.max(1e-3, b[0] - a[0])));
+        g.position.set(a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, a[3] + (b[3] - a[3]) * k);
+        g.quaternion.copy(_ga.set(a[4], a[5], a[6], a[7])).slerp(_gb.set(b[4], b[5], b[6], b[7]), k);
+        g.visible = true;
+    });
+    return <group ref={ref} visible={false}><Coupe ghost /></group>;
+}
+
 // soft radial blob under the car (grounds it where the shadow map is soft)
 const blobTex = (() => {
     if (typeof document === "undefined") return null;
@@ -560,7 +598,7 @@ function SectorMarker({ s, night }) {
     );
 }
 
-function Scene({ input, api, onNear, onTick, onLap, started, night = false, tier = "HIGH" }) {
+function Scene({ input, api, onNear, onTick, onLap, started, night = false, ghost = null, tier = "HIGH" }) {
     const light = useRef(), shadow = useRef();
     const high = tier === "HIGH", low = tier === "LOW";
     return (
@@ -588,6 +626,7 @@ function Scene({ input, api, onNear, onTick, onLap, started, night = false, tier
                 <Props />
                 <Car input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} light={light} started={started} shadow={shadow} night={night} />
                 {SECTORS.map((s) => <SectorMarker key={s.kind} s={s} night={night} />)}
+                {ghost && <Ghost samples={ghost} />}
                 <Skids />
             </Physics>
 

@@ -213,7 +213,7 @@ RIDE v2.1 (same day): synthesised engine + tyre squeal (src/worlds/ride/engine.j
 skid marks + dust (instanced ring buffers), fastback coupe with arches/ducktail/grille, lap timer + best lap
 (localStorage `ride-best-lap`, anti-cheat halfway checkpoint) with a "Like how it handles?" contact card per lap,
 tickets printed to one canvas texture each (was ~440 troika text meshes), BALANCED tier drops bloom + MSAA.
-Rapier adds ~855 KB gz to the RIDE chunk only (lazy). Night mode shipped 2026-11-18 (follows the visitor's clock, N toggles): moonlight, two headlight spots, lightbox tickets (emissive = printed face), glowing pylon caps, dim grid. Ideas left: ghost car of your best lap, gamepad support, photo mode.
+Rapier adds ~855 KB gz to the RIDE chunk only (lazy). Night mode shipped 2026-11-18 (follows the visitor's clock, N toggles): moonlight, two headlight spots, lightbox tickets (emissive = printed face), glowing pylon caps, dim grid. Ghost car shipped 2026-11-19: the best lap is recorded at 20 Hz ([s, x,y,z, quat], ~30 KB) into localStorage `ride-ghost` next to `ride-best-lap`, and replayed as a translucent signal-red coupe synced to the running lap clock (bone at 22% vanished on the day floor). Ideas left: gamepad support, photo mode.
 
 ## QA pass (2026-11-18) — 13 pages × 8 viewports + Lighthouse (GPU on, production build)
 Sweep script: Playwright, clicks past the boot gate, flags sideways scroll / spill outside scrollers / console errors /

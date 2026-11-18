@@ -26,6 +26,10 @@ const lowPower = () => {
 const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 const lapTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
 const readBest = () => { try { return Number(localStorage.getItem("ride-best-lap")) || null; } catch { return null; } };
+// the best lap's recording, raced as a ghost; dropped if it doesn't match the stored best time
+const readGhost = () => {
+    try { const g = JSON.parse(localStorage.getItem("ride-ghost") || "null"); return g && Math.abs(g.time - readBest()) < 0.05 && Array.isArray(g.s) ? g.s : null; } catch { return null; }
+};
 const KEYS = { ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down", ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right", " ": "brake" };
 
 function StopCard({ stop }) {
@@ -116,6 +120,7 @@ export default function RideWorld() {
     const kmh = useRef(null), lapEl = useRef(null);
     const [engine] = useState(createEngine);
     const [best, setBest] = useState(readBest);
+    const [ghost, setGhost] = useState(readGhost);
     const [lap, setLap] = useState(null);
     const laps = useRef(0), lapTimer = useRef(0);
     const [sound, setSoundState] = useState(soundOn);
@@ -145,9 +150,12 @@ export default function RideWorld() {
         if (lapEl.current) lapEl.current.textContent = elapsed == null ? "–:––.–" : lapTime(elapsed);
         engine.update(v, throttle, slip);
     }, [engine]);
-    const onLap = useCallback((time) => {
+    const onLap = useCallback((time, rec) => {
         const n = ++laps.current, prev = readBest(), isBest = !prev || time < prev;
-        if (isBest) { try { localStorage.setItem("ride-best-lap", String(time)); } catch { /* private mode */ } setBest(time); }
+        if (isBest) {
+            try { localStorage.setItem("ride-best-lap", String(time)); localStorage.setItem("ride-ghost", JSON.stringify({ time, s: rec })); } catch { /* private mode / full */ }
+            setBest(time); if (rec?.length > 1) setGhost(rec);
+        }
         // the pitch card once (first lap); after that a one-line result in the dash, so driving isn't interrupted
         setLap({ n, time, best: prev, isBest, card: n === 1 });
         track("ride_lap", { seconds: Math.round(time) });
@@ -193,7 +201,7 @@ export default function RideWorld() {
 
     return (
         <div className="rd" data-started={started || undefined}>
-            {scene && <Suspense fallback={null}><Stage3D input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} started={started} night={night} tier={tier} /></Suspense>}
+            {scene && <Suspense fallback={null}><Stage3D input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} started={started} night={night} ghost={ghost} tier={tier} /></Suspense>}
 
             <header className="rd-top">
                 <p className="rd-brand">RIDE <span>· PX-01 test track · Aman Patel</span></p>
