@@ -225,3 +225,7 @@ a `<main>` (registry `main: true` for worlds with their own); name-glyph font CS
 `tickets.js` + `three/quality.js` (shell chunk ~6 KB gz).
 Lighthouse after (perf/a11y/bp/seo): Editorial phone 70/100/100/100 (was 51/99), desktop 97; Home 64–68/97/100/100;
 RIDE phone 40, desktop 56 — observed LCP ~1.8–2.2 s; the rest is WebGL main-thread work under 4× CPU simulation.
+Home 3D intro (same day): drei <Preload all> (sync gl.compile + 6-face cube render in one frame) → AsyncPreload
+(renderer.compileAsync, KHR_parallel_shader_compile; scene hidden until programs are ready; FirstFrame waits for the
+visible scene). Desktop TBT 1630 → 670 ms (longest task 1269 → 362 ms), perf 68 → 73; phone (simulated) TBT 10.2 s → 3.7 s.
+Left: first visible frame (env PMREM, shadow map, uploads) ~380 ms real, and React mounting the whole printout at once.

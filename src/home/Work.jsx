@@ -93,13 +93,14 @@ export default function Work() {
     }, []);
     // touch: the card in the middle of the screen is "hovered"
     useEffect(() => {
-        if (!touch()) return;
+        const ul = list.current;
+        if (!touch() || !ul) return;   // ul is null while React re-attaches effects (StrictMode / Suspense reveal)
         const io = new IntersectionObserver((es) => es.forEach((e) => {
             if (!e.isIntersecting) return;
             setActive(e.target.dataset.slug);
-            setAt([...list.current.children].indexOf(e.target));
-        }), isPhone ? { root: list.current, rootMargin: "0px -45% 0px -45%" } : { rootMargin: "-40% 0px -40% 0px" });
-        list.current.querySelectorAll(".card").forEach((c) => io.observe(c));
+            setAt([...ul.children].indexOf(e.target));
+        }), isPhone ? { root: ul, rootMargin: "0px -45% 0px -45%" } : { rootMargin: "-40% 0px -40% 0px" });
+        ul.querySelectorAll(".card").forEach((c) => io.observe(c));
         return () => io.disconnect();
     }, [kind, all, isPhone]);
 

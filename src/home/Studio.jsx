@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, Lightformer, Float, PresentationControls, SpotLight, Sparkles, Preload } from "@react-three/drei";
+import { Environment, Lightformer, Float, PresentationControls, SpotLight, Sparkles } from "@react-three/drei";
 import { Machine, GlassSurface, mat } from "#machine/MachineModel.jsx";
 import Keychains from "./Keychains.jsx";
 import { CAMERA_SHOTS, LIGHTING_PRESETS, detectQualityTier } from "../three/cinematography.js";
@@ -267,10 +267,29 @@ const Debug = ({ on }) => {
     return null;
 };
 
-// Reports the first rendered frame (after Preload compiled every shader), which ends the boot screen.
+// Compiles every shader without blocking: drei's <Preload all> called gl.compile (the main thread waits on the GPU
+// driver for each program) and then rendered the scene 6× through a cube camera — one ~1.3 s frozen frame on desktop,
+// ~5 s under phone throttling. compileAsync uses KHR_parallel_shader_compile, so the driver compiles in the
+// background while the boot screen keeps animating; the scene stays hidden (free to "render") until it's ready.
+const AsyncPreload = () => {
+    const { gl, scene, camera } = useThree();
+    useLayoutEffect(() => {
+        let alive = true;
+        const hidden = [];
+        scene.traverse((o) => { if (o !== scene && !o.visible) { hidden.push(o); o.visible = true; } });   // compile the hidden ones too
+        scene.visible = false;
+        const ready = gl.compileAsync(scene, camera);
+        hidden.forEach((o) => { o.visible = false; });
+        ready.catch(() => {}).then(() => { if (alive) scene.visible = true; });
+        return () => { alive = false; scene.visible = true; };
+    }, [gl, scene, camera]);
+    return null;
+};
+
+// Reports the first frame that actually shows the scene (after AsyncPreload), which ends the boot screen.
 const FirstFrame = ({ onFrame }) => {
     const done = useRef(false);
-    useFrame(() => { if (!done.current) { done.current = true; onFrame?.(); } });
+    useFrame(({ scene }) => { if (!done.current && scene.visible) { done.current = true; onFrame?.(); } });
     return null;
 };
 
@@ -353,7 +372,7 @@ export default function Studio({ count, ticket, ticketData, onTicket, onDebug, d
             <Ground floatRef={floatRef} dropRef={dropRef} light={light} />
             <FirstFrame onFrame={onFrame} />
             <Debug on={!!debug} />
-            <Preload all />
+            <AsyncPreload />
         </Canvas>
     );
 }
