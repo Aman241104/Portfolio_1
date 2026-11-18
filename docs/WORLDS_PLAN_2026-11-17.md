@@ -198,3 +198,14 @@ Pending Aman's call: RIDE cuts (points/orbs/gates/props; Fjord + Sakura biomes),
 - `host()` lives once in `content/work.js` (was 12 copies across home, worlds, mobile, résumé).
 - `src/status.js` `liveStatus(fresh?)`: one /api/status check with browser-ping fallback, cached 60 s; used by home Maintained, Mission (60 s poll + R re-scan = fresh), Longhorn. Replaced 3 hand-rolled probes.
 - Still open: ticket-feed portal transition, `?style=<id>&p=<slug>` deep links, shared useWorldPerf.
+
+## RIDE v2 — PX-01 test track (2026-11-18, Aman chose: classic car / abstract PX-01 track / miniature tilt-shift)
+Replaces the on-rails golden-hour bike ride. Free driving with Rapier raycast-vehicle physics (`@react-three/rapier`):
+a classic coupe built from code (black enamel, vermilion stripes, chrome), on a kerbed circuit on a floating plinth,
+giant PX-01 in the infield, ramps + knockable cones/crates. Projects = 44 double-sided printed tickets in 4 sectors;
+pulling up beside one opens its card. Fixed high camera + fov 30 + TiltShift2 = miniature look. Old points/orbs/gates/
+biomes/props and public/ride assets removed.
+Gotchas: vehicle forward = chassis +X needs axle (0,0,+1) — with (0,0,-1) engine force drives backwards. Chassis mass
+150 with ENGINE 620/rear wheel (Rapier scales suspension by chassis mass).
+Next for RIDE: sound (engine pitch, tyre squeal), skid marks + dust, a better car silhouette (wheel arches), finish-line
+contact gate, lap timer, perf pass on phones (shadows/EffectComposer off on BALANCED?).

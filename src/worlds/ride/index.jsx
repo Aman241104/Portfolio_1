@@ -1,19 +1,18 @@
-import { useCallback, Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { profile, socials } from "#content/profile.js";
 import { shot, KINDS, host } from "../../../content/work.js";
 import { cases } from "../../../content/cases.js";
 import { useFonts } from "../fonts.js";
 import { track } from "../../analytics.js";
-import { STOPS, END, LENGTH, LANE_X, CERT_ORBS, APEX_GATES } from "./route.js";
-import Scene from "./Scene.jsx";
+import { STOPS, SECTORS } from "./track.js";
+import Scene, { setActiveTicket } from "./Scene.jsx";
 import { detectQualityTier } from "../../three/cinematography.js";
 import "./ride.css";
 
-// World 12: RIDE, "Golden hour highway". A motorbike ride out of Ahmedabad at golden hour; each project is a roadside
-// billboard showing the real site, announced by a green highway sign. It cruises on its own like a film (and eases off
-// at every stop so the card can be read); scroll or the arrow keys ride faster, Space pauses, M opens the map.
-// Low-power devices and reduced motion get the same journey as a 2D route map.
+// World 12: RIDE — the PX-01 test track. Drive a classic coupe around a miniature circuit; every project is a printed
+// ticket standing beside the track, and pulling up next to one opens it. Arrows/WASD drive, Space handbrakes,
+// R puts the car back on the track, M opens the full list. Low-power devices and reduced motion get the list.
 const FONTS = ["Saira+Condensed:wght@600;800", "Saira:wght@400;600"];
 const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const lowPower = () => {
@@ -22,51 +21,15 @@ const lowPower = () => {
         return (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
     } catch { return true; }
 };
-const CRUISE = 13, MAX = 42;                                       // m/s: ~47 km/h cruise, ~150 km/h flat out
 const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
-
-function Speedo({ kmh, visited, d, leanDeg = 0, tps = 0 }) {
-    const a = -120 + Math.min(1, kmh / 160) * 240;
-    const gear = kmh < 2 ? "N" : kmh < 28 ? 1 : kmh < 54 ? 2 : kmh < 82 ? 3 : kmh < 112 ? 4 : kmh < 138 ? 5 : 6;
-    const bands = [0, 2, 28, 54, 82, 112, 138, 165];
-    const gIdx = gear === "N" ? 0 : gear;
-    const lo = bands[gIdx], hi = bands[gIdx + 1] || 165;
-    const ratio = gear === "N" ? 0.08 : Math.min(1, Math.max(0.18, (kmh - lo) / Math.max(1, hi - lo)));
-    const rpm = Math.round(1400 + ratio * 12100);
-    const segs = Math.round(ratio * 12);
-    const leanLabel = leanDeg === 0 ? "0°" : `${Math.abs(leanDeg)}° ${leanDeg < 0 ? "L" : "R"}`;
-    return (
-        <div className="rd-speedo" aria-label={`${Math.round(kmh)} km per hour, gear ${gear}, ${rpm} RPM, ${visited} of ${STOPS.length} projects visited`}>
-            <svg viewBox="0 0 120 120" aria-hidden>
-                <circle cx="60" cy="60" r="56" className="rd-dial" />
-                {Array.from({ length: 17 }, (_, i) => { const t = (-120 + i * 15) * Math.PI / 180, r1 = i % 2 ? 46 : 42; return <line key={i} x1={60 + Math.sin(t) * r1} y1={60 - Math.cos(t) * r1} x2={60 + Math.sin(t) * 52} y2={60 - Math.cos(t) * 52} className="rd-tick" />; })}
-                {[0, 40, 80, 120, 160].map((v, i) => { const t = (-120 + i * 60) * Math.PI / 180; return <text key={v} x={60 + Math.sin(t) * 33} y={64 - Math.cos(t) * 33} className="rd-num">{v}</text>; })}
-                <line x1="60" y1="60" x2="60" y2="14" className="rd-needle" style={{ transform: `rotate(${a}deg)` }} />
-                <circle cx="60" cy="60" r="5" className="rd-hub" />
-            </svg>
-            <p className="rd-kmh"><b>{Math.round(kmh)}</b> km/h</p>
-            <div className="rd-rpm" aria-hidden>
-                {Array.from({ length: 12 }, (_, i) => (
-                    <i key={i} data-on={i < segs || undefined} data-red={i >= 9 || undefined} />
-                ))}
-            </div>
-            <div className="rd-tele">
-                <span>GEAR <b>{gear}</b></span>
-                <span>RPM <b>{(rpm / 1000).toFixed(1)}k</b></span>
-                <span>LEAN <b>{leanLabel}</b></span>
-                <span>THR <b>{tps}%</b></span>
-            </div>
-            <p className="rd-odo"><span>{String(visited).padStart(2, "0")}</span>/{STOPS.length} · {(d / 1000).toFixed(2)} km</p>
-        </div>
-    );
-}
+const KEYS = { ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down", ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right", " ": "brake" };
 
 function StopCard({ stop }) {
     if (!stop) return null;
     const href = cases[stop.w.slug] ? `/case.html?p=${stop.w.slug}` : null;
     return (
         <aside className="rd-card" key={stop.i} aria-live="polite">
-            <p className="rd-kicker">Stop {stop.i + 1} of {STOPS.length} · {stop.kind} · {stop.status}</p>
+            <p className="rd-kicker">Ticket {String(stop.i + 1).padStart(2, "0")} of {STOPS.length} · {stop.kind} · {stop.status}</p>
             <h2>{stop.title}</h2>
             <p>{stop.w.line}</p>
             {stop.w.stack && <p className="rd-stack">{stop.w.stack}</p>}
@@ -78,7 +41,7 @@ function StopCard({ stop }) {
     );
 }
 
-function RouteMap({ onGo, onClose, here }) {
+function TicketList({ onGo, onClose, here = -1 }) {
     const [kind, setKind] = useState("all");
     const [q, setQ] = useState("");
     const query = q.trim().toLowerCase();
@@ -87,211 +50,98 @@ function RouteMap({ onGo, onClose, here }) {
         (!query || s.title.toLowerCase().includes(query) || (s.w.stack || "").toLowerCase().includes(query) || s.w.line.toLowerCase().includes(query))
     );
     return (
-        <section className="rd-map" role="dialog" aria-label="Route map: every stop">
+        <section className="rd-map" role="dialog" aria-label="Every ticket on the track">
             <header>
-                <h2>Route map</h2>
-                <p>NH-PX01 · Ahmedabad → your team · {(LENGTH / 1000).toFixed(1)} km · {STOPS.length} stops</p>
-                {onClose && <button type="button" onClick={onClose}>Back to the ride</button>}
+                <h2>Track sheet</h2>
+                <p>PX-01 test track · {STOPS.length} tickets in {SECTORS.length} sectors</p>
+                {onClose && <button type="button" onClick={onClose}>Back to the track</button>}
             </header>
             <div className="rd-map-tools">
-                <div className="rd-map-filters" role="tablist" aria-label="Filter stops">
+                <div className="rd-map-filters" role="tablist" aria-label="Filter tickets">
                     {Object.entries({ all: "All", ...KINDS }).map(([k, label]) => (
                         <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>{label}</button>
                     ))}
                 </div>
-                <input id="rd-map-search" name="q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search project or stack (e.g. FastAPI, Three.js)…" aria-label="Search stops" />
+                <input id="rd-map-search" name="q" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search project or stack (e.g. FastAPI, Three.js)…" aria-label="Search tickets" />
             </div>
             <ol>{list.map((s) => (
-                <li key={s.i} data-here={Math.abs(here - s.d) < 37 || undefined}>
+                <li key={s.i} data-here={here === s.i || undefined}>
                     <button type="button" onClick={() => onGo?.(s)} disabled={!onGo}>
                         <img src={shot(s.w, 240)} alt="" loading="lazy" />
-                        <span><small>km {(s.d / 1000).toFixed(2)} · {s.kind}</small><b>{s.title}</b><small>{s.w.line}</small>{s.w.stack && <small className="rd-map-stack">{s.w.stack}</small>}</span>
+                        <span><small>№ {String(s.i + 1).padStart(2, "0")} · {s.kind}</small><b>{s.title}</b><small>{s.w.line}</small>{s.w.stack && <small className="rd-map-stack">{s.w.stack}</small>}</span>
                     </button>
                     {s.w.url && <a href={s.w.url} target="_blank" rel="noreferrer">Visit ↗</a>}
                 </li>
             ))}
-                <li className="rd-map-end"><b>Next exit: your team.</b> <a href={`mailto:${profile.email}`}>{profile.email}</a> · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a> · {linkedin && <><a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a> · </>}<a href={profile.resume} target="_blank" rel="noreferrer">Résumé</a></li>
+                <li className="rd-map-end"><b>Finish line: your team.</b> <a href={`mailto:${profile.email}`}>{profile.email}</a> · <a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a> · <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a> · {linkedin && <><a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a> · </>}<a href={profile.resume} target="_blank" rel="noreferrer">Résumé</a></li>
             </ol>
-            <p className="rd-map-credit">Trees &amp; rocks: Kenney (CC0) · Motorcycle: Poly by Google, CC BY 3.0</p>
         </section>
     );
 }
 
-const BIOMES = [["golden", "Golden Hour"], ["fjord", "Fjord"], ["sakura", "Kyoto Touge"]];
+function Pad({ input, k, label, children }) {
+    const set = (v) => () => { input.current[k] = v; };
+    return <button type="button" aria-label={label} onPointerDown={set(1)} onPointerUp={set(0)} onPointerLeave={set(0)} onPointerCancel={set(0)}>{children}</button>;
+}
 
 export default function RideWorld() {
     useFonts(FONTS);
     const [flat] = useState(() => reduced || lowPower());
     const [force3d, setForce3d] = useState(false);
-    const state = useRef({ d: 0, v: 0, cruise: true, push: 0, hold: 0, snap: true, lane: LANE_X, steer: 0, steerHold: 0 });
-    const [hud, setHud] = useState({ d: 0, v: 0 });
+    const input = useRef({ up: 0, down: 0, left: 0, right: 0, brake: 0 });
+    const api = useRef(null);
     const [started, setStarted] = useState(false);
     const [map, setMap] = useState(false);
-    const [cruise, setCruise] = useState(true);
-    const [preset, setPreset] = useState("golden");
-    const [cameraMode, setCameraMode] = useState("chase");
-    const [near, setNear] = useState(0);
-    const [collected, setCollected] = useState([]);
-    const [clearedGates, setClearedGates] = useState([]);
-    const [quest, setQuest] = useState({ score: 0, combo: 0, topKmh: 0, toast: null });
-    const visitedRef = useRef(new Set());
-    const collectedRef = useRef(new Set());
-    const gatesRef = useRef(new Set());
-    const questRef = useRef({ score: 0, combo: 0, topKmh: 0, toastTimer: 0 });
+    const [near, setNear] = useState(-1);
+    const kmh = useRef(null);
+    const seen = useRef(new Set());
+    const [tier] = useState(detectQualityTier);
     const show3d = !flat || force3d;
 
-    // the ride itself: speed eases toward a target; cruising eases off around every stop
-    useEffect(() => {
-        if (!show3d) return;
-        let raf, last = performance.now();
-        const pushToast = (text) => {
-            clearTimeout(questRef.current.toastTimer);
-            setQuest((q) => ({ ...q, score: questRef.current.score, combo: questRef.current.combo, topKmh: questRef.current.topKmh, toast: text }));
-            questRef.current.toastTimer = setTimeout(() => setQuest((q) => ({ ...q, toast: null })), 2200);
-        };
-        const tick = (now) => {
-            const s = state.current, dt = Math.min(0.05, (now - last) / 1000); last = now;
-            let target = 0;
-            if (started) {
-                if (s.cruise) {
-                    const next = STOPS.find((st) => st.d > s.d - 18);
-                    const gap = next ? next.d - s.d : 999;
-                    target = gap < 26 && gap > -18 ? 3.2 : CRUISE;          // slow roll past each billboard
-                }
-                target = Math.max(target, s.push);
-                if (s.hold) target = s.hold > 0 ? MAX : 0;
-            }
-            s.v += (target - s.v) * (1 - Math.exp(-dt * (target > s.v ? 1.6 : 2.4)));
-            s.push *= Math.exp(-dt * 1.4);
-            s.steer += ((s.steerHold || 0) - s.steer) * (1 - Math.exp(-dt * 10));
-            if (started) {
-                s.lane = Math.max(-2.75, Math.min(2.75, (s.lane ?? LANE_X) + s.steer * dt * 5.2));
-            }
-            s.d = Math.min(END + 30, Math.max(0, s.d + s.v * dt));
-            const kmh = s.v * 3.6;
-            if (kmh > questRef.current.topKmh) questRef.current.topKmh = Math.round(kmh);
-            STOPS.forEach((st) => { if (s.d > st.d && !visitedRef.current.has(st.i)) { visitedRef.current.add(st.i); track("ride_stop", { project: st.w.slug }); } });
-            CERT_ORBS.forEach((o) => {
-                if (!collectedRef.current.has(o.id) && Math.abs(s.d - o.d) < 4.2 && Math.abs((s.lane ?? LANE_X) - o.lane) < 1.55) {
-                    collectedRef.current.add(o.id);
-                    questRef.current.score += 1000;
-                    setCollected(Array.from(collectedRef.current));
-                    pushToast(`+1000 PTS · ${o.label} Cert Collected`);
-                }
-            });
-            APEX_GATES.forEach((g) => {
-                if (!gatesRef.current.has(g.id) && Math.abs(s.d - g.d) < 3.6 && Math.abs((s.lane ?? LANE_X) - g.lane) < 1.65) {
-                    gatesRef.current.add(g.id);
-                    questRef.current.combo = Math.min(8, questRef.current.combo + 1);
-                    const pts = 500 * questRef.current.combo;
-                    questRef.current.score += pts;
-                    setClearedGates(Array.from(gatesRef.current));
-                    pushToast(`APEX x${questRef.current.combo} · +${pts} PTS (${g.label})`);
-                }
-            });
-            raf = requestAnimationFrame(tick);
-        };
-        raf = requestAnimationFrame(tick);
-        const hudT = setInterval(() => {
-            const s = state.current;
-            const tps = s.hold > 0 ? 100 : s.hold < 0 ? 0 : Math.min(100, Math.round((s.v / MAX) * 85));
-            setHud({ d: s.d, v: s.v, leanDeg: s.leanDeg || 0, tps });
-            setQuest((q) => ({ ...q, score: questRef.current.score, combo: questRef.current.combo, topKmh: questRef.current.topKmh }));
-            setNear((n) => (Math.abs(n - s.d) > 40 ? s.d : n));
-        }, 120);
-        return () => { cancelAnimationFrame(raf); clearInterval(hudT); clearTimeout(questRef.current.toastTimer); };
-    }, [show3d, started]);
+    const onNear = useCallback((i) => {
+        setNear(i); setActiveTicket(i);
+        if (i >= 0 && !seen.current.has(i)) { seen.current.add(i); track("ride_stop", { project: STOPS[i].w.slug }); }
+    }, []);
+    const onSpeed = useCallback((v) => { if (kmh.current) kmh.current.textContent = String(Math.round(Math.abs(v) * 3.6)).padStart(3, "0"); }, []);
 
-    // input: wheel and touch drags push speed; arrows hold throttle / brake; Space toggles cruise; M map
     useEffect(() => {
         if (!show3d) return;
-        const s = state.current;
-        const begin = () => setStarted(true);
-        const wheel = (e) => { if (e.target.closest?.(".rd-map, .rd-card")) return; e.preventDefault(); begin(); s.push = Math.min(MAX, Math.max(0, s.push + e.deltaY * 0.05)); };
-        let ty = null;
-        const ts = (e) => { ty = e.touches[0].clientY; };
-        const tm = (e) => { if (ty == null || e.target.closest?.(".rd-map, .rd-card, a, button")) return; const dy = ty - e.touches[0].clientY; ty = e.touches[0].clientY; begin(); s.push = Math.min(MAX, Math.max(0, s.push + dy * 0.12)); };
         const kd = (e) => {
             if (e.target.closest?.("input, textarea")) return;
-            if (["ArrowUp", "w", "W"].includes(e.key)) { e.preventDefault(); begin(); s.hold = 1; }
-            else if (["ArrowDown", "s", "S"].includes(e.key)) { e.preventDefault(); s.hold = -1; }
-            else if (["ArrowLeft", "a", "A"].includes(e.key)) { e.preventDefault(); begin(); s.steerHold = -1; }
-            else if (["ArrowRight", "d", "D"].includes(e.key)) { e.preventDefault(); begin(); s.steerHold = 1; }
-            else if (e.key === " ") { e.preventDefault(); begin(); s.cruise = !s.cruise; setCruise(s.cruise); }
+            const k = KEYS[e.key];
+            if (k) { e.preventDefault(); input.current[k] = 1; setStarted(true); }
             else if (e.key === "m" || e.key === "M") setMap((m) => !m);
-            else if (e.key === "b" || e.key === "B") setPreset((p) => BIOMES[(BIOMES.findIndex(([id]) => id === p) + 1) % BIOMES.length][0]);
-            else if (e.key === "c" || e.key === "C") setCameraMode((m) => (m === "chase" ? "iso" : "chase"));
-            else if (e.key === "r" || e.key === "R") { s.lane = LANE_X; s.steer = 0; }
+            else if (e.key === "r" || e.key === "R") api.current?.reset();
         };
-        const ku = (e) => {
-            if (["ArrowUp", "w", "W", "ArrowDown", "s", "S"].includes(e.key)) s.hold = 0;
-            if (["ArrowLeft", "a", "A", "ArrowRight", "d", "D"].includes(e.key)) s.steerHold = 0;
-        };
-        addEventListener("wheel", wheel, { passive: false }); addEventListener("touchstart", ts, { passive: true }); addEventListener("touchmove", tm, { passive: true });
-        addEventListener("keydown", kd); addEventListener("keyup", ku);
-        return () => { removeEventListener("wheel", wheel); removeEventListener("touchstart", ts); removeEventListener("touchmove", tm); removeEventListener("keydown", kd); removeEventListener("keyup", ku); };
+        const ku = (e) => { const k = KEYS[e.key]; if (k) input.current[k] = 0; };
+        const blur = () => Object.keys(input.current).forEach((k) => { input.current[k] = 0; });
+        addEventListener("keydown", kd); addEventListener("keyup", ku); addEventListener("blur", blur);
+        return () => { removeEventListener("keydown", kd); removeEventListener("keyup", ku); removeEventListener("blur", blur); };
     }, [show3d]);
-
-    const go = (stop) => { const s = state.current; s.d = Math.max(0, stop.d - 30); s.v = 4; s.snap = true; setMap(false); setStarted(true); setHud({ d: s.d, v: s.v }); setNear(s.d); };
-    const stop = STOPS.find((s) => hud.d > s.d - 28 && hud.d < s.d + 22);
-    const handleKnock = useCallback(() => {          // stable identity so the memoised Scene isn't re-rendered by the HUD tick
-        questRef.current.score += 100;
-        clearTimeout(questRef.current.toastTimer);
-        setQuest((q) => ({ ...q, score: questRef.current.score, toast: "+100 PTS · Prop Smash" }));
-        questRef.current.toastTimer = setTimeout(() => setQuest((q) => ({ ...q, toast: null })), 1600);
-    }, []);
-    const atEnd = hud.d > END - 40;
-    const visited = STOPS.filter((s) => hud.d > s.d).length;
 
     if (!show3d) {
         return (
             <div className="rd rd-flat">
                 <header className="rd-top"><p className="rd-brand">RIDE <span>· Aman Patel, full-stack engineer</span></p>
                     <nav><a href={profile.resume} target="_blank" rel="noreferrer">Résumé</a><a href={`mailto:${profile.email}`}>Email</a><a href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></nav></header>
-                <p className="rd-flat-note">{reduced ? "Reduced motion is on, so here is the route as a map." : "This device looks light on graphics power, so here is the route as a map."} <button type="button" onClick={() => setForce3d(true)}>Ride in 3D anyway</button></p>
-                <RouteMap here={-999} />
+                <p className="rd-flat-note">{reduced ? "Reduced motion is on, so here is the track as a list." : "This device looks light on graphics power, so here is the track as a list."} <button type="button" onClick={() => setForce3d(true)}>Drive in 3D anyway</button></p>
+                <TicketList />
             </div>
         );
     }
 
-    const stepStop = (dir) => {
-        const curIdx = STOPS.findIndex((s) => s.d > state.current.d - 18);
-        const idx = curIdx === -1 ? STOPS.length - 1 : Math.max(0, Math.min(STOPS.length - 1, curIdx + dir));
-        go(STOPS[idx]);
-    };
+    const go = (s) => { api.current?.go(s); setMap(false); setStarted(true); };
 
-    const resetRide = () => {
-        collectedRef.current.clear();
-        gatesRef.current.clear();
-        questRef.current = { score: 0, combo: 0, topKmh: 0, toastTimer: 0 };
-        setCollected([]);
-        setClearedGates([]);
-        setQuest({ score: 0, combo: 0, topKmh: 0, toast: null });
-        state.current.lane = LANE_X;
-        go(STOPS[0]);
-    };
-
-
-    const grade = quest.score >= 5000 ? "S" : quest.score >= 2500 ? "A" : "B";
-
-    const tier = detectQualityTier();
     return (
-        <div className="rd" data-started={started || undefined} data-preset={preset}>
-            <Canvas className="rd-canvas" shadows={tier.name === "HIGH"} dpr={tier.dpr} camera={{ fov: 52, near: 0.5, far: 720, position: [-8, 3, 10] }} gl={{ antialias: tier.name !== "LOW", powerPreference: "high-performance" }}>
-                <Suspense fallback={null}><Scene state={state} near={near} preset={preset} collected={collected} clearedGates={clearedGates} started={started} cameraMode={cameraMode} onKnock={handleKnock} qualityTier={tier.name} /></Suspense>
+        <div className="rd" data-started={started || undefined}>
+            <Canvas className="rd-canvas" shadows={tier.name !== "LOW" ? "soft" : false} dpr={tier.dpr} camera={{ fov: 30, near: 1, far: 400, position: [-24, 33, 68] }} gl={{ antialias: tier.name !== "LOW", powerPreference: "high-performance" }}>
+                <Suspense fallback={null}><Scene input={input} api={api} onNear={onNear} onSpeed={onSpeed} tier={tier.name} /></Suspense>
             </Canvas>
-            <div className="rd-grade" aria-hidden />
 
             <header className="rd-top">
-                <p className="rd-brand">RIDE <span>· Aman Patel, full-stack engineer · Ahmedabad</span></p>
-                <div className="rd-biomes" role="group" aria-label="Biome">
-                    {BIOMES.map(([id, label]) => (
-                        <button key={id} type="button" aria-pressed={preset === id} onClick={() => setPreset(id)}>{label}</button>
-                    ))}
-                </div>
+                <p className="rd-brand">RIDE <span>· PX-01 test track · Aman Patel</span></p>
                 <nav>
-                    <button type="button" onClick={() => setCameraMode((m) => (m === "chase" ? "iso" : "chase"))} aria-label="Toggle camera angle">Cam: {cameraMode === "chase" ? "Chase" : "3/4 Iso"}</button>
-                    <button type="button" onClick={() => setMap(true)}>Map ({STOPS.length})</button>
+                    <button type="button" onClick={() => setMap(true)}>Tickets ({STOPS.length})</button>
                     <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "world" })}>Résumé</a>
                     <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
                     {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
@@ -301,69 +151,31 @@ export default function RideWorld() {
 
             {!started && (
                 <section className="rd-intro">
-                    <p className="rd-kicker">NH-PX01 · Ahmedabad → your team · {(LENGTH / 1000).toFixed(1)} km</p>
-                    <h1>Golden hour.<br />{STOPS.length} projects down the road.</h1>
-                    <p>Every billboard on this highway is something Aman built, and most of them are live right now. It rides itself; scroll to go faster.</p>
+                    <p className="rd-kicker">PX-01 test track · {STOPS.length} tickets · {SECTORS.length} sectors</p>
+                    <h1>Take it for a spin.</h1>
+                    <p>Every ticket standing round this track is something Aman built, and most of them are live right now. Pull up next to one to open it.</p>
                     <div className="rd-intro-cta">
-                        <button type="button" className="rd-btn rd-go rd-start" onClick={() => setStarted(true)}>Click to ride</button>
-                        <button type="button" className="rd-btn" onClick={() => setMap(true)}>See the route map</button>
+                        <button type="button" className="rd-btn rd-go rd-start" onClick={() => setStarted(true)}>Start driving</button>
+                        <button type="button" className="rd-btn" onClick={() => setMap(true)}>Just show me the list</button>
                     </div>
                 </section>
             )}
 
+            {started && near >= 0 && !map && <StopCard stop={STOPS[near]} />}
+            {started && <p className="rd-speed" aria-hidden><b ref={kmh}>000</b> km/h</p>}
             {started && (
-                <div className="rd-quest" aria-label="Touge objectives">
-                    <span className="rd-q-item"><b>{String(quest.score).padStart(4, "0")}</b> PTS</span>
-                    <span className="rd-q-item">CERTS <b>{collected.length}/{CERT_ORBS.length}</b></span>
-                    <span className="rd-q-item">APEX <b>{clearedGates.length}/{APEX_GATES.length}</b></span>
-                    {quest.combo > 0 && <span className="rd-q-combo">x{quest.combo}</span>}
+                <div className="rd-hint">
+                    <div className="rd-pads">
+                        <Pad input={input} k="left" label="Steer left">◀</Pad>
+                        <Pad input={input} k="right" label="Steer right">▶</Pad>
+                        <Pad input={input} k="brake" label="Handbrake">HB</Pad>
+                        <Pad input={input} k="down" label="Brake / reverse">▼</Pad>
+                        <Pad input={input} k="up" label="Accelerate">▲</Pad>
+                    </div>
+                    <span>WASD / arrows drive · Space handbrake · R reset · M tickets</span>
                 </div>
             )}
-            {started && quest.toast && <p className="rd-toast" role="status">{quest.toast}</p>}
-            {started && <Speedo kmh={hud.v * 3.6} visited={visited} d={hud.d} leanDeg={hud.leanDeg} tps={hud.tps} />}
-            {started && !atEnd && stop && <StopCard stop={stop} />}
-            {started && !atEnd && !stop && (() => {
-                const next = STOPS.find((s) => s.d >= hud.d + 20);
-                if (!next) return null;
-                return (
-                    <button type="button" className="rd-next-pill" onClick={() => go(next)}>
-                        <span>Next in {Math.max(1, Math.round(next.d - hud.d))} m</span>
-                        <b>{next.title} →</b>
-                    </button>
-                );
-            })()}
-            {atEnd && (
-                <aside className="rd-card rd-end">
-                    <p className="rd-kicker">Touge complete · Grade {grade}</p>
-                    <h2>Your team.</h2>
-                    <div className="rd-end-stats">
-                        <span><b>{quest.score}</b> Score</span>
-                        <span><b>{quest.topKmh} km/h</b> Top Speed</span>
-                        <span><b>{collected.length}/{CERT_ORBS.length}</b> AI Certs</span>
-                        <span><b>{clearedGates.length}/{APEX_GATES.length}</b> Apexes</span>
-                    </div>
-                    <p>That was all {STOPS.length}. If one of them looked like the work you need, Aman is a full-stack engineer in Ahmedabad, open to on-site or hybrid roles.</p>
-                    <p className="rd-actions">
-                        <a className="rd-btn rd-go" href={`mailto:${profile.email}`}>{profile.email}</a>
-                        <a className="rd-btn" href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
-                        <a className="rd-btn" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>
-                        <button type="button" className="rd-btn" onClick={resetRide}>Ride again</button>
-                    </p>
-                </aside>
-            )}
-            {started && (
-                <p className="rd-hint">
-                    <button type="button" onPointerDown={() => { state.current.steerHold = -1; }} onPointerUp={() => { state.current.steerHold = 0; }} onPointerLeave={() => { state.current.steerHold = 0; }} aria-label="Steer left">◀</button>
-                    <button type="button" onPointerDown={() => { state.current.hold = 1; }} onPointerUp={() => { state.current.hold = 0; }} onPointerLeave={() => { state.current.hold = 0; }} aria-label="Throttle boost">Boost</button>
-                    <button type="button" onPointerDown={() => { state.current.steerHold = 1; }} onPointerUp={() => { state.current.steerHold = 0; }} onPointerLeave={() => { state.current.steerHold = 0; }} aria-label="Steer right">▶</button>
-                    <button type="button" onClick={() => stepStop(-1)} aria-label="Previous stop">← Prev</button>
-                    <button type="button" onClick={() => { state.current.cruise = !state.current.cruise; setCruise(state.current.cruise); }}>{cruise ? "Cruise on" : "Cruise off"}</button>
-                    <button type="button" onClick={() => stepStop(1)} aria-label="Next stop">Next →</button>
-                    <span>A/D steer · W/↑ gas · C cam · B biome · M map</span>
-                </p>
-            )}
-            <p className="rd-progress" aria-hidden><i style={{ width: `${Math.min(100, (hud.d / END) * 100)}%` }} /></p>
-            {map && <RouteMap here={hud.d} onGo={go} onClose={() => setMap(false)} />}
+            {map && <TicketList here={near} onGo={go} onClose={() => setMap(false)} />}
         </div>
     );
 }
