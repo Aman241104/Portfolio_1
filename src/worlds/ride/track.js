@@ -1,7 +1,7 @@
 // RIDE's test track: a closed circuit on a floating PX-01 studio plinth. Every project is a printed ticket standing
 // on the outside of the circuit, grouped into four painted sectors by kind. All placement is deterministic.
 import * as THREE from "three";
-import { work, KINDS, status } from "../../../content/work.js";
+import { TICKETS, SECTORS } from "./tickets.js";
 
 export const ROAD_W = 9;
 export const PLINTH = { w: 150, d: 104 };                       // floor slab, top face at y = 0
@@ -25,28 +25,11 @@ export function onTrack(t, out = {}) {
     return out;
 }
 
-// projects grouped by kind → contiguous sectors, boards evenly spaced with a gap between sectors
-const order = Object.keys(KINDS);
-const sorted = work.map((w, i) => ({ w, i })).sort((a, b) => order.indexOf(a.w.kind) - order.indexOf(b.w.kind) || a.i - b.i);
-const SLOTS = sorted.length + order.length * 2;                   // two empty slots before each sector for its label
-export const SECTORS = [];
-export const STOPS = [];
-let slot = 0;
-order.forEach((kind, k) => {
-    const items = sorted.filter((s) => s.w.kind === kind);
-    if (!items.length) return;
-    SECTORS.push({ kind, label: KINDS[kind], n: `0${k + 1}`, t: (slot + 1) / SLOTS, count: items.length });
-    slot += 2;
-    items.forEach(({ w }) => {
-        const t = (slot + 0.5) / SLOTS, f = onTrack(t);
-        const off = ROAD_W / 2 + 4.0 + (STOPS.length % 2) * 0.9;   // every other ticket steps back: a staggered wall, not a fence
-        STOPS.push({
-            i: STOPS.length, w, t, title: w.title, kind: KINDS[w.kind], status: status(w),
-            x: f.x + f.nx * off, z: f.z + f.nz * off,
-            face: Math.atan2(-f.nx, -f.nz),                       // board faces the road
-        });
-        slot++;
-    });
+// tickets stand outside the road, every other one stepped back: a staggered wall, not a fence
+export { SECTORS };
+export const STOPS = TICKETS.map((s) => {
+    const f = onTrack(s.t), off = ROAD_W / 2 + 4.0 + (s.i % 2) * 0.9;
+    return { ...s, x: f.x + f.nx * off, z: f.z + f.nz * off, face: Math.atan2(-f.nx, -f.nz) };   // board faces the road
 });
 
 // spawn mid-way down the near straight, which is the tail end of the loop

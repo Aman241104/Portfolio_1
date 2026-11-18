@@ -6,6 +6,7 @@ import { lazy } from "react";
 export const worlds = [
     {
         id: "desktop",
+        main: true,   // renders its own <main>
         paper: "#0b0b0b",   // the world's own background: the enter transition wipes in this colour
         name: "Desktop OS",
         tagline: "The one you know. Windows, dock, Finder.",
@@ -35,6 +36,7 @@ export const worlds = [
     },
     {
         id: "album",
+        main: true,   // renders its own <main>
         paper: "#070707",   // the world's own background: the enter transition wipes in this colour
         name: "Album Rollout",
         tagline: "The portfolio, deluxe. Projects as a tracklist.",
@@ -53,6 +55,7 @@ export const worlds = [
     },
     {
         id: "ask",
+        main: true,   // renders its own <main>
         paper: "#3f4c3e",   // the world's own background: the enter transition wipes in this colour
         name: "Ask Aman",
         tagline: "Ask anything. Answers cite the real work.",
@@ -81,6 +84,7 @@ export const worlds = [
     },
     {
         id: "y2001",
+        main: true,   // renders its own <main>
         paper: "#000033",   // the world's own background: the enter transition wipes in this colour
         beta: true,   // new (2026-11-12): out of the machine's pool until the reviewers pass it
         name: "2001 Homepage",

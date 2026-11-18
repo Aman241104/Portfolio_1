@@ -1,14 +1,15 @@
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { linkedProject, shareProject } from "#shell/deepLink.js";
-import { Canvas } from "@react-three/fiber";
 import { profile, socials } from "#content/profile.js";
 import { shot, KINDS, host } from "../../../content/work.js";
 import { cases } from "../../../content/cases.js";
 import { useFonts } from "../fonts.js";
 import { track } from "../../analytics.js";
-import { STOPS, SECTORS } from "./track.js";
-import Scene, { setActiveTicket } from "./Scene.jsx";
-import { detectQualityTier } from "../../three/cinematography.js";
+import { TICKETS as STOPS, SECTORS } from "./tickets.js";   // three-free: the shell paints before the 3D core
+import { setActiveTicket } from "./active.js";
+// the canvas, three and rapier (~1 MB gz) load behind the start slip instead of blocking it
+const Stage3D = lazy(() => import("./Stage3D.jsx"));
+import { detectQualityTier } from "../../three/quality.js";
 import { soundOn, setSound, onSound } from "#machine/sfx.js";
 import { createEngine } from "./engine.js";
 import "./ride.css";
@@ -123,6 +124,15 @@ export default function RideWorld() {
     const begin = useCallback(() => { engine.start(); setStarted(true); }, [engine]);
     const seen = useRef(new Set());
     const [tier] = useState(detectQualityTier);
+    // paint the HTML slip first, then start the 3D: parsing ~1 MB of three/rapier on the main thread delayed the slip's
+    // first frame to ~3 s (Lighthouse LCP ~10 s on phones). Fonts ready (≤1.2 s) + two frames, then mount the canvas.
+    const [scene, setScene] = useState(false);
+    useEffect(() => {
+        let alive = true;
+        Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1200))])
+            .then(() => requestAnimationFrame(() => requestAnimationFrame(() => alive && setScene(true))));
+        return () => { alive = false; };
+    }, []);
     const [night, setNight] = useState(() => { const h = new Date().getHours(); return h >= 19 || h < 6; });   // follows the visitor's clock
     const show3d = !flat || force3d;
 
@@ -183,9 +193,7 @@ export default function RideWorld() {
 
     return (
         <div className="rd" data-started={started || undefined}>
-            <Canvas className="rd-canvas" shadows={tier.name !== "LOW" ? "soft" : false} dpr={tier.dpr} camera={{ fov: 30, near: 1, far: 400, position: [-24, 33, 68] }} gl={{ antialias: tier.name !== "LOW", powerPreference: "high-performance" }}>
-                <Suspense fallback={null}><Scene input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} started={started} night={night} tier={tier.name} /></Suspense>
-            </Canvas>
+            {scene && <Suspense fallback={null}><Stage3D input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} started={started} night={night} tier={tier} /></Suspense>}
 
             <header className="rd-top">
                 <p className="rd-brand">RIDE <span>· PX-01 test track · Aman Patel</span></p>

@@ -214,3 +214,14 @@ skid marks + dust (instanced ring buffers), fastback coupe with arches/ducktail/
 (localStorage `ride-best-lap`, anti-cheat halfway checkpoint) with a "Like how it handles?" contact card per lap,
 tickets printed to one canvas texture each (was ~440 troika text meshes), BALANCED tier drops bloom + MSAA.
 Rapier adds ~855 KB gz to the RIDE chunk only (lazy). Night mode shipped 2026-11-18 (follows the visitor's clock, N toggles): moonlight, two headlight spots, lightbox tickets (emissive = printed face), glowing pylon caps, dim grid. Ideas left: ghost car of your best lap, gamepad support, photo mode.
+
+## QA pass (2026-11-18) — 13 pages × 8 viewports + Lighthouse (GPU on, production build)
+Sweep script: Playwright, clicks past the boot gate, flags sideways scroll / spill outside scrollers / console errors /
+phone hero overlap. Fixed: Mission scrolled sideways on phones + 1024 (plain `1fr` tracks → `minmax(0,1fr)`), Flap
+threw when a cell unmounted mid-frame, Editorial long domains at 320px, phone charms climbing into the header, and the
+mobile hero key (now the lever). Perf: Home is its own chunk (worlds no longer download three + the studio); worlds get
+a `<main>` (registry `main: true` for worlds with their own); name-glyph font CSS no longer render-blocking; RIDE's 3D
+(Stage3D → Scene, ~0.9 MB gz with rapier) is lazy and mounts after the slip paints; RIDE shell imports three-free
+`tickets.js` + `three/quality.js` (shell chunk ~6 KB gz).
+Lighthouse after (perf/a11y/bp/seo): Editorial phone 70/100/100/100 (was 51/99), desktop 97; Home 64–68/97/100/100;
+RIDE phone 40, desktop 56 — observed LCP ~1.8–2.2 s; the rest is WebGL main-thread work under 4× CPU simulation.

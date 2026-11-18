@@ -6,6 +6,7 @@ import { EffectComposer, Bloom, TiltShift2, Vignette } from "@react-three/postpr
 import * as THREE from "three";
 import { shot } from "../../../content/work.js";
 import { Machine } from "../../machine/MachineModel.jsx";
+import { activeStore } from "./active.js";
 import { CURVE, ROAD_W, PLINTH, STOPS, SECTORS, SPAWN, START_T, onTrack, standoff, trackT } from "./track.js";
 
 // RIDE: a classic coupe on the PX-01 test track, shot like a miniature — high camera, long lens, tilt-shift,
@@ -608,8 +609,6 @@ function Scene({ input, api, onNear, onTick, onLap, started, night = false, tier
 }
 
 // tickets light up (lift) when the car is next to them; the active index lives on a tiny store so only 2 boards re-render
-const activeStore = { i: -1, subs: new Set() };
-export const setActiveTicket = (i) => { activeStore.i = i; activeStore.subs.forEach((f) => f()); };
 function TicketSlot({ stop, res, night }) {
     const [active, setActive] = useState(false);
     useEffect(() => { const f = () => setActive(activeStore.i === stop.i); activeStore.subs.add(f); return () => activeStore.subs.delete(f); }, [stop.i]);

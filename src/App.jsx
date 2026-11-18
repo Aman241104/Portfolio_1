@@ -3,12 +3,17 @@ import { setWorld } from "./analytics.js";
 import { findWorld, worlds } from "#worlds/registry.js";
 import { setLast } from "#shell/storage.js";
 const Machine = lazy(() => import("#machine/Machine.jsx"));   // only for browsers without WebGL 2 (keeps GSAP off every other page)
-import Home from "./home/Home.jsx";
 import CoinSlot from "#shell/CoinSlot.jsx";
 import WorldBoundary from "#shell/WorldBoundary.jsx";
 
 // `/` always opens on the machine; only an explicit ?style= link goes straight into a world.
 const initialWorld = () => findWorld(new URLSearchParams(location.search).get("style"))?.id ?? null;
+
+// The home (and its three.js studio) is its own chunk, so a visitor landing on a world never downloads it. Landing on
+// home, the fetch starts the moment this module runs — the same moment a static import would have.
+const loadHome = () => import("./home/Home.jsx");
+const homeEarly = initialWorld() ? null : loadHome();
+const Home = lazy(() => homeEarly ?? loadHome());
 
 // The 3D home needs WebGL 2; without it the CSS machine still spins and lands.
 const hasWebGL = (() => { try { return !!document.createElement("canvas").getContext("webgl2"); } catch { return false; } })();
@@ -116,20 +121,21 @@ const App = () => {
     if (!world) {
         return (
             <>
-                {hasWebGL ? <Home onSelect={go} /> : <Suspense fallback={null}><Machine onSelect={go} /></Suspense>}
+                <Suspense fallback={null}>{hasWebGL ? <Home onSelect={go} /> : <Machine onSelect={go} />}</Suspense>
                 {portalOverlay}
             </>
         );
     }
 
     const { Component } = world;
+    const Stage = world.main ? "div" : "main";   // one <main> landmark per page: worlds with their own keep theirs
     return (
         <>
             <WorldBoundary key={world.id}>
                 <Suspense fallback={<div className="world-wipe hold" style={{ background: world.paper }}><p>Loading {world.name}…</p></div>}>
-                    <div className="world-stage">
+                    <Stage className="world-stage">
                         <Component shell={{ go, spin: toMachine }} />
-                    </div>
+                    </Stage>
                 </Suspense>
             </WorldBoundary>
             <CoinSlot current={world.id} onSpin={toMachine} onSelect={go} />

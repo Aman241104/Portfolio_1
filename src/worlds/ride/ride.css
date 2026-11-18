@@ -34,7 +34,10 @@
 .rd-intro p { margin: 0; font-size: 16px; max-width: 46ch; color: var(--muted); }
 .rd-intro .rd-kicker { margin-bottom: 10px; }
 .rd-intro-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-@media (prefers-reduced-motion: no-preference) { .rd-intro { animation: rd-rise .7s var(--ease-out) both; } }
+/* the slip rises but never starts invisible: it holds the page's largest text, and an opacity-0 start (held further by
+   the font wait) pushed RIDE's LCP to ~10 s on throttled phones */
+@media (prefers-reduced-motion: no-preference) { .rd-intro { animation: rd-slide .7s var(--ease-out) both; } }
+@keyframes rd-slide { from { translate: 0 24px; } }
 @keyframes rd-rise { from { opacity: 0; translate: 0 24px; } }
 
 .rd-dash { position: absolute; z-index: 4; left: 20px; top: 68px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 22px; }
