@@ -537,3 +537,28 @@
     .home[data-booted] .cta .pull:not(:active):not(:disabled) .pull-ball { animation: pull-nudge 4.2s 2.6s ease-in-out infinite; }
 }
 @keyframes pull-nudge { 0%, 78%, 100% { translate: 0 0; } 86% { translate: 0 9px; } 92% { translate: 0 2px; } }
+
+/* ---- Hero critic pass (agy 2026-11-18, claims verified) ---- */
+@media (max-width: 760px) {
+    /* the signature sits just on top of the wordmark (derived from its size, not a fixed 266px) — overlapping it hid
+       "Aman" behind the letters; on short phones it shrinks so it clears the machine */
+    .home .signature { bottom: calc(var(--word-bottom) + clamp(64px, 20vw, 102px) * .9) !important; }
+    .home[data-light] .signature { bottom: calc(var(--word-bottom) + clamp(56px, 17.5vw, 90px) * .95) !important; }
+    /* idle start lights read as dead carousel dots on phones; the lever knob already says "pull" */
+    .home .start-lights { display: none; }
+    /* one row of secondary actions, each a real tap target */
+    .home .cta-alt { flex-wrap: nowrap !important; justify-content: space-between !important; gap: 8px !important; }
+    .home .cta-alt > * { min-height: 40px; display: inline-flex !important; align-items: center; padding: 0 2px !important; }
+    .home .bar :is(.theme-link, .recruiter-link) { min-height: 40px; display: inline-flex; align-items: center; }
+    /* light paper: a lighter, tighter rim instead of the dark-mode drop shadow */
+    .home[data-light] .cta .pull { box-shadow: 0 1px 0 #fff inset, 0 -2px 0 rgb(20 20 22 / .16) inset, 0 0 0 1px rgb(20 20 22 / .26), 0 10px 22px -8px rgb(20 20 22 / .28) !important; }
+}
+@media (max-width: 760px) and (max-height: 700px) { .home .signature { font-size: 7vw !important; } }
+@media (max-width: 375px) {
+    .home .bar .right { gap: 8px; }
+    .home .bar .right :is(.theme-link, .recruiter-link) { font-size: 10px; letter-spacing: .1em; }
+}
+/* laptops/tablets landscape: the key sat against the lever housing at 1024 — anchor it to the gutter, lower */
+@media (min-width: 761px) and (max-width: 1200px) {
+    .home .cta:not(.reveal) { right: var(--gutter); top: 60%; }
+}

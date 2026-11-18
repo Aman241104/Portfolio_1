@@ -572,12 +572,12 @@ const Home = ({ onSelect }) => {
                             <button type="button" className="pull" onClick={pull} disabled={busy}>
                                 {/* phones: the key is the lever — the knob sits in a slot and travels down it on press */}
                                 <span className="pull-slot" aria-hidden><i className="pull-ball" /></span>
-                                <span className="pull-txt"><b>Pull the lever</b><small>Spins one of {POOL} worlds</small></span>
+                                <span className="pull-txt"><b>Pull the lever</b><small>Spins one of {POOL} · 12 in all</small></span>
                                 <span className="pull-desk"><span className="cta-n mono" aria-hidden>01</span> Pull the lever <i aria-hidden>→</i></span>
                             </button>
                             <div className="cta-alt">
                                 <button type="button" onClick={() => document.querySelector(".work")?.scrollIntoView({ behavior: "smooth" })}>
-                                    <span className="cta-n" aria-hidden>02</span> or scroll · it prints the work
+                                    <span className="cta-n" aria-hidden>02</span> <span className="desk-only">or scroll · it prints the work</span><span className="phone-only">The work ↓</span>
                                 </button>
                                 <button type="button" className="phone-only" onClick={() => setPicking(true)}>All worlds</button>
                                 <a className="phone-only" href={profile.resume} target="_blank" rel="noreferrer">Résumé</a>

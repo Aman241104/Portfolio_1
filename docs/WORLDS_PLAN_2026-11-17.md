@@ -229,3 +229,12 @@ Home 3D intro (same day): drei <Preload all> (sync gl.compile + 6-face cube rend
 (renderer.compileAsync, KHR_parallel_shader_compile; scene hidden until programs are ready; FirstFrame waits for the
 visible scene). Desktop TBT 1630 → 670 ms (longest task 1269 → 362 ms), perf 68 → 73; phone (simulated) TBT 10.2 s → 3.7 s.
 Left: first visible frame (env PMREM, shadow map, uploads) ~380 ms real, and React mounting the whole printout at once.
+
+## Home hero critic pass (agy, 2026-11-18) — desktop 7.2, phone 5.0; claims verified
+Fixed: phone signature derived from the wordmark (was fixed bottom: 266px → hit the machine on short phones; overlapping
+the word hid "Aman" behind it), phones show the same 2 charms as desktop (the red ENTER key competed with the lever
+knob), idle start-lights hidden on phones, secondary links one row of 40px targets ("The work ↓" on phones), key copy
+"Spins one of 7 · 12 in all" (was a 7-vs-12 contradiction), light-mode key rim, 320px top-bar spacing, desktop 761–1200px
+key anchored to the gutter (sat on the lever housing at 1024).
+Rejected: "74px phone bottom padding is dead space" (it clears the global Worlds dock); "remove Creative Developer"
+(Aman asked for it back); signature halo text-shadow (effect, not polish).
