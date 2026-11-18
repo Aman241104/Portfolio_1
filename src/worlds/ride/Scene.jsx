@@ -92,7 +92,21 @@ function Wheel() {
 const _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _fwd = new THREE.Vector3(), _look = new THREE.Vector3(), _cam = new THREE.Vector3(), _off = new THREE.Vector3(), _aim = new THREE.Vector3(SPAWN.x, 0.6, SPAWN.z);
 const CAM_OFF = new THREE.Vector3(-24, 33, 38);                  // fixed world-space angle: diorama, never spins with the car
 
-function Car({ input, api, onNear, onTick, onLap, light, started, shadow }) {
+function Headlights() {
+    const targets = useMemo(() => [-0.58, 0.58].map((z) => { const o = new THREE.Object3D(); o.position.set(20, -1.2, z * 3); return o; }), []);
+    return (
+        <group position={[2.1, 0, 0]}>
+            {targets.map((o, i) => (
+                <group key={i}>
+                    <primitive object={o} />
+                    <spotLight position={[0, 0, i ? 0.58 : -0.58]} target={o} color="#fff1d6" intensity={160} distance={48} angle={0.42} penumbra={0.65} decay={1.6} />
+                </group>
+            ))}
+        </group>
+    );
+}
+
+function Car({ input, api, onNear, onTick, onLap, light, started, shadow, night }) {
     const body = useRef(), wheels = useRef([]);
     const { world } = useRapier();
     const ctrl = useRef(null);
@@ -224,6 +238,7 @@ function Car({ input, api, onNear, onTick, onLap, light, started, shadow }) {
             <CuboidCollider args={[2.1, 0.3, 0.9]} position={[0, 0.05, 0]} mass={MASS} />
             <CuboidCollider args={[1.0, 0.25, 0.8]} position={[-0.35, 0.55, 0]} mass={0} />
             <Coupe />
+            {night && <Headlights />}
             {WHEELS.map(([x, z], i) => (
                 <group key={i} ref={(el) => (wheels.current[i] = el)} position={[x, -0.12 - REST, z]}>
                     <Wheel />
@@ -349,7 +364,7 @@ function printTicket(canvas, s, img) {
 
 const LOAD_RANK = new Map(STOPS.map((s) => [s.i, Math.hypot(s.x - SPAWN.x, s.z - SPAWN.z)]).sort((a, b) => a[1] - b[1]).map(([i], r) => [i, r]));
 
-function Ticket({ stop, active, res = 1 }) {
+function Ticket({ stop, active, res = 1, night }) {
     const tex = useMemo(() => {
         const c = document.createElement("canvas"); c.width = TW * res; c.height = TH * res;
         const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
@@ -373,7 +388,7 @@ function Ticket({ stop, active, res = 1 }) {
                     <group key={r} rotation={[0, r, 0]} position={[0, 2.85, 0]}>
                         <mesh position={[0, 0, 0.052]}>
                             <planeGeometry args={[3.2, 5.3]} />
-                            <meshStandardMaterial map={tex} roughness={0.8} />
+                            <meshStandardMaterial map={tex} roughness={0.8} emissive="#ffffff" emissiveMap={tex} emissiveIntensity={night ? 0.5 : 0} />
                         </mesh>
                     </group>
                 ))}
@@ -497,7 +512,7 @@ function Props() {
 }
 
 // ── the plinth + the giant PX-01 in the infield ─────────────────────────────────────────────
-function Plinth() {
+function Plinth({ night }) {
     return (
         <>
             <RigidBody type="fixed" colliders={false}>
@@ -505,7 +520,8 @@ function Plinth() {
                 <mesh position={[0, -1.5, 0]} receiveShadow><boxGeometry args={[PLINTH.w, 3, PLINTH.d]} /><meshStandardMaterial color={FLOOR} roughness={0.92} /></mesh>
             </RigidBody>
             {/* painted floor grid, every 10 m */}
-            <gridHelper args={[PLINTH.w - 4, (PLINTH.w - 4) / 10, "#bdb7aa", "#c7c1b5"]} position={[0, 0.004, 0]} scale={[1, 1, PLINTH.d / PLINTH.w]} />
+            {/* grid lines are unlit: give night its own dim colours (key remounts the helper) */}
+            <gridHelper key={night ? "n" : "d"} args={[PLINTH.w - 4, (PLINTH.w - 4) / 10, night ? "#2a2a30" : "#bdb7aa", night ? "#222228" : "#c7c1b5"]} position={[0, 0.004, 0]} scale={[1, 1, PLINTH.d / PLINTH.w]} />
             <RigidBody type="fixed" colliders={false} position={[0, 0, -2]}>
                 <CuboidCollider args={[6.2, 8, 3.6]} position={[0, 8, 0]} />
                 <Machine scale={4.2} position={[0, 7.5, 0]} />
@@ -527,12 +543,12 @@ const blobTex = (() => {
 })();
 
 // a black pylon on the shoulder where each sector begins: big sector number, red cap
-function SectorMarker({ s }) {
+function SectorMarker({ s, night }) {
     const f = onTrack(s.t), off = ROAD_W / 2 + 4.2;
     return (
         <RigidBody type="fixed" colliders="cuboid" position={[f.x + f.nx * off, 0, f.z + f.nz * off]} rotation={[0, Math.atan2(-f.nx, -f.nz), 0]}>
             <mesh position={[0, 3.4, 0]} castShadow receiveShadow><boxGeometry args={[1.6, 6.8, 1.6]} /><meshStandardMaterial color={INK} roughness={0.45} metalness={0.2} /></mesh>
-            <mesh position={[0, 6.9, 0]} castShadow><boxGeometry args={[1.64, 0.22, 1.64]} /><meshStandardMaterial color={SIGNAL} roughness={0.5} /></mesh>
+            <mesh position={[0, 6.9, 0]} castShadow><boxGeometry args={[1.64, 0.22, 1.64]} /><meshStandardMaterial color={SIGNAL} roughness={0.5} emissive={SIGNAL} emissiveIntensity={night ? 1.4 : 0} /></mesh>
             {[0, Math.PI].map((r) => (
                 <group key={r} rotation={[0, r, 0]}>
                     <Text font={FONT} fontSize={1.3} color={BONE} position={[0, 5.2, 0.81]} anchorY="middle">{s.n}</Text>
@@ -543,18 +559,18 @@ function SectorMarker({ s }) {
     );
 }
 
-function Scene({ input, api, onNear, onTick, onLap, started, tier = "HIGH" }) {
+function Scene({ input, api, onNear, onTick, onLap, started, night = false, tier = "HIGH" }) {
     const light = useRef(), shadow = useRef();
     const high = tier === "HIGH", low = tier === "LOW";
     return (
         <>
-            <color attach="background" args={[VOID]} />
-            <fog attach="fog" args={[VOID, 70, 190]} />
-            <hemisphereLight args={["#fff1dc", "#4a4239", 0.35]} />
-            <directionalLight ref={light} color="#ffd8a8" intensity={1.9} castShadow={!low}
+            <color attach="background" args={[night ? "#040406" : VOID]} />
+            <fog attach="fog" args={[night ? "#040406" : VOID, night ? 50 : 70, night ? 150 : 190]} />
+            <hemisphereLight args={night ? ["#7d8cb0", "#0b0b10", 0.12] : ["#fff1dc", "#4a4239", 0.35]} />
+            <directionalLight ref={light} color={night ? "#8ea4d8" : "#ffd8a8"} intensity={night ? 0.22 : 1.9} castShadow={!low}
                 shadow-mapSize={[high ? 2048 : 1024, high ? 2048 : 1024]} shadow-bias={-0.0004} shadow-normalBias={0.04}
                 shadow-camera-left={-48} shadow-camera-right={48} shadow-camera-top={48} shadow-camera-bottom={-48} shadow-camera-far={120} />
-            <Environment resolution={128} frames={1} environmentIntensity={0.45}>
+            <Environment resolution={128} frames={1} environmentIntensity={night ? 0.07 : 0.45}>
                 <Lightformer form="rect" intensity={3} position={[0, 8, 0]} rotation-x={Math.PI / 2} scale={[20, 8, 1]} />
                 <Lightformer form="rect" intensity={2} position={[-10, 3, 6]} rotation-y={Math.PI / 2} scale={[10, 2, 1]} color="#ffd2a0" />
                 <Lightformer form="rect" intensity={1.2} position={[10, 2, -6]} rotation-y={-Math.PI / 2} scale={[10, 2, 1]} />
@@ -565,12 +581,12 @@ function Scene({ input, api, onNear, onTick, onLap, started, tier = "HIGH" }) {
                 <meshBasicMaterial map={blobTex} transparent opacity={0.5} depthWrite={false} toneMapped={false} />
             </mesh>
             <Physics gravity={[0, -14, 0]} timeStep="vary">
-                <Plinth />
+                <Plinth night={night} />
                 <Track />
-                {STOPS.map((s) => <TicketSlot key={s.i} stop={s} res={high ? 1.25 : 1} />)}
+                {STOPS.map((s) => <TicketSlot key={s.i} stop={s} res={high ? 1.25 : 1} night={night} />)}
                 <Props />
-                <Car input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} light={light} started={started} shadow={shadow} />
-                {SECTORS.map((s) => <SectorMarker key={s.kind} s={s} />)}
+                <Car input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} light={light} started={started} shadow={shadow} night={night} />
+                {SECTORS.map((s) => <SectorMarker key={s.kind} s={s} night={night} />)}
                 <Skids />
             </Physics>
 
@@ -594,10 +610,10 @@ function Scene({ input, api, onNear, onTick, onLap, started, tier = "HIGH" }) {
 // tickets light up (lift) when the car is next to them; the active index lives on a tiny store so only 2 boards re-render
 const activeStore = { i: -1, subs: new Set() };
 export const setActiveTicket = (i) => { activeStore.i = i; activeStore.subs.forEach((f) => f()); };
-function TicketSlot({ stop, res }) {
+function TicketSlot({ stop, res, night }) {
     const [active, setActive] = useState(false);
     useEffect(() => { const f = () => setActive(activeStore.i === stop.i); activeStore.subs.add(f); return () => activeStore.subs.delete(f); }, [stop.i]);
-    return <Ticket stop={stop} active={active} res={res} />;
+    return <Ticket stop={stop} active={active} res={res} night={night} />;
 }
 
 export default memo(Scene);

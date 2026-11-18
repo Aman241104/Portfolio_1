@@ -199,7 +199,7 @@ Pending Aman's call: RIDE cuts (points/orbs/gates/props; Fjord + Sakura biomes),
 - `src/status.js` `liveStatus(fresh?)`: one /api/status check with browser-ping fallback, cached 60 s; used by home Maintained, Mission (60 s poll + R re-scan = fresh), Longhorn. Replaced 3 hand-rolled probes.
 - Ticket-feed portal (2026-11-18): the world shutter is a thermal strip with torn zig-zag edges; centre prints `PX-01 · Ticket № NN · Now entering`, poster name, symbols, id-seeded barcode; the world's chunk is prefetched (`next.load()`) as it feeds in.
 - Deep links (2026-11-18): `?style=<id>&p=<slug>` via src/shell/deepLink.js (`linkedProject`, `useShareProject`). Works in Mission, Terminal (boots into `cat <slug>`), Canvas (flies to the sheet), Album, Longhorn (opens the window), Arcade (inspector), RIDE (parks beside the ticket, skips the gate). Opening a project writes ?p= back; App drops ?p= on world change. Not wired (no project view): Editorial, Desktop, 2001, Ask, Pocket.
-- Still open: shared useWorldPerf.
+- useWorldPerf: dropped (2026-11-18) — only RIDE + home are WebGL; Arcade already pauses off-screen, other loops are rAF (paused in hidden tabs by the browser). RIDE's own low-power check now reuses detectQualityTier.
 
 ## RIDE v2 — PX-01 test track (2026-11-18, Aman chose: classic car / abstract PX-01 track / miniature tilt-shift)
 Replaces the on-rails golden-hour bike ride. Free driving with Rapier raycast-vehicle physics (`@react-three/rapier`):
@@ -213,5 +213,4 @@ RIDE v2.1 (same day): synthesised engine + tyre squeal (src/worlds/ride/engine.j
 skid marks + dust (instanced ring buffers), fastback coupe with arches/ducktail/grille, lap timer + best lap
 (localStorage `ride-best-lap`, anti-cheat halfway checkpoint) with a "Like how it handles?" contact card per lap,
 tickets printed to one canvas texture each (was ~440 troika text meshes), BALANCED tier drops bloom + MSAA.
-Rapier adds ~855 KB gz to the RIDE chunk only (lazy). Ideas left: night mode with headlights, ghost car of your best
-lap, gamepad support, photo mode.
+Rapier adds ~855 KB gz to the RIDE chunk only (lazy). Night mode shipped 2026-11-18 (follows the visitor's clock, N toggles): moonlight, two headlight spots, lightbox tickets (emissive = printed face), glowing pylon caps, dim grid. Ideas left: ghost car of your best lap, gamepad support, photo mode.

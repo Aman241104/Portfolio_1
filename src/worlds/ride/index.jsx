@@ -18,11 +18,9 @@ import "./ride.css";
 // R puts the car back on the track, M opens the full list. Low-power devices and reduced motion get the list.
 const FONTS = ["Saira+Condensed:wght@600;800", "Saira:wght@400;600"];
 const reduced = typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+// the site's quality tier decides (LOW = reduced motion or ≤2 cores/≤2 GB); RIDE also needs WebGL 2
 const lowPower = () => {
-    try {
-        if (!document.createElement("canvas").getContext("webgl2")) return true;
-        return (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
-    } catch { return true; }
+    try { return !document.createElement("canvas").getContext("webgl2") || detectQualityTier().name === "LOW"; } catch { return true; }
 };
 const linkedin = socials.find((s) => s.text === "LinkedIn")?.link;
 const lapTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
@@ -125,6 +123,7 @@ export default function RideWorld() {
     const begin = useCallback(() => { engine.start(); setStarted(true); }, [engine]);
     const seen = useRef(new Set());
     const [tier] = useState(detectQualityTier);
+    const [night, setNight] = useState(() => { const h = new Date().getHours(); return h >= 19 || h < 6; });   // follows the visitor's clock
     const show3d = !flat || force3d;
 
     const onNear = useCallback((i) => {
@@ -161,6 +160,7 @@ export default function RideWorld() {
             if (k) { e.preventDefault(); input.current[k] = 1; begin(); }
             else if (e.key === "m" || e.key === "M") setMap((m) => !m);
             else if (e.key === "r" || e.key === "R") api.current?.reset();
+            else if (e.key === "n" || e.key === "N") setNight((v) => !v);
         };
         const ku = (e) => { const k = KEYS[e.key]; if (k) input.current[k] = 0; };
         const blur = () => Object.keys(input.current).forEach((k) => { input.current[k] = 0; });
@@ -184,7 +184,7 @@ export default function RideWorld() {
     return (
         <div className="rd" data-started={started || undefined}>
             <Canvas className="rd-canvas" shadows={tier.name !== "LOW" ? "soft" : false} dpr={tier.dpr} camera={{ fov: 30, near: 1, far: 400, position: [-24, 33, 68] }} gl={{ antialias: tier.name !== "LOW", powerPreference: "high-performance" }}>
-                <Suspense fallback={null}><Scene input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} started={started} tier={tier.name} /></Suspense>
+                <Suspense fallback={null}><Scene input={input} api={api} onNear={onNear} onTick={onTick} onLap={onLap} started={started} night={night} tier={tier.name} /></Suspense>
             </Canvas>
 
             <header className="rd-top">
@@ -192,6 +192,7 @@ export default function RideWorld() {
                 <nav>
                     <button type="button" onClick={() => setMap(true)}>Tickets ({STOPS.length})</button>
                     <button type="button" aria-pressed={sound} onClick={() => setSound(!sound)}>Sound {sound ? "on" : "off"}</button>
+                    <button type="button" aria-pressed={night} onClick={() => setNight((v) => !v)} title="Night (N)">{night ? "Night" : "Day"}</button>
                     <a href={profile.resume} target="_blank" rel="noreferrer" onClick={() => track("resume_opened", { from: "world" })}>Résumé</a>
                     <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
                     {linkedin && <a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
@@ -229,7 +230,7 @@ export default function RideWorld() {
                         <Pad input={input} k="down" label="Brake / reverse">▼</Pad>
                         <Pad input={input} k="up" label="Accelerate">▲</Pad>
                     </div>
-                    <span>WASD / arrows drive · Space handbrake · R reset · M tickets</span>
+                    <span>WASD / arrows drive · Space handbrake · R reset · N night · M tickets</span>
                 </div>
             )}
             {map && <TicketList here={near} onGo={go} onClose={() => setMap(false)} />}
