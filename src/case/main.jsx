@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { cases } from "../../content/cases.js";
 import { work } from "../../content/work.js";
+import { profile } from "../../content/profile.js";
 import { initAnalytics, track } from "../analytics.js";
 import "./case.css";
 
@@ -16,16 +17,18 @@ if (ed) {
         href: "https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap",
     }));
 }
+const known = !!cases[slug];                              // a mistyped/old ?p= says so instead of showing another project
 const c = cases[slug] || cases["job-search-os"];
 const w = work.find((x) => x.slug === (cases[slug] ? slug : "job-search-os"));
 const shot = `https://res.cloudinary.com/dhrcarq8g/image/upload/f_auto,q_auto,w_1600/${w.img || `portfolio/work/${w.slug}`}`;
 document.title = `${c.title} — case study · Aman Patel`;
-track("case_study_viewed", { project: slug });
+track("case_study_viewed", { project: slug, known });
 const others = Object.entries(cases).filter(([k]) => k !== slug);
 
 const Case = () => (
     <main className={ed ? "case case-ed" : "case"}>
         <nav className="case-nav"><a href={ed ? "/?style=editorial" : "/"}>{ed ? "← The Index" : "← aman-patel.me"}</a><a href="/resume.html">Résumé</a></nav>
+        {!known && <p className="mono case-missing" role="status">No case study called “{slug}”. Here’s {c.title}; the other one is linked at the end.</p>}
         <header>
             <p className="mono">{ed ? "The Index · Feature" : "Case study"}</p>
             <h1>{c.title}</h1>
@@ -42,7 +45,7 @@ const Case = () => (
         ))}
         <footer>
             {others.map(([k, o]) => <a key={k} className="next" href={`/case.html?p=${k}${skin}`}><span className="mono">Next case study</span>{o.title} →</a>)}
-            <p>Want the walkthrough? <a href="mailto:patelaman0241@gmail.com">patelaman0241@gmail.com</a></p>
+            <p>Want the walkthrough? <a href={`mailto:${profile.email}`}>{profile.email}</a></p>
         </footer>
     </main>
 );

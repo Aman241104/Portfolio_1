@@ -49,3 +49,5 @@ body.ed-skin { background: #f2f0ea; color: #0a0a0a; font: 400 18px/1.6 "Newsread
 .case-ed .next { color: #0a0a0a; font-family: "Schibsted Grotesk", sans-serif; }
 .case-ed .next:hover { color: #002fa7; }
 @media (max-width: 760px) { .case-ed section { grid-template-columns: 1fr; } }
+
+.case-missing { margin: 0 0 18px; padding: 10px 12px; border: 1px dashed currentColor; opacity: .8; }
