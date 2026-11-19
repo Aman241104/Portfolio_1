@@ -286,6 +286,8 @@ export default function ShipBreaker() {
 
         const loop = (t) => {
             if (!onScreen || document.hidden) { prev = t; raf = requestAnimationFrame(loop); return; }
+            // attract mode plays behind the high-score card: ~30 fps is plenty (elapsed time still drives the steps)
+            if (hudRef.current === "attract" && t - prev < 33) { raf = requestAnimationFrame(loop); return; }
             const dt = Math.min(100, t - prev); prev = t;
             const st = hudRef.current, g = game.current;
             if (g.stop > 0) { g.stop -= dt; acc = 0; }

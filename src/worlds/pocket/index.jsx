@@ -81,6 +81,8 @@ export default function PocketWorld({ shell }) {
         const b = buf.getContext("2d");
         let raf;
         const loop = (now) => {
+            // the Dex and project card cover the screen: don't redraw the town behind them
+            if (modeRef.current === "dex" || modeRef.current === "card") { raf = requestAnimationFrame(loop); return; }
             const s = g.current;
             // movement (only while walking)
             if (modeRef.current === "walk" && !s.moving && s.held) {

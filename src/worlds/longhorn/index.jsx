@@ -70,7 +70,11 @@ function Win({ w, top, onFocus, onClose, onMin, title, children, wide }) {
 // ---- gadgets ----
 function ClockGadget() {
     const [t, setT] = useState(() => new Date());
-    useEffect(() => { const i = setInterval(() => setT(new Date()), 1000); return () => clearInterval(i); }, []);
+    useEffect(() => {
+        if (matchMedia("(max-width: 760px)").matches) return;   // the gadget sidebar is hidden on phones
+        const i = setInterval(() => { if (!document.hidden) setT(new Date()); }, 1000);
+        return () => clearInterval(i);
+    }, []);
     const ist = new Date(t.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const h = ist.getHours() % 12, m = ist.getMinutes(), s = ist.getSeconds();
     const hand = (deg, len, wdt, c) => <line x1="50" y1="50" x2={50 + len * Math.sin(deg * Math.PI / 180)} y2={50 - len * Math.cos(deg * Math.PI / 180)} stroke={c} strokeWidth={wdt} strokeLinecap="round" />;

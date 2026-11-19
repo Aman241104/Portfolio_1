@@ -250,3 +250,7 @@ filter tabs one swipeable row on phones, Ask duplicate mode buttons removed + ba
 private projects no longer "#" links, Editorial phone masthead orphan, Longhorn windows can't be dragged off-screen.
 Rejected (agy wrong): "Georama never loaded" (index.html loads it), "dependency-less useEffect is a bug" (latest-ref
 pattern), "remove VinylGate" (deliberate; recruiter mode skips it), "remove Pocket fast links" (recruiter 1–2 click rule).
+Pass 2 follow-ups (same day): Desktop dock 24px clear of the site menu (agy's "collision at 1024–1200" was false — 12px
+gap, now 24), Arcade attract mode ~30 fps (plays behind the card), Pocket stops redrawing the town under the Dex/card,
+Longhorn clock gadget idle on phones/hidden tabs, Mission PLAT. legend tooltips. Album's clickable track row kept: the
++/− is a real button with aria-expanded; the row click only widens the mouse target.

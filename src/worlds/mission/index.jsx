@@ -167,7 +167,7 @@ export default function Departures() {
                 </div>
 
                 <div className="dp-table">
-                    <div className="dp-row dp-th" aria-hidden><span>Time</span><span>Destination</span><span>Via / Stack</span><span>Plat.</span><span>Status</span><span>Latency</span></div>
+                    <div className="dp-row dp-th" aria-hidden><span>Time</span><span>Destination</span><span>Via / Stack</span><span title={Object.entries(PLATFORM).map(([k, n]) => `${n} ${KINDS[k]}`).join(" · ")}>Plat.</span><span>Status</span><span>Latency</span></div>
                     <ol>
                         {visibleWork.map((w, i) => {
                             const s = sites[w.slug];
@@ -180,7 +180,7 @@ export default function Departures() {
                                         <Flap key={`t-${scanId}`} text={inProduction(w) ? at.replace(":", ".") : String(w.year)} len={5} start={i * 35} />
                                         <Flap key={`d-${scanId}`} text={w.title} len={22} start={i * 35 + 25} className="dp-dest" />
                                         <span className="dp-via">{w.url ? host(w.url) : w.stack?.split("·")[0]?.trim()}</span>
-                                        <Flap text={PLATFORM[w.kind]} len={1} start={i * 35} className="dp-plat" />
+                                        <span title={`Platform ${PLATFORM[w.kind]} · ${KINDS[w.kind]}`}><Flap text={PLATFORM[w.kind]} len={1} start={i * 35} className="dp-plat" /></span>
                                         <Flap key={`s-${scanId}`} text={v} len={8} start={i * 35 + 60} className="dp-status" />
                                         <Flap key={`m-${scanId}`} text={s?.ok ? `${s.ms}MS` : inProduction(w) ? (s ? "TIMEOUT" : "...") : "—"} len={7} start={i * 35 + 80} />
                                     </button>
