@@ -156,6 +156,8 @@ a:is(:hover, :focus-visible) > .ed-duo::after { opacity: 0; }
 @media (max-width: 700px) {
     .ed-ear { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; text-align: left; justify-items: start; }
     .ed-ear a { margin: 0; padding: 4px 0; }
-    .ed-ear .ed-ink { grid-column: 1 / -1; }
+    .ed-ear .ed-ink { grid-column: 1 / -1; order: 1; }   /* the full-width email closes the grid instead of stranding a cell */
 }
 .ed-live a > * { min-width: 0; } .ed-live .ed-mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* long domains (classicorganicchemicals.com) overflowed 320px phones */
+
+a:not([href]) { cursor: default; }   /* private projects: no page to open */

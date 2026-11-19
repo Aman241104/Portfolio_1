@@ -25,6 +25,7 @@ const Springboard = () => {
                         <img key={w.slug} src={shot(w, 360)} alt="" className="absolute w-[86%] aspect-[4/3] object-cover object-top rounded-xl shadow-xl"
                             style={{ left: `${7 + i * 3}%`, top: `${10 + i * 12}%`, transform: `rotate(${(i - 1) * 5}deg)`, zIndex: 3 - i }} />
                     ))}
+                    <span className="absolute inset-x-0 bottom-0 h-12 z-[9] bg-gradient-to-t from-black/80 to-transparent" aria-hidden />
                     <p className="absolute left-3 bottom-2.5 z-10 text-white text-xs font-semibold drop-shadow">{work.length} projects →</p>
                 </button>
             </div>

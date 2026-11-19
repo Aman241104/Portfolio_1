@@ -49,7 +49,8 @@ function Win({ w, top, onFocus, onClose, onMin, title, children, wide }) {
         e.currentTarget.setPointerCapture(e.pointerId);
         onFocus();
     };
-    const move = (e) => { if (drag.current) setPos({ x: Math.max(-200, e.clientX - drag.current.x), y: Math.max(0, e.clientY - drag.current.y) }); };
+    // keep at least the title bar on screen: windows can't be lost past any edge
+    const move = (e) => { if (drag.current) setPos({ x: Math.min(innerWidth - 180, Math.max(-200, e.clientX - drag.current.x)), y: Math.min(innerHeight - 96, Math.max(0, e.clientY - drag.current.y)) }); };
     return (
         <section ref={ref} className="lh-win" data-top={top || undefined} data-closing={w.closing || undefined} data-min={w.min || undefined} data-wide={wide || undefined}
             style={{ "--x": `${pos.x}px`, "--y": `${pos.y}px`, zIndex: w.z }} role="dialog" aria-label={title} onPointerDown={onFocus}

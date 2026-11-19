@@ -183,7 +183,7 @@ export default function EditorialWorld() {
                         <li className="ed-th" aria-hidden><span>№</span><span>Title</span><span>Kind</span><span>Year</span><span>Status</span><span /></li>
                         {rows.map((w) => (
                             <li key={w.slug}>
-                                <a href={href(w) || "#"} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer" onPointerEnter={() => setPeek(w)} onFocus={() => setPeek(w)}>
+                                <a href={href(w) || undefined} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer" onPointerEnter={() => setPeek(w)} onFocus={() => setPeek(w)}>
                                     <span className="ed-no">{String(work.indexOf(w) + 1).padStart(2, "0")}</span>
                                     <span className="ed-title">{w.title}<small>{w.line}</small>{w.stack && <em className="ed-stack">{w.stack}</em>}</span>
                                     <span>{KINDS[w.kind].replace(/s$/, "")}</span>
@@ -197,7 +197,7 @@ export default function EditorialWorld() {
                 ) : (
                     <div className="ed-gallery">
                         {rows.map((w) => (
-                            <a key={w.slug} className="ed-gcard" href={href(w) || "#"} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer">
+                            <a key={w.slug} className="ed-gcard" href={href(w) || undefined} target={cases[w.slug] || !w.url ? undefined : "_blank"} rel="noreferrer">
                                 <p className="ed-gcard-meta">
                                     <span>{String(work.indexOf(w) + 1).padStart(2, "0")}</span>
                                     <span>{w.year}</span>

@@ -260,14 +260,7 @@ export default function ReferenceDesk() {
                                 <p>{tab === "ask"
                                     ? `Every answer is pulled from Aman's real file: ${work.length} shipped projects, experience, skills, and ${certifications.length} verified certs.`
                                     : "Paste a job description below. Matching skills get stamped and closest projects are footnoted for verification."}</p>
-                                <div className="jld-modes" role="tablist" aria-label="Choose mode">
-                                    <button type="button" className={tab === "ask" ? "is-active" : undefined} onClick={() => setTab("ask")}>
-                                        <span aria-hidden>▶</span> Ask Aman Mode
-                                    </button>
-                                    <button type="button" className={tab === "match" ? "is-active" : undefined} onClick={() => setTab("match")}>
-                                        <span aria-hidden>{tab === "match" ? "▶" : "·"}</span> Recruiter JD Match
-                                    </button>
-                                </div>
+{/* the mode switch lives in the tabs above; a second copy here was removed */}
                             </div>
                         </section>
                     )}

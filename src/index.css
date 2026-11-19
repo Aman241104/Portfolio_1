@@ -148,3 +148,8 @@ body {
 @media (pointer: coarse) { .coin-slot > * { min-height: 40px; } }
 /* the world pill floats over every world, light paper included: dark glass so its labels always read */
 .coin-slot.lg { background: rgba(12, 12, 14, .74); }
+
+/* The global dock floats over the bottom of every world on phones/tablets. Worlds with their own bottom bar add
+   var(--coin-clear) to it, so the bar rides above the dock and drops back when the dock slides away. */
+:root { --coin-clear: 0px; }
+@media (max-width: 1023px) { html[data-coin="shown"] { --coin-clear: 72px; } }

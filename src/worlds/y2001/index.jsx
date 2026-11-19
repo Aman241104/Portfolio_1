@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { profile } from "#content/profile.js";
-import { work, KINDS, shot, status, host } from "../../../content/work.js";
+import { work, KINDS, shot, status, host, inProduction } from "../../../content/work.js";
 import { experience } from "../../../content/experience.js";
 import { skillGroups } from "../../../content/skills.js";
 import { cases } from "../../../content/cases.js";
@@ -159,7 +159,7 @@ export default function Y2001({ shell }) {
     const me = ring.findIndex((w) => w.id === "y2001");
     const hop = (d) => shell?.go(ring[(me + d + ring.length) % ring.length].id);
     const shown = (i) => (i < loaded ? "" : undefined);
-    const live = work.filter((w) => w.live);
+    const live = work.filter(inProduction);   // 24, as everywhere else
     const filteredWork = filter === "all" ? work : filter === "live" ? live : work.filter((w) => w.kind === filter);
     const job = experience[0], edu = experience[1];
 

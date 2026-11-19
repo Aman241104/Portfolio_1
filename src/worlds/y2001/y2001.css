@@ -42,7 +42,8 @@
 .y-word > span { display: inline-block; animation: y-wave 2.4s var(--ease-in-out) infinite; animation-delay: calc(var(--i) * 70ms); }
 @keyframes y-wave { 0%, 60%, 100% { translate: 0 0; } 30% { translate: 0 -8px; color: var(--cyan); } }
 
-.y-blink { animation: y-blink 1s steps(1) infinite; color: var(--lime); }
+.y-blink { animation: y-blink-c 1s steps(1) infinite; color: var(--lime); }   /* OPEN TO WORK must never disappear */
+@keyframes y-blink-c { 50% { color: #ffff00; } }
 @keyframes y-blink { 50% { opacity: 0; } }
 .y-new { display: inline-block; padding: 0 6px; margin-right: 6px; background: var(--red); color: #fff; font: 700 13px Arial, sans-serif;
     transform: rotate(-8deg); vertical-align: middle; animation: y-blink 1s steps(1) infinite; }
@@ -132,7 +133,7 @@
 .y-foot { text-align: center; font-size: 15px; }
 
 /* the browser status bar: the 56k download made visible */
-.y-statusbar { position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 8px;
+.y-statusbar { position: fixed; z-index: 50; left: 0; right: 0; bottom: var(--coin-clear); transition: bottom .3s var(--ease-out); height: 26px; display: flex; align-items: center; gap: 8px; padding: 0 8px;
     background: #c0c0c0; color: #000; font: 12px Arial, sans-serif; border-top: 2px solid #fff; }
 .y-sb-icon { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9fe7ff, #1f6fd1); }
 .y-sb-icon[data-busy] { animation: y-pulse .6s steps(2) infinite; }
@@ -141,7 +142,7 @@
 .y-sb-bar { width: 140px; height: 14px; border: 1px inset #888; background: #fff; }
 .y-sb-bar i { display: block; height: 100%; width: calc(var(--p) * 100%); background: repeating-linear-gradient(90deg, #000080 0 8px, transparent 8px 10px); transition: width .25s steps(4, end); }
 .y-sb-zone { border: 1px inset #888; padding: 1px 8px; }
-@media (min-width: 1024px) { .y-statusbar { padding-right: 460px; } }
+@media (min-width: 1024px) { .y-statusbar { padding-right: max(460px, var(--coin-w, 0px)); } }   /* clears the dock's measured width */
 @media (max-width: 640px) { .y-statusbar { display: none; } .y2k { padding-bottom: 170px; } .y-counter { font-size: 15px; } }
 
 /* sparkle trail */

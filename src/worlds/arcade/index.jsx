@@ -227,7 +227,7 @@ export default function ShipBreaker() {
             }
         };
 
-        const draw = (t) => {
+        const draw = () => {
             const g = game.current;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, W, H);
@@ -281,10 +281,7 @@ export default function ShipBreaker() {
             ctx.textAlign = "center"; ctx.fillStyle = "#e8392b"; ctx.fillText("HI-SCORE", W / 2 - 40, 20);
             ctx.fillStyle = "#f2efe8"; ctx.fillText(String(Math.max(g.score, hiRef.current)).padStart(6, "0"), W / 2 + 50, 20);
             ctx.textAlign = "right"; ctx.fillStyle = "#ffd23f"; ctx.fillText("■ ".repeat(Math.max(0, g.lives)).trim(), W - 16, 20);
-            if (hudRef.current === "attract" && (reducedMotion || Math.floor(t / 600) % 2 === 0)) {
-                ctx.textAlign = "center"; ctx.fillStyle = "#ffd23f"; ctx.font = "400 22px Silkscreen, monospace";
-                ctx.fillText("INSERT COIN", W / 2, H - 80);
-            }
+            // (attract mode's "INSERT COIN" lives in the HTML overlay; the canvas copy showed through behind its buttons)
         };
 
         const loop = (t) => {

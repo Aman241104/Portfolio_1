@@ -31,7 +31,7 @@
     position: fixed; inset: 0; z-index: 30;
     background: #08080a; color: #f2efe9;
     display: grid; grid-template-rows: auto 1fr auto;
-    padding: 20px clamp(18px, 3.2vw, 38px);
+    padding: 20px clamp(18px, 3.2vw, 38px) calc(20px + var(--coin-clear));   /* foot clears the phone dock */
 }
 .akira-top, .akira-foot {
     display: flex; align-items: center; justify-content: space-between;
@@ -296,3 +296,5 @@
 /* phones: the side pill never wraps; the track title gets the rest of the bar */
 .album-era-pill { white-space: nowrap; flex: none; }
 @media (max-width: 600px) { .album-bar-l .dim { display: none; } }
+
+a:not([href]) { cursor: default; }   /* private projects: no page to open */

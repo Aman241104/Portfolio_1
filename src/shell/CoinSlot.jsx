@@ -18,6 +18,17 @@ const CoinSlot = ({ current, onSpin, onSelect }) => {
     useLiquid(pill, LENS);
 
     const activeWorld = findWorld(current);
+    // publish whether the dock is showing, so worlds can lift their own bottom bars above it (--coin-clear in index.css)
+    useEffect(() => { document.documentElement.dataset.coin = hidden ? "hidden" : "shown"; }, [hidden]);
+    useEffect(() => () => { delete document.documentElement.dataset.coin; }, []);
+    // desktop: the pill sits bottom-right; full-width bottom bars pad their right side by its measured width
+    useEffect(() => {
+        const el = pill.current, root = document.documentElement.style;
+        if (!el) return;
+        const ro = new ResizeObserver(() => root.setProperty("--coin-w", innerWidth >= 1024 ? `${Math.ceil(el.getBoundingClientRect().width) + 28}px` : "0px"));
+        ro.observe(el);
+        return () => { ro.disconnect(); root.removeProperty("--coin-w"); };
+    }, []);
 
     useEffect(() => {
         if (!matchMedia("(max-width: 1023px)").matches) return;

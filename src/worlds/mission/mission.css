@@ -168,3 +168,5 @@ a.dp-row:focus-visible { outline: 2px solid var(--yel); outline-offset: -2px; }
 .dp-cta-top a { min-height: 44px; display: inline-flex; align-items: center; }
 @media (prefers-reduced-motion: no-preference) { .dp-intro .dp-who, .dp-intro .dp-cta-top { animation: dp-rise var(--t-4) var(--ease-out) .26s both; } }
 @media (prefers-reduced-motion: reduce) { .dp-marquee { white-space: normal; mask-image: none; } .dp-marquee i { padding-left: 0; animation: none; } }   /* still readable, just still */
+
+@media (max-width: 900px) { .dp-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; min-width: 0; max-width: 100%; flex: 1 1 100%; } .dp-tabs button { flex: none; } .dp-controls { min-width: 0; flex: 1 1 100%; } }   /* one row, swipe for more; tabs and their controls row may shrink */

@@ -73,7 +73,7 @@
     .tty-glass { height: auto; min-height: calc(100dvh - 110px); }
     .tty-split { grid-template-columns: 1fr; }
     .tty-main, .tty-inspector { overflow-y: visible; }
-    .tty-dock { position: sticky; bottom: 12px; padding-right: 0; }
+    .tty-dock { position: sticky; bottom: calc(12px + var(--coin-clear)); transition: bottom .3s var(--ease-out); padding-right: 0; }
 }
 @media (max-width: 640px) {
     .tty { font-size: 13.5px; padding: 8px 8px 150px; }

@@ -25,6 +25,9 @@ const CLOUD = (() => {
     return { d, w, h, pad };
 })();
 
+// the top bar's jump labels: short enough that all seven fit at 1440px (full names stay in the title tooltip)
+const SHORT = { product: "Products", mobile: "Mobile", client: "Clients", concept: "Concepts", contact: "Hire", career: "History", skills: "Parts" };
+
 // layout: one section per kind, laid out as rows of frames; then skills, career and contact boards
 const build = () => {
     const items = [], sections = [];
@@ -80,7 +83,7 @@ export default function CanvasWorld() {
     }, [apply]);
     // phones open on the title block (readable), wide screens on the first zones
     useEffect(() => {
-        if (innerWidth < 760) fitTo(0, 0, 1150, 900, 12); else fitTo(0, 0, Math.min(W, 1900), 1300, 30);
+        if (innerWidth < 760) fitTo(0, 0, 1150, 900, 12); else fitTo(-220, 0, Math.min(W, 1900) + 220, 1300, 30);   // 220 units of empty sheet on the left sit under the minimap
         // Only what is on screen drafts itself on arrival; everything else is simply already drawn (keeps raster cheap).
         const v = view.current, r = vp.current.getBoundingClientRect();
         board.current.querySelectorAll(".bp-sheet, .bp-zone").forEach((el) => {
@@ -197,15 +200,15 @@ export default function CanvasWorld() {
         return () => window.removeEventListener("keydown", onKey);
     }, [focus, items, open, fitTo, W, H]);
 
-    const MM = 180 / W;
+    const MM = 150 / W;
 
     return (
         <div className="cv" data-list={list || undefined}>
             <header className="cv-bar">
                 <button type="button" className="cv-mode" onClick={() => { setList(!list); setFocus(null); }}>{list ? "Open the full drawing" : "Plain view"}</button>
-                <p className="cv-file"><b>AP-2026-001</b> Portfolio, general arrangement</p>
+                <p className="cv-file"><b>AP-2026-001</b> <span>Portfolio, general arrangement</span></p>
                 <nav className="cv-jump" aria-label="Go to section">
-                    {sections.map((s) => <button key={s.id} type="button" onClick={() => { setFocus(null); fitTo(s.x, s.y, s.w, s.h); }}>{s.label}</button>)}
+                    {sections.map((s) => <button key={s.id} type="button" title={s.label} onClick={() => { setFocus(null); fitTo(s.x, s.y, s.w, s.h); }}>{SHORT[s.id] ?? s.label}</button>)}
                 </nav>
                 <div className="cv-zoom">
                     <span ref={coordsEl} className="cv-coords" aria-hidden>X:0000 Y:0000</span>

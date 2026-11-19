@@ -20,7 +20,7 @@ const FONTS = ["VT323", "IBM+Plex+Mono:wght@400;500"];
 // argument-level Tab completion, and 1-click recruiter fast-path.
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 const secondsSince = (t) => Math.round((Date.now() - t) / 1000);
-const live = work.filter((w) => w.live);
+const live = work.filter(inProduction);   // same "live" as the header and every other world
 const THEMES = ["amber", "green", "plain"];
 
 const POST = [
@@ -128,10 +128,10 @@ const TerminalWorld = ({ shell }) => {
             <p key="h" className="dim">tap any highlighted word, or type it. Tab completes args, ↑↓ recalls, Ctrl+L clears, / focuses.</p>,
             ...[
                 ["about", "sysinfo dossier & quick links"],
-                ["projects", "all 26 builds (--live, --ai, --client)"],
+                ["projects", `all ${work.length} builds (--live, --ai, --client)`],
                 ["cat <slug|n>", "inspect project in CRT preview pane"],
                 ["open <slug|n>", "launch project URL in new tab"],
-                ["live", "13 production sites I maintain"],
+                ["live", `${live.length} production sites I keep running`],
                 ["experience", "work history & client impact"],
                 ["certs", "verified industry credentials"],
                 ["skills", "full-stack, AI & 3D toolkit"],
@@ -162,15 +162,15 @@ const TerminalWorld = ({ shell }) => {
                 <p key="e">
                     Fast path: <a className="tty-link" href={profile.resume} target="_blank" rel="noreferrer">[Résumé PDF ↗]</a>{" "}
                     · <a className="tty-link" href={`mailto:${profile.email}`}>[Email]</a>{" "}
-                    · {cmd("projects", `[All ${work.length} Projects]`)} · {cmd("live", `[${work.filter((w) => w.live).length} Live Sites]`)} · {cmd("certs", "[Certs]")} · {cmd("cv", "[Tailored CVs]")}
+                    · {cmd("projects", `[All ${work.length} Projects]`)} · {cmd("live", `[${live.length} Live Sites]`)} · {cmd("certs", "[Certs]")} · {cmd("cv", "[Tailored CVs]")}
                 </p>,
             ];
         },
         projects: (flag = "") => {
             const f = flag.toLowerCase();
             let filtered = work.map((w, i) => [w, i]);
-            let label = "all 26 builds";
-            if (f === "--live") { filtered = filtered.filter(([w]) => w.live); label = "live deployments"; }
+            let label = `all ${work.length} builds`;
+            if (f === "--live") { filtered = filtered.filter(([w]) => inProduction(w)); label = "live deployments"; }
             else if (f === "--ai") { filtered = filtered.filter(([w]) => /ai|python|llm|agent|rag/i.test(`${w.line} ${w.stack || ""}`)); label = "AI & backend"; }
             else if (f === "--client") { filtered = filtered.filter(([w]) => w.kind === "client"); label = "client websites"; }
 

@@ -175,3 +175,6 @@
 .cv[data-list] .bp-approve { grid-template-columns: minmax(0, 1fr); } .cv[data-list] .bp-approve * { min-width: 0; white-space: normal; }
 .cv[data-list] .cv-board { contain: paint; }   /* rotated stamps/notes bled 2 px sideways on phones */
 .cv[data-list] .bp-stampbox a { font-size: clamp(22px, 7vw, 30px); overflow-wrap: anywhere; word-break: normal; }
+.cv-jump button { padding-inline: 7px; letter-spacing: .02em; }   /* all seven jump labels fit at 1440px */
+@media (max-width: 1600px) { .cv-file span, .cv-coords { display: none; } }   /* the jump labels get the room */
+@media (max-width: 1100px) { .cv-file { display: none; } }

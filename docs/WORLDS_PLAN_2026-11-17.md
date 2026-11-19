@@ -238,3 +238,15 @@ knob), idle start-lights hidden on phones, secondary links one row of 40px targe
 key anchored to the gutter (sat on the lever housing at 1024).
 Rejected: "74px phone bottom padding is dead space" (it clears the global Worlds dock); "remove Creative Developer"
 (Aman asked for it back); signature halo text-shadow (effect, not polish).
+
+## Worlds pass 2 (agy, 2026-11-19) — 11 worlds, claims verified
+Systemic: the global dock publishes `html[data-coin]` → `--coin-clear` (72px on phones while it shows) and `--coin-w`
+(its measured width on desktop); world bottom bars add them (Ask .rd-write, Terminal .tty-dock, 2001 .y-statusbar,
+Album .akira-gate). Fixed: Terminal stale counts (26/13/21 → work.length / inProduction), 2001 OPEN TO WORK blinked to
+invisible (now colour-only) + live = inProduction, Arcade canvas "INSERT COIN" showed through the attract overlay
+(removed) + darker attract card, Pocket key legend contrast (#969fae → #06282c), Desktop springboard "44 projects"
+scrim, Canvas jump labels short + top bar frees room (all 7 fit 1024–1440) + opening view clears the minimap, Mission
+filter tabs one swipeable row on phones, Ask duplicate mode buttons removed + balanced headline, Editorial/Album
+private projects no longer "#" links, Editorial phone masthead orphan, Longhorn windows can't be dragged off-screen.
+Rejected (agy wrong): "Georama never loaded" (index.html loads it), "dependency-less useEffect is a bug" (latest-ref
+pattern), "remove VinylGate" (deliberate; recruiter mode skips it), "remove Pocket fast links" (recruiter 1–2 click rule).

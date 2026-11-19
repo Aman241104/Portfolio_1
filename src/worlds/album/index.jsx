@@ -206,7 +206,7 @@ export default function AlbumWorld() {
                                             <span className="tn mono">{String(n).padStart(2, "0")}</span>
                                             <img src={shot(w, 160)} alt="" loading="lazy" />
                                             <div className="tt">
-                                                <a href={w.url || "#"} target={w.url ? "_blank" : undefined} rel="noreferrer">
+                                                <a href={w.url || undefined} target={w.url ? "_blank" : undefined} rel="noreferrer">
                                                     <b>{w.title}</b>{w.stack && <span className="feat"> (feat. {w.stack.split(" · ").slice(0, 3).join(", ")})</span>}
                                                 </a>
                                                 <p>{w.line}</p>
