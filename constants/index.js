@@ -1,4 +1,4 @@
-import { work, KINDS, shot } from "../content/work.js";
+import { work, KINDS, shot, inProduction } from "../content/work.js";
 import { skillGroups } from "../content/skills.js";
 import { cases } from "../content/cases.js";
 import { certifications } from "../content/certifications.js";
@@ -296,7 +296,7 @@ const ABOUT_LOCATION = {
             subtitle: "Aman Patel — Full-Stack & 3D Web Engineer",
             image: "/images/aman-1.jpeg",
             description: [
-                "Full-stack & 3D Web Engineer in Ahmedabad, India — shipping 26+ live websites, SaaS tools, and mobile apps.",
+                `Full-stack & 3D Web Engineer in Ahmedabad, India — ${work.length} shipped projects, ${work.filter(inProduction).length} live in production: websites, SaaS tools and mobile apps.`,
                 ...experience.map((e) => `${e.role} @ ${e.org} (${e.when} · ${e.where}) — ${e.points[0]}`),
                 `CREDENTIALS · ${certifications.length} Verified AI Certifications (Anthropic, AWS, Google, Microsoft).`,
             ],

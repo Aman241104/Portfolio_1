@@ -26,7 +26,8 @@ const MobileContact = () => {
                              [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:mt-3
                              [&_li]:rounded-xl [&_li]:px-4 [&_li]:py-3
                              [&_li_a]:flex [&_li_a]:items-center [&_li_a]:gap-3 [&_li_a]:text-white [&_li_a]:text-sm [&_li_a]:font-medium
-                             px-5">
+                             [&_img.rounded-full]:hidden
+                             px-5">{/* the embedded desktop Contact repeats the avatar shown above */}
                 <Contact embedded />
             </div>
         </div>
