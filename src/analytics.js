@@ -1,4 +1,6 @@
 // PostHog, loaded after the page is idle and only when VITE_POSTHOG_KEY is set (Vercel env). Never in `vite dev`.
+// The same events are mirrored to Aman's own Job Search OS (Insights > Portfolio) through a cookie-less beacon:
+// a random per-browser id, no IP stored server-side, text/plain body so there's no CORS preflight.
 // Product events only (no autocapture, no session recording): what people do with the machine and the footer.
 const KEY = import.meta.env.VITE_POSTHOG_KEY;
 let ph = null, who = null, world = "home", since = Date.now();
@@ -30,7 +32,28 @@ const onClick = (e) => {
     if (hit) track(...hit);
 };
 
+const BEACON = "https://job-search.mind-core.workers.dev/api/portfolio/beacon";
+const vid = (() => { try { let v = localStorage.getItem("px01-vid"); if (!v) { v = Math.random().toString(36).slice(2, 12); localStorage.setItem("px01-vid", v); } return v; } catch { return ""; } })();
+const beacon = (type, extra) => {
+    if (import.meta.env.DEV || navigator.doNotTrack === "1") return;
+    try { navigator.sendBeacon?.(BEACON, new Blob([JSON.stringify({ type, vid, path: location.pathname + location.search, ...extra })], { type: "text/plain" })); } catch { /* best effort */ }
+};
+// PostHog event -> beacon type/target (what Insights > Portfolio ranks).
+const mirror = (event, props = {}) => {
+    if (event === "resume_opened") beacon("click", { target: "resume" });
+    else if (event === "contact_clicked") beacon("click", { target: `contact:${props.via || "?"}` });
+    else if (event === "live_site_visited") beacon("click", { target: `live:${props.host || "?"}` });
+    else if (event === "case_study_viewed") beacon("project", { target: props.slug || props.project || "case-study" });
+    else if (event === "recruiter_mode") beacon("recruiter");
+    else if (event === "world_left") beacon("click", { target: `world:${props.world}` });
+};
+
 export const initAnalytics = () => {
+    if (!import.meta.env.DEV) {
+        const t0 = Date.now();
+        beacon("view", { ref: document.referrer, device: matchMedia("(pointer: coarse)").matches ? "mobile" : "desktop" });
+        addEventListener("pagehide", () => beacon("leave", { ms: Date.now() - t0 }), { once: true });
+    }
     if (!KEY || import.meta.env.DEV) return;
     document.addEventListener("click", onClick, true);
     addEventListener("pagehide", () => world !== "home" && track("world_left", { seconds: Math.round((Date.now() - since) / 1000) }));
@@ -50,6 +73,7 @@ export const initAnalytics = () => {
 export const track = (event, props) => {
     if (event === "resume_opened" && typeof window !== "undefined") window.dispatchEvent(new Event("px01:resume"));   // the nudge listens
     props = { world, ...props };
+    mirror(event, props);
     if (ph) ph.capture(event, props);
     else if (KEY && queue.length < 50) queue.push([event, props]);
 };

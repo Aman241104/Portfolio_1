@@ -3,17 +3,21 @@ import { work, KINDS, inProduction, host } from "#content/work.js";
 import { liveStatus } from "../status.js";
 
 // Production sites and products I built and still look after, checked live (src/status.js).
+// Public, read-only numbers from Job Search OS on Aman's own server (via its Cloudflare Worker). Server off -> hidden.
+const LIVE_URL = "https://job-search.mind-core.workers.dev/api/public/live-stats";
 const ago = (iso) => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 1 ? "just now" : `${m} min ago`; };
 
 export default function Maintained() {
     const list = work.filter(inProduction);
     const [status, setStatus] = useState({});
     const [checked, setChecked] = useState(null);       // { at, from } when the server check answered
+    const [hunt, setHunt] = useState(null);             // live job-hunt numbers, null = hidden
     const ref = useRef(null);
     useEffect(() => {
         const io = new IntersectionObserver(([e]) => {
             if (!e.isIntersecting) return;
             io.disconnect();
+            fetch(LIVE_URL, { signal: AbortSignal.timeout?.(8000) }).then((r) => (r.ok ? r.json() : null)).then(setHunt).catch(() => {});
             liveStatus().then((d) => {
                 setStatus(Object.fromEntries(list.map((w) => [w.slug, d.sites[w.slug]?.ok ? d.sites[w.slug].ms : -1])));
                 setChecked({ at: d.checkedAt, from: d.from });
@@ -33,6 +37,12 @@ export default function Maintained() {
                 <p className="mono kept-sum" aria-live="polite">
                     {Object.keys(status).length < list.length ? `Probing ${Object.keys(status).length} / ${list.length}…` : `${up} / ${list.length} operational · ${checked.from === "browser" ? "live browser probe" : `${ago(checked.at)} (${checked.from === "sin1" ? "SIN1" : "server"})`}`}
                 </p>
+                {hunt && (
+                    <p className="mono kept-sum" aria-label="Job hunt, live">
+                        Job hunt, live · {hunt.applications_total} applications · {hunt.linkedin_followers ?? "–"} LinkedIn followers
+                        {hunt.portfolio_visitors_30d ? ` · ${hunt.portfolio_visitors_30d} visitors this month` : ""}
+                    </p>
+                )}
             </aside>
             <ol className="kept-list" data-reveal>
                 {list.map((w, i) => {

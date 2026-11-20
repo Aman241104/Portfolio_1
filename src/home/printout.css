@@ -390,7 +390,7 @@
 .printout .flagship-hero > a { grid-column: 1 / -1; grid-row: auto; display: block !important; }
 .printout .flagship-hero .card-shot { aspect-ratio: 16 / 8; margin-bottom: 36px; }
 .printout .flagship-hero .card-img { height: 100%; aspect-ratio: auto; }
-.printout .flagship-hero .card-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.printout .flagship-hero .card-img img { width: 100%; }
 .printout .flagship-hero .card-meta { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 36px; }
 .printout .flagship-hero .card-meta > * { grid-column: 2; }
 .printout .flagship-hero .card-meta h3 { grid-column: 1; grid-row: 1 / span 8; margin: 0; font-size: clamp(40px, 4.8vw, 80px) !important; line-height: .95; letter-spacing: -0.045em; }
@@ -401,8 +401,9 @@
     .printout .flagship-hero .card-meta h3 { margin-bottom: 14px; }
 }
 .home .recruiter-link, .home .pull { text-transform: uppercase; letter-spacing: .12em; }
-.printout .flagship-hero .card-meta h3 { white-space: nowrap; }
-@media (max-width: 960px) { .printout .flagship-hero .card-meta h3 { white-space: normal; } }
+/* Wrap inside its own column (nowrap pushed "Job Search OS ↗" into the meta column); arrow stays glued to the last word. */
+.printout .flagship-hero .card-meta h3 { min-width: 0; text-wrap: balance; }
+.printout .flagship-hero .card-meta h3 i { white-space: nowrap; }
 
 /* #39 mannan.io → the jali watermark beside the poster: the paper's own ink at 7%, masked from the canvas drawing. */
 .po-poster { position: relative; }
